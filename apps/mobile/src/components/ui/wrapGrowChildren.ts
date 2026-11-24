@@ -8,7 +8,7 @@ export function wrapGrowChildren(children: ReactNode, direction: "column" | "row
   const className = direction === "row" ? GROUP_GROW_CHILD_CLASS : STACK_GROW_CHILD_CLASS;
 
   return Children.map(children, (child) => {
-    if (child == null || typeof child === "boolean") {
+    if (child === null || child === undefined || typeof child === "boolean") {
       return child;
     }
 

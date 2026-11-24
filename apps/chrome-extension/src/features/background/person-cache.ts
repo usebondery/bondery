@@ -13,17 +13,20 @@ import type {
   ScrapedProfileData,
 } from "../../lib/messaging/types";
 import { openWebappPersonTab } from "../../lib/navigation";
+import { firstNonEmpty } from "../../lib/text";
 import { backgroundState } from "./state";
 
+const LINKEDIN_IN_PATHNAME_RE = /^\/in\/([^/?#]+)\/?$/;
+const SINGLE_PATH_SEGMENT_RE = /^\/([^/?#]+)\/?$/;
 const personExistenceCache = new Map<string, { result: SocialLookupResult; expiresAt: number }>();
 const personExistenceLookupInFlight = new Map<string, Promise<SocialLookupResult | null>>();
-export const PERSON_EXISTENCE_CACHE_TTL_MS = 30_000;
+const PERSON_EXISTENCE_CACHE_TTL_MS = 30_000;
 
-export function getPersonExistenceCacheKey(profile: ScrapedProfileData): string {
+function getPersonExistenceCacheKey(profile: ScrapedProfileData): string {
   return `${profile.platform}:${profile.handle.toLowerCase()}`;
 }
 
-export function clearPersonCaches(): void {
+function clearPersonCaches(): void {
   personExistenceCache.clear();
   personExistenceLookupInFlight.clear();
 }
@@ -35,7 +38,7 @@ function setPersonCacheEntry(cacheKey: string, result: SocialLookupResult): void
   });
 }
 
-export function parseProfileFromUrl(rawUrl?: string): ScrapedProfileData | null {
+function parseProfileFromUrl(rawUrl?: string): ScrapedProfileData | null {
   if (!rawUrl) {
     return null;
   }
@@ -48,10 +51,10 @@ export function parseProfileFromUrl(rawUrl?: string): ScrapedProfileData | null 
   }
 
   const hostname = parsedUrl.hostname.toLowerCase();
-  const pathname = parsedUrl.pathname;
+  const { pathname } = parsedUrl;
 
   if (hostname.includes("linkedin.com")) {
-    const linkedInMatch = pathname.match(/^\/in\/([^/?#]+)\/?$/);
+    const linkedInMatch = pathname.match(LINKEDIN_IN_PATHNAME_RE);
     if (linkedInMatch?.[1]) {
       return {
         handle: decodeURIComponent(linkedInMatch[1]),
@@ -61,7 +64,7 @@ export function parseProfileFromUrl(rawUrl?: string): ScrapedProfileData | null 
   }
 
   if (hostname.includes("instagram.com")) {
-    const instagramMatch = pathname.match(/^\/([^/?#]+)\/?$/);
+    const instagramMatch = pathname.match(SINGLE_PATH_SEGMENT_RE);
     const reservedPaths = new Set([
       "explore",
       "reels",
@@ -84,7 +87,7 @@ export function parseProfileFromUrl(rawUrl?: string): ScrapedProfileData | null 
   return null;
 }
 
-export async function getScrapedProfileFromTab(
+async function getScrapedProfileFromTab(
   tabId: number,
   tabUrl?: string,
 ): Promise<ScrapedProfileData | null> {
@@ -121,7 +124,7 @@ export async function getScrapedProfileFromTab(
   }
 }
 
-export async function resolvePersonLookup(
+async function resolvePersonLookup(
   profile: ScrapedProfileData,
 ): Promise<SocialLookupResult | null> {
   const cacheKey = getPersonExistenceCacheKey(profile);
@@ -133,7 +136,7 @@ export async function resolvePersonLookup(
   }
 
   const inFlight = personExistenceLookupInFlight.get(cacheKey);
-  if (inFlight) {
+  if (inFlight !== undefined) {
     return inFlight;
   }
 
@@ -156,15 +159,15 @@ export async function resolvePersonLookup(
   return lookupPromise;
 }
 
-export async function resolvePersonExists(profile: ScrapedProfileData): Promise<boolean | null> {
+async function resolvePersonExists(profile: ScrapedProfileData): Promise<boolean | null> {
   const lookup = await resolvePersonLookup(profile);
   if (!lookup) {
     return null;
   }
-  return Boolean(lookup.exists);
+  return lookup.exists;
 }
 
-export async function handleAddPerson(
+async function handleAddPerson(
   message: AddPersonRequest,
   sendResponse: (response: unknown) => void,
 ): Promise<void> {
@@ -204,8 +207,10 @@ export async function handleAddPerson(
       workHistory: payload.workHistory,
     });
 
-    const contact = result.contact;
+    const { contact } = result;
     const contactId = contact.id;
+    // biome-ignore lint/suspicious/noUnnecessaryConditions: response.json() is not validated at runtime, so a missing firstName must still fall back to the scraped name
+    const firstName = contact.firstName ?? payload.firstName ?? payload.handle;
 
     extLog.debug("[background] addOrFindPerson result", {
       contactId,
@@ -215,7 +220,7 @@ export async function handleAddPerson(
     if (result.existed) {
       const previewContact = {
         avatar: contact.avatar ?? payload.profileImageUrl ?? null,
-        firstName: contact.firstName ?? payload.firstName ?? payload.handle,
+        firstName,
         id: contactId,
         lastName: contact.lastName ?? payload.lastName ?? null,
       };
@@ -228,7 +233,7 @@ export async function handleAddPerson(
       const preview: PersonPreviewData = {
         avatar: contact.avatar ?? payload.profileImageUrl ?? null,
         contactId,
-        firstName: contact.firstName ?? payload.firstName ?? payload.handle,
+        firstName,
         handle: payload.handle,
         lastName: contact.lastName ?? payload.lastName ?? null,
         platform: payload.platform,
@@ -251,7 +256,7 @@ export async function handleAddPerson(
       setPersonCacheEntry(cacheKey, {
         contact: {
           avatar: contact.avatar ?? payload.profileImageUrl ?? null,
-          firstName: contact.firstName ?? payload.firstName ?? payload.handle,
+          firstName,
           id: contactId,
           lastName: contact.lastName ?? payload.lastName ?? null,
         },
@@ -284,7 +289,7 @@ export async function handleAddPerson(
   }
 }
 
-export async function handleActiveProfileContext(
+async function handleActiveProfileContext(
   sendResponse: (response: unknown) => void,
 ): Promise<void> {
   const [activeTab] = await browser.tabs.query({ active: true, currentWindow: true });
@@ -320,7 +325,7 @@ export async function handleActiveProfileContext(
       const preview: PersonPreviewData = {
         avatar: lookup.contact.avatar ?? profile.profileImageUrl ?? null,
         contactId: lookup.contact.id,
-        firstName: lookup.contact.firstName || profile.firstName || profile.handle,
+        firstName: firstNonEmpty(lookup.contact.firstName, profile.firstName) ?? profile.handle,
         handle: profile.handle,
         lastName: lookup.contact.lastName ?? profile.lastName ?? null,
         platform: profile.platform,
@@ -369,3 +374,15 @@ export async function handleActiveProfileContext(
     });
   }
 }
+
+export {
+  clearPersonCaches,
+  getPersonExistenceCacheKey,
+  getScrapedProfileFromTab,
+  handleActiveProfileContext,
+  handleAddPerson,
+  PERSON_EXISTENCE_CACHE_TTL_MS,
+  parseProfileFromUrl,
+  resolvePersonExists,
+  resolvePersonLookup,
+};

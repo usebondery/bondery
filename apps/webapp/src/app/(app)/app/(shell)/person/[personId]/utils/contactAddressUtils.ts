@@ -1,5 +1,10 @@
 import { formatAddressLabel } from "@bondery/helpers/address";
 import type { Contact, ContactAddressEntry, ContactAddressType } from "@bondery/schemas";
+import { firstNonEmpty } from "@/lib/shared/nonEmpty";
+
+function normalizeAddressTypes(entries: ContactAddressEntry[]): ContactAddressEntry[] {
+  return entries;
+}
 
 export interface EditableAddress extends ContactAddressEntry {
   id: string;
@@ -36,17 +41,14 @@ export function applyGeocodedSuggestion(
   return { ...suggestion, type };
 }
 
-function normalizeAddressTypes(entries: ContactAddressEntry[]): ContactAddressEntry[] {
-  return entries;
-}
-
 export function toEditableAddresses(contact: Contact): EditableAddress[] {
   const existing = Array.isArray(contact.addresses)
     ? (contact.addresses as ContactAddressEntry[])
     : [];
 
   if (existing.length > 0) {
-    return normalizeAddressTypes(existing).map((address, index) => {
+    const editable: EditableAddress[] = [];
+    for (const [index, address] of normalizeAddressTypes(existing).entries()) {
       const computedValue = formatAddressLabel({
         addressLine1: address.addressLine1,
         addressLine2: address.addressLine2,
@@ -55,19 +57,21 @@ export function toEditableAddresses(contact: Contact): EditableAddress[] {
         postalCode: address.addressPostalCode,
         state: address.addressState,
       });
-      return {
+      editable.push({
         ...address,
         id: `${address.type}-${index}`,
         type: address.type,
         value:
-          computedValue ||
-          address.value ||
-          address.addressFormatted ||
-          address.addressLine1 ||
-          contact.location ||
-          "",
-      };
-    });
+          firstNonEmpty(
+            computedValue,
+            address.value,
+            address.addressFormatted,
+            address.addressLine1,
+            contact.location,
+          ) ?? "",
+      });
+    }
+    return editable;
   }
 
   return [];

@@ -25,7 +25,7 @@ import { extractAvatarOptions } from "../../lib/data/select-fragments.js";
 import { internal, notFound } from "../../lib/platform/errors/http-errors.js";
 import { resolveContactAvatarUrl } from "../../lib/storage/avatar-urls.js";
 
-export type PreviewListQuery = AvatarTransformQuery & {
+type PreviewListQuery = AvatarTransformQuery & {
   previewLimit?: number | string;
 };
 
@@ -54,6 +54,8 @@ function peopleListOrderBy(sort: PeopleListQuery["sort"]): Prisma.PeopleOrderByW
       return [{ firstName: "asc" }, { id: "asc" }];
   }
 }
+
+export type { PreviewListQuery };
 
 export async function listGroups(ctx: GroupListContext, query?: PreviewListQuery) {
   const { user } = ctx;
@@ -137,19 +139,20 @@ export async function listGroups(ctx: GroupListContext, query?: PreviewListQuery
     }
   }
 
-  const groupsWithCounts: GroupWithCount[] = groupRows.map((row) => {
+  const groupsWithCounts: GroupWithCount[] = [];
+  for (const row of groupRows) {
     const baseGroup = toGroupDto(row);
     const previewIds = includePreview ? (previewMap.get(row.id) ?? []) : [];
     const previewContacts = includePreview
       ? (previewIds.map((id) => previewContactsById.get(id)).filter(Boolean) as ContactPreview[])
       : undefined;
 
-    return {
+    groupsWithCounts.push({
       ...baseGroup,
       contactCount: countMap.get(row.id) ?? 0,
       previewContacts,
-    };
-  });
+    });
+  }
 
   return {
     groups: groupsWithCounts,
@@ -199,7 +202,7 @@ export async function listGroupMembers(
   };
 
   let contacts = [] as ReturnType<typeof mapContactListRecord>[];
-  let totalCount = 0;
+  let totalCount: number;
 
   if (search) {
     const [searchResult, countResult] = await Promise.all([
@@ -252,7 +255,7 @@ export async function listGroupMembers(
     totalCount = count;
   }
 
-  let enrichedContacts = contacts;
+  let enrichedContacts: typeof contacts;
   try {
     enrichedContacts = await attachContactExtras(db, user.id, contacts, {
       addresses: true,
@@ -260,19 +263,24 @@ export async function listGroupMembers(
     });
   } catch (error) {
     log?.error({ err: error }, "Failed to attach contact channels/social media for group contacts");
-    enrichedContacts = contacts.map((contact) => ({
-      ...contact,
-      addresses: [],
-      avatar: null,
-      emails: [],
-      facebook: null,
-      instagram: null,
-      linkedin: null,
-      phones: [],
-      signal: null,
-      website: null,
-      whatsapp: null,
-    }));
+    const fallbackContacts: typeof contacts = [];
+    for (const contact of contacts) {
+      const next = {
+        ...contact,
+        addresses: [],
+        avatar: null,
+        emails: [],
+        facebook: null,
+        instagram: null,
+        linkedin: null,
+        phones: [],
+        signal: null,
+        website: null,
+        whatsapp: null,
+      };
+      fallbackContacts.push(next);
+    }
+    enrichedContacts = fallbackContacts;
   }
 
   const pagination = buildPaginationMeta({

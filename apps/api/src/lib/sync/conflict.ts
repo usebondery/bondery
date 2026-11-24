@@ -3,12 +3,15 @@ import { DomainError } from "../../domains/_shared/context.js";
 import { loadEnrichedContact } from "../contacts/enrichment.js";
 
 export class SyncConflictError extends DomainError {
+  readonly serverContact: NonNullable<Awaited<ReturnType<typeof loadEnrichedContact>>>;
+
   constructor(
     message: string,
-    readonly serverContact: NonNullable<Awaited<ReturnType<typeof loadEnrichedContact>>>,
+    serverContact: NonNullable<Awaited<ReturnType<typeof loadEnrichedContact>>>,
   ) {
     super(message, 409, "sync_conflict");
     this.name = "SyncConflictError";
+    this.serverContact = serverContact;
   }
 }
 

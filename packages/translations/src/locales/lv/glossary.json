@@ -1,0 +1,23 @@
+{
+  "entities": {
+    "contact": "kontakts",
+    "contactPlural": "kontakti",
+    "group": "grupa",
+    "interaction": "mijiedarbība",
+    "interactionPlural": "mijiedarbības",
+    "network": "tīkls",
+    "person": "persona",
+    "person_one": "{count} persona",
+    "person_other": "{count} personas",
+    "person_zero": "{count} personu",
+    "tag": "etiķete"
+  },
+  "features": {
+    "aiAssistant": "AI asistents",
+    "fixAndMerge": "Labot un apvienot",
+    "keepInTouch": "Uzturi kontaktu"
+  },
+  "product": {
+    "name": "Bondery"
+  }
+}

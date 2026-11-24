@@ -4,27 +4,31 @@ import type { UpdateSettingsBody } from "@bondery/schemas";
 import { DEFAULT_LOCALE } from "@bondery/schemas/locale/supported-locale";
 import { type DomainContext, DomainError } from "../../domains/_shared/context.js";
 import { domainDb } from "../../domains/_shared/domain-db.js";
+import { firstAiUsagePeriodEnd } from "../../lib/chat/ai-usage-period.js";
 import { internal } from "../../lib/platform/errors/http-errors.js";
 import { invalidateProductAnalyticsCache } from "../analytics/posthog-capture.js";
 
-export type UserSettingsLanguage = SupportedLocale;
+type UserSettingsLanguage = SupportedLocale;
 
 const DEFAULT_REMINDER_SEND_HOUR = "08:00:00";
 const NEW_SIGNUP_WINDOW_MS = 30_000;
 
 function normalizeReminderSendHour(value: string): string {
-  const [hourPart, minutePart, secondPart] = value.trim().split(":");
+  const [hourPart = "", minutePart = "", secondPart] = value.trim().split(":");
   const normalizedHour = hourPart.padStart(2, "0");
   const normalizedMinute = minutePart.padStart(2, "0");
   const normalizedSecond = (secondPart || "00").padStart(2, "0");
   return `${normalizedHour}:${normalizedMinute}:${normalizedSecond}`;
 }
 
+export type { UserSettingsLanguage };
+
 export function formatSettingsPatchData(result: {
   timezone?: string | null;
   defaultPhoneCountry?: string | null;
   reminderSendHour?: string | null;
   timeFormat?: string | null;
+  dateFormat?: string | null;
   language?: UserSettingsLanguage | null;
   colorScheme?: ColorScheme | null;
   leftSwipeAction?: string | null;
@@ -35,6 +39,7 @@ export function formatSettingsPatchData(result: {
 }) {
   return {
     colorScheme: result.colorScheme,
+    dateFormat: result.dateFormat,
     defaultPhoneCountry: result.defaultPhoneCountry ?? null,
     groupSortOrder: result.groupSortOrder,
     language: result.language,
@@ -63,8 +68,9 @@ export async function ensureDefaultSettings(ctx: DomainContext) {
   try {
     return await db.userSettings.create({
       data: {
-        aiMessagesMonthResetAt: new Date(),
+        aiMessagesMonthResetAt: firstAiUsagePeriodEnd(),
         colorScheme: "auto",
+        dateFormat: "locale",
         language: DEFAULT_LOCALE as SupportedLocale,
         nextReminderAtUtc: new Date(),
         reminderSendHour: DEFAULT_REMINDER_SEND_HOUR,
@@ -73,8 +79,8 @@ export async function ensureDefaultSettings(ctx: DomainContext) {
         userId: user.id,
       },
     });
-  } catch {
-    throw internal("settings_failed_to_create_default_settings");
+  } catch (error) {
+    throw internal("settings_failed_to_create_default_settings", error);
   }
 }
 
@@ -89,6 +95,7 @@ export async function updateUserSettings(ctx: DomainContext, input: UpdateSettin
     language?: UserSettingsLanguage;
     colorScheme?: ColorScheme;
     timeFormat?: string;
+    dateFormat?: string;
     leftSwipeAction?: string;
     rightSwipeAction?: string;
     groupSortOrder?: string;
@@ -113,6 +120,9 @@ export async function updateUserSettings(ctx: DomainContext, input: UpdateSettin
   }
   if (input.timeFormat !== undefined) {
     updatePayload.timeFormat = input.timeFormat;
+  }
+  if (input.dateFormat !== undefined) {
+    updatePayload.dateFormat = input.dateFormat;
   }
   if (input.leftSwipeAction !== undefined) {
     updatePayload.leftSwipeAction = input.leftSwipeAction;
@@ -184,7 +194,7 @@ export async function updateUserSettings(ctx: DomainContext, input: UpdateSettin
       })
     : await db.userSettings.create({
         data: {
-          aiMessagesMonthResetAt: new Date(),
+          aiMessagesMonthResetAt: firstAiUsagePeriodEnd(),
           nextReminderAtUtc: new Date(),
           userId: user.id,
           ...updatePayload,

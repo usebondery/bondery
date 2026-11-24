@@ -1,0 +1,32 @@
+{
+  "LoggedIn": {
+    "OpenBondery": "Bondery megnyitása",
+    "UnsupportedSiteMessage": "Nyisd meg valaki profilját az Instagramon vagy a LinkedInen, hogy a bővítmény további műveleteit és lehetőségeit lásd."
+  },
+  "LoggedOut": {
+    "Description": "Kapcsold össze a fiókodat, hogy kapcsolatokat ments közösségi oldalakról.",
+    "SignIn": "Bejelentkezés",
+    "Title": "Bejelentkezés a Bonderybe"
+  },
+  "PersonActions": {
+    "AddInteraction": "Interakció hozzáadása ehhez a személyhez"
+  },
+  "Settings": {
+    "ApiServer": "API szerver",
+    "SignOut": "Kijelentkezés"
+  },
+  "UpdateRequired": {
+    "Description": "A Bondery-bővítményed elavult, és lehet, hogy nem működik rendesen. A folytatáshoz frissítsd.",
+    "OpenExtensionsPage": "Bővítmények oldal megnyitása",
+    "Title": "Frissítés szükséges"
+  },
+  "Welcome": {
+    "ConnectButton": "Bondery-fiók összekapcsolása",
+    "Description": "Kapcsold össze a Bondery-fiókodat, hogy a közösségi oldalak profiljairól közvetlenül menthess kapcsolatokat.",
+    "SignInHint": "A rendszer kérni fogja, hogy jelentkezz be a Bondery-fiókodba, és engedélyezd a bővítményt.",
+    "SuccessClose": "Ezt a lapot most már bezárhatod.",
+    "SuccessDescription": "A Bondery-fiókod most már össze van kapcsolva. Nyisd meg bármelyik Instagram- vagy LinkedIn-profilt, és kezdj el kapcsolatokat menteni.",
+    "SuccessTitle": "Minden kész!",
+    "Title": "Üdv a Bonderyben"
+  }
+}

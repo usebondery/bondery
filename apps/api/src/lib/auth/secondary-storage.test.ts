@@ -7,13 +7,19 @@ type RedisSecondaryStorage = ReturnType<typeof redisStorage>;
 
 function createMockStorage(overrides: Partial<RedisSecondaryStorage> = {}): RedisSecondaryStorage {
   return {
-    clear: async () => {},
-    delete: async () => {},
+    clear: async () => {
+      // Default mock: this storage does not persist keys.
+    },
+    delete: async () => {
+      // Default mock: this storage does not persist keys.
+    },
     get: async () => null,
     getAndDelete: async () => null,
     increment: async () => 1,
     listKeys: async () => [],
-    set: async () => {},
+    set: async () => {
+      // Default mock: this storage does not persist keys.
+    },
     ...overrides,
   };
 }
@@ -56,7 +62,7 @@ describe("wrapWithResilience", () => {
   });
 });
 
-describe("Better Auth redis key prefix", () => {
+describe("better Auth redis key prefix", () => {
   it("prefixes keys with bondery:auth:", async () => {
     const calls: Array<{ command: string; args: unknown[] }> = [];
     const client = {

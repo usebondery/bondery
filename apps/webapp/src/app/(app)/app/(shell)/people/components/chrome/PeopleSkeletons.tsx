@@ -1,5 +1,6 @@
-﻿import { Box, Group, Paper, Skeleton, Stack } from "@mantine/core";
+import { Group, Paper, Skeleton, Stack } from "@mantine/core";
 import { PageHeaderSkeleton } from "@/components/shell/PageHeaderSkeleton";
+import { PageWrapper } from "@/components/shell/PageWrapper";
 import type { ColumnKey } from "@/lib/contacts/table-types";
 
 const DEFAULT_VISIBLE_COLUMNS: ColumnKey[] = [
@@ -9,14 +10,6 @@ const DEFAULT_VISIBLE_COLUMNS: ColumnKey[] = [
   "lastInteraction",
   "social",
 ];
-
-/**
- * Skeleton for the People page header.
- * Import Contacts (~148px) + Add Person (~120px).
- */
-export function PeoplePageHeaderSkeleton() {
-  return <PageHeaderSkeleton primaryActionWidth={120} secondaryActionWidth={148} />;
-}
 
 interface PeopleTableSkeletonProps {
   /**
@@ -96,6 +89,14 @@ function ColumnCellSkeleton({ col }: { col: ColumnKey }) {
 }
 
 /**
+ * Skeleton for the People page header.
+ * Import Contacts (~148px) + Add Person (~120px).
+ */
+export function PeoplePageHeaderSkeleton() {
+  return <PageHeaderSkeleton primaryActionWidth={120} secondaryActionWidth={148} />;
+}
+
+/**
  * Skeleton for the contacts table Paper section only.
  * Column shapes match the real cell renderers so the layout does not shift
  * when data arrives. Used as the Suspense fallback while contacts data loads.
@@ -164,9 +165,9 @@ export function PeopleTableSkeleton({
  */
 export function PeoplePageSkeleton() {
   return (
-    <Box p="xl">
+    <PageWrapper>
       <PeoplePageHeaderSkeleton />
       <PeopleTableSkeleton />
-    </Box>
+    </PageWrapper>
   );
 }

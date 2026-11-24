@@ -12,7 +12,11 @@ export async function handleInvoicePaid(
     return;
   }
 
-  await resetPaymentFailureCount(subscriptionId);
+  const updated = await resetPaymentFailureCount(subscriptionId);
+  if (updated === 0) {
+    log?.info({ subscriptionId }, "stripe-webhook: invoice paid, no subscription row yet");
+    return;
+  }
   log?.info({ subscriptionId }, "stripe-webhook: payment failure count reset");
 }
 
@@ -26,6 +30,13 @@ export async function handleInvoicePaymentFailed(
   }
 
   const attemptCount = invoice.attempt_count ?? 1;
-  await setPaymentFailureCount(subscriptionId, attemptCount);
+  const updated = await setPaymentFailureCount(subscriptionId, attemptCount);
+  if (updated === 0) {
+    log?.info(
+      { attemptCount, subscriptionId },
+      "stripe-webhook: payment failed, no subscription row yet",
+    );
+    return;
+  }
   log?.info({ attemptCount, subscriptionId }, "stripe-webhook: payment failure recorded");
 }

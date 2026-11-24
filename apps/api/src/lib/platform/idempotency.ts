@@ -7,6 +7,7 @@
 import { createHash } from "node:crypto";
 import { PassThrough, Readable } from "node:stream";
 import { prisma } from "@bondery/db";
+import { detachPromise } from "@bondery/helpers/async";
 import { IDEMPOTENCY_KEY_HEADER } from "@bondery/helpers/globals/paths";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { DomainError } from "../../domains/_shared/context.js";
@@ -43,111 +44,6 @@ type ClaimState = {
 const bodyHashes = new WeakMap<FastifyRequest, string>();
 const claims = new WeakMap<FastifyRequest, ClaimState>();
 
-export function registerIdempotency(fastify: FastifyInstance): void {
-  fastify.addHook("preParsing", async (request, _reply, payload) => {
-    if (!shouldHashBody(request) || !isReadable(payload)) {
-      return payload;
-    }
-
-    return teeAndHash(payload, (hex) => {
-      bodyHashes.set(request, hex);
-    });
-  });
-
-  fastify.addHook("preHandler", async (request, reply) => {
-    const decision = classifyRequest(request);
-    if (decision.kind === "skip") {
-      return;
-    }
-    if (decision.kind === "invalid") {
-      throw badRequest(
-        "Idempotency-Key must be 1 to 255 printable ASCII characters.",
-        "idempotency_key_invalid",
-      );
-    }
-    if (decision.kind === "unsupported") {
-      throw badRequest(
-        "Idempotency-Key is not supported on this route.",
-        "idempotency_key_unsupported",
-      );
-    }
-
-    const userId = decision.userId;
-    const { pathname, rawQuery } = splitRequestUrl(request.url);
-    const requestHash = buildIdempotencyFingerprint({
-      bodySha256: bodyHashes.get(request) ?? EMPTY_BODY_SHA256,
-      method: request.method,
-      pathname,
-      rawQuery,
-    });
-
-    let row: ClaimRow;
-    try {
-      row = await claimIdempotencyKey(userId, decision.key, requestHash);
-    } catch (error) {
-      request.log.error({ err: error }, "idempotency claim failed");
-      throw internal("internal_server_error");
-    }
-
-    if (row.outcome === "claimed") {
-      claims.set(request, {
-        clearLease: armLeaseRefresh(request, reply, userId, decision.key),
-        key: decision.key,
-        userId,
-      });
-      return;
-    }
-
-    if (row.outcome === "replay") {
-      if (row.response_omitted) {
-        return sendOmittedReplay(request, reply);
-      }
-      reply.header(IDEMPOTENCY_REPLAYED_HEADER, "true");
-      const statusCode = row.status_code ?? 200;
-      if (row.response_body === null || row.response_body === undefined) {
-        return reply.status(statusCode).send();
-      }
-      return reply.status(statusCode).send(row.response_body);
-    }
-
-    if (row.outcome === "mismatch") {
-      throw new DomainError(
-        "The idempotency key was reused with a different request.",
-        422,
-        "idempotency_key_mismatch",
-      );
-    }
-
-    if (row.outcome === "in_progress") {
-      reply.header("Retry-After", String(idempotencyRetryAfterSeconds()));
-      throw conflict(
-        "A request with this idempotency key is already in progress.",
-        "idempotency_key_in_progress",
-      );
-    }
-
-    request.log.error({ outcome: row.outcome }, "idempotency claim returned an unknown outcome");
-    throw internal("internal_server_error");
-  });
-
-  fastify.addHook("onSend", async (request, reply, payload) => {
-    const state = claims.get(request);
-    if (!state) {
-      return payload;
-    }
-    claims.delete(request);
-    state.clearLease();
-
-    try {
-      await settleClaim(state, reply.statusCode, payload);
-    } catch (error) {
-      request.log.error({ err: error }, "idempotency settle failed");
-    }
-
-    return payload;
-  });
-}
-
 type ClassifiedRequest =
   | { kind: "apply"; key: string; userId: string }
   | { kind: "invalid" }
@@ -178,9 +74,20 @@ function classifyRequest(request: FastifyRequest): ClassifiedRequest {
   return { key: header, kind: "apply", userId: request.authUser.id };
 }
 
+/**
+ * Multipart bodies are not hashed. `@fastify/multipart` reads `request.raw` itself instead of
+ * the preParsing payload, so a tee on that stream has no reader: it paused the socket at 16 KB
+ * and every larger upload hung. The handler streams the parts after the claim, so a hash could
+ * never be ready in time anyway; the key alone identifies a multipart request.
+ */
 function shouldHashBody(request: FastifyRequest): boolean {
   const header = request.headers[IDEMPOTENCY_KEY_HEADER.toLowerCase()];
-  return header !== undefined && isIdempotencyMethod(request.method);
+  const contentType = request.headers["content-type"] ?? "";
+  return (
+    header !== undefined &&
+    isIdempotencyMethod(request.method) &&
+    !contentType.toLowerCase().startsWith("multipart/")
+  );
 }
 
 function sendOmittedReplay(request: FastifyRequest, reply: FastifyReply) {
@@ -202,7 +109,7 @@ function armLeaseRefresh(
   key: string,
 ): () => void {
   const timer = setInterval(() => {
-    void refreshIdempotencyLease(userId, key).catch((error: unknown) => {
+    detachPromise(refreshIdempotencyLease(userId, key), (error: unknown) => {
       request.log.error({ err: error }, "idempotency lease refresh failed");
     });
   }, IDEMPOTENCY_LEASE_REFRESH_MS);
@@ -291,7 +198,7 @@ async function claimIdempotencyKey(
       ${IDEMPOTENCY_LEASE_SECONDS}::int
     )
   `;
-  const row = rows[0];
+  const [row] = rows;
   if (!row) {
     throw new Error("claim_idempotency_key returned no row");
   }
@@ -332,4 +239,109 @@ async function refreshIdempotencyLease(userId: string, key: string): Promise<voi
       ${IDEMPOTENCY_LEASE_SECONDS}::int
     ) AS ok
   `;
+}
+
+export function registerIdempotency(fastify: FastifyInstance): void {
+  fastify.addHook("preParsing", async (request, _reply, payload) => {
+    if (!shouldHashBody(request) || !isReadable(payload)) {
+      return payload;
+    }
+
+    return teeAndHash(payload, (hex) => {
+      bodyHashes.set(request, hex);
+    });
+  });
+
+  fastify.addHook("preHandler", async (request, reply) => {
+    const decision = classifyRequest(request);
+    if (decision.kind === "skip") {
+      return;
+    }
+    if (decision.kind === "invalid") {
+      throw badRequest(
+        "Idempotency-Key must be 1 to 255 printable ASCII characters.",
+        "idempotency_key_invalid",
+      );
+    }
+    if (decision.kind === "unsupported") {
+      throw badRequest(
+        "Idempotency-Key is not supported on this route.",
+        "idempotency_key_unsupported",
+      );
+    }
+
+    const { userId } = decision;
+    const { pathname, rawQuery } = splitRequestUrl(request.url);
+    const requestHash = buildIdempotencyFingerprint({
+      bodySha256: bodyHashes.get(request) ?? EMPTY_BODY_SHA256,
+      method: request.method,
+      pathname,
+      rawQuery,
+    });
+
+    let row: ClaimRow;
+    try {
+      row = await claimIdempotencyKey(userId, decision.key, requestHash);
+    } catch (error) {
+      request.log.error({ err: error }, "idempotency claim failed");
+      throw internal("internal_server_error", error);
+    }
+
+    if (row.outcome === "claimed") {
+      claims.set(request, {
+        clearLease: armLeaseRefresh(request, reply, userId, decision.key),
+        key: decision.key,
+        userId,
+      });
+      return;
+    }
+
+    if (row.outcome === "replay") {
+      if (row.response_omitted) {
+        return sendOmittedReplay(request, reply);
+      }
+      reply.header(IDEMPOTENCY_REPLAYED_HEADER, "true");
+      const statusCode = row.status_code ?? 200;
+      if (row.response_body === null || row.response_body === undefined) {
+        return reply.status(statusCode).send();
+      }
+      return reply.status(statusCode).send(row.response_body);
+    }
+
+    if (row.outcome === "mismatch") {
+      throw new DomainError(
+        "The idempotency key was reused with a different request.",
+        422,
+        "idempotency_key_mismatch",
+      );
+    }
+
+    if (row.outcome === "in_progress") {
+      reply.header("Retry-After", String(idempotencyRetryAfterSeconds()));
+      throw conflict(
+        "A request with this idempotency key is already in progress.",
+        "idempotency_key_in_progress",
+      );
+    }
+
+    request.log.error({ outcome: row.outcome }, "idempotency claim returned an unknown outcome");
+    throw internal("internal_server_error");
+  });
+
+  fastify.addHook("onSend", async (request, reply, payload) => {
+    const state = claims.get(request);
+    if (!state) {
+      return payload;
+    }
+    claims.delete(request);
+    state.clearLease();
+
+    try {
+      await settleClaim(state, reply.statusCode, payload);
+    } catch (error) {
+      request.log.error({ err: error }, "idempotency settle failed");
+    }
+
+    return payload;
+  });
 }

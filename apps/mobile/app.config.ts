@@ -1,14 +1,42 @@
 import type { ConfigContext, ExpoConfig } from "expo/config";
 
+const IPV4_HOSTNAME_RE = /^\d{1,3}(\.\d{1,3}){3}$/;
+
+/**
+ * Associated-domain host for passkeys and App Links. Skip localhost and IP
+ * so local Expo configs do not claim production well-known files.
+ */
+function associatedDomainHost(websiteUrl: string): string | null {
+  try {
+    const parsed = new URL(websiteUrl);
+    if (parsed.protocol !== "https:") {
+      return null;
+    }
+
+    const hostname = parsed.hostname.toLowerCase();
+    if (!hostname || hostname === "localhost" || hostname.includes(":")) {
+      return null;
+    }
+
+    if (IPV4_HOSTNAME_RE.test(hostname)) {
+      return null;
+    }
+
+    return hostname;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Dynamic Expo config — reads BONDERY_PUBLIC_* from process.env into `extra`
  * so app code never depends on EXPO_PUBLIC_ inlining.
  */
 export default ({ config }: ConfigContext): ExpoConfig => {
-  const apiUrl = process.env.BONDERY_PUBLIC_API_URL ?? "";
-  const storageUrl = process.env.BONDERY_PUBLIC_STORAGE_URL ?? "";
-  const websiteUrl = process.env.BONDERY_PUBLIC_WEBSITE_URL ?? "https://usebondery.com";
-  const syncDebug = process.env.BONDERY_PUBLIC_SYNC_DEBUG ?? "";
+  const apiUrl = process.env["BONDERY_PUBLIC_API_URL"] ?? "";
+  const storageUrl = process.env["BONDERY_PUBLIC_STORAGE_URL"] ?? "";
+  const websiteUrl = process.env["BONDERY_PUBLIC_WEBSITE_URL"] ?? "https://usebondery.com";
+  const syncDebug = process.env["BONDERY_PUBLIC_SYNC_DEBUG"] ?? "";
   const associatedHost = associatedDomainHost(websiteUrl);
 
   return {
@@ -122,32 +150,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     scheme: "bondery",
     slug: "bondery",
     userInterfaceStyle: "automatic",
-    version: "1.11.2",
+    version: "1.11.3",
   };
 };
-
-/**
- * Associated-domain host for passkeys and App Links. Skip localhost and IP
- * so local Expo configs do not claim production well-known files.
- */
-function associatedDomainHost(websiteUrl: string): string | null {
-  try {
-    const parsed = new URL(websiteUrl);
-    if (parsed.protocol !== "https:") {
-      return null;
-    }
-
-    const hostname = parsed.hostname.toLowerCase();
-    if (!hostname || hostname === "localhost" || hostname.includes(":")) {
-      return null;
-    }
-
-    if (/^\d{1,3}(\.\d{1,3}){3}$/.test(hostname)) {
-      return null;
-    }
-
-    return hostname;
-  } catch {
-    return null;
-  }
-}

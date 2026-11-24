@@ -2,16 +2,31 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import localeCatalog from "@bondery/schemas/locale/supported-locales.json" with { type: "json" };
-
 import { createCheck } from "../../../scripts/check/check-report.mjs";
+import {
+  ALL_LOCALES as LOCALES,
+  localesForNamespace,
+  SOURCE_LOCALE,
+} from "./lib/namespace-locales.mjs";
+
+const TSX_JSX_MJS_RE = /\.(tsx?|jsx?|mjs)$/;
 
 const check = createCheck("check-i18n-structure");
+
+/**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+function asUnknown(value) {
+  return value;
+}
+
+/** Longest list of files the report prints per category before it shows only a count. */
+const MAX_LISTED_FILES = 20;
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const localesRoot = path.join(repoRoot, "packages/translations/src/locales");
 const manifestPath = path.join(repoRoot, "packages/translations/manifest.json");
-const LOCALES = localeCatalog.supported.map((entry) => entry.code);
 const APP_LOCALE_CODES = LOCALES;
 const SCAN_ROOTS = [
   path.join(repoRoot, "apps/webapp/src"),
@@ -34,7 +49,7 @@ function walk(dir, acc = []) {
         continue;
       }
       walk(full, acc);
-    } else if (/\.(tsx?|jsx?|mjs)$/.test(entry.name)) {
+    } else if (TSX_JSX_MJS_RE.test(entry.name)) {
       acc.push(full);
     }
   }
@@ -59,28 +74,46 @@ function walkJson(dir, prefix = "", acc = []) {
 
 function loadNamespaceJson(locale, relativePath) {
   const filePath = path.join(localesRoot, locale, relativePath);
-  return JSON.parse(fs.readFileSync(filePath, "utf8"));
+  return asUnknown(JSON.parse(fs.readFileSync(filePath, "utf8")));
 }
 
+const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+
 // --- Locale file tree parity ---
-const enFiles = new Set(walkJson(path.join(localesRoot, "en")));
+const enFiles = new Set(walkJson(path.join(localesRoot, SOURCE_LOCALE)));
+const englishOnlyFiles = new Set(
+  Object.values(manifest.namespaces)
+    .filter((entry) => entry.englishOnly)
+    .map((entry) => entry.path.replace(/\\/g, "/")),
+);
 for (const locale of LOCALES) {
-  if (locale === "en") {
+  if (locale === SOURCE_LOCALE) {
     continue;
   }
   const localeFiles = new Set(walkJson(path.join(localesRoot, locale)));
-  const missing = [...enFiles].filter((file) => !localeFiles.has(file)).sort();
-  const extra = [...localeFiles].filter((file) => !enFiles.has(file)).sort();
+  const missing = [...enFiles]
+    .filter((file) => !englishOnlyFiles.has(file) && !localeFiles.has(file))
+    .sort((left, right) => left.localeCompare(right));
+  const extra = [...localeFiles]
+    .filter((file) => !enFiles.has(file))
+    .sort((left, right) => left.localeCompare(right));
+  for (const file of localeFiles) {
+    if (englishOnlyFiles.has(file)) {
+      fail(
+        `${locale} has a translation of the englishOnly namespace file ${file}. Remove "englishOnly" from the manifest entry once a namespace is translated.`,
+      );
+    }
+  }
   console.log(
     `\nFile tree parity (${locale} vs en): missing=${missing.length}, extra=${extra.length}`,
   );
-  for (const file of missing.slice(0, 20)) {
+  for (const file of missing.slice(0, MAX_LISTED_FILES)) {
     console.log(`  - ${file}`);
   }
-  if (missing.length > 20) {
-    console.log(`  ... and ${missing.length - 20} more`);
+  if (missing.length > MAX_LISTED_FILES) {
+    console.log(`  ... and ${missing.length - MAX_LISTED_FILES} more`);
   }
-  for (const file of extra.slice(0, 20)) {
+  for (const file of extra.slice(0, MAX_LISTED_FILES)) {
     console.log(`  + ${file}`);
   }
   if (missing.length > 0 || extra.length > 0) {
@@ -89,9 +122,8 @@ for (const locale of LOCALES) {
 }
 
 // --- Manifest ↔ filesystem ---
-const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
 for (const [name, entry] of Object.entries(manifest.namespaces)) {
-  for (const locale of LOCALES) {
+  for (const locale of localesForNamespace(entry)) {
     const filePath = path.join(localesRoot, locale, entry.path);
     if (!fs.existsSync(filePath)) {
       fail(`manifest namespace "${name}" missing file: locales/${locale}/${entry.path}`);

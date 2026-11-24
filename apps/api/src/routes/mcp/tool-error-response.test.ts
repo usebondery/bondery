@@ -6,6 +6,14 @@ import {
   rewriteToolErrorText,
 } from "./tool-error-response.js";
 
+const CORRECT_THOSE_ARGUMENTS_PATTERN = /correct those arguments/;
+const DOCS_API_ERRORS_VALIDATION_ERROR_PATTERN = /\/docs\/api\/errors\/validation_error$/;
+const RETRY_THE_CALL_ONCE_PATTERN = /Retry the call once/;
+const VALIDATION_ERROR_PATTERN = /"validation_error"/;
+const DOC_URL_PATTERN = /doc_url/;
+const VALIDATION_ERROR_PATTERN_2 = /validation_error/;
+const SEARCH_CONTACTS_PATTERN = /search_contacts/;
+
 const REQUEST_ID = "req-test-1";
 
 describe("rewriteToolErrorText", () => {
@@ -16,11 +24,11 @@ describe("rewriteToolErrorText", () => {
     );
     assert.ok(rewritten);
     assert.equal(rewritten.error.code, "validation_error");
-    assert.match(rewritten.error.message, /search_contacts/);
-    assert.match(String(rewritten.error.doc_url), /\/docs\/api\/errors\/validation_error$/);
+    assert.match(rewritten.error.message, SEARCH_CONTACTS_PATTERN);
+    assert.match(rewritten.error.doc_url, DOCS_API_ERRORS_VALIDATION_ERROR_PATTERN);
     assert.equal(rewritten.error.request_id, REQUEST_ID);
     assert.equal((rewritten.error.details as { toolName: string }).toolName, "search_contacts");
-    assert.match(rewritten.error.agent_message, /correct those arguments/);
+    assert.match(rewritten.error.agent_message, CORRECT_THOSE_ARGUMENTS_PATTERN);
   });
 
   it("converts an SDK output validation error", () => {
@@ -30,14 +38,14 @@ describe("rewriteToolErrorText", () => {
     );
     assert.ok(rewritten);
     assert.equal(rewritten.error.code, "internal_server_error");
-    assert.match(rewritten.error.agent_message, /Retry the call once/);
+    assert.match(rewritten.error.agent_message, RETRY_THE_CALL_ONCE_PATTERN);
   });
 
   it("converts an unknown tool name", () => {
     const rewritten = rewriteToolErrorText("Tool get_contactt not found", REQUEST_ID);
     assert.ok(rewritten);
     assert.equal(rewritten.error.code, "validation_error");
-    assert.match(rewritten.error.agent_message, /correct those arguments/);
+    assert.match(rewritten.error.agent_message, CORRECT_THOSE_ARGUMENTS_PATTERN);
     assert.equal((rewritten.error.details as { toolName: string }).toolName, "get_contactt");
   });
 
@@ -77,9 +85,9 @@ describe("rewriteMcpToolErrors", () => {
       },
     };
     assert.equal(rewriteMcpToolErrors(payload, REQUEST_ID), true);
-    const text = payload.result.content[0].text;
-    assert.match(text, /"validation_error"/);
-    assert.match(text, /doc_url/);
+    const { text } = payload.result.content[0];
+    assert.match(text, VALIDATION_ERROR_PATTERN);
+    assert.match(text, DOC_URL_PATTERN);
     assert.equal(
       (payload.result as { structuredContent?: { error: { code: string } } }).structuredContent
         ?.error.code,
@@ -148,7 +156,7 @@ describe("rewriteMcpFetchResponse", () => {
     );
     const rewritten = await rewriteMcpFetchResponse(response, REQUEST_ID);
     const body = await rewritten.text();
-    assert.match(body, /validation_error/);
+    assert.match(body, VALIDATION_ERROR_PATTERN_2);
   });
 
   it("passes an SSE body through untouched", async () => {

@@ -1,5 +1,6 @@
-import { Component, type ReactNode } from "react";
+import { Component, type ErrorInfo, type ReactNode } from "react";
 import { StyleSheet, Text, View } from "react-native";
+import { useCommonTranslations } from "@/lib/i18n/generated/hooks";
 import type { MobileThemeColors } from "../theme/colors";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../theme/tokens";
 
@@ -13,11 +14,29 @@ type RootErrorBoundaryProps = {
   colors: MobileThemeColors;
 };
 
+/** A class cannot call a hook, so the fallback is a function component under the provider. */
+function RuntimeErrorScreen({ colors, message }: { colors: MobileThemeColors; message: string }) {
+  const t = useCommonTranslations();
+
+  return (
+    <View style={[styles.errorScreen, { backgroundColor: colors.appBackground }]}>
+      <Text style={[styles.errorTitle, { color: colors.textPrimary }]}>
+        {t("feedback.mobileRuntimeError")}
+      </Text>
+      <Text style={[styles.errorMessage, { color: colors.dangerText }]}>
+        {message || t("feedback.unknownError")}
+      </Text>
+    </View>
+  );
+}
+
 /**
  * Isolated from `app/_layout.tsx` so Fast Refresh does not mix a class and the
  * route default export in one file.
  */
-export class RootErrorBoundary extends Component<RootErrorBoundaryProps, RootErrorBoundaryState> {
+class RootErrorBoundary extends Component<RootErrorBoundaryProps, RootErrorBoundaryState> {
+  lastComponentStack = "";
+
   constructor(props: RootErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, message: "" };
@@ -30,20 +49,19 @@ export class RootErrorBoundary extends Component<RootErrorBoundaryProps, RootErr
     };
   }
 
-  render() {
+  override componentDidCatch(error: unknown, info: ErrorInfo): void {
+    this.setState({
+      hasError: true,
+      message: error instanceof Error ? error.message : String(error),
+    });
+    this.lastComponentStack = info.componentStack ?? "";
+  }
+
+  override render() {
     const { colors } = this.props;
 
     if (this.state.hasError) {
-      return (
-        <View style={[styles.errorScreen, { backgroundColor: colors.appBackground }]}>
-          <Text style={[styles.errorTitle, { color: colors.textPrimary }]}>
-            Mobile app runtime error
-          </Text>
-          <Text style={[styles.errorMessage, { color: colors.dangerText }]}>
-            {this.state.message || "Unknown error"}
-          </Text>
-        </View>
-      );
+      return <RuntimeErrorScreen colors={colors} message={this.state.message} />;
     }
 
     return this.props.children;
@@ -67,3 +85,5 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
 });
+
+export { RootErrorBoundary };

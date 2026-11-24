@@ -17,6 +17,7 @@ release/
   bondery.yml              -> release.yml           vX.Y.Z unified production (skips -rc)
   rc.yml                   -> rc-release.yml        vX.Y.Z-rc.N prerelease + staging zip; no CWS
   mcp-registry.yml         -> publish-mcp-registry.yml  workflow_dispatch or vX.Y.Z (skips -rc)
+  claude-plugin.yml        -> publish-claude-plugin.yml  vX.Y.Z fast-forwards `claude-plugin` when the plugin folder changed
 
 smoke/
   bondery-stack.yml        -> smoke-bondery-stack.yml  manual workflow_dispatch drill
@@ -44,15 +45,15 @@ shared/
 
 ## Naming rules
 
-| Prefix | Meaning | Trigger |
-|--------|---------|---------|
-| `verify` | Quality gates | **PR only** (`website-build` path-filtered; `contract` always runs). Uses `concurrency` to cancel stale runs. |
-| `stage-images` | Integration images on main | Push to `main` (path-filtered matrix: api, webapp, website) |
-| `deploy-*` | Production CD (floating channel) | Push to `release` (path-filtered); website promotes `:sha` when staged on main |
-| `release-*` | Versioned production releases | Git tag `vX.Y.Z` (skips `-rc.`) |
-| `rc-release` | Named RC / beta | Git tag `vX.Y.Z-rc.N` |
-| `shared-*` | Reusable workflows (not triggered directly) | `workflow_call` only |
-| `sync-dokploy-env` | Infisical → Dokploy ops env sync | `workflow_dispatch` (OIDC only; no GitHub secrets) |
+| Prefix             | Meaning                                     | Trigger                                                                                                       |
+| ------------------ | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `verify`           | Quality gates                               | **PR only** (`website-build` path-filtered; `contract` always runs). Uses `concurrency` to cancel stale runs. |
+| `stage-images`     | Integration images on main                  | Push to `main` (path-filtered matrix: api, webapp, website)                                                   |
+| `deploy-*`         | Production CD (floating channel)            | Push to `release` (path-filtered); website promotes `:sha` when staged on main                                |
+| `release-*`        | Versioned production releases               | Git tag `vX.Y.Z` (skips `-rc.`)                                                                               |
+| `rc-release`       | Named RC / beta                             | Git tag `vX.Y.Z-rc.N`                                                                                         |
+| `shared-*`         | Reusable workflows (not triggered directly) | `workflow_call` only                                                                                          |
+| `sync-dokploy-env` | Infisical → Dokploy ops env sync            | `workflow_dispatch` (OIDC only; no GitHub secrets)                                                            |
 
 Display names use ASCII hyphens (for example `Stage - Webapp`) because GitHub rejects some workflow expressions when combined with certain name encodings, and because reusable-workflow `with:` blocks cannot use the `env` context.
 
@@ -62,12 +63,12 @@ Display names use ASCII hyphens (for example `Stage - Webapp`) because GitHub re
 
 **Dokploy webhooks** (Infisical **production** via OIDC):
 
-| Infisical key | Workflow | Dokploy app |
-|---------------|----------|-------------|
-| `BONDERY_OPS_DOKPLOY_WEBSITE_DEPLOY_WEBHOOK` | `deploy-website.yml` (after smoke) | `deploy/ops` marketing website |
-| `BONDERY_OPS_DOKPLOY_SERVICES_DEPLOY_WEBHOOK` | `release.yml` | `deploy/bondery` product stack |
-| `BONDERY_OPS_DOKPLOY_STAGING_SERVICES_DEPLOY_WEBHOOK` | `stage-images.yml` (named RC cuts on `main`) | `bondery-beta` product stack |
-| `BONDERY_OPS_DOKPLOY_STAGING_WEBSITE_DEPLOY_WEBHOOK` | `stage-images.yml` (named RC cuts on `main`) | `bondery-beta` marketing website |
+| Infisical key                                         | Workflow                                     | Dokploy app                      |
+| ----------------------------------------------------- | -------------------------------------------- | -------------------------------- |
+| `BONDERY_OPS_DOKPLOY_WEBSITE_DEPLOY_WEBHOOK`          | `deploy-website.yml` (after smoke)           | `deploy/ops` marketing website   |
+| `BONDERY_OPS_DOKPLOY_SERVICES_DEPLOY_WEBHOOK`         | `release.yml`                                | `deploy/bondery` product stack   |
+| `BONDERY_OPS_DOKPLOY_STAGING_SERVICES_DEPLOY_WEBHOOK` | `stage-images.yml` (named RC cuts on `main`) | `bondery-beta` product stack     |
+| `BONDERY_OPS_DOKPLOY_STAGING_WEBSITE_DEPLOY_WEBHOOK`  | `stage-images.yml` (named RC cuts on `main`) | `bondery-beta` marketing website |
 
 Workflows fetch production secrets with `infisical-production-secrets`. Empty webhook skips redeploy (manual Dokploy).
 
@@ -75,10 +76,10 @@ Workflows fetch production secrets with `infisical-production-secrets`. Empty we
 
 **Turbo remote cache** (`BONDERY_OPS_TURBO_TOKEN` secret + `BONDERY_OPS_TURBO_TEAM` variable):
 
-| Where | Mechanism |
-|-------|-----------|
-| `verify` `contract`, `website-build` | `turbo-remote-cache` action |
-| `shared-release-extension` | job `env` `TURBO_TOKEN` / `TURBO_TEAM` |
+| Where                                | Mechanism                                                                                                                  |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| `verify` `contract`, `website-build` | `turbo-remote-cache` action                                                                                                |
+| `shared-release-extension`           | job `env` `TURBO_TOKEN` / `TURBO_TEAM`                                                                                     |
 | Docker builds (api, webapp, website) | `shared-docker-build-push` passes `TURBO_TEAM` build-arg + `turbo_token` secret; Dockerfiles mount secret on `turbo build` |
 
 **Verify path filters:** `website-build` runs when marketing-site paths change. `contract` always runs. API HTTP integration (`test:api`) is not in CI; run manually when changing routes if needed. Auth integration (`pnpm --filter api run test:auth`) is local-only until the suite is repaired.
@@ -87,13 +88,13 @@ Docker builds also use GHA layer cache (`cache-from: type=gha`). Builder stages 
 
 ## Docker channels
 
-| Channel | Git trigger | Docker tags |
-|---------|-------------|-------------|
-| Everyday `main` | push `main` (not an RC cut) | `:sha-<short>` only |
-| Named RC cut | push `main` when package.json becomes `X.Y.Z-rc.N` | `:sha-<short>`, `:X.Y.Z-rc.N`, `:beta` |
-| RC tag | `vX.Y.Z-rc.N` (`rc-release.yml`) | Verify `:sha-<short>` = `:X.Y.Z-rc.N` = `:beta` (no retag) |
-| Production tag | `vX.Y.Z` (`release.yml`; skips `-rc.`) | Promote last `:X.Y.Z-rc.N` → `:X.Y.Z`; `:production` + `:latest` after smoke + CWS gate |
-| Deploy (website) | push to `release` | Promote `:sha-<short>` → `:production` + `:latest` when image exists on main; else build |
+| Channel          | Git trigger                                        | Docker tags                                                                              |
+| ---------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Everyday `main`  | push `main` (not an RC cut)                        | `:sha-<short>` only                                                                      |
+| Named RC cut     | push `main` when package.json becomes `X.Y.Z-rc.N` | `:sha-<short>`, `:X.Y.Z-rc.N`, `:beta`                                                   |
+| RC tag           | `vX.Y.Z-rc.N` (`rc-release.yml`)                   | Verify `:sha-<short>` = `:X.Y.Z-rc.N` = `:beta` (no retag)                               |
+| Production tag   | `vX.Y.Z` (`release.yml`; skips `-rc.`)             | Promote last `:X.Y.Z-rc.N` → `:X.Y.Z`; `:production` + `:latest` after smoke + CWS gate  |
+| Deploy (website) | push to `release`                                  | Promote `:sha-<short>` → `:production` + `:latest` when image exists on main; else build |
 
 `:sha-<short>` is the **immutable artifact** built on `main`. Named RC cuts also tag `:X.Y.Z-rc.N` and `:beta` (same digest). `:beta` is a floating pointer updated **only on named RC cuts**, not every merge and not on the RC git tag. `vX.Y.Z` promotes that named RC digest; drop-rc is changelog / `package.json` / CWS. `:latest` is an alias of `:production` — pin CalVer (`BONDERY_INFRA_VERSION=X.Y.Z`), never `:latest`. Health `version` follows runtime `BONDERY_INFRA_VERSION` when it is production CalVer — never the word `beta`.
 
@@ -120,17 +121,23 @@ If you change lockfile layout or pnpm major version, bump the BuildKit cache id 
 
 **Production Infisical keys for CI** (in addition to runtime/Dokploy sync keys):
 
-| Key | CI use |
-|-----|--------|
-| `BONDERY_OPS_DOKPLOY_SERVICES_DEPLOY_WEBHOOK` | Product stack redeploy after unified release |
-| `BONDERY_OPS_DOKPLOY_WEBSITE_DEPLOY_WEBHOOK` | Marketing website redeploy (`deploy-website.yml`) |
-| `BONDERY_INFRA_CHROME_EXTENSION_ID`, `BONDERY_OPS_CHROME_PUBLISHER_ID` | Chrome Web Store API |
-| `BONDERY_OPS_GHCR_WRITE_TOKEN` | GHCR login (docker build, promote, smoke pull) |
-| `BONDERY_OPS_MCP_REGISTRY_PRIVATE_KEY` | Ed25519 seed (hex) for `mcp-publisher login http` (`publish-mcp-registry.yml`) |
-| `BONDERY_INFRA_WEBAPP_DOMAIN`, `BONDERY_INFRA_API_DOMAIN` | Derive extension build URLs |
-| `BONDERY_PUBLIC_OAUTH_CLIENT_ID` | Extension PKCE OAuth client id (must not equal the webapp BFF client) |
+| Key                                                                    | CI use                                                                         |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `BONDERY_OPS_DOKPLOY_SERVICES_DEPLOY_WEBHOOK`                          | Product stack redeploy after unified release                                   |
+| `BONDERY_OPS_DOKPLOY_WEBSITE_DEPLOY_WEBHOOK`                           | Marketing website redeploy (`deploy-website.yml`)                              |
+| `BONDERY_INFRA_CHROME_EXTENSION_ID`, `BONDERY_OPS_CHROME_PUBLISHER_ID` | Chrome Web Store API                                                           |
+| `BONDERY_OPS_GHCR_WRITE_TOKEN`                                         | GHCR login (docker build, promote, smoke pull)                                 |
+| `BONDERY_OPS_MCP_REGISTRY_PRIVATE_KEY`                                 | Ed25519 seed (hex) for `mcp-publisher login http` (`publish-mcp-registry.yml`) |
+| `BONDERY_INFRA_WEBAPP_DOMAIN`, `BONDERY_INFRA_API_DOMAIN`              | Derive extension build URLs                                                    |
+| `BONDERY_PUBLIC_OAUTH_CLIENT_ID`                                       | Extension PKCE OAuth client id (must not equal the webapp BFF client)          |
 
 **MCP Registry** (`publish-mcp-registry.yml`): publishes root `server.json` as `com.usebondery/mcp` (`https://api.usebondery.com/mcp`). Auth is HTTP (`mcp-publisher login http --domain usebondery.com`). `GET https://usebondery.com/.well-known/mcp-registry-auth` must already return **200** `text/plain` with no redirect (marketing website on `release`; the registry client does not follow redirects). Publish uses Infisical **production** `BONDERY_OPS_MCP_REGISTRY_PRIVATE_KEY` (never GitHub secrets, never Dokploy). Development and staging have distinct seeds under the same name; they are not used to publish. First publish: merge → website CD → curl 200 on the proof URL → Infisical OIDC allows this workflow → `workflow_dispatch`. Later production tags `vX.Y.Z` republish (RC tags are skipped).
+
+**Claude plugin** (`publish-claude-plugin.yml`): the Claude directory follows one git ref, `claude-plugin`. A new tag does not move a ref the directory already tracks, so the workflow fast-forwards that branch to the `vX.Y.Z` commit when the folder changed. Production tags `vX.Y.Z` may move `claude-plugin`; RC tags never do. `workflow_dispatch` takes a `vX.Y.Z` tag and checks out that tag. The run needs `contents: write` and nothing else: no Infisical, no registry key. It fails when `llm-plugins/claude/.claude-plugin/plugin.json` still carries an RC string, and it treats a version-only bump as a green skip so no review opens. The plugin folder is content, not a pnpm workspace package. `verify.yml` runs `pnpm run check:llm-plugins` on every pull request. Portal Submit and Publish stay human steps.
+
+**Claude plugin manifest.** The source of truth is `llm-plugins/src/plugin.config.json`. The config has no version. `node scripts/pkg/build-llm-plugins.mjs` writes `llm-plugins/claude` and `llm-plugins/openai`. `pnpm run sync-version` runs that builder in write mode. The builder stamps the root `package.json` version on both manifests. OpenAI has no git ref.
+
+The Claude manifest sets `icon`, `documentationUrl`, `supportUrl`, `privacyPolicyUrl`, and `termsOfServiceUrl`. `apps/website/scripts/generate-icons.ts` writes `llm-plugins/src/assets/icon.png` on website `prebuild` and `predev`. The builder copies that file into both packages. These fields are absent: `dependencies`, `defaultEnabled`, `metadata`, `userConfig`, and every component key. `skills/` and `.mcp.json` use their default paths. `pnpm run check:llm-plugins` checks that a listing field points inside the bundle or uses `https://`.
 
 **Ops checklist (Infisical UI — before relying on Infisical-only CI):**
 
@@ -172,45 +179,45 @@ Use `defaultEnvironment: development` in `.infisical.json` for `pnpm env:pull`; 
 
 Manual workflow: upload manifest `dokploySync` keys to a Dokploy compose app via OIDC (no GitHub secrets).
 
-| Input | Role |
-|-------|------|
-| `deployment` | `production` — Infisical production only. `beta` — staging app secrets + production ops keys (website and services). |
-| `target` | `website` (`deploy/ops`), `services` (`deploy/bondery`), or `plausible` (`deploy/plausible`). With `deployment=beta`, `website` maps to `website-beta` and `services` maps to `services-beta`. Plausible is production-only. |
-| `dry_run` | Log env names to runner console instead of uploading to Dokploy API. |
-| `redeploy` | POST Dokploy deploy webhook after save (`refs/heads/release` for production stacks; `refs/heads/main` for beta website and product stacks). |
+| Input        | Role                                                                                                                                                                                                                         |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `deployment` | `production` — Infisical production only. `beta` — staging app secrets + production ops keys (website and services).                                                                                                         |
+| `target`     | `website` (`deploy/ops`), `services` (`deploy/bondery`), or `plausible` (`deploy/plausible`). With `deployment=beta`, `website` maps to `website-beta` and `services` maps to `services-beta`. Plausible is production-only. |
+| `dry_run`    | Log env names to runner console instead of uploading to Dokploy API.                                                                                                                                                         |
+| `redeploy`   | POST Dokploy deploy webhook after save (`refs/heads/release` for production stacks; `refs/heads/main` for beta website and product stacks).                                                                                  |
 
 **Infisical fetch by deployment:**
 
-| `deployment` | App secrets source | Ops keys (`BONDERY_OPS_DOKPLOY_*`) |
-|--------------|-------------------|-------------------------------------|
-| `production` | production | production |
-| `beta` | staging (after production fetch + ops snapshot restore) | production |
+| `deployment` | App secrets source                                      | Ops keys (`BONDERY_OPS_DOKPLOY_*`) |
+| ------------ | ------------------------------------------------------- | ---------------------------------- |
+| `production` | production                                              | production                         |
+| `beta`       | staging (after production fetch + ops snapshot restore) | production                         |
 
 Dokploy connection creds and compose ids live in Infisical **production** — including `BONDERY_OPS_DOKPLOY_STAGING_SERVICES_*` and `BONDERY_OPS_DOKPLOY_STAGING_WEBSITE_*` for the beta stacks.
 
-| Infisical key (production) | Role |
-|----------------------------|------|
-| `BONDERY_OPS_DOKPLOY_HOST`, `BONDERY_OPS_DOKPLOY_API_KEY` | Dokploy API (required for all targets) |
-| `BONDERY_OPS_DOKPLOY_OPS_COMPOSE_ID` | Website stack compose id |
-| `BONDERY_OPS_DOKPLOY_WEBSITE_DEPLOY_WEBHOOK` | Optional redeploy for **website** when `redeploy: true` |
-| `BONDERY_OPS_DOKPLOY_SERVICES_COMPOSE_ID` | Product stack compose id (`deploy/bondery`) |
-| `BONDERY_OPS_DOKPLOY_SERVICES_DEPLOY_WEBHOOK` | Optional redeploy for **services** when `redeploy: true` |
-| `BONDERY_OPS_DOKPLOY_PLAUSIBLE_COMPOSE_ID` | Plausible stack compose id |
-| `BONDERY_OPS_DOKPLOY_PLAUSIBLE_DEPLOY_WEBHOOK` | Optional redeploy for **plausible** when `redeploy: true` |
-| `BONDERY_OPS_DOKPLOY_STAGING_SERVICES_COMPOSE_ID` | Beta product stack compose id (`bondery-beta`) |
-| `BONDERY_OPS_DOKPLOY_STAGING_SERVICES_DEPLOY_WEBHOOK` | Optional redeploy for **beta** (`deployment=beta`, `redeploy=true`) or when `stage-images` fires; payload `refs/heads/main` |
-| `BONDERY_OPS_DOKPLOY_STAGING_WEBSITE_COMPOSE_ID` | Beta marketing website compose id |
-| `BONDERY_OPS_DOKPLOY_STAGING_WEBSITE_DEPLOY_WEBHOOK` | Optional redeploy for **beta website** (`deployment=beta` `target=website`, `redeploy=true`) or when `stage-images` fires; payload `refs/heads/main` |
+| Infisical key (production)                                | Role                                                                                                                                                 |
+| --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `BONDERY_OPS_DOKPLOY_HOST`, `BONDERY_OPS_DOKPLOY_API_KEY` | Dokploy API (required for all targets)                                                                                                               |
+| `BONDERY_OPS_DOKPLOY_OPS_COMPOSE_ID`                      | Website stack compose id                                                                                                                             |
+| `BONDERY_OPS_DOKPLOY_WEBSITE_DEPLOY_WEBHOOK`              | Optional redeploy for **website** when `redeploy: true`                                                                                              |
+| `BONDERY_OPS_DOKPLOY_SERVICES_COMPOSE_ID`                 | Product stack compose id (`deploy/bondery`)                                                                                                          |
+| `BONDERY_OPS_DOKPLOY_SERVICES_DEPLOY_WEBHOOK`             | Optional redeploy for **services** when `redeploy: true`                                                                                             |
+| `BONDERY_OPS_DOKPLOY_PLAUSIBLE_COMPOSE_ID`                | Plausible stack compose id                                                                                                                           |
+| `BONDERY_OPS_DOKPLOY_PLAUSIBLE_DEPLOY_WEBHOOK`            | Optional redeploy for **plausible** when `redeploy: true`                                                                                            |
+| `BONDERY_OPS_DOKPLOY_STAGING_SERVICES_COMPOSE_ID`         | Beta product stack compose id (`bondery-beta`)                                                                                                       |
+| `BONDERY_OPS_DOKPLOY_STAGING_SERVICES_DEPLOY_WEBHOOK`     | Optional redeploy for **beta** (`deployment=beta`, `redeploy=true`) or when `stage-images` fires; payload `refs/heads/main`                          |
+| `BONDERY_OPS_DOKPLOY_STAGING_WEBSITE_COMPOSE_ID`          | Beta marketing website compose id                                                                                                                    |
+| `BONDERY_OPS_DOKPLOY_STAGING_WEBSITE_DEPLOY_WEBHOOK`      | Optional redeploy for **beta website** (`deployment=beta` `target=website`, `redeploy=true`) or when `stage-images` fires; payload `refs/heads/main` |
 
 **Uploaded keys by target:**
 
-| Target | Keys |
-|--------|------|
-| `website` | `BONDERY_INFRA_WEBAPP_DOMAIN`, `BONDERY_INFRA_WEBSITE_DOMAIN`, `BONDERY_INFRA_PLAUSIBLE_DOMAIN`, plus `BONDERY_INFRA_TRAEFIK_PREFIX` and `BONDERY_INFRA_WEBSITE_IMAGE_TAG` when set |
-| `website-beta` | Same upload keys as `website`; compose id / webhook from `BONDERY_OPS_DOKPLOY_STAGING_WEBSITE_*` in production Infisical; app secret values from Infisical **staging** when `deployment=beta` |
-| `services` | All `deploy/bondery/.env.example` manifest keys except `BONDERY_INFRA_GIT_SHA`, `BONDERY_INFRA_VERSION`, `BONDERY_PRIVATE_S3_ENDPOINT`, `BONDERY_PUBLIC_STORAGE_URL` (compose derives storage URL from `BONDERY_INFRA_STORAGE_DOMAIN`; image pin stays in the Dokploy UI). `BONDERY_INFRA_TRAEFIK_PREFIX` syncs from Infisical (`bondery` in production, `bondery-beta` in staging). |
-| `services-beta` | Same upload keys as `services`; compose id / webhook from `BONDERY_OPS_DOKPLOY_STAGING_SERVICES_*` in production Infisical; app secret values from Infisical **staging** when `deployment=beta` |
-| `plausible` | `BONDERY_INFRA_PLAUSIBLE_DOMAIN`, `BONDERY_PRIVATE_PLAUSIBLE_SECRET_KEY_BASE`, `BONDERY_PRIVATE_PLAUSIBLE_TOTP_VAULT_KEY`, `BONDERY_PRIVATE_PLAUSIBLE_POSTGRES_PASSWORD`, `BONDERY_INFRA_PLAUSIBLE_DISABLE_REGISTRATION` (optional) |
+| Target          | Keys                                                                                                                                                                                                                                                                                                                                                                                 |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `website`       | `BONDERY_INFRA_WEBAPP_DOMAIN`, `BONDERY_INFRA_WEBSITE_DOMAIN`, `BONDERY_INFRA_PLAUSIBLE_DOMAIN`, plus `BONDERY_INFRA_TRAEFIK_PREFIX` and `BONDERY_INFRA_WEBSITE_IMAGE_TAG` when set                                                                                                                                                                                                  |
+| `website-beta`  | Same upload keys as `website`; compose id / webhook from `BONDERY_OPS_DOKPLOY_STAGING_WEBSITE_*` in production Infisical; app secret values from Infisical **staging** when `deployment=beta`                                                                                                                                                                                        |
+| `services`      | All `deploy/bondery/.env.example` manifest keys except `BONDERY_INFRA_GIT_SHA`, `BONDERY_INFRA_VERSION`, `BONDERY_PRIVATE_S3_ENDPOINT`, `BONDERY_PUBLIC_STORAGE_URL` (compose derives storage URL from `BONDERY_INFRA_STORAGE_DOMAIN`; image pin stays in the Dokploy UI). `BONDERY_INFRA_TRAEFIK_PREFIX` syncs from Infisical (`bondery` in production, `bondery-beta` in staging). |
+| `services-beta` | Same upload keys as `services`; compose id / webhook from `BONDERY_OPS_DOKPLOY_STAGING_SERVICES_*` in production Infisical; app secret values from Infisical **staging** when `deployment=beta`                                                                                                                                                                                      |
+| `plausible`     | `BONDERY_INFRA_PLAUSIBLE_DOMAIN`, `BONDERY_PRIVATE_PLAUSIBLE_SECRET_KEY_BASE`, `BONDERY_PRIVATE_PLAUSIBLE_TOTP_VAULT_KEY`, `BONDERY_PRIVATE_PLAUSIBLE_POSTGRES_PASSWORD`, `BONDERY_INFRA_PLAUSIBLE_DISABLE_REGISTRATION` (optional)                                                                                                                                                  |
 
 **Ops checklist:**
 

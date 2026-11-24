@@ -19,6 +19,8 @@ import {
   stripeCliFailure,
 } from "./stripe-cli.js";
 
+const STRIPE_LOGIN_RE = /stripe login/i;
+
 const WEBHOOK_SECRET_KEY = "BONDERY_PRIVATE_STRIPE_WEBHOOK_SECRET";
 
 const log = createCliLogger("setup:stripe");
@@ -42,25 +44,29 @@ function main() {
   if (cliFailure) {
     log.error(cliFailure.error);
     log.info(cliFailure.hint);
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   log.step(2, 4, "Read CLI webhook signing secret");
   const printed = printStripeListenSecret();
   if (!printed.ok) {
-    if (/stripe login/i.test(printed.error)) {
+    if (STRIPE_LOGIN_RE.test(printed.error)) {
       log.error("Stripe CLI is not logged in");
       log.info("Run: stripe login");
-      process.exit(1);
+      process.exitCode = 1;
+      return;
     }
     log.error(printed.error);
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   log.step(3, 4, `Write ${WEBHOOK_SECRET_KEY} to .env.local`);
   if (!existsSync(rootEnv)) {
     log.error("Missing .env.local — run: pnpm run setup:dev");
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   const current = parseEnvFile(rootEnv)[WEBHOOK_SECRET_KEY];
@@ -75,7 +81,8 @@ function main() {
     log.warn(`${WEBHOOK_SECRET_KEY} is already set and is not the example placeholder`);
     log.info("Re-run with --force to replace it with the Stripe CLI listen secret");
     log.info("Then restart the API so it reloads env");
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   if (decision === "match") {

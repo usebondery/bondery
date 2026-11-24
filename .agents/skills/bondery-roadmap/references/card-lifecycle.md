@@ -21,6 +21,7 @@ This page shows what we're exploring, planning, and building for Bondery —
 your personal relationship manager.
 
 **How to read this page**
+
 - **Exploring** — we're researching; not a commitment yet
 - **Planned** — we intend to build it
 - **Building** — we're building it now
@@ -41,43 +42,48 @@ The roadmap is published in English. Bondery supports English, Czech, and German
 
 ## Title rules
 
-| Rule | Good | Bad |
-|------|------|-----|
-| Outcome-first | Import contacts from Google on mobile | Google People API phase 2 |
-| User language | Snooze a reminder from the notification | Add snooze endpoint |
-| Specific | Merge duplicate contacts after import | Better import |
-| Short | ≤ 80 characters | Full paragraph as title |
+| Rule          | Good                                    | Bad                       |
+| ------------- | --------------------------------------- | ------------------------- |
+| Outcome-first | Import contacts from Google on mobile   | Google People API phase 2 |
+| User language | Snooze a reminder from the notification | Add snooze endpoint       |
+| Specific      | Merge duplicate contacts after import   | Better import             |
+| Short         | ≤ 80 characters                         | Full paragraph as title   |
 
 ## Description template
 
 ```markdown
 ## What
+
 [1–2 sentences: what will be different for the user. Second person.]
 
 ## Why (optional)
+
 [1 sentence — only if not obvious from title.]
 
 ## Platform
+
 [Mobile | Webapp | Chrome Extension | API | All platforms]
 
 ## Notes (optional)
+
 [Phasing, e.g. "Webapp first; mobile follows." Only if needed.]
 
 ## Related
+
 - Released: [Changelog X.Y.Z](url) — only when status = Released
 - Docs: [topic](url) — only if concept doc exists
 ```
 
 ## Status copy patterns
 
-| Status | Opening pattern |
-|--------|-----------------|
-| Exploring | "We're exploring how to …" |
-| Planned | "We plan to …" |
-| Building | "We're building …" |
+| Status            | Opening pattern                                  |
+| ----------------- | ------------------------------------------------ |
+| Exploring         | "We're exploring how to …"                       |
+| Planned           | "We plan to …"                                   |
+| Building          | "We're building …"                               |
 | Ready for Release | "Built and scheduled for an upcoming release. …" |
-| Released | "Released in [X.Y.Z](changelog-url). …" |
-| Not Planned | "Not on our roadmap right now. …" |
+| Released          | "Released in [X.Y.Z](changelog-url). …"          |
+| Not Planned       | "Not on our roadmap right now. …"                |
 
 ## Banned phrases
 
@@ -87,11 +93,11 @@ The roadmap is published in English. Bondery supports English, Czech, and German
 
 ## Hygiene cadence
 
-| Rhythm | Action |
-|--------|--------|
-| **Weekly** (15 min) | Status sync; move release-ready items; honest delays |
-| **At release** | Ready for Release → Released + changelog link ([release-day.md](release-day.md)) |
-| **Monthly** | Groom Released cards off default kanban; cancel stale Exploring |
+| Rhythm              | Action                                                                           |
+| ------------------- | -------------------------------------------------------------------------------- |
+| **Weekly** (15 min) | Status sync; move release-ready items; honest delays                             |
+| **At release**      | Ready for Release → Released + changelog link ([release-day.md](release-day.md)) |
+| **Monthly**         | Groom Released cards off default kanban; cancel stale Exploring                  |
 
 ## Delay / pivot template
 

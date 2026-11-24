@@ -1,0 +1,9 @@
+{
+  "ApiRejectedDescription": "Palvelin hylkäsi pyynnön, koska laajennuksesi on vanhentunut. Päivitä se.",
+  "ApiRejectedTitle": "Liian vanha versio",
+  "UpdateButton": "Päivitä",
+  "UpdateRequiredDescription": "Bondery-laajennuksesi on vanhentunut eikä välttämättä toimi oikein. Päivitä jatkaaksesi.",
+  "UpdateRequiredTitle": "Päivitys vaaditaan",
+  "WebappNotificationDescription": "Chrome Bondery -laajennuksesi on päivitettävä, jotta se toimii oikein.",
+  "WebappNotificationTitle": "Laajennuspäivitys saatavilla"
+}

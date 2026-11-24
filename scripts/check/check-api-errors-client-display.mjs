@@ -10,6 +10,8 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "./check-report.mjs";
 
+const TSX_TS_RE = /\.(tsx|ts)$/;
+
 const check = createCheck("check-api-errors-client-display");
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -38,7 +40,7 @@ function collectFiles(dir) {
       files.push(...collectFiles(path));
       continue;
     }
-    if (/\.(tsx|ts)$/.test(entry) && !entry.endsWith(".test.ts")) {
+    if (TSX_TS_RE.test(entry) && !entry.endsWith(".test.ts")) {
       files.push(path);
     }
   }
@@ -75,7 +77,10 @@ for (const root of targets) {
         : sharedBanned;
       for (const pattern of patterns) {
         if (pattern.test(line)) {
-          check.add(`${rel}:${i + 1}: ${line.trim()}`);
+          check.add(
+            `${rel}:${i + 1}: shows a raw error message to the user: ${line.trim()}
+      Pass the error to getUserFacingError() and show its message instead, so the user reads a translated catalog string and not a server detail.`,
+          );
         }
       }
     }

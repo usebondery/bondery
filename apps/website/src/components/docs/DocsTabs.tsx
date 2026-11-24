@@ -1,14 +1,17 @@
 "use client";
 
+import docs from "@bondery/translations/locales/en/platform/website/WebsiteDocs.json" with {
+  type: "json",
+};
 import { Group, Select } from "@mantine/core";
 import { type Icon, IconBook, IconCode, IconServer, IconTool } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { getTabForUrl } from "@/lib/docs-nav";
 import { routeAssert } from "@/lib/navigation/route/assert";
 
-export type DocsTabIcon = "book" | "server" | "code" | "tool";
+type DocsTabIcon = "book" | "server" | "code" | "tool";
 
-export type DocsTab = {
+type DocsTab = {
   icon: DocsTabIcon;
   key: string;
   title: string;
@@ -41,14 +44,14 @@ function tabIcon(icon: DocsTabIcon, size: number) {
 }
 
 /** Section switcher. The closed control shows the current section. */
-export function DocsTabs({ pathname, tabs }: DocsTabsProps) {
+function DocsTabs({ pathname, tabs }: DocsTabsProps) {
   const router = useRouter();
   const active = tabs.find((tab) => isTabKeyActive(tab.key, pathname)) ?? tabs[0];
 
   return (
     <Select
       allowDeselect={false}
-      aria-label="Documentation section"
+      aria-label={docs.Sidebar.SectionAria}
       data={tabs.map((tab) => ({ label: tab.title, value: tab.key }))}
       leftSection={active ? tabIcon(active.icon, 16) : null}
       leftSectionWidth={34}
@@ -76,3 +79,6 @@ export function DocsTabs({ pathname, tabs }: DocsTabsProps) {
     />
   );
 }
+
+export type { DocsTab, DocsTabIcon };
+export { DocsTabs };

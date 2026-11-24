@@ -47,7 +47,7 @@ export async function deleteContacts(
 
   const candidateLogoIds = await collectLinkedInLogoIds(db, user.id, candidateIds);
 
-  let deletedCount = 0;
+  let deletedCount: number;
   try {
     const deleted = await db.people.deleteMany({
       where: { id: { in: candidateIds }, myself: false, userId: user.id },

@@ -56,7 +56,7 @@ export async function resolveGroupMemberPersonIds(
         db,
         userId,
         search,
-        10000,
+        10_000,
         0,
         { groupId },
       );
@@ -66,7 +66,7 @@ export async function resolveGroupMemberPersonIds(
       }
 
       const excludeSet = new Set(body.excludePersonIds ?? []);
-      return (ranked || []).map((row) => row.id).filter((id) => !excludeSet.has(id));
+      return (ranked ?? []).map((row) => row.id).filter((id) => !excludeSet.has(id));
     }
 
     const rows = await db.people.findMany({

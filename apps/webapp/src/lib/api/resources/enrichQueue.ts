@@ -26,7 +26,7 @@ export function buildEnrichQueueItemPath(queueItemId: string): string {
   return `${API_ROUTES.CONTACTS}/enrich-queue/${queueItemId}`;
 }
 
-export function parseEnrichQueueCount(raw: EnrichQueueCountResponse): number {
+export function parseEnrichQueueCount(raw: Partial<EnrichQueueCountResponse>): number {
   return raw.eligibleCount ?? 0;
 }
 
@@ -45,12 +45,14 @@ export function parseEnrichQueueStatus(
   return raw;
 }
 
-export function parseEnrichQueueInit(raw: EnrichQueueInitResponse): EnrichQueueInitResponse {
+export function parseEnrichQueueInit(
+  raw: Partial<EnrichQueueInitResponse>,
+): EnrichQueueInitResponse {
   return { totalEligible: raw.totalEligible ?? 0 };
 }
 
 export function parseEnrichQueueNextBatch(
-  raw: EnrichQueueNextBatchResponse,
+  raw: Partial<EnrichQueueNextBatchResponse>,
 ): EnrichQueueNextBatchItem[] {
   return raw.items ?? [];
 }

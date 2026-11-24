@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Group, Select, type SelectProps, Stack, Text, Tooltip } from "@mantine/core";
-import type { CSSProperties, ReactNode } from "react";
+import type { CSSProperties, ReactElement, ReactNode } from "react";
 
 export interface DescribedSelectOption {
   /** Extra text beside the label, such as a version number. */
@@ -36,7 +36,7 @@ export function DescribedSelect({
   allowDeselect = false,
   leftSection,
   ...selectProps
-}: DescribedSelectProps) {
+}: DescribedSelectProps): ReactElement {
   const selectedOption = data.find((option) => option.value === value);
 
   const closedLeftSection =

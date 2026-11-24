@@ -1,23 +1,14 @@
-﻿import { CodeHighlightProvider } from "@bondery/mantine-next";
+import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import { CodeHighlightProvider } from "@bondery/mantine-next";
 import { ModalsProvider } from "@mantine/modals";
-import { getResources, getT, initServerI18next } from "next-i18next/server";
+import { headers } from "next/headers";
+import { getT, initServerI18next } from "next-i18next/server";
 import { LocaleProvider } from "@/components/shell/UserLocaleProvider";
 import i18nConfig from "@/i18n.config";
-import { preloadWebNamespaces } from "@/lib/i18n/preloadNamespaces.server";
+import { getRouteResources } from "@/lib/i18n/getRouteResources.server";
+import { preloadAllWebNamespaces, preloadWebNamespaces } from "@/lib/i18n/preloadNamespaces.server";
 import { resolveLocaleSettings } from "@/lib/i18n/resolveLocaleSettings";
 import { QueryProvider } from "@/lib/query/QueryProvider";
-
-const NEXT_I18NEXT_SERVER = Symbol.for("next-i18next.server");
-
-/** HMR keeps the next-i18next singleton; drop it in dev so a new resourceLoader attaches. */
-if (process.env.NODE_ENV === "development") {
-  const shared = (globalThis as Record<symbol, { state: unknown } | undefined>)[
-    NEXT_I18NEXT_SERVER
-  ];
-  if (shared) {
-    shared.state = null;
-  }
-}
 
 initServerI18next(i18nConfig);
 
@@ -29,15 +20,29 @@ export const dynamic = "force-dynamic";
 
 /**
  * Shared layout for the (app) route group.
+ *
+ * Product routes (`/app/*`) mount the only `LocaleProvider` of the shell. Their
+ * nested layouts preload namespaces for server rendering but mount no provider,
+ * so this provider must ship every web namespace.
+ *
+ * Login, confirm, and OAuth routes mount their own `PreloadedLocaleProvider`
+ * with a route group. They need the shell strings only.
  */
 export default async function AppGroupLayout({ children }: { children: React.ReactNode }) {
-  const { locale, timezone, timeFormat } = await resolveLocaleSettings();
-  await preloadWebNamespaces(locale, ["web.shell"]);
+  const [{ locale, timezone, timeFormat, dateFormat }, headersList] = await Promise.all([
+    resolveLocaleSettings(),
+    headers(),
+  ]);
+  const pathname = headersList.get("x-pathname") ?? "";
+  const namespaces = pathname.startsWith(WEBAPP_ROUTES.APP_GROUP)
+    ? await preloadAllWebNamespaces(locale)
+    : await preloadWebNamespaces(locale, ["web.shell"]);
   const { i18n } = await getT("common", { lng: locale });
-  const resources = getResources(i18n);
+  const resources = getRouteResources(i18n, locale, namespaces);
 
   return (
     <LocaleProvider
+      dateFormat={dateFormat}
       locale={locale}
       resources={resources}
       timeFormat={timeFormat}

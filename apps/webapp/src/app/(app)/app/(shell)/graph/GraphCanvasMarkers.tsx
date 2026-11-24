@@ -7,6 +7,7 @@ import { Avatar, Group, Tooltip } from "@mantine/core";
 import { IconBriefcase, IconSchool } from "@tabler/icons-react";
 import { type PointerEvent as ReactPointerEvent, type RefObject, useEffect, useRef } from "react";
 import { PersonMapAvatarMarker } from "@/components/map/mapMarkerIcons";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 import type { GraphMarkerDrag } from "./mountRelationshipGraph";
 import "./graphMarkers.css";
 
@@ -31,11 +32,12 @@ function useMarkerDrag(
 ) {
   const moved = useRef(false);
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       setDragCursor(false);
-    };
-  }, []);
+    },
+    [],
+  );
 
   function onPointerDown(event: ReactPointerEvent<HTMLButtonElement>) {
     if (event.button !== 0) {
@@ -188,7 +190,7 @@ export function GraphHubMarker(props: {
           name={hub.label}
           radius="md"
           size={34}
-          src={hub.logoUrl || undefined}
+          src={nonEmpty(hub.logoUrl)}
           style={{
             backgroundColor: "#fff",
             border: "3px solid #fff",

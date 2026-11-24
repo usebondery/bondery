@@ -2,9 +2,7 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"]
-    },
-    "target": "ES2017",
-    "tsBuildInfoFile": "./.cache/tsconfig.tsbuildinfo"
+    }
   },
   "exclude": ["node_modules", ".next/dev"],
   "extends": "@bondery/typescript-config/nextjs.json",

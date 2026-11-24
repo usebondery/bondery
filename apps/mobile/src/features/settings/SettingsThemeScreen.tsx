@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import { IconMoon, IconSettings, IconSun } from "@tabler/icons-react-native";
 import { useRouter } from "expo-router";
 import { ScrollView } from "react-native";
@@ -43,9 +44,9 @@ export function SettingsThemeScreen() {
       await updateSettings({
         colorScheme: nextThemePreference === "system" ? "auto" : nextThemePreference,
       });
-    } catch (err) {
+    } catch (error) {
       setThemePreference(previousThemePreference);
-      showErrorToast(err);
+      showErrorToast(error);
     }
   };
 
@@ -87,7 +88,7 @@ export function SettingsThemeScreen() {
             ]}
             label={tMobileSettings("Theme")}
             onChange={(nextThemePreference) => {
-              void handleThemeChange(nextThemePreference);
+              detachPromise(handleThemeChange(nextThemePreference));
             }}
             value={themePreference}
           />

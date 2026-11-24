@@ -2,6 +2,7 @@
 "use client";
 
 import { getAuthUserFacingError } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import { errorNotificationTemplate, ModalTitle } from "@bondery/mantine-next";
 import { PASSKEY_LIMITS } from "@bondery/schemas";
 import { Box, Button, Group, Skeleton, Stack, Text, Tooltip } from "@mantine/core";
@@ -32,6 +33,7 @@ import {
   usePasskeysQuery,
 } from "@/lib/query/hooks/usePasskeys";
 import { settingsKeys } from "@/lib/query/keys";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 import { SettingsCredentialCard } from "./SettingsCredentialCard";
 import {
   SETTINGS_CREDENTIAL_ICON_PX,
@@ -100,6 +102,9 @@ function PasskeyRow({
   const [name, setName] = useState(passkey.name?.trim() || fallbackName);
   const [isSaving, setIsSaving] = useState(false);
   const persistedNameRef = useRef(passkey.name?.trim() || fallbackName);
+  const persistName = (next: string) => {
+    persistedNameRef.current = next;
+  };
 
   useEffect(() => {
     const next = passkey.name?.trim() || fallbackName;
@@ -123,7 +128,7 @@ function PasskeyRow({
       if (error) {
         throw error;
       }
-      persistedNameRef.current = trimmed;
+      persistName(trimmed);
       setName(trimmed);
       onRenamed(trimmed);
       captureEvent("account_settings:passkey_update");
@@ -184,13 +189,13 @@ function PasskeyRow({
       deleteAriaLabel={deleteAriaLabel}
       deleteTooltip={t("Passkeys.RevokeTooltip")}
       icon={<PasskeyRowIcon aaguid={passkey.aaguid} catalog={catalog} />}
-      iconTooltip={iconTooltip || undefined}
+      iconTooltip={nonEmpty(iconTooltip)}
       label={
         <InlineEditableInput
           aria-label={nameFieldLabel}
           isSaving={isSaving}
           maxLength={PASSKEY_LIMITS.nameMaxLength}
-          onBlur={() => void saveName()}
+          onBlur={() => detachPromise(saveName())}
           onChange={setName}
           size="sm"
           style={{ width: "100%" }}
@@ -221,17 +226,18 @@ export function PasskeysBlock() {
 
   useEffect(() => {
     let cancelled = false;
-    void loadVendoredAaguidCatalog()
-      .then((loaded) => {
+    detachPromise(
+      loadVendoredAaguidCatalog().then((loaded) => {
         if (!cancelled) {
           setCatalog(loaded);
         }
-      })
-      .catch(() => {
+      }),
+      () => {
         if (!cancelled) {
           setCatalog({});
         }
-      });
+      },
+    );
     return () => {
       cancelled = true;
     };
@@ -251,8 +257,8 @@ export function PasskeysBlock() {
       neverUsed: t("Passkeys.NeverUsed"),
     });
 
-  const runCeremony = async () => {
-    return runAddPasskeyCeremony({
+  const runCeremony = async () =>
+    runAddPasskeyCeremony({
       authClient,
       catalog,
       createErrorDescription: t("Passkeys.CreateErrorDescription"),
@@ -262,7 +268,6 @@ export function PasskeysBlock() {
       queryClient,
       tCommon,
     });
-  };
 
   const handleAdd = async () => {
     if (atLimit || !webAuthnSupported || isAdding) {
@@ -298,7 +303,7 @@ export function PasskeysBlock() {
           disabled={atLimit || !webAuthnSupported}
           leftSection={<IconPlus size={16} />}
           loading={isAdding}
-          onClick={() => void handleAdd()}
+          onClick={() => detachPromise(handleAdd())}
           size="sm"
           variant="outline"
         >
@@ -353,11 +358,13 @@ export function PasskeysBlock() {
                 );
               }}
               onRenamed={(nextName) => {
-                queryClient.setQueryData<PasskeyRecord[]>(settingsKeys.passkeys(), (current) =>
-                  (current ?? []).map((item) =>
-                    item.id === passkey.id ? { ...item, name: nextName } : item,
-                  ),
-                );
+                queryClient.setQueryData<PasskeyRecord[]>(settingsKeys.passkeys(), (current) => {
+                  const next: PasskeyRecord[] = [];
+                  for (const item of current ?? []) {
+                    next.push(item.id === passkey.id ? { ...item, name: nextName } : item);
+                  }
+                  return next;
+                });
               }}
               passkey={passkey}
             />

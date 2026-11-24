@@ -231,10 +231,13 @@ export async function getContactGroups(
     countMap.set(item.groupId, current + 1);
   }
 
-  const groupsWithCounts: GroupWithCount[] = groups.map((group) => ({
-    ...toGroupDto(group),
-    contactCount: countMap.get(group.id) ?? 0,
-  }));
+  const groupsWithCounts: GroupWithCount[] = [];
+  for (const group of groups) {
+    groupsWithCounts.push({
+      ...toGroupDto(group),
+      contactCount: countMap.get(group.id) ?? 0,
+    });
+  }
 
   return { groups: groupsWithCounts };
 }
@@ -358,7 +361,7 @@ export async function getContactVCardExport(
     });
   } catch (vcardError) {
     ctx.log?.error({ vcardError }, "Failed to generate vCard");
-    throw internal("failed_to_generate_vcard");
+    throw internal("failed_to_generate_vcard", vcardError);
   }
 
   const firstName = mappedContact.firstName || "contact";

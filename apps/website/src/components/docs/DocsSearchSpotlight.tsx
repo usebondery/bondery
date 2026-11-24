@@ -1,6 +1,10 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { Kbd } from "@bondery/mantine-next";
+import docs from "@bondery/translations/locales/en/platform/website/WebsiteDocs.json" with {
+  type: "json",
+};
 import { Group, Loader, Text } from "@mantine/core";
 import { useDebouncedCallback, useHotkeys } from "@mantine/hooks";
 import { Spotlight, spotlight } from "@mantine/spotlight";
@@ -8,6 +12,7 @@ import { IconSearch } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { type DocsSearchResult, toSearchGroups } from "@/lib/docs-search";
+import { formatMessage } from "@/lib/i18n/message";
 import { routeAssert } from "@/lib/navigation/route/assert";
 
 const RESULT_LIMIT = 24;
@@ -17,14 +22,21 @@ function keepServerResults<T>(_query: string, actions: readonly T[]): readonly T
   return actions;
 }
 
+type DocsSearchResultFields = {
+  breadcrumbs?: unknown;
+  content?: unknown;
+  id?: unknown;
+  type?: unknown;
+  url?: unknown;
+};
+
 function isDocsSearchResult(value: unknown): value is DocsSearchResult {
   if (typeof value !== "object" || value === null) {
     return false;
   }
 
-  const record = value as Record<string, unknown>;
-  const type = record.type;
-  const breadcrumbs = record.breadcrumbs;
+  const record = value as DocsSearchResultFields;
+  const { type, breadcrumbs } = record;
   const breadcrumbsOk =
     breadcrumbs === undefined ||
     (Array.isArray(breadcrumbs) && breadcrumbs.every((item) => typeof item === "string"));
@@ -69,38 +81,40 @@ export function DocsSearchSpotlight() {
     setResults([]);
     setLoading(true);
 
-    void fetch(`/api/search?query=${encodeURIComponent(trimmed)}`, {
-      signal: controller.signal,
-    })
-      .then(async (response) => {
-        if (!response.ok) {
-          throw new Error("Search failed");
-        }
+    detachPromise(
+      fetch(`/api/search?query=${encodeURIComponent(trimmed)}`, {
+        signal: controller.signal,
+      })
+        .then(async (response) => {
+          if (!response.ok) {
+            throw new Error("Search failed");
+          }
 
-        const body: unknown = await response.json();
-        if (requestId.current !== id) {
-          return;
-        }
+          const body: unknown = await response.json();
+          if (requestId.current !== id) {
+            return;
+          }
 
-        if (!Array.isArray(body)) {
+          if (!Array.isArray(body)) {
+            setResults([]);
+            return;
+          }
+
+          setResults(body.filter(isDocsSearchResult));
+        })
+        .catch((error: unknown) => {
+          if (isAbortError(error) || requestId.current !== id) {
+            return;
+          }
+
           setResults([]);
-          return;
-        }
-
-        setResults(body.filter(isDocsSearchResult));
-      })
-      .catch((error: unknown) => {
-        if (isAbortError(error) || requestId.current !== id) {
-          return;
-        }
-
-        setResults([]);
-      })
-      .finally(() => {
-        if (requestId.current === id) {
-          setLoading(false);
-        }
-      });
+        })
+        .finally(() => {
+          if (requestId.current === id) {
+            setLoading(false);
+          }
+        }),
+    );
   }, 200);
 
   function handleQueryChange(next: string) {
@@ -133,9 +147,9 @@ export function DocsSearchSpotlight() {
       shortcut="mod + K"
     >
       <Spotlight.Search
-        aria-label="Search documentation"
+        aria-label={docs.Search.Label}
         leftSection={<IconSearch size={18} stroke={1.5} />}
-        placeholder="Search docs"
+        placeholder={docs.Search.Placeholder}
       />
       {showLoader ? (
         <Spotlight.Empty>
@@ -144,7 +158,7 @@ export function DocsSearchSpotlight() {
       ) : null}
       {showEmpty ? (
         <Spotlight.Empty>
-          <Text size="sm">No results for "{query}".</Text>
+          <Text size="sm">{formatMessage(docs.Search.NoResults, { query })}</Text>
         </Spotlight.Empty>
       ) : null}
       {groups.length > 0 ? (
@@ -172,19 +186,19 @@ export function DocsSearchSpotlight() {
             <Kbd keys={["up"]} size="xs" />
             <Kbd keys={["down"]} size="xs" />
             <Text c="dimmed" size="xs">
-              Navigate
+              {docs.Search.Navigate}
             </Text>
           </Group>
           <Group gap={6}>
             <Kbd keys={["enter"]} size="xs" />
             <Text c="dimmed" size="xs">
-              Open
+              {docs.Search.Open}
             </Text>
           </Group>
           <Group gap={6}>
             <Kbd keys={["esc"]} size="xs" />
             <Text c="dimmed" size="xs">
-              Close
+              {docs.Search.Close}
             </Text>
           </Group>
         </Group>

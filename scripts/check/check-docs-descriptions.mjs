@@ -19,6 +19,12 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "./check-report.mjs";
 
+const PATTERN_5C723F5C6E_RE = /\r?\n/;
+const DESCRIPTION_RE_2 = /^description\s*:/;
+const DESCRIPTION_RE = /^description\s*:\s*/;
+const RELEASE_NOTES_FROM_RE = /release notes from/i;
+const DOCS_CHANGELOG_MDX_RE = /^docs\/changelog\/(\d+\.\d+\.\d+)\.mdx$/;
+
 const check = createCheck("check-docs-descriptions");
 
 /** Pass band. A description in this range renders well on every surface. */
@@ -72,7 +78,7 @@ function repoPath(filePath) {
  * has no frontmatter. `block` is true for `>`/`|` scalars and indented values.
  */
 function readDescription(content) {
-  const lines = content.split(/\r?\n/);
+  const lines = content.split(PATTERN_5C723F5C6E_RE);
   if (lines[0]?.trim() !== "---") {
     return null;
   }
@@ -83,12 +89,12 @@ function readDescription(content) {
   }
 
   const frontmatter = lines.slice(1, endIndex);
-  const keyIndex = frontmatter.findIndex((line) => /^description\s*:/.test(line));
+  const keyIndex = frontmatter.findIndex((line) => DESCRIPTION_RE_2.test(line));
   if (keyIndex === -1) {
     return { block: false, value: null };
   }
 
-  const inlineValue = frontmatter[keyIndex].replace(/^description\s*:\s*/, "").trim();
+  const inlineValue = frontmatter[keyIndex].replace(DESCRIPTION_RE, "").trim();
   if (
     inlineValue === ">" ||
     inlineValue === "|" ||
@@ -107,8 +113,8 @@ function readDescription(content) {
 
 function stripQuotes(value) {
   if (value.length >= 2) {
-    const first = value[0];
-    const last = value[value.length - 1];
+    const [first] = value;
+    const last = value.at(-1);
     if ((first === '"' && last === '"') || (first === "'" && last === "'")) {
       return value.slice(1, -1);
     }
@@ -130,7 +136,7 @@ const COUNTED_CATEGORY_PATTERN =
   /(?:^|[^\d.])\d+\s+(new features?|fixes|changes|breaking changes?|security fixes?|dependency updates?|ci changes?|test changes?|documentation updates?)\b/i;
 
 function isGeneratedSummary(text) {
-  return COUNTED_CATEGORY_PATTERN.test(text) || /release notes from/i.test(text);
+  return COUNTED_CATEGORY_PATTERN.test(text) || RELEASE_NOTES_FROM_RE.test(text);
 }
 
 /**
@@ -141,7 +147,7 @@ function isGeneratedSummary(text) {
  * makes a description copied from another release fail.
  */
 function changelogVersionFromPath(path) {
-  const match = path.match(/^docs\/changelog\/(\d+\.\d+\.\d+)\.mdx$/);
+  const match = path.match(DOCS_CHANGELOG_MDX_RE);
   return match?.[1] ?? null;
 }
 
@@ -153,27 +159,37 @@ for (const filePath of walkMdxFiles(docsRoot).sort()) {
   const description = readDescription(readFileSync(filePath, "utf8"));
 
   if (description === null) {
-    check.add(`${path}: missing frontmatter`);
+    check.add(
+      `${path}: has no frontmatter block. Add a --- fenced block with a description of ${MIN_LENGTH}-${MAX_LENGTH} characters.`,
+    );
     continue;
   }
 
   if (description.block) {
-    check.add(`${path}: must be a single-line description`);
+    check.add(
+      `${path}: description must be a single line. Put the whole value on the \`description:\` line.`,
+    );
     continue;
   }
 
   if (description.value === null) {
-    check.add(`${path}: missing description`);
+    check.add(
+      `${path}: frontmatter has no description. Add \`description:\` with ${MIN_LENGTH}-${MAX_LENGTH} characters that name what the page covers.`,
+    );
     continue;
   }
 
   const text = stripQuotes(description.value);
   if (text.length > MAX_LENGTH) {
-    check.add(`${path}: description is ${text.length} chars (max ${MAX_LENGTH}): ${text}`);
+    check.add(
+      `${path}: description is ${text.length} chars (max ${MAX_LENGTH}): ${text}. Shorten it to ${MIN_LENGTH}-${MAX_LENGTH} characters.`,
+    );
   } else if (text.length < WARN_MIN_LENGTH) {
-    check.add(`${path}: description is ${text.length} chars (min ${WARN_MIN_LENGTH}): ${text}`);
+    check.add(
+      `${path}: description is ${text.length} chars (min ${WARN_MIN_LENGTH}): ${text}. Extend it to ${MIN_LENGTH}-${MAX_LENGTH} characters.`,
+    );
   } else if (text.length < MIN_LENGTH) {
-    const message = `${path}: description is ${text.length} chars (target ${MIN_LENGTH}-${MAX_LENGTH}): ${text}`;
+    const message = `${path}: description is ${text.length} chars (target ${MIN_LENGTH}-${MAX_LENGTH}): ${text}. Add a distinguishing detail.`;
     if (strict) {
       check.add(message);
     } else {

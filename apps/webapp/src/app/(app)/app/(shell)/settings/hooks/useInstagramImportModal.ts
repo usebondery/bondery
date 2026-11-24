@@ -1,17 +1,14 @@
 "use client";
 
 import { getUserFacingError } from "@bondery/helpers/api";
-import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
+import { errorNotificationTemplate } from "@bondery/mantine-next";
 import type { InstagramImportStrategy, InstagramPreparedContact } from "@bondery/schemas";
 import { SOCIAL_IMPORT_COMMIT_BATCH_SIZE } from "@bondery/schemas/constants";
 import { notifications } from "@mantine/notifications";
-import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { captureImportComplete } from "@/lib/analytics/imports";
 import { useCommonTranslations, useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useModalDismiss } from "@/lib/modals";
-import { routeAssert } from "@/lib/navigation/route/assert";
 import {
   useCommitInstagramImportMutation,
   useParseInstagramImportMutation,
@@ -22,11 +19,9 @@ import {
   type InstagramImportStep,
   readNumberField,
   sortInstagramContactsForPreview,
-  toInstagramPreviewContact,
   validateInstagramZipFile,
   type ZipValidationErrorCode,
 } from "../utils/instagram-import-helpers";
-import { useImportContactSelection } from "./useImportContactSelection";
 import { useImporterNavigationProgress } from "./useImporterNavigationProgress";
 
 interface UseInstagramImportModalParams {
@@ -44,7 +39,6 @@ export function useInstagramImportModal({
 }: UseInstagramImportModalParams) {
   const tCommon = useCommonTranslations();
   const t = useSettingsPageTranslations("DataManagement.InstagramImport");
-  const router = useRouter();
   const parseImport = useParseInstagramImportMutation();
   const commitImport = useCommitInstagramImportMutation();
   const followupMutation = useUpdateImportFollowupMutation();
@@ -89,33 +83,32 @@ export function useInstagramImportModal({
   const [uploadedZip, setUploadedZip] = useState<File | null>(null);
   const [strategy, setStrategy] = useState<InstagramImportStrategy>("following_and_followers");
   const [parsedContacts, setParsedContacts] = useState<InstagramPreparedContact[]>([]);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const openRef = useRef<() => void>(null);
-
-  const previewContacts = parsedContacts
-    .filter((contact) => contact.isValid)
-    .map(toInstagramPreviewContact);
+  const [finishedStats, setFinishedStats] = useState<{
+    imported: number;
+    updated: number;
+    skipped: number;
+  } | null>(null);
+  const openRef = useRef<(() => void) | null>(null);
 
   const validContactsCount = parsedContacts.filter((contact) => contact.isValid).length;
-
   const invalidContactsCount = parsedContacts.length - validContactsCount;
   const alreadyExistsCount = parsedContacts.filter((contact) => contact.alreadyExists).length;
-  const likelyInfluencersCount = parsedContacts.filter((contact) => !contact.likelyPerson).length;
-  const nonSelectableIds = new Set(
-    parsedContacts.filter((contact) => contact.alreadyExists).map((contact) => contact.tempId),
-  );
-  const selectableIds = previewContacts
-    .map((contact) => contact.id)
-    .filter((id) => !nonSelectableIds.has(id));
 
-  const { allSelected, someSelected, handleToggleAll, handleToggleOne, resetSelectionAnchor } =
-    useImportContactSelection({
-      nonSelectableIds,
-      previewContacts,
-      selectableIds,
-      selectedIds,
-      setSelectedIds,
-    });
+  /**
+   * Every contact that can be added. Nothing is selectable in the preview, so this is also what
+   * the import commits. Accounts that look like businesses are included: the import no longer
+   * guesses who is a person.
+   */
+  const importableContacts = parsedContacts.filter(
+    (contact) => contact.isValid && !contact.alreadyExists,
+  );
+
+  const previewPeople = importableContacts.map((contact) => ({
+    avatar: null,
+    firstName: contact.firstName,
+    id: contact.tempId,
+    lastName: contact.lastName,
+  }));
 
   useImporterNavigationProgress({
     importProgress,
@@ -157,7 +150,8 @@ export function useInstagramImportModal({
   };
 
   const handleZipDrop = (files: File[]) => {
-    if (files.length !== 1) {
+    const [file] = files;
+    if (files.length !== 1 || !file) {
       notifications.show(
         errorNotificationTemplate({
           description: t("ZipTooManyFiles"),
@@ -167,7 +161,7 @@ export function useInstagramImportModal({
       return;
     }
 
-    handleZipSelected(files[0]);
+    handleZipSelected(file);
   };
 
   const parseUpload = async () => {
@@ -190,17 +184,7 @@ export function useInstagramImportModal({
     try {
       const data = await parseImport.mutateAsync(formData);
       const contacts = (data?.contacts || []) as InstagramPreparedContact[];
-      const sortedContacts = sortInstagramContactsForPreview(contacts);
-
-      setParsedContacts(sortedContacts);
-      resetSelectionAnchor();
-      setSelectedIds(
-        new Set(
-          sortedContacts
-            .filter((item) => item.isValid && item.likelyPerson && !item.alreadyExists)
-            .map((item) => item.tempId),
-        ),
-      );
+      setParsedContacts(sortInstagramContactsForPreview(contacts));
       setStep("preview");
     } catch (error) {
       notifications.show(
@@ -216,9 +200,7 @@ export function useInstagramImportModal({
   };
 
   const handleImport = async () => {
-    const selectedContacts = parsedContacts.filter((contact) => selectedIds.has(contact.tempId));
-
-    if (selectedContacts.length === 0) {
+    if (importableContacts.length === 0) {
       notifications.show({
         color: "yellow",
         message: t("NoContactsSelected"),
@@ -228,8 +210,10 @@ export function useInstagramImportModal({
     }
 
     setIsImporting(true);
-    setImportProgress({ current: 0, total: selectedContacts.length });
-    const isFirstImport = settingsResult?.data?.importCompletedAt == null;
+    setImportProgress({ current: 0, total: importableContacts.length });
+    const isFirstImport =
+      settingsResult?.data?.importCompletedAt === null ||
+      settingsResult?.data?.importCompletedAt === undefined;
 
     let totalImported = 0;
     let totalUpdated = 0;
@@ -237,9 +221,9 @@ export function useInstagramImportModal({
 
     try {
       const batchSize = SOCIAL_IMPORT_COMMIT_BATCH_SIZE;
-      for (let i = 0; i < selectedContacts.length; i += batchSize) {
-        const batch = selectedContacts.slice(i, i + batchSize);
-        const isLastBatch = i + batchSize >= selectedContacts.length;
+      for (let i = 0; i < importableContacts.length; i += batchSize) {
+        const batch = importableContacts.slice(i, i + batchSize);
+        const isLastBatch = i + batchSize >= importableContacts.length;
 
         const data = await commitImport.mutateAsync({
           body: { contacts: batch },
@@ -251,34 +235,27 @@ export function useInstagramImportModal({
         totalSkipped += readNumberField(data, "skippedCount");
 
         setImportProgress({
-          current: Math.min(i + batchSize, selectedContacts.length),
-          total: selectedContacts.length,
+          current: Math.min(i + batchSize, importableContacts.length),
+          total: importableContacts.length,
         });
       }
 
-      notifications.show(
-        successNotificationTemplate({
-          description: t("ImportSuccess", {
-            imported: totalImported,
-            skipped: totalSkipped,
-            updated: totalUpdated,
-          }),
-          title: t("SuccessTitle"),
-        }),
-      );
-
       captureImportComplete("instagram", totalImported + totalUpdated, isFirstImport);
 
-      closeModal();
-
       if (onSuccess) {
+        closeModal();
         onSuccess({
           imported: totalImported,
           skipped: totalSkipped,
           updated: totalUpdated,
         });
       } else {
-        router.push(routeAssert(WEBAPP_ROUTES.PEOPLE));
+        setFinishedStats({
+          imported: totalImported,
+          skipped: totalSkipped,
+          updated: totalUpdated,
+        });
+        setStep("finished");
       }
     } catch (error) {
       notifications.show(
@@ -294,30 +271,25 @@ export function useInstagramImportModal({
   };
 
   return {
-    allSelected,
     alreadyExistsCount,
     closeModal,
+    finishedStats,
     handleImport,
     handleRequestedExport,
-    handleToggleAll,
-    handleToggleOne,
     handleZipDrop,
+    importableCount: importableContacts.length,
     importProgress,
     importStrategyOptions,
     invalidContactsCount,
     isImporting,
     isOnboardingFlow,
     isParsing,
-    likelyInfluencersCount,
-    nonSelectableIds,
     openRef,
     parsedContacts,
     parseUpload,
-    previewContacts,
-    selectedIds,
+    previewPeople,
     setStep,
     setStrategy,
-    someSelected,
     step,
     strategy,
     t,

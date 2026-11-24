@@ -8,6 +8,13 @@ type WakeBusEnvelope = {
   event: SyncWakeEvent;
 };
 
+async function connectRedisIfNeeded(client: Redis): Promise<void> {
+  if (client.status === "ready" || client.status === "connecting") {
+    return;
+  }
+  await client.connect();
+}
+
 export class RedisSyncWakeBus implements SyncWakeBus {
   private handler: ((userId: string, event: SyncWakeEvent) => void) | null = null;
   private readonly onMessage = (channel: string, message: string): void => {
@@ -15,8 +22,9 @@ export class RedisSyncWakeBus implements SyncWakeBus {
       return;
     }
     try {
-      const envelope = JSON.parse(message) as WakeBusEnvelope;
-      if (!envelope?.userId || !envelope?.event) {
+      // The message comes from Redis, so it can be any JSON value, including `null`.
+      const envelope = JSON.parse(message) as WakeBusEnvelope | null;
+      if (!envelope?.userId || !envelope.event) {
         return;
       }
       this.handler?.(envelope.userId, envelope.event);
@@ -25,10 +33,13 @@ export class RedisSyncWakeBus implements SyncWakeBus {
     }
   };
 
-  constructor(
-    private readonly publisher: Redis,
-    private readonly subscriber: Redis,
-  ) {}
+  private readonly publisher: Redis;
+  private readonly subscriber: Redis;
+
+  constructor(publisher: Redis, subscriber: Redis) {
+    this.publisher = publisher;
+    this.subscriber = subscriber;
+  }
 
   async publish(userId: string, event: SyncWakeEvent): Promise<void> {
     const envelope: WakeBusEnvelope = { event, userId };
@@ -37,8 +48,8 @@ export class RedisSyncWakeBus implements SyncWakeBus {
 
   async start(onMessage: (userId: string, event: SyncWakeEvent) => void): Promise<void> {
     this.handler = onMessage;
-    await this.connectIfNeeded(this.subscriber);
-    await this.connectIfNeeded(this.publisher);
+    await connectRedisIfNeeded(this.subscriber);
+    await connectRedisIfNeeded(this.publisher);
     this.subscriber.on("message", this.onMessage);
     await this.subscriber.subscribe(WAKE_BROADCAST_CHANNEL);
   }
@@ -53,12 +64,5 @@ export class RedisSyncWakeBus implements SyncWakeBus {
 
   isSubscriberConnected(): boolean {
     return this.subscriber.status === "ready";
-  }
-
-  private async connectIfNeeded(client: Redis): Promise<void> {
-    if (client.status === "ready" || client.status === "connecting") {
-      return;
-    }
-    await client.connect();
   }
 }

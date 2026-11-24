@@ -1,5 +1,6 @@
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Pressable } from "@/components/ui/Pressable";
+import { useCommonTranslations } from "@/lib/i18n/generated/hooks";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import {
@@ -43,7 +44,8 @@ function SlashCommandRow({
   );
 }
 
-export function SlashCommandListContent({ query, onSelect }: SlashCommandListContentProps) {
+function SlashCommandListContent({ query, onSelect }: SlashCommandListContentProps) {
+  const t = useCommonTranslations();
   const colors = useMobileThemeColors();
   const commands = filterSlashCommands(query);
   const sections = groupSlashCommands(commands);
@@ -51,7 +53,9 @@ export function SlashCommandListContent({ query, onSelect }: SlashCommandListCon
   if (commands.length === 0) {
     return (
       <View style={styles.empty}>
-        <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No results</Text>
+        <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+          {t("feedback.noResults")}
+        </Text>
       </View>
     );
   }
@@ -111,3 +115,5 @@ const styles = StyleSheet.create({
     gap: 1,
   },
 });
+
+export { SlashCommandListContent };

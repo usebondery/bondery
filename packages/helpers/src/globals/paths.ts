@@ -1,4 +1,16 @@
 /** Better Auth mount path on the API host (`api.example.com/auth/*`). */
+const PATTERN_5C2F2B24_RE = /\/+$/;
+
+const OAUTH_AUTHORIZATION_SERVER_WELL_KNOWN_PATH =
+  "/.well-known/oauth-authorization-server" as const;
+const OPENID_CONFIGURATION_WELL_KNOWN_PATH = "/.well-known/openid-configuration" as const;
+
+function betterAuthResourcePath(resourcePath: string): string {
+  return resourcePath.startsWith("/")
+    ? resourcePath.replace(PATTERN_5C2F2B24_RE, "")
+    : `/${resourcePath}`;
+}
+
 export const BETTER_AUTH_BASE_PATH = "/auth" as const;
 
 /** Path under {@link BETTER_AUTH_BASE_PATH}, e.g. `/auth/oauth2/token`. */
@@ -6,10 +18,6 @@ export function betterAuthPath(segment: string): string {
   const suffix = segment.startsWith("/") ? segment : `/${segment}`;
   return `${BETTER_AUTH_BASE_PATH}${suffix}`;
 }
-
-const OAUTH_AUTHORIZATION_SERVER_WELL_KNOWN_PATH =
-  "/.well-known/oauth-authorization-server" as const;
-const OPENID_CONFIGURATION_WELL_KNOWN_PATH = "/.well-known/openid-configuration" as const;
 
 /** RFC 8414 authorization-server metadata document for the configured base path. */
 export function betterAuthAuthorizationServerMetadataPath(): string {
@@ -44,10 +52,6 @@ export function betterAuthOpenIdConfigurationPaths(): string[] {
 /** RFC 9728 protected-resource metadata (root document). */
 export const BETTER_AUTH_PROTECTED_RESOURCE_METADATA_PATH =
   "/.well-known/oauth-protected-resource" as const;
-
-function betterAuthResourcePath(resourcePath: string): string {
-  return resourcePath.startsWith("/") ? resourcePath.replace(/\/+$/, "") : `/${resourcePath}`;
-}
 
 /**
  * RFC 9728 paths: Better Auth `mcp()` root + path-inserted documents, plus the
@@ -176,7 +180,7 @@ export const CHROME_EXTENSION_URL =
  * production git tag — never the version being shipped, never Chrome 4-part.
  * Do not hand-edit. Set to "0.0.0" only to disable enforcement locally.
  */
-export const MIN_EXTENSION_VERSION: string = "1.11.1";
+export const MIN_EXTENSION_VERSION: string = "1.11.2";
 
 /** One-shot account-delete nonce. Browser → BFF and BFF → API must forward it. */
 export const BONDERY_STEP_UP_HEADER = "X-Bondery-Step-Up" as const;
@@ -185,7 +189,7 @@ export const BONDERY_STEP_UP_HEADER = "X-Bondery-Step-Up" as const;
 export const IDEMPOTENCY_KEY_HEADER = "Idempotency-Key" as const;
 
 export const HELP_DOCS_URL = "https://usebondery.com/docs";
-export const CHANGELOG_URL = `${HELP_DOCS_URL}/changelog`;
+export const CHANGELOG_URL: string = `${HELP_DOCS_URL}/changelog`;
 
 /**
  * Repository identity. Every other GitHub URL below derives from this, so a
@@ -194,19 +198,19 @@ export const CHANGELOG_URL = `${HELP_DOCS_URL}/changelog`;
 export const GITHUB_REPO_SLUG = "usebondery/bondery" as const;
 
 /** Repository web URL, for humans and for `blob` / `tree` links. */
-export const GITHUB_REPO_WEB_URL = `https://github.com/${GITHUB_REPO_SLUG}`;
+export const GITHUB_REPO_WEB_URL: string = `https://github.com/${GITHUB_REPO_SLUG}`;
 
 /** GitHub REST base for this repository. */
-export const GITHUB_REPO_URL = `https://api.github.com/repos/${GITHUB_REPO_SLUG}`;
+export const GITHUB_REPO_URL: string = `https://api.github.com/repos/${GITHUB_REPO_SLUG}`;
 
 /** Default branch, the target of every `blob` and `tree` link. */
 export const GITHUB_DEFAULT_BRANCH = "main" as const;
 
 /** Base for `blob` links to files on the default branch. */
-export const GITHUB_BLOB_BASE = `${GITHUB_REPO_WEB_URL}/blob/${GITHUB_DEFAULT_BRANCH}`;
+export const GITHUB_BLOB_BASE: string = `${GITHUB_REPO_WEB_URL}/blob/${GITHUB_DEFAULT_BRANCH}`;
 
 /** Base for `blob` links to files in the `docs` directory. */
-export const DOCS_GITHUB_BLOB_BASE = `${GITHUB_BLOB_BASE}/docs`;
+export const DOCS_GITHUB_BLOB_BASE: string = `${GITHUB_BLOB_BASE}/docs`;
 
 export const PUBLIC_ROADMAP_PLANE_URL =
   "https://sites.plane.so/issues/8a364296fbbc4c858adeb1952a72a451";
@@ -218,7 +222,7 @@ export const SUPPORT_EMAIL = "team@usebondery.com";
 export const WEBAPP_NAME = "Bondery";
 
 /** Display name used in the web app manifest and browser install UI. */
-export const PWA_APP_NAME = `${WEBAPP_NAME} PWA`;
+export const PWA_APP_NAME: string = `${WEBAPP_NAME} PWA`;
 
 /** Divider character used in browser tab titles, e.g. "Person • Bondery" */
 export const METADATA_TITLE_DIVIDER = "•";

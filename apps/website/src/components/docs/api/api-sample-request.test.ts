@@ -6,6 +6,7 @@ import {
   type SampleRequestInput,
 } from "./api-sample-request.js";
 
+const CURL_GET_CONTACTS_RE = /^curl -X GET "https:\/\/api\.usebondery\.com\/contacts\?limit=50"/;
 const SERVERS = [
   { description: "Local development server", url: "https://api.usebondery.test" },
   { description: "Production server", url: "https://api.usebondery.com" },
@@ -44,7 +45,7 @@ describe("buildSampleRequest", () => {
       security: BEARER,
     });
 
-    assert.match(sample.curl, /^curl -X GET "https:\/\/api\.usebondery\.com\/contacts\?limit=50"/);
+    assert.match(sample.curl, CURL_GET_CONTACTS_RE);
     assert.ok(sample.curl.includes("Authorization: Bearer YOUR_API_TOKEN"));
     assert.ok(!sample.curl.includes("-d "));
     assert.ok(!sample.curl.includes("Content-Type"));

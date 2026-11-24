@@ -1,13 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import type { DictationAvailability } from "@/lib/speech/dictation/dictationAvailability";
+import { detachPromise } from "@bondery/helpers/async";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { resolveDictationAvailability } from "@/lib/speech/dictation/dictationAvailability";
 import type { DictationErrorCode, DictationResult } from "@/lib/speech/dictation/dictationEngine";
 import { getDictationEngine } from "@/lib/speech/dictation/dictationEngine";
 import {
   createDictationEngineHandlers,
-  type DictationStatus,
   isLiveStatus,
   statusForError,
 } from "@/lib/speech/dictation/dictationHandlers";
@@ -28,50 +34,29 @@ import {
   type DictationSession,
   sessionInterimPreview,
 } from "@/lib/speech/dictation/dictationSession";
-
-export type { DictationAvailability, DictationStatus };
-
-/** Live selection of the field. */
-export interface DictationSelection {
-  end: number;
-  start: number;
-}
-
-export interface UseDictationOptions {
-  /** A running reply blocks dictation. */
-  disabled: boolean;
-  /** BCP 47 tag for the recognizer. */
-  lang: string;
-  /** Reads the field selection. Must not prompt and must not throw. */
-  readSelection: () => DictationSelection | null;
-  /** Changing this value ends the session. It combines the route and the new-chat counter. */
-  resetKey: string;
-  /** Puts the caret back after a write. */
-  restoreCaret: (index: number) => void;
-  setValue: (value: string) => void;
-  value: string;
-}
-
-export interface UseDictationResult {
-  /** True while a session holds the microphone. */
-  active: boolean;
-  /** `null` until the browser check has run. */
-  availability: DictationAvailability | null;
-  /** Ends a live session and keeps the text. Called on submit and on a manual edit. */
-  cancel: () => void;
-  clearError: () => void;
-  /** One error per failure. The button shows a toast, then calls `clearError`. */
-  error: DictationErrorCode | null;
-  /** The current guess. Empty when the recognizer holds none. */
-  interimText: string;
-  /** True until the speech route is known. The control shows a loader. */
-  pending: boolean;
-  status: DictationStatus;
-  toggle: () => void;
-}
+import type {
+  DictationAvailability,
+  DictationStatus,
+  UseDictationOptions,
+  UseDictationResult,
+} from "@/lib/speech/dictation/useDictation-types";
 
 /** A `stop()` that never reports `onend` must not keep the control spinning. */
 const FINALIZE_GUARD_MS = 1500;
+
+/** Browser capabilities never change while the page is open, so there is nothing to subscribe to. */
+const subscribeToNothing = () => () => undefined;
+
+/** The server has no recognizer and has not run the browser check. */
+const getServerAvailability = (): null => null;
+
+export type {
+  DictationAvailability,
+  DictationSelection,
+  DictationStatus,
+  UseDictationOptions,
+  UseDictationResult,
+} from "@/lib/speech/dictation/useDictation-types";
 
 /**
  * Dictation session for the chat composer.
@@ -99,8 +84,24 @@ export function useDictation({
   const [status, setStatusState] = useState<DictationStatus>("idle");
   const [error, setError] = useState<DictationErrorCode | null>(null);
   const [interimText, setInterimText] = useState("");
-  const [availability, setAvailability] = useState<DictationAvailability | null>(null);
+  // The first render matches the server, which has no recognizer. The client then reads the
+  // real capability.
+  const availability = useSyncExternalStore<DictationAvailability | null>(
+    subscribeToNothing,
+    () =>
+      resolveDictationAvailability({
+        secure: window.isSecureContext,
+        supported: engine.isSupported(),
+      }),
+    getServerAvailability,
+  );
   const [routeReady, setRouteReady] = useState(false);
+  // A new language needs a new route check, so the loader returns until it finishes.
+  const [routeLang, setRouteLang] = useState(lang);
+  if (routeLang !== lang) {
+    setRouteLang(lang);
+    setRouteReady(false);
+  }
 
   const sessionRef = useRef<DictationSession | null>(null);
   const statusRef = useRef<DictationStatus>("idle");
@@ -108,15 +109,15 @@ export function useDictation({
   const finalizeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const restartTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   /** Set when this capture received a transcript. Cleared on the next start. */
-  const heardSpeechRef = useRef(false);
+  const heardSpeechRef = useRef<boolean>(false);
   /** Epoch ms of the current capture's `onstart`. */
   const captureStartedAtRef = useRef(0);
   /** True only while the browser holds the capture. False in the restart gap. */
-  const captureLiveRef = useRef(false);
+  const captureLiveRef = useRef<boolean>(false);
   /** A service drop reported before `onend`. The end handler consumes it. */
   const pendingFaultRef = useRef<"network" | null>(null);
   /** True when this session must stay on the device. Restarts keep the same mode. */
-  const processLocallyRef = useRef(false);
+  const processLocallyRef = useRef<boolean>(false);
   /** Bumped when a start is abandoned, so a late route check cannot open the mic. */
   const startTokenRef = useRef(0);
   /** Route learned before the first click. `none` never opens the microphone. */
@@ -132,7 +133,7 @@ export function useDictation({
    */
   const lastWrittenFromRef = useRef("");
   /** True between a write and its caret restore. The caret guard waits for it. */
-  const caretPendingRef = useRef(false);
+  const caretPendingRef = useRef<boolean>(false);
   /**
    * The live field value.
    *
@@ -141,7 +142,11 @@ export function useDictation({
    * rather than the captured one.
    */
   const valueRef = useRef(value);
-  valueRef.current = value;
+  // A layout effect runs in the commit, before the browser can deliver the next result
+  // event, so the ref never trails the rendered value.
+  useLayoutEffect(() => {
+    valueRef.current = value;
+  }, [value]);
 
   /** State and ref move together, so a handler never reads a stale status. */
   const setStatus = useCallback((next: DictationStatus) => {
@@ -210,7 +215,7 @@ export function useDictation({
 
   const openCapture = useCallback(
     (processLocally: boolean) => {
-      const current = valueRef.current;
+      const { current } = valueRef;
       const selection = readSelection();
       const start = selection?.start ?? current.length;
       const end = selection?.end ?? current.length;
@@ -266,17 +271,19 @@ export function useDictation({
     setInterimText("");
     setStatus("requesting");
 
-    void resolveDictationRoute(lang).then((route) => {
-      if (startTokenRef.current !== token) {
-        return;
-      }
-      if (route === "none") {
-        routeRef.current = "none";
-        setStatus("no-service");
-        return;
-      }
-      openCapture(route === "local");
-    });
+    detachPromise(
+      resolveDictationRoute(lang).then((route) => {
+        if (startTokenRef.current !== token) {
+          return;
+        }
+        if (route === "none") {
+          routeRef.current = "none";
+          setStatus("no-service");
+          return;
+        }
+        openCapture(route === "local");
+      }),
+    );
   }, [engine, lang, openCapture, setStatus]);
 
   /** Writes the composed value. Returns false when the session lost the field. */
@@ -405,33 +412,24 @@ export function useDictation({
     );
   }, [applyResult, clearRestartTimer, endSession, engine, forgetSession, restart, setStatus]);
 
-  // The first render matches the server, which has no recognizer.
-  useEffect(() => {
-    setAvailability(
-      resolveDictationAvailability({
-        secure: window.isSecureContext,
-        supported: engine.isSupported(),
-      }),
-    );
-  }, [engine]);
-
   // A slow route check keeps the loader up. No speech service leaves the mic closed.
   useEffect(() => {
     if (availability !== "available") {
       return;
     }
     let cancelled = false;
-    setRouteReady(false);
-    void readDictationRouteChoice(lang).then((choice) => {
-      if (cancelled) {
-        return;
-      }
-      routeRef.current = choice;
-      if (choice === "none" && statusRef.current === "idle") {
-        setStatus("no-service");
-      }
-      setRouteReady(true);
-    });
+    detachPromise(
+      readDictationRouteChoice(lang).then((choice) => {
+        if (cancelled) {
+          return;
+        }
+        routeRef.current = choice;
+        if (choice === "none" && statusRef.current === "idle") {
+          setStatus("no-service");
+        }
+        setRouteReady(true);
+      }),
+    );
     return () => {
       cancelled = true;
     };
@@ -444,14 +442,16 @@ export function useDictation({
       return;
     }
     let cancelled = false;
-    void readDictationPermission().then((permission) => {
-      if (cancelled || permission !== "denied") {
-        return;
-      }
-      if (statusRef.current === "idle") {
-        setStatus("denied");
-      }
-    });
+    detachPromise(
+      readDictationPermission().then((permission) => {
+        if (cancelled || permission !== "denied") {
+          return;
+        }
+        if (statusRef.current === "idle") {
+          setStatus("denied");
+        }
+      }),
+    );
     return () => {
       cancelled = true;
     };
@@ -470,22 +470,21 @@ export function useDictation({
   // A terminal status (denied, unavailable) describes the browser, not the
   // session, so it survives a reset and the user keeps its explanation.
   useEffect(() => {
-    void lang;
-    void resetKey;
     if (isLiveStatus(statusRef.current)) {
       endSession();
     }
   }, [endSession, lang, resetKey]);
 
   // A route change unmounts the composer. No capture outlives it.
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       startTokenRef.current += 1;
       clearRestartTimer();
       engine.abort();
       sessionRef.current = null;
-    };
-  }, [clearRestartTimer, engine]);
+    },
+    [clearRestartTimer, engine],
+  );
 
   return {
     active: isLiveStatus(status),

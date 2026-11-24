@@ -1,0 +1,32 @@
+{
+  "LoggedIn": {
+    "OpenBondery": "Bondery openen",
+    "UnsupportedSiteMessage": "Bezoek iemands profiel op Instagram of LinkedIn om meer acties en mogelijkheden van de extensie te zien."
+  },
+  "LoggedOut": {
+    "Description": "Koppel je account om contacten van socials op te slaan.",
+    "SignIn": "Inloggen",
+    "Title": "Inloggen bij Bondery"
+  },
+  "PersonActions": {
+    "AddInteraction": "Interactie met deze persoon toevoegen"
+  },
+  "Settings": {
+    "ApiServer": "API-server",
+    "SignOut": "Afmelden"
+  },
+  "UpdateRequired": {
+    "Description": "Je Bondery-extensie is verouderd en werkt mogelijk niet goed. Werk bij om door te gaan.",
+    "OpenExtensionsPage": "Extensiepagina openen",
+    "Title": "Update vereist"
+  },
+  "Welcome": {
+    "ConnectButton": "Je Bondery-account koppelen",
+    "Description": "Koppel je Bondery-account om contacten rechtstreeks vanuit socialmediaprofielen op te slaan.",
+    "SignInHint": "Je wordt gevraagd om in te loggen op je Bondery-account en de extensie te autoriseren.",
+    "SuccessClose": "Je kunt dit tabblad nu sluiten.",
+    "SuccessDescription": "Je Bondery-account is nu gekoppeld. Bezoek een Instagram- of LinkedIn-profiel om contacten op te slaan.",
+    "SuccessTitle": "Alles is klaar!",
+    "Title": "Welkom bij Bondery"
+  }
+}

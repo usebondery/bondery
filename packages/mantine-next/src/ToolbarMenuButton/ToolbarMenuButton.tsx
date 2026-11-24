@@ -1,7 +1,8 @@
 "use client";
 
 import { Button, type ButtonProps } from "@mantine/core";
-import type { MouseEventHandler, ReactNode, Ref } from "react";
+import { cn } from "cn";
+import type { MouseEventHandler, ReactElement, ReactNode, Ref } from "react";
 
 export interface ToolbarMenuButtonProps extends Omit<ButtonProps, "color" | "variant"> {
   children: ReactNode;
@@ -25,9 +26,8 @@ export function ToolbarMenuButton({
   opened = false,
   ref,
   ...props
-}: ToolbarMenuButtonProps) {
-  const openedClassName = opened ? "button-scale-effect-active" : undefined;
-  const mergedClassName = [className, openedClassName].filter(Boolean).join(" ") || undefined;
+}: ToolbarMenuButtonProps): ReactElement {
+  const mergedClassName = cn(className, opened && "button-scale-effect-active") || undefined;
 
   return (
     <Button

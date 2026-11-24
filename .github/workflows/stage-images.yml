@@ -115,7 +115,7 @@ jobs:
           fi
 
   build_api:
-    needs: [detect_changes, resolve]
+    needs: [ detect_changes, resolve ]
     if: needs.detect_changes.outputs.api == 'true'
     uses: ./.github/workflows/shared-docker-build-push.yml
     secrets: inherit
@@ -138,7 +138,7 @@ jobs:
         BONDERY_INFRA_VERSION=${{ needs.resolve.outputs.infra_version }}
 
   build_webapp:
-    needs: [detect_changes, resolve]
+    needs: [ detect_changes, resolve ]
     if: needs.detect_changes.outputs.webapp == 'true'
     uses: ./.github/workflows/shared-docker-build-push.yml
     secrets: inherit
@@ -161,7 +161,7 @@ jobs:
         BONDERY_INFRA_VERSION=${{ needs.resolve.outputs.infra_version }}
 
   build_website:
-    needs: [detect_changes, resolve]
+    needs: [ detect_changes, resolve ]
     if: needs.detect_changes.outputs.website == 'true'
     uses: ./.github/workflows/shared-docker-build-push.yml
     secrets: inherit
@@ -184,7 +184,7 @@ jobs:
         BONDERY_INFRA_VERSION=${{ needs.resolve.outputs.infra_version }}
 
   notify_beta_website:
-    needs: [resolve, build_website]
+    needs: [ resolve, build_website ]
     if: always() && needs.build_website.result == 'success' && needs.resolve.outputs.is_rc_cut == 'true'
     runs-on: ubuntu-latest
     permissions:
@@ -203,7 +203,7 @@ jobs:
           branch: main
 
   notify_beta_services:
-    needs: [resolve, build_api, build_webapp]
+    needs: [ resolve, build_api, build_webapp ]
     if: >-
       always() &&
       needs.resolve.outputs.is_rc_cut == 'true' &&

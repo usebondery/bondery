@@ -18,7 +18,11 @@ function mockRequest(input: {
   permission?: "read" | "full";
   openApiArea?: "integration" | "session" | "internal";
 }): FastifyRequest {
-  const log = { warn: () => {} };
+  const log = {
+    warn: () => {
+      // Test logger: API-key warnings are not asserted here.
+    },
+  };
   return {
     authApiKey: input.permission ? { id: "k", label: "t", permission: input.permission } : null,
     log,
@@ -106,7 +110,7 @@ describe("assertApiKeyAccess", () => {
   });
 });
 
-describe("API key policy via HTTP", () => {
+describe("aPI key policy via HTTP", () => {
   it("returns 401 for session merge route with API key bearer", async () => {
     loadTestEnv();
     const { createTestApp } = await import("./create-test-app.js");

@@ -1,3 +1,4 @@
+import { cn } from "cn";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { ActivityIndicator, View } from "react-native";
@@ -11,7 +12,6 @@ import { Pressable } from "@/components/ui/Pressable";
 import type { MobileThemeColors } from "../../theme/colors";
 import { PRESS_SCALES } from "../../theme/pressFeedback";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
-import { joinClassNames } from "./joinClassNames";
 import { Text } from "./Text";
 
 type ButtonVariant = "filled" | "outline" | "subtle";
@@ -29,8 +29,8 @@ const BUTTON_SCALE_TIMING = {
 } as const;
 
 const SIZE_CLASS: Record<ButtonSize, string> = {
-  lg: "min-h-[44px] px-3.5 py-3",
-  md: "min-h-[44px] px-3 py-2.5",
+  lg: "min-h-touch px-3.5 py-3",
+  md: "min-h-touch px-3 py-2.5",
 };
 
 function isButtonTone(color: string | undefined): color is ButtonTone {
@@ -74,18 +74,16 @@ type ButtonPropsBase = {
 };
 
 /** When `loading` is set, `loadingText` is required and shown instead of `children`. */
-export type ButtonLoadingProps =
-  | { loading?: undefined }
-  | { loading: boolean; loadingText: string };
+type ButtonLoadingProps = { loading?: undefined } | { loading: boolean; loadingText: string };
 
-export type ButtonProps = ButtonPropsBase & ButtonLoadingProps;
+type ButtonProps = ButtonPropsBase & ButtonLoadingProps;
 
 type ButtonRuntimeProps = ButtonPropsBase & {
   loading?: boolean;
   loadingText?: string;
 };
 
-export function Button(props: ButtonProps) {
+function Button(props: ButtonProps) {
   const {
     accessibilityHint,
     children,
@@ -127,9 +125,12 @@ export function Button(props: ButtonProps) {
           : accent
         : colors.textOnPrimary);
   const isDimmed = inactive && !loading;
-  const isPressLocked = disabled || loading;
-  const showLeftSlot = loading && rightSection == null ? true : leftSection != null;
-  const showRightSlot = rightSection != null;
+  const isPressLocked = disabled === true || loading === true;
+  const showLeftSlot =
+    loading && (rightSection === null || rightSection === undefined)
+      ? true
+      : leftSection !== null && leftSection !== undefined;
+  const showRightSlot = rightSection !== null && rightSection !== undefined;
   const isSpread = align === "spread" && !isSubtle;
   const isContentCentered = align === "center" && !isSubtle;
   const labelContent = loading && loadingText ? loadingText : children;
@@ -143,12 +144,12 @@ export function Button(props: ButtonProps) {
     }
 
     setIsPressed(true);
-    scale.value = withTiming(PRESS_SCALES.subtle, BUTTON_SCALE_TIMING);
+    scale.set(withTiming(PRESS_SCALES.subtle, BUTTON_SCALE_TIMING));
   };
 
   const pressOut = () => {
     setIsPressed(false);
-    scale.value = withTiming(1, BUTTON_SCALE_TIMING);
+    scale.set(withTiming(1, BUTTON_SCALE_TIMING));
   };
 
   const pressable = (
@@ -156,18 +157,18 @@ export function Button(props: ButtonProps) {
       accessibilityHint={accessibilityHint}
       accessibilityRole="button"
       accessibilityState={{ busy: loading, disabled }}
-      className={joinClassNames(
-        "rounded-[10px] disabled:opacity-[0.38]",
+      className={cn(
+        "rounded-control disabled:opacity-disabled",
         isSubtle
           ? "items-center justify-center bg-transparent"
-          : joinClassNames(
+          : cn(
               "flex-row items-center",
-              isSpread ? "justify-between" : undefined,
-              isContentCentered ? "justify-center" : undefined,
+              isSpread && "justify-between",
+              isContentCentered && "justify-center",
             ),
-        isOutline ? "border" : undefined,
+        isOutline && "border",
         SIZE_CLASS[size],
-        fullWidth ? "w-full" : undefined,
+        fullWidth && "w-full",
         className,
       )}
       data-disabled={isPressLocked ? "true" : undefined}
@@ -201,10 +202,10 @@ export function Button(props: ButtonProps) {
     >
       {showLeftSlot ? (
         <View className="mr-2.5 w-5 items-center justify-center">
-          {loading && rightSection == null ? (
+          {loading && (rightSection === null || rightSection === undefined) ? (
             <ActivityIndicator color={labelColor} size="small" />
           ) : (
-            leftSection
+            <>{leftSection}</>
           )}
         </View>
       ) : null}
@@ -220,13 +221,8 @@ export function Button(props: ButtonProps) {
         {labelContent}
       </Text>
       {showRightSlot ? (
-        <View
-          className={joinClassNames(
-            "w-5 flex-shrink-0 items-center justify-center",
-            isSpread ? undefined : "ml-2.5",
-          )}
-        >
-          {loading ? <ActivityIndicator color={labelColor} size="small" /> : rightSection}
+        <View className={cn("w-5 shrink-0 items-center justify-center", !isSpread && "ml-2.5")}>
+          {loading ? <ActivityIndicator color={labelColor} size="small" /> : <>{rightSection}</>}
         </View>
       ) : null}
     </Pressable>
@@ -243,7 +239,7 @@ export function Button(props: ButtonProps) {
       <View className="relative overflow-visible">
         {pressable}
         <View
-          className="absolute right-3 -top-2 z-[1] rounded-full px-2 py-0.5"
+          className="absolute -top-2 right-3 z-1 rounded-full px-2 py-0.5"
           pointerEvents="none"
           style={{ backgroundColor: colors.primary }}
         >
@@ -255,3 +251,6 @@ export function Button(props: ButtonProps) {
     </Animated.View>
   );
 }
+
+export type { ButtonLoadingProps, ButtonProps };
+export { Button };

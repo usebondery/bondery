@@ -1,11 +1,7 @@
-import { BonderyDynamicLogotype as BonderyDynamicLogotypeComponent } from "#react/BonderyDynamicLogotype.js";
-import { BonderyIcon as BonderyIconComponent } from "#react/BonderyIcon.js";
-import { BonderyIconWhite as BonderyIconWhiteComponent } from "#react/BonderyIconWhite.js";
-import { BonderyLogotypeBlack as BonderyLogotypeBlackComponent } from "#react/BonderyLogotypeBlack.js";
-import { BonderyLogotypeWhite as BonderyLogotypeWhiteComponent } from "#react/BonderyLogotypeWhite.js";
-
-export const BonderyDynamicLogotype = BonderyDynamicLogotypeComponent;
-export const BonderyIcon = BonderyIconComponent;
-export const BonderyIconWhite = BonderyIconWhiteComponent;
-export const BonderyLogotypeBlack = BonderyLogotypeBlackComponent;
-export const BonderyLogotypeWhite = BonderyLogotypeWhiteComponent;
+export { ANTHROPIC_MARK_COLOR, AnthropicIcon } from "#react/AnthropicIcon.js";
+export { BonderyDynamicLogotype } from "#react/BonderyDynamicLogotype.js";
+export { BonderyIcon } from "#react/BonderyIcon.js";
+export { BonderyIconWhite } from "#react/BonderyIconWhite.js";
+export { BonderyLogotypeBlack } from "#react/BonderyLogotypeBlack.js";
+export { BonderyLogotypeWhite } from "#react/BonderyLogotypeWhite.js";
+export { BrandIcon, type BrandIconName, type BrandIconProps } from "#react/BrandIcon.js";

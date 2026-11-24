@@ -4,14 +4,18 @@ import type { DomainContext } from "../../domains/_shared/context.js";
 import { mapStripeStatus } from "./map-status.js";
 import { getStripeClient } from "./stripe.js";
 import { getSubscriptionPeriod, isScheduledToCancel } from "./stripe-helpers.js";
-import { deletePendingSubscription, upsertSubscription } from "./subscription.js";
+import {
+  deletePendingSubscription,
+  syncAiQuotaPeriod,
+  upsertSubscription,
+} from "./subscription.js";
 
-export type SubscriptionSyncResult =
+type SubscriptionSyncResult =
   | { synced: true; source: "pending" | "stripe_api" }
   | { synced: false; reason: string };
 
 function extractMirrorFromStripeSubscription(subscription: Stripe.Subscription) {
-  const item = subscription.items.data[0];
+  const [item] = subscription.items.data;
   const price = item?.price;
   const product = price?.product;
   const productName =
@@ -30,11 +34,13 @@ function extractMirrorFromStripeSubscription(subscription: Stripe.Subscription) 
   };
 }
 
+export type { SubscriptionSyncResult };
+
 export async function syncSubscriptionFromStripe(
   ctx: DomainContext,
 ): Promise<SubscriptionSyncResult> {
   const { user, log } = ctx;
-  const email = user.email;
+  const { email } = user;
 
   if (email) {
     const pending = await prisma.pendingSubscription.findUnique({
@@ -51,6 +57,10 @@ export async function syncSubscriptionFromStripe(
         pending.currentPeriodEnd,
         pending.cancelAtPeriodEnd,
       );
+
+      if (pending.currentPeriodEnd) {
+        await syncAiQuotaPeriod(user.id, pending.currentPeriodEnd, log ?? undefined);
+      }
 
       await deletePendingSubscription(email);
 
@@ -78,8 +88,8 @@ export async function syncSubscriptionFromStripe(
       query: `metadata['bondery_user_id']:'${user.id}'`,
     });
     stripeCustomer = search.data[0] ?? null;
-  } catch (err) {
-    log?.warn({ err, userId: user.id }, "subscription-sync: Stripe customer search failed");
+  } catch (error) {
+    log?.warn({ err: error, userId: user.id }, "subscription-sync: Stripe customer search failed");
   }
 
   if (!stripeCustomer && email) {
@@ -129,6 +139,10 @@ export async function syncSubscriptionFromStripe(
     cancelAtPeriodEnd,
     mirror,
   );
+
+  if (currentPeriodEnd) {
+    await syncAiQuotaPeriod(user.id, currentPeriodEnd, log ?? undefined);
+  }
 
   log?.info({ status, userId: user.id }, "subscription-sync: synced from Stripe API");
   return { source: "stripe_api", synced: true };

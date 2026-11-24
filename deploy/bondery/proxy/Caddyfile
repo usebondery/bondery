@@ -1,0 +1,41 @@
+# Bondery behind Caddy on the same host, without Traefik (docs/deploy/reverse-proxy.mdx).
+# Use it with docker-compose.override.yml.example, which binds every stack port to 127.0.0.1.
+# Caddy gets the public certificates from Let's Encrypt itself.
+#
+# 1. Export the private CAs (again after replacing a CA):
+#      sh deploy/bondery/scripts/api-ca.sh > /etc/caddy/bondery-api-ca.crt
+# 2. Export the storage CA and the client certificate the gateway requires:
+#      sh deploy/bondery/scripts/storage-ca.sh --client-dir /etc/caddy/bondery-storage
+# 3. Give Caddy the values from deploy/bondery/.env (for example in Caddy's environment file):
+#      BONDERY_INFRA_API_DOMAIN, BONDERY_INFRA_WEBAPP_DOMAIN, BONDERY_INFRA_STORAGE_DOMAIN,
+#      BONDERY_INFRA_TRAEFIK_PREFIX (only if you changed it; the default is bondery)
+
+{$BONDERY_INFRA_API_DOMAIN} {
+	# HTTPS to the API, WebSocket sync included, verified against the API CA.
+	reverse_proxy https://127.0.0.1:26631 {
+		transport http {
+			tls_trust_pool file /etc/caddy/bondery-api-ca.crt
+			tls_server_name {$BONDERY_INFRA_TRAEFIK_PREFIX:bondery}-api
+		}
+	}
+}
+{$BONDERY_INFRA_WEBAPP_DOMAIN} {
+	# The webapp listens on plain HTTP, on 127.0.0.1 only, so this hop never leaves the host.
+	reverse_proxy 127.0.0.1:26632
+}
+
+{$BONDERY_INFRA_STORAGE_DOMAIN} {
+	# Public reads only. Cookies and credentials are dropped: public reads never need them.
+	@not_read not method GET HEAD OPTIONS
+	respond @not_read 405
+
+	reverse_proxy https://127.0.0.1:8443 {
+		header_up -Cookie
+		header_up -Authorization
+		transport http {
+			tls_trust_pool file /etc/caddy/bondery-storage/ca.crt
+			tls_client_auth /etc/caddy/bondery-storage/tls.crt /etc/caddy/bondery-storage/tls.key
+			tls_server_name {$BONDERY_INFRA_TRAEFIK_PREFIX:bondery}-storage
+		}
+	}
+}

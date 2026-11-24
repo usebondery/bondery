@@ -1,23 +1,23 @@
 "use client";
 
-import { IconBrandLinkedin } from "@tabler/icons-react";
-import { IntegrationCard } from "@/components/shared/IntegrationCard";
+import { BrandIcon } from "@bondery/branding";
+import { TileCard } from "@bondery/mantine-next";
 import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { openLinkedInImportModal } from "../modals/openLinkedInImportModal";
 
 export function LinkedInImportSection() {
   const t = useSettingsPageTranslations("DataManagement.LinkedInImport");
+  const tDataManagement = useSettingsPageTranslations("DataManagement");
 
   return (
-    <IntegrationCard
-      displayName={t("LinkedIn")}
-      icon={IconBrandLinkedin}
-      iconColor="blue"
-      isConnected={false}
-      isDisabled={false}
-      isLinkable={false}
+    <TileCard
+      actionLabel={t("ImportAction")}
+      caption={tDataManagement("CategorySocials")}
+      description={t("IntroDescription1")}
+      icon={<BrandIcon name="linkedin" size={32} />}
       onClick={() => openLinkedInImportModal()}
-      provider="linkedin_import"
+      title={t("LinkedIn")}
+      variant="link"
     />
   );
 }

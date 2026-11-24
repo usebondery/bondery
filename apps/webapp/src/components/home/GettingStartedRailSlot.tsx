@@ -1,14 +1,14 @@
 "use client";
 
-import type { ContactSelectable } from "@bondery/schemas";
+import type { ContactSelectable, UserSettingsResponse } from "@bondery/schemas";
 import { GettingStartedProgressRail } from "@/components/home/GettingStartedProgressRail";
 import { GettingStartedRailSkeleton } from "@/components/home/GettingStartedRailSkeleton";
 
 interface GettingStartedRailSlotProps {
   hasInteraction: boolean;
   hasInteractionReady: boolean;
-  initialSettings?: Record<string, unknown>;
-  settingsData?: Record<string, unknown>;
+  initialSettings?: UserSettingsResponse["data"];
+  settingsData?: UserSettingsResponse["data"];
   settingsReady: boolean;
   statsReady: boolean;
   timelineContacts: ContactSelectable[];
@@ -26,7 +26,12 @@ export function GettingStartedRailSlot({
   totalContacts,
 }: GettingStartedRailSlotProps) {
   const resolvedSettings = settingsData ?? initialSettings;
-  const railReady = settingsReady && statsReady && hasInteractionReady && resolvedSettings != null;
+  const railReady =
+    settingsReady &&
+    statsReady &&
+    hasInteractionReady &&
+    resolvedSettings !== null &&
+    resolvedSettings !== undefined;
 
   if (!railReady) {
     return <GettingStartedRailSkeleton />;

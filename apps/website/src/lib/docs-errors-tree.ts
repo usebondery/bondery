@@ -1,4 +1,7 @@
 import { API_ERROR_CODE_ENTRIES, API_ERROR_TYPES } from "@bondery/schemas/errors";
+import docs from "@bondery/translations/locales/en/platform/website/WebsiteDocs.json" with {
+  type: "json",
+};
 import type * as PageTree from "fumadocs-core/page-tree";
 import { resolveDocsIcon } from "@/lib/docs-icon";
 
@@ -12,14 +15,14 @@ const ERRORS_INDEX = `${ERRORS_PREFIX}/index`;
  * as a deeper level.
  */
 const ERROR_TYPES: Record<string, { icon: string; label: string }> = {
-  api_error: { icon: "Server", label: "Server errors" },
-  authentication_error: { icon: "Key", label: "Authentication" },
-  authorization_error: { icon: "Shield", label: "Authorization" },
-  conflict_error: { icon: "GitMerge", label: "Conflicts" },
-  invalid_request_error: { icon: "AlertCircle", label: "Invalid requests" },
-  not_found_error: { icon: "Search", label: "Not found" },
-  rate_limit_error: { icon: "Gauge", label: "Rate limits" },
-  service_unavailable_error: { icon: "Cloud", label: "Service unavailable" },
+  api_error: { icon: "Server", label: docs.ErrorGroups.Api },
+  authentication_error: { icon: "Key", label: docs.ErrorGroups.Authentication },
+  authorization_error: { icon: "Shield", label: docs.ErrorGroups.Authorization },
+  conflict_error: { icon: "GitMerge", label: docs.ErrorGroups.Conflicts },
+  invalid_request_error: { icon: "AlertCircle", label: docs.ErrorGroups.InvalidRequests },
+  not_found_error: { icon: "Search", label: docs.ErrorGroups.NotFound },
+  rate_limit_error: { icon: "Gauge", label: docs.ErrorGroups.RateLimits },
+  service_unavailable_error: { icon: "Cloud", label: docs.ErrorGroups.ServiceUnavailable },
 };
 
 /** Short label for a code. The sentence form lives in `description`. */
@@ -107,7 +110,7 @@ function buildErrorGroups(nodes: PageTree.Node[]): PageTree.Node[] {
       collapsible: true,
       defaultOpen: false,
       icon: resolveDocsIcon("Archive"),
-      name: "Retired codes",
+      name: docs.ErrorGroups.Retired,
       type: "folder",
     });
   }

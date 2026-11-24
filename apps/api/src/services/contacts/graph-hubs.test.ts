@@ -71,7 +71,10 @@ describe("buildHubBuckets", () => {
     );
     const byId = new Map(hubs.map((row) => [row.id, row]));
 
-    assert.deepEqual([...byId.keys()].sort(), ["company:li:99", "company:name:acme"]);
+    assert.deepEqual(
+      [...byId.keys()].sort((left, right) => left.localeCompare(right)),
+      ["company:li:99", "company:name:acme"],
+    );
     assert.deepEqual(byId.get("company:li:99")?.personIds, ["a", "b"]);
     assert.deepEqual(byId.get("company:name:acme")?.personIds, ["c", "d"]);
   });
@@ -105,10 +108,10 @@ describe("buildHubBuckets", () => {
       [school("a", null, "Harvard"), school("b", null, "Harvard")],
     );
 
-    assert.deepEqual(hubs.map((row) => row.id).sort(), [
-      "company:name:harvard",
-      "school:name:harvard",
-    ]);
+    assert.deepEqual(
+      hubs.map((row) => row.id).sort((left, right) => left.localeCompare(right)),
+      ["company:name:harvard", "school:name:harvard"],
+    );
   });
 
   it("includes past jobs and every school row", () => {
@@ -123,11 +126,10 @@ describe("buildHubBuckets", () => {
       [school("a", null, "State"), school("b", null, "State")],
     );
 
-    assert.deepEqual(hubs.map((row) => row.id).sort(), [
-      "company:name:now",
-      "company:name:old",
-      "school:name:state",
-    ]);
+    assert.deepEqual(
+      hubs.map((row) => row.id).sort((left, right) => left.localeCompare(right)),
+      ["company:name:now", "company:name:old", "school:name:state"],
+    );
   });
 
   it("requires two distinct people", () => {

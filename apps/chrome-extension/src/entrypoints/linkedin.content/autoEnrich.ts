@@ -42,7 +42,9 @@ async function waitForEnrichContext(
 
   const start = Date.now();
   while (Date.now() - start < 20_000) {
-    await new Promise((resolve) => setTimeout(resolve, 250));
+    await new Promise((resolve) => {
+      setTimeout(resolve, 250);
+    });
     const next = await pollOnce();
     if (next) {
       return next;
@@ -60,37 +62,47 @@ async function waitForEnrichScrapeReady(timeoutMs = 15_000): Promise<void> {
  * Runs enrich when this LinkedIn tab was opened by the background.
  * Callable from startup (poll) or when background sends RUN_PENDING_ENRICH.
  */
-export async function runPendingEnrich(triggerRequestId?: string): Promise<void> {
+async function runPendingEnrich(triggerRequestId?: string): Promise<void> {
   if (triggerRequestId && enrichInFlightRequestId === triggerRequestId) {
     extLog.debug("[linkedin][enrich] already in flight", triggerRequestId);
     return;
   }
 
-  let requestId: string | undefined;
+  await runPendingEnrichBody(triggerRequestId);
+}
+
+async function runPendingEnrichBody(triggerRequestId?: string): Promise<void> {
+  const context = await waitForEnrichContext(triggerRequestId);
+  if (!context) {
+    const msg = "Enrich context not found (extension may have reloaded)";
+    extLog.warn("[linkedin][enrich]", msg);
+    if (triggerRequestId) {
+      await browser.runtime.sendMessage({
+        payload: { error: msg, requestId: triggerRequestId },
+        type: "ENRICH_ERROR",
+      });
+    }
+    return;
+  }
+
+  if (triggerRequestId && context.requestId !== triggerRequestId) {
+    extLog.warn("[linkedin][enrich] requestId mismatch", triggerRequestId, context.requestId);
+    return;
+  }
+
+  const { requestId } = context;
+  enrichInFlightRequestId = requestId;
+  await executeEnrich(context).finally(() => {
+    if (enrichInFlightRequestId === requestId) {
+      enrichInFlightRequestId = null;
+    }
+  });
+}
+
+async function executeEnrich(context: EnrichContextPayload): Promise<void> {
+  const { contactId, linkedinHandle, requestId } = context;
 
   try {
-    const context = await waitForEnrichContext(triggerRequestId);
-    if (!context) {
-      const msg = "Enrich context not found (extension may have reloaded)";
-      extLog.warn("[linkedin][enrich]", msg);
-      if (triggerRequestId) {
-        await browser.runtime.sendMessage({
-          payload: { error: msg, requestId: triggerRequestId },
-          type: "ENRICH_ERROR",
-        });
-      }
-      return;
-    }
-
-    if (triggerRequestId && context.requestId !== triggerRequestId) {
-      extLog.warn("[linkedin][enrich] requestId mismatch", triggerRequestId, context.requestId);
-      return;
-    }
-
-    const { contactId, linkedinHandle } = context;
-    requestId = context.requestId;
-    enrichInFlightRequestId = requestId;
-
     const username = getLinkedInUsername();
     if (!username) {
       const msg = `Not a LinkedIn profile URL: ${window.location.href}`;
@@ -120,8 +132,10 @@ export async function runPendingEnrich(triggerRequestId?: string): Promise<void>
 
     let profile = await scrapeLinkedInProfile(username);
     if (profile.workHistory.length === 0 && profile.educationHistory.length === 0) {
-      await new Promise((resolve) => setTimeout(resolve, 2_000));
-      await ensureProfileSectionsLoaded(undefined, 8_000);
+      await new Promise((resolve) => {
+        setTimeout(resolve, 2000);
+      });
+      await ensureProfileSectionsLoaded(undefined, 8000);
       profile = await scrapeLinkedInProfile(username);
     }
     const {
@@ -165,23 +179,18 @@ export async function runPendingEnrich(triggerRequestId?: string): Promise<void>
     extLog.debug("[linkedin][enrich] Enrich data submitted for", username);
   } catch (error) {
     extLog.error("[linkedin][enrich] Auto-enrich failed:", error);
-    // Report the error back to background so the webapp gets immediate feedback
-    if (requestId) {
-      try {
-        await browser.runtime.sendMessage({
-          payload: {
-            error: error instanceof Error ? error.message : "Auto-enrich failed",
-            requestId,
-          },
-          type: "ENRICH_ERROR",
-        });
-      } catch {
-        /* background may be unreachable */
-      }
-    }
-  } finally {
-    if (requestId && enrichInFlightRequestId === requestId) {
-      enrichInFlightRequestId = null;
+    try {
+      await browser.runtime.sendMessage({
+        payload: {
+          error: error instanceof Error ? error.message : "Auto-enrich failed",
+          requestId,
+        },
+        type: "ENRICH_ERROR",
+      });
+    } catch {
+      /* background may be unreachable */
     }
   }
 }
+
+export { runPendingEnrich };

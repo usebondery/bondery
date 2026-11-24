@@ -1,14 +1,14 @@
 import { COMMON_PERSON_NAME_TOKEN_SET } from "#name/common-person-name-tokens.js";
 
-export interface ParsedInstagramName {
+const PATTERN_285B272D5D29_RE = /(['-])/;
+const PATTERN_5E282E295C31_RE = /^(.)\1+$/u;
+const PATTERN_5B5C732E2F5F_RE = /[\s./_+|\\-]+/;
+const PATTERN_5B2E5F2D5D2B_RE = /[._-]+/;
+
+interface ParsedInstagramName {
   firstName: string;
   lastName: string | null;
   middleName: string | null;
-}
-
-export interface ParseInstagramUsernameInput {
-  displayName?: string | null;
-  username: string;
 }
 
 const SMALL_CAPS_MAP: Record<string, string> = {
@@ -48,7 +48,7 @@ function toTitleCase(token: string): string {
 
 function toNameCase(token: string): string {
   return token
-    .split(/(['-])/)
+    .split(PATTERN_285B272D5D29_RE)
     .map((part) => {
       if (part === "'" || part === "-") {
         return part;
@@ -77,8 +77,20 @@ function normalizeDisplayName(displayName: string): string {
     .trim();
 }
 
+/** A token shorter than this cannot hold two name parts. */
+const MIN_SPLITTABLE_TOKEN_LENGTH = 4;
+/** Room the bridging vowel and a right part of at least two letters need at the end of a token. */
+const MIN_BRIDGE_AND_RIGHT_LENGTH = 3;
+/** A known name part next to an unknown one must be at least this long to count as a split. */
+const MIN_KNOWN_PART_LENGTH = 3;
+/** Split score bonuses. The base score is ten per letter, so a bonus decides only between near ties. */
+const REPEATED_HALVES_SCORE_BONUS = 5;
+const BOTH_KNOWN_SCORE_BONUS = 200;
+const ONE_KNOWN_SCORE_BONUS = 80;
+const RIGHT_KNOWN_SCORE_BONUS = 20;
+
 function splitCompactUsernameToken(token: string): [string, string] | null {
-  if (token.length < 4) {
+  if (token.length < MIN_SPLITTABLE_TOKEN_LENGTH) {
     return null;
   }
 
@@ -89,9 +101,9 @@ function splitCompactUsernameToken(token: string): [string, string] | null {
 
   const bridgingVowels = new Set(["a", "e", "i", "o", "u", "y"]);
 
-  for (let index = 2; index <= normalized.length - 3; index += 1) {
+  for (let index = 2; index <= normalized.length - MIN_BRIDGE_AND_RIGHT_LENGTH; index += 1) {
     const left = normalized.slice(0, index);
-    const bridge = normalized[index];
+    const bridge = normalized.charAt(index);
     const right = normalized.slice(index + 1);
 
     if (!bridgingVowels.has(bridge)) {
@@ -119,7 +131,10 @@ function splitCompactUsernameToken(token: string): [string, string] | null {
     const unknownPart = leftKnown ? right : left;
     const knownPart = leftKnown ? left : right;
 
-    if (leftKnown !== rightKnown && (unknownPart.length < 1 || knownPart.length < 3)) {
+    if (
+      leftKnown !== rightKnown &&
+      (unknownPart.length === 0 || knownPart.length < MIN_KNOWN_PART_LENGTH)
+    ) {
       continue;
     }
 
@@ -127,7 +142,7 @@ function splitCompactUsernameToken(token: string): [string, string] | null {
       continue;
     }
 
-    if (/^(.)\1+$/u.test(left) || /^(.)\1+$/u.test(right)) {
+    if (PATTERN_5E282E295C31_RE.test(left) || PATTERN_5E282E295C31_RE.test(right)) {
       continue;
     }
 
@@ -136,21 +151,21 @@ function splitCompactUsernameToken(token: string): [string, string] | null {
     const oneKnown = leftKnown !== rightKnown;
     const score =
       (left.length + right.length) * 10 +
-      (isRepeated ? 5 : 0) +
-      (bothKnown ? 200 : 0) +
-      (oneKnown ? 80 : 0) +
-      (rightKnown ? 20 : 0) -
+      (isRepeated ? REPEATED_HALVES_SCORE_BONUS : 0) +
+      (bothKnown ? BOTH_KNOWN_SCORE_BONUS : 0) +
+      (oneKnown ? ONE_KNOWN_SCORE_BONUS : 0) +
+      (rightKnown ? RIGHT_KNOWN_SCORE_BONUS : 0) -
       Math.abs(left.length - right.length);
 
     candidates.push({ left, right, score });
   }
 
-  if (candidates.length === 0) {
+  candidates.sort((a, b) => b.score - a.score);
+  const best = candidates.at(0);
+  if (!best) {
     return null;
   }
-
-  candidates.sort((a, b) => b.score - a.score);
-  return [toTitleCase(candidates[0].left), toTitleCase(candidates[0].right)];
+  return [toTitleCase(best.left), toTitleCase(best.right)];
 }
 
 function parseFromDisplayName(displayName?: string | null): ParsedInstagramName | null {
@@ -164,24 +179,26 @@ function parseFromDisplayName(displayName?: string | null): ParsedInstagramName 
   }
 
   const tokens = normalized
-    .split(/[\s./_+|\\-]+/)
+    .split(PATTERN_5B5C732E2F5F_RE)
     .filter(Boolean)
     .map((token) => toNameCase(token));
-  if (tokens.length === 0) {
+  const firstName = tokens.at(0);
+  const lastName = tokens.at(-1);
+  if (firstName === undefined || lastName === undefined) {
     return null;
   }
 
   if (tokens.length === 1) {
     return {
-      firstName: tokens[0],
+      firstName,
       lastName: null,
       middleName: null,
     };
   }
 
   return {
-    firstName: tokens[0],
-    lastName: tokens[tokens.length - 1],
+    firstName,
+    lastName,
     middleName: tokens.length > 2 ? tokens.slice(1, -1).join(" ") : null,
   };
 }
@@ -191,12 +208,14 @@ function parseFromUsername(username: string): ParsedInstagramName {
   const noNumbers = stripped.replace(/\d+/g, "");
 
   const tokens = noNumbers
-    .split(/[._-]+/)
+    .split(PATTERN_5B2E5F2D5D2B_RE)
     .map((token) => token.trim())
     .filter(Boolean)
     .map((token) => toTitleCase(token));
 
-  if (tokens.length === 0) {
+  const firstName = tokens.at(0);
+  const lastName = tokens.at(-1);
+  if (firstName === undefined || lastName === undefined) {
     return {
       firstName: "Instagram",
       lastName: "Contact",
@@ -205,7 +224,7 @@ function parseFromUsername(username: string): ParsedInstagramName {
   }
 
   if (tokens.length === 1) {
-    const compactSplit = splitCompactUsernameToken(tokens[0].toLowerCase());
+    const compactSplit = splitCompactUsernameToken(firstName.toLowerCase());
 
     if (compactSplit) {
       return {
@@ -216,17 +235,24 @@ function parseFromUsername(username: string): ParsedInstagramName {
     }
 
     return {
-      firstName: tokens[0],
+      firstName,
       lastName: null,
       middleName: null,
     };
   }
 
   return {
-    firstName: tokens[0],
-    lastName: tokens[tokens.length - 1],
+    firstName,
+    lastName,
     middleName: tokens.length > 2 ? tokens.slice(1, -1).join(" ") : null,
   };
+}
+
+export type { ParsedInstagramName };
+
+export interface ParseInstagramUsernameInput {
+  displayName?: string | null;
+  username: string;
 }
 
 /**

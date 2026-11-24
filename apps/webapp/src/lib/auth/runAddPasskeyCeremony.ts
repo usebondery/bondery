@@ -90,8 +90,8 @@ export async function runAddPasskeyCeremony(input: {
     captureEvent("account_settings:passkey_add");
     await invalidatePasskeys(input.queryClient);
     return "ok";
-  } catch (caught) {
-    const kind = classifyPasskeyCeremonyError(caught);
+  } catch (error) {
+    const kind = classifyPasskeyCeremonyError(error);
     if (kind === "cancel") {
       captureEvent("account_settings:passkey_cancel");
       return "cancel";
@@ -102,7 +102,7 @@ export async function runAddPasskeyCeremony(input: {
     captureEvent("account_settings:passkey_fail");
     notifications.show(
       errorNotificationTemplate({
-        description: getAuthUserFacingError(caught, input.tCommon),
+        description: getAuthUserFacingError(error, input.tCommon),
         title: input.createErrorTitle,
       }),
     );

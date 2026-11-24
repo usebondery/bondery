@@ -50,7 +50,7 @@ type ShareEmailFormValues = {
   message?: string;
 };
 
-export function ShareContactEmailSheet({
+function ShareContactEmailSheet({
   open,
   contactId,
   contactName,
@@ -303,7 +303,7 @@ function ShareContactEmailSheetContent({
             if (!canSend) {
               return;
             }
-            void handleSend(recipients);
+            handleSend(recipients);
           },
           tone: "primary",
           variant: "filled",
@@ -505,3 +505,5 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
 });
+
+export { ShareContactEmailSheet };

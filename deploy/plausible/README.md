@@ -6,11 +6,11 @@ Product analytics remain on PostHog in the webapp only.
 
 ## What this is
 
-| Service | Image | Notes |
-|---------|-------|--------|
-| `plausible` | `ghcr.io/plausible/community-edition:v3.2.1` | Web UI + event ingestion |
-| `plausible_db` | `postgres:16-alpine` | Metadata |
-| `plausible_events_db` | `clickhouse/clickhouse-server:24.12-alpine` | Event store |
+| Service               | Image                                        | Notes                    |
+| --------------------- | -------------------------------------------- | ------------------------ |
+| `plausible`           | `ghcr.io/plausible/community-edition:v3.2.1` | Web UI + event ingestion |
+| `plausible_db`        | `postgres:16-alpine`                         | Metadata                 |
+| `plausible_events_db` | `clickhouse/clickhouse-server:24.12-alpine`  | Event store              |
 
 Expect **~2 GB RAM** for Postgres + ClickHouse + Plausible on a small VPS.
 
@@ -22,23 +22,23 @@ Expect **~2 GB RAM** for Postgres + ClickHouse + Plausible on a small VPS.
 
 ## Quick start (Dokploy)
 
-| Setting | Value |
-|---------|-------|
-| Provider | **Docker Compose** |
-| Compose path | `deploy/plausible/compose.yml` |
-| Domain | `BONDERY_INFRA_PLAUSIBLE_DOMAIN` (Traefik labels in compose) |
-| Environment | See [`deploy/plausible/.env.example`](.env.example) |
-| Watch paths | `deploy/plausible/**` (so git pushes and CI env-sync webhooks both match) |
+| Setting      | Value                                                                     |
+| ------------ | ------------------------------------------------------------------------- |
+| Provider     | **Docker Compose**                                                        |
+| Compose path | `deploy/plausible/compose.yml`                                            |
+| Domain       | `BONDERY_INFRA_PLAUSIBLE_DOMAIN` (Traefik labels in compose)              |
+| Environment  | See [`deploy/plausible/.env.example`](.env.example)                       |
+| Watch paths  | `deploy/plausible/**` (so git pushes and CI env-sync webhooks both match) |
 
 Set these in Dokploy **Environment** (compose maps them to Plausible CE container env):
 
-| Variable | Example / generate |
-|----------|-------------------|
-| `BONDERY_INFRA_PLAUSIBLE_DOMAIN` | `plausible.usebondery.com` |
-| `BONDERY_PRIVATE_PLAUSIBLE_SECRET_KEY_BASE` | `openssl rand -base64 48` |
-| `BONDERY_PRIVATE_PLAUSIBLE_TOTP_VAULT_KEY` | `openssl rand -base64 32` |
-| `BONDERY_PRIVATE_PLAUSIBLE_POSTGRES_PASSWORD` | `openssl rand -base64 24 \| tr -d '/+=' \| head -c 32` |
-| `BONDERY_INFRA_PLAUSIBLE_DISABLE_REGISTRATION` | `invite_only` (optional) |
+| Variable                                       | Example / generate                                     |
+| ---------------------------------------------- | ------------------------------------------------------ |
+| `BONDERY_INFRA_PLAUSIBLE_DOMAIN`               | `plausible.usebondery.com`                             |
+| `BONDERY_PRIVATE_PLAUSIBLE_SECRET_KEY_BASE`    | `openssl rand -base64 48`                              |
+| `BONDERY_PRIVATE_PLAUSIBLE_TOTP_VAULT_KEY`     | `openssl rand -base64 32`                              |
+| `BONDERY_PRIVATE_PLAUSIBLE_POSTGRES_PASSWORD`  | `openssl rand -base64 24 \| tr -d '/+=' \| head -c 32` |
+| `BONDERY_INFRA_PLAUSIBLE_DISABLE_REGISTRATION` | `invite_only` (optional)                               |
 
 Compose derives `BASE_URL` as `https://<BONDERY_INFRA_PLAUSIBLE_DOMAIN>`.
 

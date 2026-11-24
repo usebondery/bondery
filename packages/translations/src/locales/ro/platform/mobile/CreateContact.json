@@ -1,0 +1,13 @@
+{
+  "Create": "Adaugă în Bondery",
+  "Creating": "Se creează persoana…",
+  "ErrorDescription": "Ceva nu a mers bine la crearea acestei persoane.",
+  "ErrorTitle": "Nu s-a putut crea persoana",
+  "FullNameLabel": "Nume complet",
+  "FullNamePlaceholder": "ex. Maria Popescu",
+  "InvalidName": "Adaugă un nume valid",
+  "NameRequired": "Adaugă un nume",
+  "SuccessDescription": "Persoana nouă a fost adăugată la contactele tale.",
+  "SuccessTitle": "Persoană creată",
+  "Title": "Creează persoană"
+}

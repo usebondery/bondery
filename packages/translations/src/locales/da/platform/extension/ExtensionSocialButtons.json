@@ -1,0 +1,14 @@
+{
+  "Instagram": {
+    "ExtensionError": "Udvidelsesfejl – förSøg igen",
+    "OpenInBondery": "Åbn i Bondery",
+    "SignInRequired": "Inloggning kræves – klicka på Bondery-ikonen",
+    "SomethingWrong": "Något gick fel"
+  },
+  "LinkedIn": {
+    "ExtensionError": "Udvidelsesfejl – förSøg igen",
+    "OpenInBondery": "Åbn i Bondery",
+    "SignInRequired": "Inloggning kræves – klicka på Bondery-ikonen",
+    "SomethingWrong": "Något gick fel"
+  }
+}

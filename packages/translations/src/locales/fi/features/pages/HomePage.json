@@ -1,0 +1,57 @@
+{
+  "AddInteraction": "Kirjaa vuorovaikutus",
+  "AddPerson": "Luo henkilö",
+  "ExtensionNudge": {
+    "Description": "Tuo yhteystietoja LinkedIn- ja Instagram-profiileista ja pidä verkostosi ajan tasalla vaivatta.",
+    "InstallButton": "Asenna laajennus",
+    "Title": "Tehosta Bonderya Chrome-laajennuksellamme"
+  },
+  "HeaderDescription": "Kotisivulla näet nopean yhteenvedon verkostostasi, muistutuksista ja viimeisimmistä vuorovaikutuksista.",
+  "NoRecentlyAdded": "Henkilöitä ei ole vielä lisätty.",
+  "NoRecentlyInteracted": "Ei viimeaikaisia vuorovaikutuksia.",
+  "NotificationInDays": "{count} päivän kuluttua",
+  "NotificationSent": "Jo lähetetty",
+  "NotificationToday": "Tänään",
+  "NotificationTomorrow": "Huomenna",
+  "NotificationTooltipInDays": "Saat ilmoituksen {count} päivän kuluttua",
+  "NotificationTooltipSentAt": "Ilmoitus lähetettiin jo {sentAt}",
+  "NotificationTooltipToday": "Saat ilmoituksen tänään",
+  "NotificationTooltipTomorrow": "Saat ilmoituksen huomenna",
+  "NoUpcomingReminders": "Ei tulevia muistutuksia seuraavan 30 päivän aikana.",
+  "ProgressRail": {
+    "AwaitingExport": "{platform}-vientisi on matkalla. Viennit saapuvat yleensä 5–15 minuutissa.",
+    "ChoosePlatform": "Valitse tuontialusta",
+    "Dismiss": "Piilota",
+    "HaveZipFile": "Minulla on tiedosto",
+    "Instagram": "Instagram",
+    "LinkedIn": "LinkedIn",
+    "Progress": "{completed}/{total} valmis",
+    "SkipImport": "Ohita tuonti",
+    "Tasks": {
+      "AddContacts": "Lisää ensimmäiset yhteystietosi",
+      "ImportContacts": "Tuo yhteystietosi",
+      "LogInteraction": "Kirjaa ensimmäinen vuorovaikutuksesi",
+      "SetReminder": "Aseta muistutus"
+    },
+    "Title": "Aloitus"
+  },
+  "RecentlyAddedTitle": "Viimeksi lisätyt",
+  "RecentlyAddedTooltip": "Viisi viimeksi verkostoosi lisättyä henkilöä.",
+  "RecentlyInteractedTitle": "Viimeaikaiset vuorovaikutukset",
+  "RecentlyInteractedTooltip": "Viisi henkilöä, joiden kanssa olet viimeksi ollut tekemisissä.",
+  "Stats": {
+    "InteractionsTitle": "Vuorovaikutukset tässä kuussa",
+    "InteractionsTooltip": "Vuorovaikutuksia kirjattiin kuukaudessa {month}.",
+    "NewContactsTitle": "Uudet yhteystiedot tänä vuonna",
+    "NewContactsTooltip": "Henkilöitä lisättiin verkostoosi vuonna {year}.",
+    "TotalContactsTitle": "Yhteystietoja yhteensä",
+    "TotalContactsTooltip": "Henkilöitä verkostossasi Bonderyssa."
+  },
+  "TimelinePreviewTitle": "Vuorovaikutukset",
+  "TimelinePreviewTooltip": "Viisi viimeisintä vuorovaikutustasi. Napsauta nähdäksesi kaikki.",
+  "Title": "Koti",
+  "UnknownPerson": "Tuntematon henkilö",
+  "UpcomingRemindersMonthInfo": "Muistutukset, joiden ilmoitus erääntyy seuraavan 30 päivän aikana.",
+  "UpcomingRemindersTitle": "Tulevat muistutukset",
+  "UpcomingRemindersTooltip": "Tulevat muistutuksesi seuraavan 30 päivän ajalle."
+}

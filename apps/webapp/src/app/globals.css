@@ -46,29 +46,28 @@
 
 /* Editor placeholder: rendered via Tiptap Placeholder extension (text set in JS config) */
 .tiptap p.is-editor-empty:first-child::before {
-  content: attr(data-placeholder);
+  float: inline-start;
+  block-size: 0;
   color: var(--mantine-color-placeholder);
-  float: left;
-  height: 0;
   pointer-events: none;
+  content: attr(data-placeholder);
 }
 
 /* Editor links: pointer cursor + Mantine anchor styling */
 .tiptap a {
-  cursor: pointer;
   color: var(--mantine-color-anchor);
   text-decoration: underline;
   text-underline-offset: 2px;
+  cursor: pointer;
 }
 
 /* Task list: eliminate all native list markers — NodeView renders its own row layout */
 .tiptap ul[data-type="taskList"],
-.tiptap ul[data-type="taskList"] li,
-.tiptap ul[data-type="taskList"] li::marker {
-  list-style: none;
-  list-style-type: none;
+.tiptap ul[data-type="taskList"] li {
   padding-inline-start: 0;
   margin-inline-start: 0;
+  list-style: none;
+  list-style-type: none;
 }
 
 /* Ensure Mantine Checkbox icon is properly centred inside the checkbox square */
@@ -81,9 +80,10 @@
 
 .tiptap ul[data-type="taskList"] .mantine-Checkbox-icon {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  inset-block-start: 50%;
+  inset-inline: 0;
+  margin-inline: auto;
+  transform: translateY(-50%);
 }
 
 /*

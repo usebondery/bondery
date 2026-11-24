@@ -24,6 +24,8 @@ import { oauthProviders } from "./oauth-provider-config.js";
 import { resolveUnconfiguredSocialOAuthProvider } from "./oauth-social-request.js";
 import { isMagicLinkVerifyPath } from "./redact-auth-query.js";
 
+const TRAILING_SLASHES_PATTERN = /\/+$/;
+
 const authServerMetadataHandler = oauthProviderAuthServerMetadata(auth);
 const openIdConfigMetadataHandler = oauthProviderOpenIdConfigMetadata(auth);
 
@@ -37,7 +39,7 @@ const MCP_CANONICAL_PRM_PATH = `${BETTER_AUTH_PROTECTED_RESOURCE_METADATA_PATH}$
  */
 function toProtectedResourceMetadataRequest(request: FastifyRequest): Request {
   const fetchRequest = toFetchRequest(request);
-  const pathname = new URL(fetchRequest.url).pathname.replace(/\/+$/, "") || "/";
+  const pathname = new URL(fetchRequest.url).pathname.replace(TRAILING_SLASHES_PATTERN, "") || "/";
   if (pathname !== MCP_CONCATENATED_PRM_PATH) {
     return fetchRequest;
   }
@@ -99,9 +101,7 @@ export async function registerAuthRoutes(fastify: FastifyInstance): Promise<void
   // OAuth JSON stays on the discovery documents above. Unauthenticated GET /mcp
   // after this hop is 401 + RFC 9728 WWW-Authenticate.
   const mcpUrl = `${CANONICAL_ORIGIN}${API_ROUTES.MCP}`;
-  fastify.get(API_ROUTES.WELL_KNOWN_MCP, async (_request, reply) => {
-    return reply.redirect(mcpUrl, 308);
-  });
+  fastify.get(API_ROUTES.WELL_KNOWN_MCP, async (_request, reply) => reply.redirect(mcpUrl, 308));
 
   fastify.route({
     async handler(request, reply) {

@@ -1,3 +1,5 @@
+const IDEMPOTENCY_IN_PROGRESS_CODE = "idempotency_key_in_progress";
+
 /**
  * Pure idempotency rules for the webapp client.
  * Tests call these functions without a browser or a server.
@@ -8,8 +10,6 @@ export const IDEMPOTENCY_ATTEMPT_LIMIT = 3;
 
 /** Cap for one `Retry-After` wait. */
 export const IDEMPOTENCY_MAX_WAIT_SECONDS = 60;
-
-const IDEMPOTENCY_IN_PROGRESS_CODE = "idempotency_key_in_progress";
 
 /** `POST` and `PATCH` get a key. Other methods do not. */
 export function methodSendsIdempotencyKey(method: string | undefined): boolean {
@@ -35,11 +35,11 @@ export function readIdempotencyErrorCode(bodyText: string): string | null {
     if (!parsed || typeof parsed !== "object") {
       return null;
     }
-    const error = (parsed as { error?: unknown }).error;
+    const { error } = parsed as { error?: unknown };
     if (!error || typeof error !== "object") {
       return null;
     }
-    const code = (error as { code?: unknown }).code;
+    const { code } = error as { code?: unknown };
     return typeof code === "string" ? code : null;
   } catch {
     return null;
@@ -66,7 +66,7 @@ export function idempotencyWaitSeconds(
 
 /** `FormData` and string bodies can be sent again. A stream cannot. */
 export function canReplayRequestBody(body: BodyInit | null | undefined): boolean {
-  if (body == null) {
+  if (body === null || body === undefined) {
     return true;
   }
   if (typeof body === "string") {

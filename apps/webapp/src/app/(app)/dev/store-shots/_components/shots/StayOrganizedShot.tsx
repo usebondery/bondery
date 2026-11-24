@@ -16,7 +16,10 @@ import {
 } from "../../_lib/fixtures";
 import { StoreShotFrame } from "../StoreShotFrame";
 
-const NOOP = () => {};
+function NOOP() {
+  // no-op: store-shot previews do not handle card actions
+}
+
 export function StayOrganizedShot() {
   const copy = STORE_SHOT_COPY["stay-organized"];
 

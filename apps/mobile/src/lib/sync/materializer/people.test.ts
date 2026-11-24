@@ -4,15 +4,17 @@ import type { SQLiteDatabase } from "expo-sqlite";
 import { resetPendingAvatarJobsForTests } from "../avatar-file-queue.ts";
 import { applyPeopleShapeOp, PEOPLE_UPSERT_SQL } from "./people.ts";
 
-describe("PEOPLE_UPSERT_SQL", () => {
+const AVATAR_CLOCK_COLUMNS_RE = /avatar_updated_at, avatar_local_updated_at/;
+const PEOPLE_UPSERT_CLOCK_PLACEHOLDERS_RE = /\?, \?, NULL, \?/;
+describe("people upsert sql", () => {
   it("writes avatar_updated_at from the server and preserves avatar_local_updated_at", () => {
     assert.equal(
       PEOPLE_UPSERT_SQL.includes("avatar_updated_at = excluded.avatar_updated_at"),
       true,
     );
     assert.equal(PEOPLE_UPSERT_SQL.includes("avatar_local_updated_at = excluded"), false);
-    assert.match(PEOPLE_UPSERT_SQL, /avatar_updated_at, avatar_local_updated_at/);
-    assert.match(PEOPLE_UPSERT_SQL, /\?, \?, NULL, \?/);
+    assert.match(PEOPLE_UPSERT_SQL, AVATAR_CLOCK_COLUMNS_RE);
+    assert.match(PEOPLE_UPSERT_SQL, PEOPLE_UPSERT_CLOCK_PLACEHOLDERS_RE);
   });
 });
 

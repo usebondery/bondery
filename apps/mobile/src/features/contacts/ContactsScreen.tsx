@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import type { Contact, Group } from "@bondery/schemas";
 import type { FlashListRef } from "@shopify/flash-list";
 import { IconSearch } from "@tabler/icons-react-native";
@@ -89,9 +90,8 @@ export function ContactsScreen() {
     myselfContactId: screenData.myselfContactId,
   });
 
-  const selectedGroupId = screenData.selectedGroupId;
+  const { selectedGroupId } = screenData;
   useEffect(() => {
-    void selectedGroupId;
     flashListRef.current?.scrollToOffset({ animated: false, offset: 0 });
   }, [selectedGroupId]);
 
@@ -140,7 +140,7 @@ export function ContactsScreen() {
         placeholder={tMobileContacts("SearchPlaceholder")}
         ref={searchInputRef}
         rightSection={
-          <View className="w-[22px] items-center justify-center">
+          <View className="w-icon-slot items-center justify-center">
             {screenData.isSearching ? (
               <ActivityIndicator color={colors.textMuted} size="small" />
             ) : null}
@@ -171,14 +171,12 @@ export function ContactsScreen() {
       <ContactsScreenHeader accessory={headerAccessory} />
 
       {screenData.showFullScreenLoader ? (
-        <Stack
-          align="center"
-          className="px-5"
-          justify="center"
+        <View
+          className="items-center justify-center px-5"
           style={{ paddingTop: MOBILE_LAYOUT.floatingTabBar.screenHeaderInset }}
         >
           <ActivityIndicator color={colors.textPrimary} size="large" />
-        </Stack>
+        </View>
       ) : null}
 
       {!screenData.showFullScreenLoader && screenData.error ? (
@@ -186,7 +184,7 @@ export function ContactsScreen() {
           <LoadErrorCard
             description={screenData.error}
             onRetry={() => {
-              void screenData.reloadContacts();
+              detachPromise(screenData.reloadContacts());
             }}
             title={tMobileSettings("LoadErrorTitle")}
           />

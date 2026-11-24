@@ -2,14 +2,14 @@
 
 ## Stack
 
-| Layer | Package / path | Role |
-|-------|----------------|------|
-| Templates | `packages/emails` (`@bondery/emails`) | React Email; files under `src/templates/{account,billing,internal,notifications}/` |
-| Copy | `packages/translations` (`platform/email/*`) | en / cs / de namespaces loaded in API |
-| i18n | `apps/api/src/lib/notifications/email-i18n.ts` | Locale resolution + `loadNamespace` + interpolation |
-| Render | `apps/api` | `renderEmailParts` — `@react-email/render` `render` + [`toPlainText`](https://react.email/docs/utilities/render#4-convert-to-plain-text) |
-| Transport | `apps/api/src/lib/notifications/transporter.ts` | Nodemailer → Plunk SMTP (production) |
-| Triggers | `apps/api/src/services/notifications/`, `domains/contacts/share.ts`, `lib/jobs/` | Routes, webhooks, pg-boss |
+| Layer     | Package / path                                                                   | Role                                                                                                                                     |
+| --------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Templates | `packages/emails` (`@bondery/emails`)                                            | React Email; files under `src/templates/{account,billing,internal,notifications}/`                                                       |
+| Copy      | `packages/translations` (`platform/email/*`)                                     | en / cs / de namespaces loaded in API                                                                                                    |
+| i18n      | `apps/api/src/lib/notifications/email-i18n.ts`                                   | Locale resolution + `loadNamespace` + interpolation                                                                                      |
+| Render    | `apps/api`                                                                       | `renderEmailParts` — `@react-email/render` `render` + [`toPlainText`](https://react.email/docs/utilities/render#4-convert-to-plain-text) |
+| Transport | `apps/api/src/lib/notifications/transporter.ts`                                  | Nodemailer → Plunk SMTP (production)                                                                                                     |
+| Triggers  | `apps/api/src/services/notifications/`, `domains/contacts/share.ts`, `lib/jobs/` | Routes, webhooks, pg-boss                                                                                                                |
 
 ```text
 packages/translations (platform/email)
@@ -30,21 +30,21 @@ Plunk SMTP (BONDERY_PRIVATE_EMAIL_*)
 
 ## Trigger paths
 
-| Path | When | Example |
-|------|------|---------|
-| Sync (user request) | User action in API handler | Share contact, feedback |
-| Webhook | External event | Stripe trial ending |
-| Job | pg-boss schedule | Reminder digest hourly |
-| Teardown | Account deletion flow | Account deleted (best-effort) |
+| Path                | When                       | Example                       |
+| ------------------- | -------------------------- | ----------------------------- |
+| Sync (user request) | User action in API handler | Share contact, feedback       |
+| Webhook             | External event             | Stripe trial ending           |
+| Job                 | pg-boss schedule           | Reminder digest hourly        |
+| Teardown            | Account deletion flow      | Account deleted (best-effort) |
 
 Reminder digests run via **pg-boss** (`reminder-digest-hourly`, `0 * * * *` UTC). See [triggers-and-idempotency.md](./triggers-and-idempotency.md).
 
 ## Localization
 
-| Email | Locale source |
-|-------|----------------|
-| Trial ending, account deleted, feedback, reminder digest | Recipient/submitter `user_settings.language` |
-| Share contact | **Sender's** language (external recipients have no Bondery account) |
+| Email                                                    | Locale source                                                       |
+| -------------------------------------------------------- | ------------------------------------------------------------------- |
+| Trial ending, account deleted, feedback, reminder digest | Recipient/submitter `user_settings.language`                        |
+| Share contact                                            | **Sender's** language (external recipients have no Bondery account) |
 
 Namespaces live under `packages/translations/src/locales/{en,cs,de}/platform/email/` and are registered in `manifest.json` with `"platforms": ["email"]`.
 

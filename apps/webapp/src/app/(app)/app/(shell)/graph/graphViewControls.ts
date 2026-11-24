@@ -23,7 +23,12 @@ export function createGraphViewControls(input: {
   return {
     centerMyself: () => {
       const ownerNode = personNodes.find((node) => node.myself);
-      if (ownerNode?.x == null || ownerNode.y == null) {
+      if (
+        ownerNode?.x === null ||
+        ownerNode?.x === undefined ||
+        ownerNode.y === null ||
+        ownerNode.y === undefined
+      ) {
         return;
       }
       const scale = getTransform().k;

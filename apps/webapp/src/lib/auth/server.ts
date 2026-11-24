@@ -4,17 +4,6 @@ import { cookies, headers } from "next/headers";
 import { WEBAPP_SESSION_COOKIE } from "@/lib/auth/constants";
 import { decryptWebappSession, type WebappSessionPayload } from "@/lib/auth/oauthClient.server";
 
-export type BetterAuthUser = WebappSessionPayload["user"];
-
-export type BetterAuthSessionPayload = {
-  session: {
-    expiresAt: number;
-    token: string;
-    userId: string;
-  };
-  user: BetterAuthUser;
-};
-
 function extractCookieValue(cookieHeader: string, name: string): string | null {
   const prefix = `${name}=`;
   const match = cookieHeader.split("; ").find((entry) => entry.startsWith(prefix));
@@ -29,6 +18,17 @@ async function resolveCookieHeader(cookieHeader?: string): Promise<string> {
   const headersList = await headers();
   return headersList.get("cookie") ?? "";
 }
+
+export type BetterAuthUser = WebappSessionPayload["user"];
+
+export type BetterAuthSessionPayload = {
+  session: {
+    expiresAt: number;
+    token: string;
+    userId: string;
+  };
+  user: BetterAuthUser;
+};
 
 /**
  * Reads the webapp's own OAuth-BFF session — independent of Better Auth's

@@ -63,6 +63,47 @@ type RateLimitHeaderObject = {
 
 type RateLimitHeaderMap = Record<string, RateLimitHeaderObject>;
 
+function jsonResponse<T extends z.ZodType>(
+  schema: T,
+  description: string,
+  exampleOverride?: unknown,
+  headers?: RateLimitHeaderMap,
+) {
+  const example = exampleOverride ?? getSchemaExample(schema);
+  return {
+    content: {
+      "application/json": {
+        schema,
+        ...(example !== undefined && { example }),
+      },
+    },
+    description,
+    ...(headers ? { headers } : {}),
+  } as const;
+}
+
+/** Per-route error responses — schema uses component id (see apiErrorResponseSchema.meta). */
+function errorResponse(
+  description: string,
+  example: ApiErrorResponse,
+  headers?: RateLimitHeaderMap,
+) {
+  return jsonResponse(apiErrorResponseSchema, description, example, headers);
+}
+
+function standardErrorResponsesFor(tooManyRequests?: RateLimitHeaderMap) {
+  return {
+    400: errorResponse("Invalid request", EXAMPLE_ERROR_400),
+    401: errorResponse("Authentication required", EXAMPLE_ERROR_401),
+    403: errorResponse("Forbidden", EXAMPLE_ERROR_403),
+    404: errorResponse("Resource not found", EXAMPLE_ERROR_404),
+    426: errorResponse("Upgrade required", EXAMPLE_ERROR_426),
+    429: errorResponse("Too many requests", EXAMPLE_ERROR_429, tooManyRequests),
+    500: errorResponse("Internal server error", EXAMPLE_ERROR_500),
+    503: errorResponse("Service unavailable", EXAMPLE_ERROR_503),
+  } as const;
+}
+
 /** Structured-field quota policy. Not a JSON object. */
 export const rateLimitPolicyHeader: RateLimitHeaderObject = {
   description: RATE_LIMIT_POLICY_DESCRIPTION,
@@ -107,47 +148,6 @@ export const tooManyRequestsHeaders: RateLimitHeaderMap = {
   ...limitedRateLimitHeaders,
   "Retry-After": retryAfterHeader,
 };
-
-function jsonResponse<T extends z.ZodType>(
-  schema: T,
-  description: string,
-  exampleOverride?: unknown,
-  headers?: RateLimitHeaderMap,
-) {
-  const example = exampleOverride ?? getSchemaExample(schema);
-  return {
-    content: {
-      "application/json": {
-        schema,
-        ...(example !== undefined && { example }),
-      },
-    },
-    description,
-    ...(headers ? { headers } : {}),
-  } as const;
-}
-
-/** Per-route error responses — schema uses component id (see apiErrorResponseSchema.meta). */
-function errorResponse(
-  description: string,
-  example: ApiErrorResponse,
-  headers?: RateLimitHeaderMap,
-) {
-  return jsonResponse(apiErrorResponseSchema, description, example, headers);
-}
-
-function standardErrorResponsesFor(tooManyRequests?: RateLimitHeaderMap) {
-  return {
-    400: errorResponse("Invalid request", EXAMPLE_ERROR_400),
-    401: errorResponse("Authentication required", EXAMPLE_ERROR_401),
-    403: errorResponse("Forbidden", EXAMPLE_ERROR_403),
-    404: errorResponse("Resource not found", EXAMPLE_ERROR_404),
-    426: errorResponse("Upgrade required", EXAMPLE_ERROR_426),
-    429: errorResponse("Too many requests", EXAMPLE_ERROR_429, tooManyRequests),
-    500: errorResponse("Internal server error", EXAMPLE_ERROR_500),
-    503: errorResponse("Service unavailable", EXAMPLE_ERROR_503),
-  } as const;
-}
 
 /** Standard HTTP error responses for integration and session routes. */
 export const standardErrorResponses = standardErrorResponsesFor(tooManyRequestsHeaders);

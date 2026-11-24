@@ -6,11 +6,13 @@
  * sends a defect report to the Bondery team. A Read only token must be able to
  * report a broken read tool, so this name skips the `mcp:write` gate.
  */
+
+const CREATE_UPDATE_DELETE_PATTERN = /^(create|update|delete)_/;
 const NON_MUTATING_CREATE_TOOLS = new Set(["create_agent_feedback"]);
 
 export function isMcpWriteToolName(name: string): boolean {
   if (NON_MUTATING_CREATE_TOOLS.has(name)) {
     return false;
   }
-  return /^(create|update|delete)_/.test(name);
+  return CREATE_UPDATE_DELETE_PATTERN.test(name);
 }

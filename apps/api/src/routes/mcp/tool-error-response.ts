@@ -17,6 +17,9 @@ import {
 } from "@bondery/schemas/errors";
 import { URLS } from "../../lib/platform/config.js";
 
+const TRAILING_SLASH_PATTERN = /\/$/;
+const TOOL_A_Z0_PATTERN = /tool ([a-z0-9_]+)/i;
+
 const INPUT_VALIDATION_PREFIX = "Input validation error:";
 const OUTPUT_VALIDATION_PREFIX = "Output validation error:";
 const TOOL_NOT_FOUND_RE = /^Tool (.+?) not found$/;
@@ -28,7 +31,7 @@ function envelope(
   requestId: string,
   details?: Record<string, unknown>,
 ): { error: ApiErrorBody } {
-  const website = (URLS.website ?? "https://usebondery.com").replace(/\/$/, "");
+  const website = (URLS.website ?? "https://usebondery.com").replace(TRAILING_SLASH_PATTERN, "");
   const known = isApiErrorCode(code);
   const resolved = known ? code : "internal_server_error";
   const type: ApiErrorType = code === "validation_error" ? "invalid_request_error" : "api_error";
@@ -66,6 +69,14 @@ function isEnvelope(text: string): boolean {
   }
 }
 
+type JsonRpcPayload = {
+  error?: { code?: unknown; data?: unknown; message?: unknown };
+  result?: {
+    content?: Array<{ text?: unknown; type?: unknown }>;
+    isError?: unknown;
+  };
+};
+
 /**
  * Maps an SDK-generated tool error string to the agent-facing envelope.
  * Returns null when the text already carries one.
@@ -83,7 +94,7 @@ export function rewriteToolErrorText(
     const detail = text.slice(
       (isInput ? INPUT_VALIDATION_PREFIX : OUTPUT_VALIDATION_PREFIX).length,
     );
-    const toolMatch = detail.match(/tool ([a-z0-9_]+)/i);
+    const toolMatch = detail.match(TOOL_A_Z0_PATTERN);
     const toolName = toolMatch?.[1];
     const what = toolName ? `Invalid arguments for \`${toolName}\`` : "Invalid tool arguments";
     const why = isInput
@@ -110,14 +121,6 @@ export function rewriteToolErrorText(
   return envelope("internal_server_error", text.trim(), requestId);
 }
 
-type JsonRpcPayload = {
-  error?: { code?: unknown; data?: unknown; message?: unknown };
-  result?: {
-    content?: Array<{ text?: unknown; type?: unknown }>;
-    isError?: unknown;
-  };
-};
-
 /**
  * Rewrites every SDK-generated tool error in a JSON-RPC payload, in place.
  * Returns true when at least one result changed.
@@ -127,7 +130,7 @@ export function rewriteMcpToolErrors(payload: unknown, requestId: string): boole
     return false;
   }
   const message = payload as JsonRpcPayload;
-  const result = message.result;
+  const { result } = message;
   if (result?.isError !== true) {
     return false;
   }
@@ -135,7 +138,7 @@ export function rewriteMcpToolErrors(payload: unknown, requestId: string): boole
   if (!Array.isArray(blocks) || blocks.length === 0) {
     return false;
   }
-  const first = blocks[0];
+  const [first] = blocks;
   if (!first || typeof first.text !== "string") {
     return false;
   }

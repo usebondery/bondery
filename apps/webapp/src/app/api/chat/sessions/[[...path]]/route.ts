@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import { API_ROUTES, IDEMPOTENCY_KEY_HEADER } from "@bondery/helpers/globals/paths";
 import type { NextRequest } from "next/server";
 import { bffProxyFetch } from "@/lib/api/bffProxy";
@@ -49,7 +50,9 @@ async function proxyRequest(request: NextRequest, subPath: string) {
   }
 
   if (apiResponse.status === 204) {
-    void apiResponse.body?.cancel();
+    if (apiResponse.body) {
+      detachPromise(apiResponse.body.cancel());
+    }
     return new Response(null, { headers: responseHeaders, status: 204 });
   }
 

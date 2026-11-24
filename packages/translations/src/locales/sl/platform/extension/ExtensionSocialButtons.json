@@ -1,0 +1,14 @@
+{
+  "Instagram": {
+    "ExtensionError": "Chyba rozšírenia — poskusi znova",
+    "OpenInBondery": "Otvorit v Bondery",
+    "SignInRequired": "Vyžaduje sa prihlásenie — kliknite na ikonu Bondery",
+    "SomethingWrong": "Nečo sa pokazilo"
+  },
+  "LinkedIn": {
+    "ExtensionError": "Chyba rozšírenia — poskusi znova",
+    "OpenInBondery": "Otvorit v Bondery",
+    "SignInRequired": "Vyžaduje sa prihlásenie — kliknite na ikonu Bondery",
+    "SomethingWrong": "Nečo sa pokazilo"
+  }
+}

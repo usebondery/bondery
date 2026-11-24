@@ -17,15 +17,15 @@ If a test passes inconsistently, treat it as flaky — do not merge until fixed 
 ## Quarantine
 
 ```typescript
-test('flaky: logout clears session', async ({ page }) => {
-  test.fixme(true, 'Flaky — Plane BON-123')
+test("flaky: logout clears session", async ({ page }) => {
+  test.fixme(true, "Flaky — Plane BON-123");
   // ...
-})
+});
 
 // Or skip only in CI while investigating
-test('conditional', async ({ page }) => {
-  test.skip(Boolean(process.env.CI), 'Flaky in CI — Plane BON-123')
-})
+test("conditional", async ({ page }) => {
+  test.skip(Boolean(process.env.CI), "Flaky in CI — Plane BON-123");
+});
 ```
 
 Always link a tracking issue. Remove quarantine in the same PR that fixes root cause.
@@ -36,21 +36,21 @@ Always link a tracking issue. Remove quarantine in the same PR that fixes root c
 
 ```typescript
 // Bad
-await page.click('[data-testid="login-github"]')
+await page.click('[data-testid="login-github"]');
 
 // Good — Playwright auto-waits
-await page.getByTestId('login-github').click()
+await page.getByTestId("login-github").click();
 ```
 
 ### Arbitrary timeouts
 
 ```typescript
 // Bad
-await page.waitForTimeout(5000)
+await page.waitForTimeout(5000);
 
 // Good
-await page.waitForURL(/\/app\//, { timeout: 300_000 })
-await expect(page.getByTestId('login-github')).toBeVisible()
+await page.waitForURL(/\/app\//, { timeout: 300_000 });
+await expect(page.getByTestId("login-github")).toBeVisible();
 ```
 
 ### OAuth / external redirects

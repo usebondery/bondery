@@ -31,10 +31,10 @@ Reset form state on open (`setValue("")`, clear errors).
 
 Wire **Done** on the system keyboard to the same handler as the primary button.
 
-| Wire Done → submit | Do not wire |
-|--------------------|-------------|
-| Create contact, add/edit social, email, phone | Search/filter fields |
-| Single-primary submit sheets | Confirm-only delete sheets |
+| Wire Done → submit                            | Do not wire                |
+| --------------------------------------------- | -------------------------- |
+| Create contact, add/edit social, email, phone | Search/filter fields       |
+| Single-primary submit sheets                  | Confirm-only delete sheets |
 
 ```tsx
 <MobileTextInput
@@ -42,7 +42,7 @@ Wire **Done** on the system keyboard to the same handler as the primary button.
   enterKeyHint="done"
   onSubmitEditing={handleSave}
   editable={!isSubmitting}
-/>
+/>;
 ```
 
 Guard in handler: `if (!canSubmit) return`. One handler, two triggers.

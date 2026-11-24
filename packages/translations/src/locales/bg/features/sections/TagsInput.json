@@ -1,0 +1,22 @@
+{
+  "AddError": "Неуспешно добавяне етикет",
+  "AddNewTagTooltip": "Създаване етикет",
+  "AddSuccess": "Тег успешно добавлен",
+  "AddTagTooltip": "Добавяне етикет",
+  "CreateError": "Неуспешно създаване етикет",
+  "CreateNewTagEmpty": "Създаване етикет",
+  "CreateNewTagOption": "Създаване етикет „{label}”",
+  "CreateTagCancel": "Отказ",
+  "CreateTagConfirm": "Създаване и добавяне",
+  "CreateTagMessage": "Тега „{name}” ещё няма. Създаване его и добавяне к этому контакту?",
+  "CreateTagTitle": "Създаване етикет?",
+  "Label": "Теги",
+  "NoTagsFound": "Теги не найдены",
+  "Placeholder": "Добавяне етикети…",
+  "RemoveError": "Неуспешно изтриване етикет",
+  "RemoveTagTooltip": "Изтриване етикет",
+  "SearchPlaceholder": "Искать или създаване етикет…",
+  "TagAlreadyAddedMessage": "Тег „{name}” уже добавлен к этому контакту.",
+  "TagAlreadyAddedTitle": "Тег уже добавлен",
+  "TagAlreadyAppliedTooltip": "Тег уже применён"
+}

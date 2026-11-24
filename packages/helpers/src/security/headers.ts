@@ -1,19 +1,5 @@
 import { CSP_REPORT_GROUP } from "./csp.js";
 
-export type SecurityHeaderInput = {
-  /** Enforced policy string from {@link buildCsp}. */
-  csp: string;
-  /** Report-only policy string from {@link buildCsp}. */
-  reportOnlyCsp?: string;
-  /**
-   * Absolute URL of the CSP report endpoint. When absent, no
-   * `Reporting-Endpoints` header is written and the policies carry no
-   * `report-to` directive, so a self-host install without a collector stays
-   * silent instead of pointing at a dead endpoint.
-   */
-  reportEndpoint?: string;
-};
-
 /**
  * Baseline response headers for every HTML surface.
  *
@@ -27,7 +13,7 @@ export type SecurityHeaderInput = {
  * The API sends it from an `onSend` hook because Helmet has no option for this
  * header. Keeping the string here means the three cannot drift apart.
  */
-export const PERMISSIONS_POLICY = [
+const PERMISSIONS_POLICY: string = [
   "camera=()",
   "geolocation=(self)",
   "microphone=(self)",
@@ -42,6 +28,22 @@ const BASE_HEADERS: Record<string, string> = {
   "Permissions-Policy": PERMISSIONS_POLICY,
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "X-Content-Type-Options": "nosniff",
+};
+
+export { PERMISSIONS_POLICY };
+
+export type SecurityHeaderInput = {
+  /** Enforced policy string from {@link buildCsp}. */
+  csp: string;
+  /** Report-only policy string from {@link buildCsp}. */
+  reportOnlyCsp?: string;
+  /**
+   * Absolute URL of the CSP report endpoint. When absent, no
+   * `Reporting-Endpoints` header is written and the policies carry no
+   * `report-to` directive, so a self-host install without a collector stays
+   * silent instead of pointing at a dead endpoint.
+   */
+  reportEndpoint?: string;
 };
 
 /**

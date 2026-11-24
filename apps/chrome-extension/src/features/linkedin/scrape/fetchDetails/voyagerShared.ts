@@ -6,6 +6,10 @@ import { extLog } from "../../../../lib/log";
 import { extractProfileUrnFromComponentKey } from "../sduiProfile";
 import { logVoyagerExchange } from "./voyagerDump";
 
+const DIGITS_ONLY_RE = /^\d+$/;
+const JSESSIONID_COOKIE_RE = /JSESSIONID="?([^";]+)"?/;
+const HTML_COMMENT_WRAPPER_RE = /^<!--(.+)-->$/s;
+const URN_ID_SUFFIX_RE = /:([A-Za-z0-9_-]+)$/;
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 interface VoyagerTimePeriod {
@@ -19,16 +23,99 @@ interface VoyagerDateRange {
 }
 
 /**
+ * Untrusted LinkedIn Voyager JSON. Named fields are the ones this scrape reads.
+ * Other keys stay on the index signature.
+ */
+interface VoyagerEntity {
+  "*company"?: unknown;
+  "*country"?: unknown;
+  "*geo"?: unknown;
+  "*profile"?: unknown;
+  $id?: unknown;
+  $type?: unknown;
+  about?: unknown;
+  activities?: unknown;
+  artifacts?: VoyagerEntity[];
+  caption?: unknown;
+  company?: VoyagerEntity;
+  companyLogo?: VoyagerEntity;
+  companyName?: unknown;
+  companyUrn?: unknown;
+  countryISOCode?: unknown;
+  dashEntityUrn?: unknown;
+  data?: VoyagerEntity;
+  dateRange?: VoyagerDateRange;
+  defaultLocalizedName?: unknown;
+  defaultLocalizedNameWithoutCountryName?: unknown;
+  degreeName?: unknown;
+  description?: unknown;
+  displayImageReference?: unknown;
+  displayImageReferenceResolutionResult?: unknown;
+  elements?: VoyagerEntity[];
+  employmentTypeUrn?: unknown;
+  entityUrn?: unknown;
+  expandableText?: VoyagerEntity;
+  expandableTextComponent?: VoyagerEntity;
+  fieldOfStudy?: unknown;
+  fileIdentifyingUrlPathSegment?: unknown;
+  firstName?: unknown;
+  fullName?: unknown;
+  geoLocation?: VoyagerEntity;
+  geoLocationName?: unknown;
+  geoUrn?: unknown;
+  headline?: unknown;
+  included?: VoyagerEntity[];
+  lastName?: unknown;
+  localized?: unknown;
+  locationName?: unknown;
+  logo?: VoyagerEntity;
+  logoResolutionResult?: VoyagerEntity;
+  logoV2?: VoyagerEntity;
+  middleName?: unknown;
+  miniCompany?: VoyagerEntity;
+  miniSchool?: VoyagerEntity;
+  multiLocaleDegreeName?: unknown;
+  multiLocaleFieldOfStudy?: unknown;
+  multiLocaleSchoolName?: unknown;
+  multiLocaleSummary?: unknown;
+  name?: unknown;
+  objectUrn?: unknown;
+  paging?: VoyagerEntity;
+  picture?: unknown;
+  plainTextSummary?: unknown;
+  profilePicture?: VoyagerEntity;
+  profilePosition?: VoyagerEntity;
+  profileStatefulProfileFields?: VoyagerEntity;
+  publicIdentifier?: unknown;
+  rootUrl?: unknown;
+  school?: VoyagerEntity;
+  schoolName?: unknown;
+  schoolUrn?: unknown;
+  subtitle?: unknown;
+  summary?: unknown;
+  text?: unknown;
+  timePeriod?: VoyagerTimePeriod;
+  title?: unknown;
+  universalName?: unknown;
+  url?: unknown;
+  value?: unknown;
+  vanityName?: unknown;
+  vectorImage?: VoyagerEntity;
+  width?: unknown;
+  [key: string]: unknown;
+}
+
+/**
  * Normalises a Voyager date structure — handles both:
  *   timePeriod: { startDate: { year, month }, endDate: … }  (old format)
  *   dateRange:  { start:     { year, month }, end: … }      (dash format)
  */
-export function extractDates(entity: Record<string, unknown>): {
+function extractDates(entity: VoyagerEntity): {
   startDate?: string;
   endDate?: string;
 } {
-  const tp = entity.timePeriod as VoyagerTimePeriod | undefined;
-  const dr = entity.dateRange as VoyagerDateRange | undefined;
+  const tp = entity.timePeriod;
+  const dr = entity.dateRange;
 
   const start = tp?.startDate ?? dr?.start;
   const end = tp?.endDate ?? dr?.end;
@@ -70,10 +157,7 @@ const EMPLOYMENT_TYPE_LABELS: Record<string, string> = {
  *
  * Returns undefined for unrecognised numeric IDs.
  */
-export function resolveEmploymentType(
-  urn: string,
-  entityMap?: Map<string, string>,
-): string | undefined {
+function resolveEmploymentType(urn: string, entityMap?: Map<string, string>): string | undefined {
   // Primary: look up the full URN in the entity map (fsd_employmentType entities)
   if (entityMap) {
     const fromEntity = entityMap.get(urn);
@@ -88,7 +172,7 @@ export function resolveEmploymentType(
     return label;
   }
   // Don't surface raw numeric IDs — the entity was not included in this response
-  if (/^\d+$/.test(key)) {
+  if (DIGITS_ONLY_RE.test(key)) {
     return undefined;
   }
   return key.replace(/-/g, " ");
@@ -105,7 +189,7 @@ function formatVoyagerDate(d?: { month?: number; year?: number }): string | unde
 }
 
 function getCsrfToken(): string | null {
-  const match = document.cookie.match(/JSESSIONID="?([^";]+)"?/);
+  const match = document.cookie.match(JSESSIONID_COOKIE_RE);
   return match?.[1] ?? null;
 }
 
@@ -115,7 +199,7 @@ function getCsrfToken(): string | null {
  * Extracts all JSON objects from `<code>` elements in the live document.
  * LinkedIn wraps Voyager data in `<!--{JSON}-->` inside hidden <code> tags.
  */
-export function extractLivePageJsonBlocks(): unknown[] {
+function extractLivePageJsonBlocks(): unknown[] {
   const codeElements = document.querySelectorAll("code");
   const blocks: unknown[] = [];
 
@@ -126,7 +210,7 @@ export function extractLivePageJsonBlocks(): unknown[] {
     }
 
     // LinkedIn wraps JSON in HTML comments: <!--{...}-->
-    const commentMatch = raw.match(/^<!--(.+)-->$/s);
+    const commentMatch = raw.match(HTML_COMMENT_WRAPPER_RE);
     const jsonStr = commentMatch?.[1] ?? raw;
 
     try {
@@ -144,17 +228,17 @@ export function extractLivePageJsonBlocks(): unknown[] {
 /**
  * Collects all objects in `included` arrays across all JSON blocks.
  */
-export function collectIncludedEntities(blocks: unknown[]): Record<string, unknown>[] {
-  const entities: Record<string, unknown>[] = [];
+function collectIncludedEntities(blocks: unknown[]): VoyagerEntity[] {
+  const entities: VoyagerEntity[] = [];
   for (const block of blocks) {
     if (!block || typeof block !== "object") {
       continue;
     }
-    const obj = block as Record<string, unknown>;
+    const obj = block as VoyagerEntity;
     if (Array.isArray(obj.included)) {
       for (const item of obj.included) {
         if (item && typeof item === "object") {
-          entities.push(item as Record<string, unknown>);
+          entities.push(item);
         }
       }
     }
@@ -162,19 +246,24 @@ export function collectIncludedEntities(blocks: unknown[]): Record<string, unkno
   return entities;
 }
 
-const MAX_VOYAGER_OBJECTS = 2_000;
+const MAX_VOYAGER_OBJECTS = 2000;
 const MAX_VOYAGER_WALK_DEPTH = 6;
 
 /**
  * Walks Voyager JSON (root, `data`, `elements`, `included`) so About/`summary`
  * is not dropped when LinkedIn puts it outside `included`.
  */
-export function collectVoyagerObjects(root: unknown): Record<string, unknown>[] {
-  const out: Record<string, unknown>[] = [];
+function collectVoyagerObjects(root: unknown): VoyagerEntity[] {
+  const out: VoyagerEntity[] = [];
   const seen = new Set<object>();
 
   const visit = (value: unknown, depth: number): void => {
-    if (value == null || depth > MAX_VOYAGER_WALK_DEPTH || out.length >= MAX_VOYAGER_OBJECTS) {
+    if (
+      value === null ||
+      value === undefined ||
+      depth > MAX_VOYAGER_WALK_DEPTH ||
+      out.length >= MAX_VOYAGER_OBJECTS
+    ) {
       return;
     }
     if (typeof value !== "object") {
@@ -190,8 +279,9 @@ export function collectVoyagerObjects(root: unknown): Record<string, unknown>[] 
       }
       return;
     }
-    out.push(value as Record<string, unknown>);
-    for (const child of Object.values(value as Record<string, unknown>)) {
+    const entity = value as VoyagerEntity;
+    out.push(entity);
+    for (const child of Object.values(entity)) {
       visit(child, depth + 1);
     }
   };
@@ -203,7 +293,7 @@ export function collectVoyagerObjects(root: unknown): Record<string, unknown>[] 
 /**
  * Logs all unique $type values found in entities (for debugging).
  */
-export function logEntityTypes(entities: Record<string, unknown>[], label: string): void {
+function logEntityTypes(entities: VoyagerEntity[], label: string): void {
   const types = new Set<string>();
   for (const e of entities) {
     const t = e.$type as string | undefined;
@@ -219,7 +309,7 @@ export function logEntityTypes(entities: Record<string, unknown>[], label: strin
 
 // ─── 2. Voyager dash API caller ─────────────────────────────────────────────
 
-export async function voyagerFetch(path: string): Promise<Record<string, unknown> | null> {
+async function voyagerFetch(path: string): Promise<VoyagerEntity | null> {
   const csrfToken = getCsrfToken();
   if (!csrfToken) {
     extLog.warn("[linkedin][fetchDetails] No JSESSIONID cookie — cannot call Voyager API");
@@ -231,7 +321,7 @@ export async function voyagerFetch(path: string): Promise<Record<string, unknown
   extLog.debug(`[linkedin][fetchDetails] Voyager API: ${url}`);
 
   const controller = new AbortController();
-  const timeoutId = window.setTimeout(() => controller.abort(), 8_000);
+  const timeoutId = window.setTimeout(() => controller.abort(), 8000);
 
   try {
     // Isolated-world fetch is `chrome-extension://…` origin. `same-origin`
@@ -253,7 +343,7 @@ export async function voyagerFetch(path: string): Promise<Record<string, unknown
       return null;
     }
 
-    const body = (await response.json()) as Record<string, unknown>;
+    const body = (await response.json()) as VoyagerEntity;
     logVoyagerExchange({ body, path, status: response.status });
     return body;
   } catch (error) {
@@ -265,7 +355,7 @@ export async function voyagerFetch(path: string): Promise<Record<string, unknown
   }
 }
 
-export function nfcText(value: unknown): string | undefined {
+function nfcText(value: unknown): string | undefined {
   if (typeof value !== "string" || value.length === 0) {
     return undefined;
   }
@@ -275,10 +365,7 @@ export function nfcText(value: unknown): string | undefined {
 /**
  * Extracts the fsd_profile URN for the viewed profile on SDUI pages.
  */
-export function extractProfileUrn(
-  entities: Record<string, unknown>[],
-  username: string,
-): string | null {
+function extractProfileUrn(entities: VoyagerEntity[], username: string): string | null {
   // 1. SDUI topcard componentkey (primary — validated on current LinkedIn UI)
   const fromComponentKey = extractProfileUrnFromComponentKey();
   if (fromComponentKey) {
@@ -308,7 +395,7 @@ export function extractProfileUrn(
       extLog.debug(`[linkedin][fetchDetails] profileUrn source: embedded → ${urn}`);
       return urn;
     }
-    const idMatch = urn.match(/:([A-Za-z0-9_-]+)$/);
+    const idMatch = urn.match(URN_ID_SUFFIX_RE);
     if (idMatch) {
       const fsdUrn = `urn:li:fsd_profile:${idMatch[1]}`;
       extLog.debug(`[linkedin][fetchDetails] profileUrn source: embedded → ${fsdUrn}`);
@@ -320,10 +407,8 @@ export function extractProfileUrn(
   return null;
 }
 
-export function buildEntityByUrn(
-  entities: Record<string, unknown>[],
-): Map<string, Record<string, unknown>> {
-  const map = new Map<string, Record<string, unknown>>();
+function buildEntityByUrn(entities: VoyagerEntity[]): Map<string, VoyagerEntity> {
+  const map = new Map<string, VoyagerEntity>();
   for (const e of entities) {
     const urn = e.entityUrn as string | undefined;
     if (urn) {
@@ -336,3 +421,17 @@ export function buildEntityByUrn(
   }
   return map;
 }
+
+export type { VoyagerEntity };
+export {
+  buildEntityByUrn,
+  collectIncludedEntities,
+  collectVoyagerObjects,
+  extractDates,
+  extractLivePageJsonBlocks,
+  extractProfileUrn,
+  logEntityTypes,
+  nfcText,
+  resolveEmploymentType,
+  voyagerFetch,
+};

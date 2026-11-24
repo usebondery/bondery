@@ -17,10 +17,10 @@ Dev server: port **26633**, origin `http://127.0.0.1:26633` (`wxt.config.ts`). C
 
 Root scripts:
 
-| Script | What it runs |
-|--------|----------------|
-| `pnpm run dev:chrome-extension` | `chrome-extension#dev` only |
-| `pnpm run dev:extension` | webapp + api + chrome-extension + website |
+| Script                          | What it runs                              |
+| ------------------------------- | ----------------------------------------- |
+| `pnpm run dev:chrome-extension` | `chrome-extension#dev` only               |
+| `pnpm run dev:extension`        | webapp + api + chrome-extension + website |
 
 On Windows, Vite watch uses **polling interval 300** (`wxt.config.ts`). Do not "fix" that by enabling native FS events.
 

@@ -1,0 +1,16 @@
+{
+  "Description": "Pomozte nám vylepšit Bondery zdieľaniem vašich názorú",
+  "ErrorMessage": "Nepodarilo sa odoslať spätnú väzbu. Skúste to prosím znova.",
+  "ErrorTitle": "Chyba",
+  "GeneralFeedbackLabel": "Máte nejakú spätnú väzbu, tipy alebo chyby, ktoré by ste chceli zdieľať?",
+  "GeneralFeedbackPlaceholder": "Sdílejte své myšlenky, návrhy alebo nahlaste problémy...",
+  "NpsLabel": "Jak pravdepodobne byste doporučili Bondery priateľi alebo kolegovi?",
+  "NpsReasonLabel": "Proč ste zvolili skóre {score}?",
+  "NpsReasonPlaceholder": "Reknete nám, proč ste zvolili toto skóre...",
+  "SubmitButton": "Odoslať spätnú väzbu tímu Bondery",
+  "SubmittingMessage": "Počkajte, prosím, kým odošleme vašu spätnú väzbu",
+  "SubmittingTitle": "Odosielanie späťné vazby...",
+  "SuccessMessage": "Vaše späťná vazba bola prijata",
+  "SuccessTitle": "Dekujeme!",
+  "Title": "Späťná vazba"
+}

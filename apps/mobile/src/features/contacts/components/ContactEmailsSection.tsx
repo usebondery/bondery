@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import type { EmailEntry } from "@bondery/schemas";
 import {
   IconCopy,
@@ -55,19 +56,23 @@ export function ContactEmailsSection({ emails, onSaveEmails }: ContactEmailsSect
   }
 
   function openEditSheet(index: number) {
-    setSheet({ entry: emails[index], index, mode: "edit", open: true });
+    const entry = emails[index];
+    if (!entry) {
+      return;
+    }
+    setSheet({ entry, index, mode: "edit", open: true });
   }
 
   function persistEmails(nextEmails: EmailEntry[]) {
     try {
       onSaveEmails(nextEmails);
-    } catch {
+    } catch (error) {
       notifications.show({
         message: tContactInfo("EmailsUpdateError"),
         title: errorTitle,
         type: "error",
       });
-      throw new Error("Emails update failed");
+      throw new Error("Emails update failed", { cause: error });
     }
   }
 
@@ -152,7 +157,8 @@ export function ContactEmailsSection({ emails, onSaveEmails }: ContactEmailsSect
         emails.map((email, index) => {
           const typeLabel =
             email.type === "work" ? tContactInfo("TypeWork") : tContactInfo("TypeHome");
-          const accessibilityLabel = `${typeLabel} email, ${email.value}${email.preferred ? `, ${tContactInfo("Preferred")}` : ""}`;
+          const preferredSuffix = email.preferred ? `, ${tContactInfo("Preferred")}` : "";
+          const accessibilityLabel = `${typeLabel} email, ${email.value}${preferredSuffix}`;
 
           return (
             <ContactChannelRow
@@ -178,7 +184,7 @@ export function ContactEmailsSection({ emails, onSaveEmails }: ContactEmailsSect
                   id: "copy",
                   label: tContactInfo("CopyAction"),
                   onPress: () => {
-                    void copyEmailToClipboard(email, copyMessages);
+                    detachPromise(copyEmailToClipboard(email, copyMessages));
                   },
                 },
                 {
@@ -203,7 +209,7 @@ export function ContactEmailsSection({ emails, onSaveEmails }: ContactEmailsSect
                 },
               ]}
               onLongPress={() => {
-                void copyEmailToClipboard(email, copyMessages);
+                detachPromise(copyEmailToClipboard(email, copyMessages));
               }}
               onPress={() => openEmailMailto(email, errorTitle)}
               primaryLabel={email.value}

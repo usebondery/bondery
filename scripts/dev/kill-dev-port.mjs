@@ -6,14 +6,16 @@
  */
 import { execSync } from "node:child_process";
 
+const PATTERN_5C723F5C6E_RE = /\r?\n/;
+const LISTENING_RE_2 = /LISTENING/i;
+const PATTERN_5C732B_RE = /\s+/;
+const LISTENING_RE = /LISTENING\s+(\d+)\s*$/i;
+
 const IS_WINDOWS = process.platform === "win32";
 
 const DEFAULT_PATTERNS_BY_PORT = {
   26630: ["next dev --port 26630", "next-server \\(v"],
-  26631: [
-    "tsx watch --env-file=.env.development.local src/index.ts",
-    "node --require .*/tsx/dist/preflight.cjs.*src/index.ts",
-  ],
+  26631: ["--import tsx src/index.ts", "node --require .*/tsx/dist/preflight.cjs.*src/index.ts"],
   26632: ["next dev --port 26632", "next-server \\(v"],
 };
 
@@ -41,13 +43,13 @@ function portListeners(port) {
     const out = run("netstat -ano", { ignoreError: true });
     const suffix = `:${port}`;
     return out
-      .split(/\r?\n/)
+      .split(PATTERN_5C723F5C6E_RE)
       .map((line) => line.trim())
       .filter((line) => {
-        if (!/LISTENING/i.test(line)) {
+        if (!LISTENING_RE_2.test(line)) {
           return false;
         }
-        const parts = line.split(/\s+/);
+        const parts = line.split(PATTERN_5C732B_RE);
         const local = parts[1] ?? "";
         return local.endsWith(suffix);
       })
@@ -66,7 +68,7 @@ function portListeners(port) {
 function windowsListeningPids(port) {
   const pids = new Set();
   for (const line of portListeners(port).split("\n")) {
-    const match = line.trim().match(/LISTENING\s+(\d+)\s*$/i);
+    const match = line.trim().match(LISTENING_RE);
     if (match && match[1] !== "0") {
       pids.add(match[1]);
     }
@@ -106,8 +108,12 @@ function killWindowsPort(port, log, quiet) {
  * @param {{ patterns?: string[], quiet?: boolean }} [options]
  * @returns {boolean} true when the port is free afterward
  */
-export function killDevPort(port, { patterns = [], quiet = false } = {}) {
-  const log = quiet ? () => {} : console.log.bind(console);
+function killDevPort(port, { patterns = [], quiet = false } = {}) {
+  const log = quiet
+    ? () => {
+        // Caller asked for no output.
+      }
+    : console.log.bind(console);
 
   if (IS_WINDOWS) {
     return killWindowsPort(port, log, quiet);
@@ -146,7 +152,7 @@ export function killDevPort(port, { patterns = [], quiet = false } = {}) {
 
 function parsePortArg(value) {
   const port = Number(value);
-  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+  if (!Number.isInteger(port) || port < 1 || port > 65_535) {
     throw new Error(`Invalid port: ${value}`);
   }
   return port;
@@ -156,7 +162,8 @@ function main() {
   const ports = process.argv.slice(2).map(parsePortArg);
   if (ports.length === 0) {
     console.error("Usage: node scripts/dev/kill-dev-port.mjs <port> [port...]");
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   let ok = true;
@@ -166,9 +173,11 @@ function main() {
     }
   }
 
-  process.exit(ok ? 0 : 1);
+  process.exitCode = ok ? 0 : 1;
 }
 
 if (process.argv[1]?.endsWith("kill-dev-port.mjs")) {
   main();
 }
+
+export { killDevPort };

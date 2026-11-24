@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { formatContactName } from "@bondery/helpers/contact";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { ActionIconButton, ButtonLink } from "@bondery/mantine-next";
@@ -191,7 +192,7 @@ export function GraphClient({ focus }: GraphClientProps) {
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
-      const target = event.target;
+      const { target } = event;
       const inField =
         target instanceof HTMLInputElement ||
         target instanceof HTMLTextAreaElement ||
@@ -266,7 +267,7 @@ export function GraphClient({ focus }: GraphClientProps) {
   if (query.isError || !graph) {
     return (
       <PageWrapper>
-        <QueryLoadError onRetry={() => void query.refetch()} />
+        <QueryLoadError onRetry={() => detachPromise(query.refetch())} />
       </PageWrapper>
     );
   }

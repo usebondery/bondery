@@ -1,0 +1,128 @@
+/** Types shared by the env manifest modules. See `manifest.ts` for the naming contract. */
+
+export type EnvEnvironment = "development" | "production";
+
+export type TargetId = "api" | "webapp" | "website" | "mobile" | "chrome-extension" | "db";
+
+export type EnvTargetWrite = {
+  /** App / package id */
+  id: TargetId;
+  /**
+   * Name written into the target file.
+   * Defaults to the canonical name when omitted (identity).
+   */
+  runtimeName?: string;
+  /**
+   * When set, derive the value from another canonical key (e.g. callback URL).
+   * If `transform` is omitted, copies the source value as-is under `runtimeName`.
+   */
+  deriveFrom?: string;
+  /** Optional value transform when deriving */
+  transform?: "local-postgres-database-url" | "webapp-auth-callback";
+};
+
+export type DeployExample = {
+  /** Include in generated `deploy/bondery/.env.example` */
+  include: boolean;
+  /** Override `exampleValue` for deploy operators */
+  value?: string;
+  /** Operator-facing section header */
+  group?: string;
+  /** Render as `# KEY=value` (optional image tag pins) */
+  commented?: boolean;
+};
+
+/** Same shape as `DeployExample` — ops marketing stack (`deploy/ops/.env.example`). */
+export type OpsExample = DeployExample;
+
+/** Infisical → Dokploy sync payload (`deploy/scripts/sync-infisical-to-dokploy.mjs`). */
+export type DokploySync = {
+  /** Dokploy compose stacks that receive this key on sync */
+  targets: readonly DokploySyncTarget[];
+};
+
+export type DokploySyncTarget =
+  | "website"
+  | "website-beta"
+  | "plausible"
+  | "services"
+  | "services-beta";
+
+/** Same shape as `DeployExample` — Plausible CE stack (`deploy/plausible/.env.example`). */
+export type PlausibleExample = DeployExample;
+
+/** Boot profile for starting a target without a `.env` file (OpenAPI gen, integration tests). */
+export type BootExample = {
+  /** Include in boot env even when not `requiredIn` for the environment (rare) */
+  include?: boolean;
+  /** Override when `exampleValue` is empty or a human placeholder */
+  value?: string;
+};
+
+export type ExampleProfile = "development" | "production" | "deploy" | "ops" | "plausible";
+
+export type EnvVarDef = {
+  canonical: string;
+  description: string;
+  /** Include in generated root `.env.local.example` */
+  exampleValue: string;
+  /** Group header in generated files */
+  group: string;
+  requiredIn: EnvEnvironment[];
+  secret: boolean;
+  targets: EnvTargetWrite[];
+  /** Self-host compose operator example (`deploy/bondery/.env.example`) */
+  deployExample?: DeployExample;
+  /** Ops marketing Compose operator example (`deploy/ops/.env.example`) */
+  opsExample?: OpsExample;
+  /** Infisical production → Dokploy compose env sync */
+  dokploySync?: DokploySync;
+  /** Plausible CE Compose operator example (`deploy/plausible/.env.example`) */
+  plausibleExample?: PlausibleExample;
+  /** Boot without `.env` (OpenAPI generation, API integration tests) */
+  boot?: BootExample;
+  /** When false, omit from turbo cache env arrays (rare) */
+  turboAffectsCache?: boolean;
+  /**
+   * When true, `pnpm run env:pull` may fetch this key from Infisical into root `.env.local`.
+   * Shared team secrets only — never inventable per-machine OAuth client ids (see block below).
+   */
+  syncable?: boolean;
+  /** Omit from generated root `.env.local.example` (derived at `pnpm run env` sync). */
+  omitFromRootExample?: boolean;
+};
+
+/**
+ * Infisical `env:pull` — keys with `syncable: true` are pulled into root `.env.local`.
+ *
+ * Already synced: SMTP, GitHub OAuth, Maps, S3/storage, SERVICE_SECRET, DO_NOT_TRACK,
+ * Stripe API keys + price IDs, Anthropic, PostHog, BONDERY_PRIVATE_POSTGRES_PASSWORD.
+ *
+ * Good candidates to add `syncable: true` when the team shares them in Infisical:
+ * - BONDERY_PRIVATE_AUTH_LINKEDIN_CLIENT_ID / _SECRET — LinkedIn login locally
+ * - BONDERY_PRIVATE_PLATFORM_ADMIN_EMAILS — who gets admin on fresh DB bootstrap
+ *
+ * Usually keep local-only (do not sync):
+ * - BONDERY_PRIVATE_STRIPE_WEBHOOK_SECRET — Stripe CLI `listen` signing secret is per machine
+ *   (`pnpm run setup:stripe`). Infisical production/staging still hold Dashboard endpoint secrets
+ *   for those deploys; `syncable` does not read or write Infisical.
+ * - BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID, BONDERY_PRIVATE_WEBAPP_OAUTH_CLIENT_SECRET,
+ *   BONDERY_PRIVATE_WEBAPP_SESSION_SECRET — invented per dev machine; run setup:dev / provision:oauth-clients
+ * - BONDERY_PRIVATE_BETTER_AUTH_SECRETS — can be shared or per-env; team policy
+ * - BONDERY_PRIVATE_REDIS_URL — local Docker Redis; deploys use the bundled service that Compose sets
+ * - BONDERY_DEV_* — local API boot toggles only
+ * - BONDERY_INFRA_* (except INTERNAL_API_URL) — deploy hostnames / image tags, not local pull
+ * Portless public URLs (BONDERY_PUBLIC_API/WEBAPP/WEBSITE_URL) are team-shared in Infisical development.
+ */
+
+export type SyncTargetConfig = {
+  id: TargetId;
+  /** Relative to repo root */
+  devFile: string;
+  /** Relative to repo root — committed example regenerated by `pnpm run env:examples` */
+  exampleFile: string;
+  /** Optional alternate example for production shape */
+  productionExampleFile?: string;
+  /** Relative to repo root — where `pnpm run env:production` writes */
+  productionFile?: string;
+};

@@ -1,5 +1,11 @@
 import type { UseOSReturnValue } from "@mantine/hooks";
 
+const APPLE_OS = new Set<UseOSReturnValue>(["macos", "ios"]);
+
+function isAppleOs(os: UseOSReturnValue): boolean {
+  return APPLE_OS.has(os);
+}
+
 export type ShortcutKeyToken =
   | "mod"
   | "ctrl"
@@ -22,12 +28,6 @@ export type ShortcutKeyToken =
   | "left"
   | "right"
   | (string & {});
-
-const APPLE_OS = new Set<UseOSReturnValue>(["macos", "ios"]);
-
-function isAppleOs(os: UseOSReturnValue): boolean {
-  return APPLE_OS.has(os);
-}
 
 /** Maps a shortcut token to a display label for the given OS. */
 export function resolveShortcutKeyLabel(token: ShortcutKeyToken, os: UseOSReturnValue): string {

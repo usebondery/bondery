@@ -22,8 +22,7 @@ export function registerOAuthProvidersRoutes(fastify: AppFastifyInstance): void 
         tags: ["Auth"],
       } satisfies FastifyZodOpenApiSchema,
     },
-    async (_request, reply) => {
-      return reply.header("Cache-Control", "public, max-age=60").send({ oauthProviders });
-    },
+    async (_request, reply) =>
+      reply.header("Cache-Control", "public, max-age=60").send({ oauthProviders }),
   );
 }

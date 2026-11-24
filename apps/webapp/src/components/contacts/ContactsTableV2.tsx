@@ -13,7 +13,9 @@ import { useState } from "react";
 import type { SortOrder } from "@/lib/contacts/table-types";
 import { useContactsTableTranslations } from "@/lib/i18n/generated/hooks";
 import { useContactsTableCopy } from "@/lib/i18n/useContactsTableCopy";
+import { useDateFormatter } from "@/lib/i18n/useDateFormatter";
 import { DEFAULT_CONTACTS_SORT } from "@/lib/query/contactsListParams";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 import type {
   BulkSelectionAction,
   ContactsTableV2Props,
@@ -113,13 +115,13 @@ export default function ContactsTableV2({
   isAllTotalSelected,
   excludedIds,
   disableNameLink,
-  dateLocale,
   noContactsFound,
   noContactsMatchSearch,
   renderLocationCell,
 }: ContactsTableV2Props) {
   const { columnDefinitions, sortOptions, buildTableLabels } = useContactsTableCopy();
   const t = useContactsTableTranslations();
+  const formatter = useDateFormatter();
   const [searchIsActive, setSearchIsActive] = useState(() =>
     Boolean(searchValue ?? searchDefaultValue),
   );
@@ -129,7 +131,7 @@ export default function ContactsTableV2({
     onSearchChange?.(value);
   };
 
-  const dateFormatter = new Intl.DateTimeFormat(dateLocale || "en-US", { dateStyle: "short" });
+  const formatDate = (date: Date) => formatter.formatDate(date, "short");
 
   const selectedIdList = selectedIds ? Array.from(selectedIds) : [];
 
@@ -138,7 +140,7 @@ export default function ContactsTableV2({
     standardMenuActions.push({
       icon: <IconArrowMerge size={14} />,
       key: "mergeWith",
-      label: standardActions.mergeMenuLabel || t("MergeMenu"),
+      label: nonEmpty(standardActions.mergeMenuLabel) ?? t("MergeMenu"),
       onClick: (contactId) => standardActions.onMergeOne?.(contactId),
     });
   }
@@ -146,7 +148,7 @@ export default function ContactsTableV2({
     standardMenuActions.push({
       icon: <IconUsersPlus size={14} />,
       key: "addToGroups",
-      label: standardActions.addToGroupsMenuLabel || t("EditGroupsMenu"),
+      label: nonEmpty(standardActions.addToGroupsMenuLabel) ?? t("EditGroupsMenu"),
       onClick: (contactId) => standardActions.onAddToGroupsOne?.(contactId),
     });
   }
@@ -155,7 +157,7 @@ export default function ContactsTableV2({
         color: "red",
         icon: <IconTrash size={14} />,
         key: "deleteContact",
-        label: standardActions.deleteMenuLabel || t("Delete"),
+        label: nonEmpty(standardActions.deleteMenuLabel) ?? t("Delete"),
         onClick: (contactId) => standardActions.onDeleteOne?.(contactId),
       }
     : null;
@@ -187,10 +189,11 @@ export default function ContactsTableV2({
       disabledTooltip: t("MergeExactlyTwoTooltip"),
       icon: <IconArrowMerge size={16} />,
       key: "mergeSelected",
-      label: standardActions.mergeBulkLabel || t("MergeBulk"),
+      label: nonEmpty(standardActions.mergeBulkLabel) ?? t("MergeBulk"),
       onClick: () => {
-        if (selectedIdList.length === 2) {
-          standardActions.onMergeSelected?.(selectedIdList[0], selectedIdList[1]);
+        const [first, second] = selectedIdList;
+        if (selectedIdList.length === 2 && first !== undefined && second !== undefined) {
+          standardActions.onMergeSelected?.(first, second);
         }
       },
     });
@@ -199,7 +202,7 @@ export default function ContactsTableV2({
     standardBulkSelectionActions.push({
       icon: <IconUsersPlus size={16} />,
       key: "addSelectedToGroups",
-      label: standardActions.addToGroupsBulkLabel || t("EditGroupsBulk"),
+      label: nonEmpty(standardActions.addToGroupsBulkLabel) ?? t("EditGroupsBulk"),
       onClick: () => {
         standardActions.onAddToGroupsSelected?.(selectedIdList);
       },
@@ -210,7 +213,7 @@ export default function ContactsTableV2({
         color: "red",
         icon: <IconTrash size={16} />,
         key: "deleteSelected",
-        label: standardActions.deleteBulkLabel || t("Delete"),
+        label: nonEmpty(standardActions.deleteBulkLabel) ?? t("Delete"),
         loading: standardActions.isDeleteSelectedLoading,
         onClick: () => {
           standardActions.onDeleteSelected?.(selectedIdList);
@@ -219,13 +222,13 @@ export default function ContactsTableV2({
     : null;
 
   const effectiveMenuActions: MenuAction[] = [
-    ...(menuActions || []),
+    ...(menuActions ?? []),
     ...standardMenuActions,
     ...(standardDeleteMenuAction ? [standardDeleteMenuAction] : []),
   ];
   const effectiveBulkSelectionActions: BulkSelectionAction[] = [
     ...standardBulkSelectionActions,
-    ...(bulkSelectionActions || []),
+    ...(bulkSelectionActions ?? []),
     ...(standardDeleteBulkAction ? [standardDeleteBulkAction] : []),
   ];
 
@@ -234,8 +237,8 @@ export default function ContactsTableV2({
   const sourceColumns = columnsForMenu ?? normalizedColumns;
 
   const tableColumns = useContactsTableColumns({
-    dateFormatter,
     disableNameLink,
+    formatDate,
     renderLocationCell,
     sourceColumns,
   });

@@ -1,6 +1,7 @@
 {
   "LoggedIn": {
-    "OpenBondery": "Open Bondery"
+    "OpenBondery": "Open Bondery",
+    "UnsupportedSiteMessage": "Visit someone on Instagram or LinkedIn to see more actions and capabilities of the extension."
   },
   "LoggedOut": {
     "Description": "Connect your account to save contacts from social media.",
@@ -20,6 +21,12 @@
     "Title": "Update Required"
   },
   "Welcome": {
-    "ConnectButton": "Connect your Bondery account"
+    "ConnectButton": "Connect your Bondery account",
+    "Description": "Connect your Bondery account to save contacts directly from social media profiles.",
+    "SignInHint": "You will be prompted to sign in to your Bondery account and authorize the extension.",
+    "SuccessClose": "You can close this tab now.",
+    "SuccessDescription": "Your Bondery account is now connected. Visit any Instagram or LinkedIn profile to start saving contacts.",
+    "SuccessTitle": "You're all set!",
+    "Title": "Welcome to Bondery"
   }
 }

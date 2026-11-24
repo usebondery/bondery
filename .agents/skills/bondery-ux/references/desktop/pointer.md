@@ -2,11 +2,11 @@
 
 A control that moves under the pointer shows the drag cursor.
 
-| Surface | At rest | While the drag is active |
-|---------|---------|--------------------------|
-| Chip or handle the user can drag | `grab` | `grabbing` |
-| Canvas or map the user can pan | `grab` | `grabbing` |
-| Control that only activates | `pointer` | `pointer` |
+| Surface                          | At rest   | While the drag is active |
+| -------------------------------- | --------- | ------------------------ |
+| Chip or handle the user can drag | `grab`    | `grabbing`               |
+| Canvas or map the user can pan   | `grab`    | `grabbing`               |
+| Control that only activates      | `pointer` | `pointer`                |
 
 Set `grabbing` on the dragged control and on `document.documentElement`. The control's own `cursor` wins over the document, so the control must change too.
 

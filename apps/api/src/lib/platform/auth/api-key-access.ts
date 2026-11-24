@@ -15,17 +15,6 @@ function normalizePath(url: string): string {
   return path.endsWith("/") && path.length > 1 ? path.slice(0, -1) : path;
 }
 
-export function isMethodAllowedForPermission(
-  method: string,
-  permission: ApiKeyPermission,
-): boolean {
-  const upper = method.toUpperCase();
-  if (permission === "full") {
-    return true;
-  }
-  return READ_METHODS.has(upper);
-}
-
 function isApiKeyAllowedOnRoute(request: FastifyRequest, path: string): boolean {
   const area = request.routeOptions?.config?.openApiArea as OpenApiRouteArea | undefined;
 
@@ -46,6 +35,17 @@ function isApiKeyAllowedOnRoute(request: FastifyRequest, path: string): boolean 
     "API key request hit route without openApiArea; denying",
   );
   return false;
+}
+
+export function isMethodAllowedForPermission(
+  method: string,
+  permission: ApiKeyPermission,
+): boolean {
+  const upper = method.toUpperCase();
+  if (permission === "full") {
+    return true;
+  }
+  return READ_METHODS.has(upper);
 }
 
 export function assertApiKeyAccess(request: FastifyRequest, _reply: FastifyReply): void {

@@ -1,6 +1,7 @@
 "use client";
 
 import { Menu, type MenuProps } from "@mantine/core";
+import type { ReactElement } from "react";
 
 /**
  * Menu dropdown with the same hover tint as a `Select` option.
@@ -8,7 +9,7 @@ import { Menu, type MenuProps } from "@mantine/core";
  * `DropdownOption` paints the selected row. This wrapper sets the hover and
  * keyboard color so a menu matches `DescribedSelect`.
  */
-export function DropdownOptionMenu({ children, ...props }: MenuProps) {
+export function DropdownOptionMenu({ children, ...props }: MenuProps): ReactElement {
   return (
     <Menu
       shadow="md"

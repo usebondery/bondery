@@ -1,18 +1,24 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
+import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { errorNotificationTemplate, ModalTitle } from "@bondery/mantine-next";
 import { List, ListItem, Stack, Text } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { NavigationProgress } from "@mantine/nprogress";
 import { IconBrandInstagram } from "@tabler/icons-react";
+import { useRouter } from "next/navigation";
 import type { JSX } from "react";
 import { useEffect } from "react";
+import { useCommonTranslations } from "@/lib/i18n/generated/hooks";
+import { routeAssert } from "@/lib/navigation/route/assert";
 import { useInstagramImportModal } from "../../hooks/useInstagramImportModal";
 import {
   INSTAGRAM_MAX_FILE_SIZE_BYTES,
   type InstagramImportStep,
 } from "../../utils/instagram-import-helpers";
+import { ImportFinishedStep } from "../import/ImportFinishedStep";
 import { ImportIntroStep } from "../import/ImportIntroStep";
 import { ImportProcessingStep, ImportProgressStep } from "../import/ImportModalProcessingSteps";
 import { IMPORT_ZIP_ACCEPT, ImportZipUploadStep } from "../import/ImportZipUploadStep";
@@ -36,35 +42,31 @@ export function InstagramImportModal({
   onAwaitingExport?: () => void | Promise<void>;
 }) {
   const {
-    allSelected,
     alreadyExistsCount,
     closeModal,
+    finishedStats,
     handleImport,
     handleRequestedExport,
-    handleToggleAll,
-    handleToggleOne,
     handleZipDrop,
     importProgress,
     importStrategyOptions,
-    invalidContactsCount,
+    importableCount,
     isImporting,
     isOnboardingFlow,
     isParsing,
-    likelyInfluencersCount,
-    nonSelectableIds,
     openRef,
     parseUpload,
     parsedContacts,
-    previewContacts,
-    selectedIds,
+    previewPeople,
     setStep,
     setStrategy,
-    someSelected,
     step,
     strategy,
     t,
-    validContactsCount,
   } = useInstagramImportModal({ initialStep, modalId, onAwaitingExport, onSuccess });
+
+  const tCommon = useCommonTranslations();
+  const router = useRouter();
 
   const renderWithNavigationProgress = (content: JSX.Element) => (
     <>
@@ -76,12 +78,12 @@ export function InstagramImportModal({
   useEffect(() => {
     modals.updateModal({
       modalId,
-      size: "lg",
+      size: step === "finished" ? "80rem" : "lg",
       title: (
         <ModalTitle icon={<IconBrandInstagram size={20} stroke={1.5} />} text={t("ModalTitle")} />
       ),
     });
-  }, [modalId, t]);
+  }, [modalId, step, t]);
 
   if (step === "intro") {
     return renderWithNavigationProgress(
@@ -122,7 +124,7 @@ export function InstagramImportModal({
         ]}
         onAction={() => {
           if (isOnboardingFlow) {
-            void handleRequestedExport();
+            detachPromise(handleRequestedExport());
           } else {
             setStep("upload");
           }
@@ -191,7 +193,7 @@ export function InstagramImportModal({
         onBack={() => setStep("upload")}
         onCancel={closeModal}
         onParse={() => {
-          void parseUpload();
+          detachPromise(parseUpload());
         }}
         onStrategyChange={setStrategy}
         parseUploadedLabel={t("ParseUploaded")}
@@ -224,40 +226,45 @@ export function InstagramImportModal({
     );
   }
 
+  if (step === "finished") {
+    return renderWithNavigationProgress(
+      <ImportFinishedStep
+        closeLabel={tCommon("a11y.close")}
+        description={finishedStats ? t("ImportSuccess", finishedStats) : undefined}
+        onClose={closeModal}
+        onViewContacts={() => {
+          closeModal();
+          router.push(routeAssert(WEBAPP_ROUTES.PEOPLE));
+        }}
+        title={t("SuccessTitle")}
+        viewContactsLabel={tCommon("actions.viewContacts")}
+      />,
+    );
+  }
+
   return renderWithNavigationProgress(
     <InstagramImportPreviewStep
-      allSelected={allSelected}
-      alreadyExistsCount={alreadyExistsCount}
       backLabel={t("Back")}
       cancelLabel={t("Cancel")}
-      chooseContactsHint={t("ChooseContactsHint")}
-      existingHandleTooltip={t("ExistingHandleTooltip")}
-      importSelectedLabel={t("ImportSelected", { count: selectedIds.size })}
-      invalidContactsCount={invalidContactsCount}
+      counts={[
+        { label: t("TotalLabel"), value: parsedContacts.length },
+        { isPrimary: true, label: t("WillAddLabel"), value: importableCount },
+        ...(alreadyExistsCount > 0 ? [{ label: t("SkipLabel"), value: alreadyExistsCount }] : []),
+      ]}
+      description={t("PreviewDescription")}
+      emptyLabel={t("NoContactsFound")}
+      importLabel={t("ImportAction")}
       isImporting={isImporting}
-      labels={{
-        alreadyExists: t("AlreadyExists", { count: alreadyExistsCount }),
-        invalid: t("Invalid", { count: invalidContactsCount }),
-        likelyBusiness: t("LikelyBusinessAndInfluencers", {
-          count: likelyInfluencersCount,
-        }),
-        total: t("Total", { count: parsedContacts.length }),
-        valid: t("Valid", { count: validContactsCount }),
-      }}
-      likelyInfluencersCount={likelyInfluencersCount}
-      noContactsFound={t("NoContactsFound")}
-      noContactsMatchSearch={t("NoContactsMatchSearch")}
-      nonSelectableIds={nonSelectableIds}
       onBack={() => setStep("strategy")}
       onCancel={closeModal}
       onImport={() => {
-        void handleImport();
+        detachPromise(handleImport());
       }}
-      onSelectAll={handleToggleAll}
-      onSelectOne={handleToggleOne}
-      previewContacts={previewContacts}
-      selectedIds={selectedIds}
-      someSelected={someSelected}
+      people={previewPeople}
+      peopleLabel={t("PeopleToAdd")}
+      remainderLabel={
+        importableCount > 10 ? t("AndMore", { count: importableCount - 10 }) : undefined
+      }
     />,
   );
 }

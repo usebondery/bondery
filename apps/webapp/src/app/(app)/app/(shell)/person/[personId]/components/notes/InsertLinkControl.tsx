@@ -8,6 +8,13 @@ import { useEditorState } from "@tiptap/react";
 import { useState } from "react";
 import { useNotesEditorTranslations } from "@/lib/i18n/generated/hooks";
 
+const HTTP_OR_HTTPS_PREFIX = /^https?:\/\//i;
+const MAILTO_PREFIX = /^mailto:/i;
+
+type LinkMarkAttrs = {
+  href?: string;
+};
+
 /**
  * Custom insert-link control for RichTextEditor.
  */
@@ -25,8 +32,8 @@ export function InsertLinkControl() {
   );
 
   const handleOpen = () => {
-    const linkData = editor?.getAttributes("link");
-    setUrl(linkData?.href || "");
+    const linkData = editor?.getAttributes("link") as LinkMarkAttrs | undefined;
+    setUrl(linkData?.href ?? "");
     setOpened(true);
   };
   const handleClose = () => {
@@ -41,7 +48,7 @@ export function InsertLinkControl() {
       editor?.chain().focus().extendMarkRange("link").unsetLink().run();
     } else {
       let href = url.trim();
-      if (href && !/^https?:\/\//i.test(href) && !/^mailto:/i.test(href)) {
+      if (href && !HTTP_OR_HTTPS_PREFIX.test(href) && !MAILTO_PREFIX.test(href)) {
         href = `https://${href}`;
       }
       editor

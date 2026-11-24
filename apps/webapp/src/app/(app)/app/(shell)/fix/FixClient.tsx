@@ -1,6 +1,7 @@
 "use client";
 
 import { getUserFacingError } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import {
   errorNotificationTemplate,
   PersonChip,
@@ -12,6 +13,7 @@ import { IconArrowMerge, IconEye, IconEyeOff, IconRefresh } from "@tabler/icons-
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { MergeRecommendationCard } from "@/components/contacts/MergeRecommendationCard";
+import classes from "@/components/contacts/MergeRecommendationCard.module.css";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { PageWrapper } from "@/components/shell/PageWrapper";
 import {
@@ -39,7 +41,7 @@ export function FixClient() {
   const [showDeclined, setShowDeclined] = useState(false);
   const [restoringIds, setRestoringIds] = useState<Set<string>>(new Set());
   const queryClient = useQueryClient();
-  const didBootstrapRefresh = useRef(false);
+  const didBootstrapRefresh = useRef<boolean>(false);
 
   const { data: recommendations, isFetching: isListFetching } =
     useMergeRecommendationsQuery(showDeclined);
@@ -49,7 +51,13 @@ export function FixClient() {
   const restoreMutation = useRestoreMergeRecommendationMutation();
 
   useEffect(() => {
-    if (didBootstrapRefresh.current || showDeclined || isListFetching || recommendations == null) {
+    if (
+      didBootstrapRefresh.current ||
+      showDeclined ||
+      isListFetching ||
+      recommendations === null ||
+      recommendations === undefined
+    ) {
       return;
     }
     if (recommendations.length > 0) {
@@ -57,7 +65,7 @@ export function FixClient() {
       return;
     }
     didBootstrapRefresh.current = true;
-    void syncMergeRecommendationsAfterChange(queryClient, { requestRefresh: true });
+    detachPromise(syncMergeRecommendationsAfterChange(queryClient, { requestRefresh: true }));
   }, [isListFetching, queryClient, recommendations, showDeclined]);
 
   const handleRefreshSuggestions = async () => {
@@ -129,7 +137,7 @@ export function FixClient() {
             <Button
               leftSection={<IconRefresh size={16} />}
               loading={refreshMutation.isPending}
-              onClick={() => void handleRefreshSuggestions()}
+              onClick={() => detachPromise(handleRefreshSuggestions())}
               size="md"
             >
               {t("RefreshSuggestions")}
@@ -169,7 +177,8 @@ export function FixClient() {
           <EnrichRecommendationCard eligibleCount={eligibleCount} queueStatus={queueStatus} />
         )}
 
-        {recommendations == null ? null : recommendations.length === 0 ? (
+        {recommendations === null ||
+        recommendations === undefined ? null : recommendations.length === 0 ? (
           <Paper p="md" radius="md" withBorder>
             <Text c="dimmed" size="sm">
               {showDeclined ? t("DeclinedEmpty") : t("Empty")}
@@ -179,28 +188,44 @@ export function FixClient() {
           <Stack gap="sm">
             {recommendations.map((recommendation) =>
               showDeclined ? (
-                <Paper key={recommendation.id} p="md" radius="md" withBorder>
-                  <Group align="center" justify="space-between" wrap="nowrap">
-                    <Group align="center" wrap="nowrap">
-                      <PersonChip isClickable person={recommendation.leftPerson} prefetch={false} />
-                      <Text c="dimmed" fw={500} size="sm">
-                        {tMerge("MergeWithLabel")}
-                      </Text>
+                <Paper
+                  className={classes["card"]}
+                  key={recommendation.id}
+                  p="md"
+                  radius="md"
+                  withBorder
+                >
+                  <div className={classes["pair"]}>
+                    <div className={classes["person"]}>
+                      <PersonChip
+                        isClickable
+                        person={recommendation.leftPerson}
+                        prefetch={false}
+                        truncate
+                      />
+                    </div>
+                    <Text c="dimmed" className={classes["label"]} fw={500} size="sm">
+                      {tMerge("MergeWithLabel")}
+                    </Text>
+                    <div className={classes["person"]}>
                       <PersonChip
                         isClickable
                         person={recommendation.rightPerson}
                         prefetch={false}
+                        truncate
                       />
-                    </Group>
+                    </div>
+                  </div>
+                  <div className={classes["actions"]}>
                     <Button
                       leftSection={<IconRefresh size={16} />}
                       loading={restoringIds.has(recommendation.id)}
-                      onClick={() => void handleRestore(recommendation.id)}
+                      onClick={() => detachPromise(handleRestore(recommendation.id))}
                       variant="default"
                     >
                       {t("RestoreSuggestion")}
                     </Button>
-                  </Group>
+                  </div>
                 </Paper>
               ) : (
                 <MergeRecommendationCard

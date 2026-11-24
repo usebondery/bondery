@@ -1,6 +1,8 @@
 import type { CSSProperties, ReactNode } from "react";
 import { Link } from "react-email";
 
+const PATTERN_5E5C7B5C7B28_RE = /^\{\{(\w+)\}\}$/;
+
 const PLACEHOLDER = /(\{\{\w+\}\})/g;
 
 export function interpolateNamedLinks(
@@ -9,12 +11,12 @@ export function interpolateNamedLinks(
   linkStyle: CSSProperties,
 ): ReactNode[] {
   return template.split(PLACEHOLDER).map((part) => {
-    const match = part.match(/^\{\{(\w+)\}\}$/);
+    const match = part.match(PATTERN_5E5C7B5C7B28_RE);
     if (!match) {
       return part;
     }
 
-    const token = match[1];
+    const [, token] = match;
     const link = token ? links[token] : undefined;
     if (!link) {
       return part;

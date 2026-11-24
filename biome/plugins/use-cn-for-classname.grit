@@ -1,0 +1,34 @@
+// Rejects every way of joining class strings in `className` except `cn()`.
+//
+// Tailwind resolves a later class over an earlier one, so a component that appends its own
+// classes to a caller's `className` must merge them, not concatenate them. `cn()` from the
+// `cn` package does both: it joins conditionals like `clsx` and resolves conflicts like
+// `tailwind-merge`. A template literal, a `+`, or a `.join()` only joins, so
+// `className={`p-2 ${className}`}` keeps both `p-2` and a caller's `p-4`, and the result
+// depends on CSS order rather than on intent.
+//
+// Joining inside `cn()` is the point of `cn()`, so a dynamic class there stays allowed:
+// `` cn(`fi-${country}`) ``.
+//
+// A conditional that selects one class string, such as `active ? "p-2" : "p-4"`, joins
+// nothing and stays allowed. Wrap the value in `cn()` as soon as two sources reach the same
+// `className`.
+//
+// `biome.json` declares the same attribute and functions under `tailwind`, so Biome's native
+// Tailwind rules read class strings from the same places.
+
+language js
+
+or {
+  JsTemplateExpression(),
+  `$_ + $_`,
+  `$_.join($_)`,
+  `clsx($args)`,
+  `classnames($args)`,
+  `cx($args)`,
+  `joinClassNames($args)`
+} as $joined where {
+  $joined <: within jsx_attribute(name="className"),
+  not $joined <: within `cn($args)`,
+  register_diagnostic(span=$joined, message="Join className parts with cn() from the cn package. A template literal, a + join, a .join(), or another merge helper only concatenates, so a caller's class cannot override the component's default. Wrap the value in cn(...).", severity="error")
+}

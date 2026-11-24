@@ -1,6 +1,7 @@
+const AVATAR_CLOCK_QUERY_RE = /[?&]t=(\d+)\b/;
 /** Returns an epoch-ms cache-bust token, or null when the clock is missing or not a date. */
 export function toCacheBustToken(value: string | null | undefined): number | null {
-  if (value == null) {
+  if (value === null || value === undefined) {
     return null;
   }
   const ts = Date.parse(value);
@@ -12,7 +13,7 @@ export function parseAvatarUpdatedAtFromUrl(avatarUrl: string | null | undefined
   if (!avatarUrl) {
     return null;
   }
-  const match = /[?&]t=(\d+)\b/.exec(avatarUrl);
+  const match = AVATAR_CLOCK_QUERY_RE.exec(avatarUrl);
   if (!match) {
     return null;
   }

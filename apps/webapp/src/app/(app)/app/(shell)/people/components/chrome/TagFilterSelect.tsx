@@ -80,6 +80,7 @@ export function TagFilterSelect() {
               return false;
             }
             replaceTagIds([...selectedIds, tag.id]);
+            return true;
           }}
           placeholder={t("TagFilterPlaceholder")}
           selected={selectedTags}

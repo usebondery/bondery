@@ -77,24 +77,28 @@ export async function stripeWebhookRoutes(fastify: FastifyInstance): Promise<voi
       let stripe: Stripe;
       try {
         stripe = getStripeClient();
-      } catch {
-        throw internal("webhook_not_configured");
+      } catch (error) {
+        throw internal("webhook_not_configured", error);
       }
 
       let event: Stripe.Event;
       try {
         event = stripe.webhooks.constructEvent(rawBody, signature, secret);
-      } catch (err) {
-        request.log.warn({ err }, "stripe-webhook: invalid signature");
+      } catch (error) {
+        request.log.warn({ err: error }, "stripe-webhook: invalid signature");
         throw badRequest("Invalid webhook signature", "bad_request");
       }
 
+      // Every later log line for this request, including the central "server error"
+      // log, carries the Stripe event it belongs to.
+      request.log = request.log.child({ stripeEventId: event.id, stripeEventType: event.type });
+
       if (await isStripeWebhookEventProcessed(event.id)) {
-        request.log.info({ eventId: event.id }, "stripe-webhook: duplicate event — skipping");
+        request.log.info("stripe-webhook: duplicate event — skipping");
         return reply.status(200).send({ received: true });
       }
 
-      request.log.info({ type: event.type }, "stripe-webhook: received event");
+      request.log.info("stripe-webhook: received event");
 
       try {
         switch (event.type) {
@@ -131,9 +135,11 @@ export async function stripeWebhookRoutes(fastify: FastifyInstance): Promise<voi
         }
 
         await recordStripeWebhookEvent(event.id, event.type);
-      } catch (err) {
-        request.log.error({ err, type: event.type }, "stripe-webhook: handler failed");
-        throw internal("failed_to_process_webhook");
+      } catch (error) {
+        // Handlers acknowledge events that can never be processed, so what reaches here is
+        // unknown or transient. Answer 500 so Stripe retries, and keep the cause: the
+        // error handler logs it and reports it.
+        throw internal("failed_to_process_webhook", error);
       }
 
       return reply.status(200).send({ received: true });

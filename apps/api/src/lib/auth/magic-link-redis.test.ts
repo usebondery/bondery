@@ -5,6 +5,10 @@ import { describe, it } from "node:test";
 import { pathToFileURL } from "node:url";
 import { hashMagicLinkEmail, hashMagicLinkStoredIdentifier } from "./magic-link-redis.js";
 
+const USER_EXAMPLE_PATTERN = /user|example/i;
+const PLAINTEXT_PATTERN = /plaintext/;
+const EQUALS_SIGN_PATTERN = /[=]/;
+
 const require = createRequire(import.meta.url);
 
 describe("magic-link hashing", () => {
@@ -12,13 +16,13 @@ describe("magic-link hashing", () => {
     const hashed = hashMagicLinkEmail("  User@Example.COM ");
     assert.equal(hashed, hashMagicLinkEmail("user@example.com"));
     assert.equal(hashed.length, 64);
-    assert.doesNotMatch(hashed, /user|example/i);
+    assert.doesNotMatch(hashed, USER_EXAMPLE_PATTERN);
   });
 
   it("hashes stored identifiers as SHA-256 base64url without padding", () => {
     const hashed = hashMagicLinkStoredIdentifier("plaintext-token");
-    assert.doesNotMatch(hashed, /plaintext/);
-    assert.doesNotMatch(hashed, /=/);
+    assert.doesNotMatch(hashed, PLAINTEXT_PATTERN);
+    assert.doesNotMatch(hashed, EQUALS_SIGN_PATTERN);
   });
 
   it("matches Better Auth magic-link defaultKeyHasher", async () => {

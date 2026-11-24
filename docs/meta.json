@@ -44,8 +44,7 @@
     "contributing/guides",
     "contributing/how-to-write-docs",
     "---Production deployment---",
-    "contributing/dokploy",
-    "contributing/api-container"
+    "contributing/dokploy"
   ],
   "title": "Bondery"
 }

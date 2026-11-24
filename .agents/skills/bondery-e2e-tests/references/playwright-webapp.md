@@ -6,11 +6,11 @@ Grounded in `apps/webapp/e2e/`. Read `playwright.config.mjs` header comments for
 
 - Mailpit (`pnpm run start:mailpit`) and API SMTP on `127.0.0.1:26640`
 - A running API + webapp (`pnpm run dev:webapp-api`). Playwright does not start them.
-- Public URLs from API env (`apps/api/.env.development.local`). Prefer **127.0.0.1**:
-  - `BONDERY_PUBLIC_API_URL=http://127.0.0.1:26631`
-  - `BONDERY_PUBLIC_WEBAPP_URL=http://127.0.0.1:26632`
+- Public URLs from API env (`apps/api/.env.development.local`), the Portless hosts. The API serves HTTPS only, and Playwright trusts the Portless CA (`trustPortlessCa()` in `e2e/resolve-e2e-public-urls.mjs`):
+  - `BONDERY_PUBLIC_API_URL=https://api.usebondery.test`
+  - `BONDERY_PUBLIC_WEBAPP_URL=https://app.usebondery.test`
 - `E2E_PUBLIC_HOST` is optional. If set, it must match those URL hosts or Playwright fails at config load.
-- GitHub OAuth app callback (GitHub regression only): `http://127.0.0.1:26631/auth/callback/github`
+- GitHub OAuth app callback (GitHub regression only): `https://api.usebondery.test/auth/callback/github`
 - Run `pnpm run provision:oauth-clients` after URL changes
 
 ## Email magic-link hop (in-app)
@@ -29,25 +29,25 @@ Do **not** mint `bondery_webapp_session` in Node. Do **not** add a production te
 
 ## Config highlights
 
-| Setting | Value | Why |
-|---------|-------|-----|
-| `testDir` | `.` (e2e folder) | Specs colocated with config |
-| `globalSetup` | `global-setup.mjs` | Requires Mailpit + API `/health/live` + webapp `/api/health/live` |
-| `fullyParallel` | `false` | Serial auth + shared ports |
-| `workers` | `1` | Same. Shared CRM data on `e2e-agent@example.test` is accepted |
-| `retries` | `1` in CI, `0` locally | CI flake tolerance |
+| Setting         | Value                  | Why                                                               |
+| --------------- | ---------------------- | ----------------------------------------------------------------- |
+| `testDir`       | `.` (e2e folder)       | Specs colocated with config                                       |
+| `globalSetup`   | `global-setup.mjs`     | Requires Mailpit + API `/health/live` + webapp `/api/health/live` |
+| `fullyParallel` | `false`                | Serial auth + shared ports                                        |
+| `workers`       | `1`                    | Same. Shared CRM data on `e2e-agent@example.test` is accepted     |
+| `retries`       | `1` in CI, `0` locally | CI flake tolerance                                                |
 
 ## Projects
 
-| Project | Specs | Auth |
-|---------|-------|------|
-| `setup` | `auth.setup.ts` | Manual GitHub login → `.auth/user.json` (OAuth regression only) |
-| `github-login` | `login.github.spec.ts` | Fresh context; full GitHub OAuth flow |
-| `email-setup` | `email.auth.setup.ts` | Headless email magic-link → `.auth/email-user.json` |
-| `auth` | `login.authenticated.spec.ts` | `storageState: .auth/email-user.json`. Depends on `email-setup` |
-| `login-email` | `login.email.spec.ts` | Empty storage; unique `e2e-${id}@example.test`; logout |
-| `unauth` | `login.unauth.spec.ts` | Empty storage |
-| `oauth-callback` | `oauth-callback.spec.ts` | Empty storage |
+| Project          | Specs                         | Auth                                                            |
+| ---------------- | ----------------------------- | --------------------------------------------------------------- |
+| `setup`          | `auth.setup.ts`               | Manual GitHub login → `.auth/user.json` (OAuth regression only) |
+| `github-login`   | `login.github.spec.ts`        | Fresh context; full GitHub OAuth flow                           |
+| `email-setup`    | `email.auth.setup.ts`         | Headless email magic-link → `.auth/email-user.json`             |
+| `auth`           | `login.authenticated.spec.ts` | `storageState: .auth/email-user.json`. Depends on `email-setup` |
+| `login-email`    | `login.email.spec.ts`         | Empty storage; unique `e2e-${id}@example.test`; logout          |
+| `unauth`         | `login.unauth.spec.ts`        | Empty storage                                                   |
+| `oauth-callback` | `oauth-callback.spec.ts`      | Empty storage                                                   |
 
 `auth` depends on `email-setup`, not GitHub `setup`. GitHub `auth-setup` is only for OAuth login regression. Do not log out in `auth` specs — that revokes the shared session.
 

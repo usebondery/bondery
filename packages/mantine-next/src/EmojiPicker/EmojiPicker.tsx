@@ -1,14 +1,18 @@
 "use client";
 
 import { Input, Popover, Text } from "@mantine/core";
-import { useState } from "react";
+import { type ReactElement, useState } from "react";
 import { EmojiPickerDropdownContent } from "#EmojiPicker/EmojiPickerDropdownContent.js";
 
 interface EmojiPickerProps {
   disabled?: boolean;
   emptyLabel?: string;
   error?: string;
+  /** Field label, already translated by the caller. */
+  label: string;
   onChange: (emoji: string) => void;
+  /** Text of the empty trigger, already translated by the caller. */
+  placeholder: string;
   /** Debounce delay in ms for the emoji search input. Defaults to 200 (local filter). */
   searchDebounceMs?: number;
   searchPlaceholder?: string;
@@ -20,10 +24,12 @@ export function EmojiPicker({
   onChange,
   emptyLabel,
   error,
+  label,
+  placeholder,
   searchDebounceMs,
   searchPlaceholder,
   disabled = false,
-}: EmojiPickerProps) {
+}: EmojiPickerProps): ReactElement {
   const [opened, setOpened] = useState(false);
 
   const handleSelect = (emoji: string) => {
@@ -34,7 +40,7 @@ export function EmojiPicker({
   return (
     <Input.Wrapper
       error={error}
-      label="Emoji"
+      label={label}
       required
       styles={{
         label: disabled ? { color: "var(--mantine-color-disabled-color)" } : undefined,
@@ -81,7 +87,7 @@ export function EmojiPicker({
               </Text>
             ) : (
               <Text c="dimmed" inherit lh={1} size="sm">
-                Select emoji
+                {placeholder}
               </Text>
             )}
           </Input>

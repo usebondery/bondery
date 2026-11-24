@@ -6,20 +6,20 @@ import { PageTopSpacer } from "@/components/page-top-spacer";
  * Outer width for every page type and for the header and footer pills.
  * One number keeps the three edges aligned.
  */
-export const SITE_MAX_WIDTH = 1440;
+const SITE_MAX_WIDTH = 1440;
 
 /**
  * Horizontal inset from the viewport edge. The header and footer pills shrink by
  * this much, so `SiteShell` must shrink by the same amount or it overflows them
  * on viewports narrower than the max width.
  */
-export const SITE_INSET = {
+const SITE_INSET = {
   base: "calc(100% - var(--mantine-spacing-xs) * 2)",
   md: "calc(100% - var(--mantine-spacing-xl) * 2)",
 } as const;
 
 /** Width, centring, and inset for the header pill, the footer pill, and `SiteShell`. */
-export const siteFrameProps = {
+const siteFrameProps = {
   maw: SITE_MAX_WIDTH,
   mx: "auto",
   w: SITE_INSET,
@@ -56,7 +56,7 @@ function track(width: string): CSSProperties {
  * The shell adds the page gap below the header. A side slot holds its own sticky box.
  * Rows stretch, so a sticky rail has room to move.
  */
-export function SiteShell({
+function SiteShell({
   children,
   left,
   leftWidth = "17rem",
@@ -84,3 +84,5 @@ export function SiteShell({
     </Box>
   );
 }
+
+export { SITE_INSET, SITE_MAX_WIDTH, SiteShell, siteFrameProps };

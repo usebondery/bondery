@@ -1,6 +1,6 @@
 import type { ActionIconProps } from "@mantine/core";
 import { IconDotsVertical } from "@tabler/icons-react";
-import type { MouseEventHandler } from "react";
+import type { MouseEventHandler, ReactElement } from "react";
 import { ActionIconButton } from "#ActionIconButton/ActionIconButton.js";
 
 export interface DotsMenuButtonProps extends Omit<ActionIconProps, "children"> {
@@ -17,7 +17,7 @@ export interface DotsMenuButtonProps extends Omit<ActionIconProps, "children"> {
  *
  * Wrap with `<Menu.Target>` to use as a menu trigger.
  */
-export function DotsMenuButton({ opened = false, ...props }: DotsMenuButtonProps) {
+export function DotsMenuButton({ opened = false, ...props }: DotsMenuButtonProps): ReactElement {
   return (
     <ActionIconButton
       className={opened ? "button-scale-effect-active" : undefined}

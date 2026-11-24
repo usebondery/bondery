@@ -19,10 +19,13 @@ function toUint8Array(data: Uint8Array | ArrayBuffer | string): Uint8Array {
   return new Uint8Array(data);
 }
 
+/** Base64 turns each group of three input bytes into four output characters. */
+const BASE64_INPUT_GROUP_BYTES = 3;
+
 function toBase64(data: Uint8Array): string {
   let result = "";
 
-  for (let index = 0; index < data.length; index += 3) {
+  for (let index = 0; index < data.length; index += BASE64_INPUT_GROUP_BYTES) {
     const byte1 = data[index] ?? 0;
     const byte2 = data[index + 1] ?? 0;
     const byte3 = data[index + 2] ?? 0;

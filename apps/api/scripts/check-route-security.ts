@@ -63,7 +63,7 @@ function collectExportedRoutePlugins(dir: string): string[] {
     const content = readFileSync(file, "utf8");
     const matches = content.matchAll(/export const (\w+Routes): AppRoutePlugin/g);
     for (const match of matches) {
-      const name = match[1];
+      const [, name] = match;
       if (name && !NESTED_ROUTE_EXPORTS.has(name)) {
         exports.push(name);
       }
@@ -71,7 +71,7 @@ function collectExportedRoutePlugins(dir: string): string[] {
 
     const asyncMatches = content.matchAll(/export async function (\w+Routes)\(/g);
     for (const match of asyncMatches) {
-      const name = match[1];
+      const [, name] = match;
       if (name && !NESTED_ROUTE_EXPORTS.has(name)) {
         exports.push(name);
       }

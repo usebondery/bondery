@@ -1,10 +1,10 @@
-export type AvatarPreset = "small" | "medium" | "large";
-
 const AVATAR_PRESETS: Record<AvatarPreset, { avatarSize: string; avatarQuality: string }> = {
   large: { avatarQuality: "high", avatarSize: "large" },
   medium: { avatarQuality: "medium", avatarSize: "medium" },
   small: { avatarQuality: "low", avatarSize: "small" },
 };
+
+export type AvatarPreset = "small" | "medium" | "large";
 
 /**
  * Appends avatarSize and avatarQuality query params to existing URLSearchParams.

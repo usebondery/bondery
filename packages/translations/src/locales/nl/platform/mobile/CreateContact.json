@@ -1,0 +1,13 @@
+{
+  "Create": "Toevoegen aan Bondery",
+  "Creating": "Persoon aanmaken...",
+  "ErrorDescription": "Er ging iets mis bij het aanmaken van deze persoon.",
+  "ErrorTitle": "Kan persoon niet aanmaken",
+  "FullNameLabel": "Volledige naam",
+  "FullNamePlaceholder": "bijv. Jan Jansen",
+  "InvalidName": "Voeg een geldige naam toe",
+  "NameRequired": "Voeg een naam toe",
+  "SuccessDescription": "De nieuwe persoon is aan je contacten toegevoegd.",
+  "SuccessTitle": "Persoon aangemaakt",
+  "Title": "Persoon aanmaken"
+}

@@ -7,23 +7,24 @@
     "@bondery/translations": "workspace:*",
     "@mantine/core": "^9.6.3",
     "@mantine/hooks": "^9.6.3",
-    "@react-email/ui": "^6.9.1",
+    "@react-email/ui": "^6.11.16",
     "@tabler/icons-react": "^3.48.0",
     "@types/react": "~19.3.0",
     "@types/react-dom": "~19.3.0",
     "fastify-zod-openapi": "^5.7.0",
-    "flag-icons": "^7.5.0",
-    "i18next": "^26.4.2",
-    "i18next-cli": "^1.74.4",
+    "flag-icons": "^7.6.0",
+    "i18next": "^27.2.2",
+    "i18next-cli": "^1.91.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
-    "react-email": "^6.9.1",
-    "react-i18next": "^17.0.15",
-    "transliteration": "^2.6.1"
+    "react-email": "^6.11.16",
+    "react-i18next": "^18.0.3",
+    "transliteration": "^2.7.0"
   },
   "description": "Bondery Extension",
   "devDependencies": {
-    "@types/chrome": "^0.2.9",
+    "@bondery/typescript-config": "workspace:*",
+    "@types/chrome": "^0.3.7",
     "@types/node": "^26.1.2",
     "@vitejs/plugin-react": "^6.0.4",
     "@wxt-dev/module-react": "^1.2.2",
@@ -31,8 +32,8 @@
     "dotenv": "^18.0.5",
     "sharp": "^0.35.5",
     "tsx": "^4.23.1",
-    "web-ext": "^10.7.0",
-    "wxt": "^0.21.4"
+    "web-ext": "^10.8.0",
+    "wxt": "^0.21.5"
   },
   "name": "chrome-extension",
   "private": true,
@@ -51,5 +52,5 @@
     "zip:firefox": "pnpm exec wxt zip -b firefox"
   },
   "type": "module",
-  "version": "1.11.2"
+  "version": "1.11.3-rc.1"
 }

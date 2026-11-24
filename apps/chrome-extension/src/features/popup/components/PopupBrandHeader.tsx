@@ -33,7 +33,7 @@ export function PopupBrandHeader({
           variant="subtle"
         />
       </Group>
-      <Divider mt={"xs"} />
+      <Divider mt="xs" />
     </div>
   );
 }

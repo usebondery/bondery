@@ -2,7 +2,7 @@ import type { TagWithCount } from "@bondery/schemas";
 import type { TagSortOrder } from "../../lib/preferences/useMobilePreferences";
 
 function compareTagLabels(left: TagWithCount, right: TagWithCount): number {
-  return (left.label ?? "").localeCompare(right.label ?? "");
+  return left.label.localeCompare(right.label);
 }
 
 export function sortTags(tags: TagWithCount[], sortOrder: TagSortOrder): TagWithCount[] {
@@ -22,7 +22,7 @@ export function sortTags(tags: TagWithCount[], sortOrder: TagSortOrder): TagWith
     case "alpha-asc":
       return sorted.sort(compareTagLabels);
     case "alpha-desc":
-      return sorted.sort((left, right) => right.label.localeCompare(left.label ?? ""));
+      return sorted.sort((left, right) => right.label.localeCompare(left.label));
     default:
       return sorted;
   }

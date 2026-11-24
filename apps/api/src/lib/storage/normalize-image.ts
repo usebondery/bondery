@@ -1,8 +1,9 @@
 import sharp from "sharp";
 
+const DEFAULT_JPEG_QUALITY = 85;
+
 export const AVATAR_IMAGE_MAX_EDGE = 512;
 export const LINKEDIN_LOGO_MAX_EDGE = 256;
-const DEFAULT_JPEG_QUALITY = 85;
 
 export type NormalizeImageOptions = {
   maxEdge?: number;

@@ -1,9 +1,11 @@
 "use client";
 
 import { createSocialUrl, normalizeWebsiteUrl } from "@bondery/helpers";
+import { detachPromise } from "@bondery/helpers/async";
 import { parsePhoneNumber } from "@bondery/helpers/phone";
 import { Stack } from "@mantine/core";
 import type { ReactNode } from "react";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 import type { SocialFieldKey, useSocialFieldEditor } from "../../hooks/useSocialFieldEditor";
 import { SocialFieldRerouteNudge } from "./SocialFieldRerouteNudge";
 import { SocialHandleInput } from "./SocialHandleInput";
@@ -11,17 +13,6 @@ import { SocialPhoneInput } from "./SocialPhoneInput";
 import { SocialPopoverButton } from "./SocialPopoverButton";
 
 type SocialFieldEditor = ReturnType<typeof useSocialFieldEditor>;
-
-export interface SocialPopoverFieldConfig {
-  color: string;
-  field: SocialFieldKey;
-  icon: ReactNode;
-  kind: "handle" | "phone";
-  label: string;
-  placeholder: string;
-  target?: "_blank";
-  tooltipLabel: string;
-}
 
 interface SocialPopoverFieldProps {
   config: SocialPopoverFieldConfig;
@@ -37,7 +28,7 @@ function getWebsiteUrl(website: string | null): string | undefined {
     return website;
   }
 
-  return normalizeWebsiteUrl(website) || undefined;
+  return nonEmpty(normalizeWebsiteUrl(website));
 }
 
 function getExternalHref(field: SocialFieldKey, persistedValue: string): string | undefined {
@@ -66,6 +57,17 @@ function getExternalHref(field: SocialFieldKey, persistedValue: string): string 
   return undefined;
 }
 
+export interface SocialPopoverFieldConfig {
+  color: string;
+  field: SocialFieldKey;
+  icon: ReactNode;
+  kind: "handle" | "phone";
+  label: string;
+  placeholder: string;
+  target?: "_blank";
+  tooltipLabel: string;
+}
+
 export function SocialPopoverField({ config, editor, fieldLabels }: SocialPopoverFieldProps) {
   const { field } = config;
   const persistedValue = editor.persisted[field];
@@ -77,7 +79,7 @@ export function SocialPopoverField({ config, editor, fieldLabels }: SocialPopove
   const href = getExternalHref(field, persistedValue);
 
   const handlePaste = (raw: string) => {
-    void editor.handlePasteAndCommit(field, raw);
+    detachPromise(editor.handlePasteAndCommit(field, raw));
   };
 
   return (
@@ -91,7 +93,7 @@ export function SocialPopoverField({ config, editor, fieldLabels }: SocialPopove
       isOpen={editor.openField === field}
       loading={isSaving}
       onCancelClose={editor.clearCloseTimeout}
-      onHoverOpen={(id) => void editor.requestOpen(id)}
+      onHoverOpen={(id) => detachPromise(editor.requestOpen(id))}
       onLinkClick={() => editor.closeField(field)}
       onScheduleClose={editor.scheduleCloseField}
       target={config.target}
@@ -104,7 +106,7 @@ export function SocialPopoverField({ config, editor, fieldLabels }: SocialPopove
             disabled={isSaving}
             field={field as "whatsapp" | "signal"}
             label={config.label}
-            onCommit={() => void editor.commitAndCloseField(field)}
+            onCommit={() => detachPromise(editor.commitAndCloseField(field))}
             onDiscard={() => editor.handleEscape(field)}
             onPaste={handlePaste}
             onPrefixChange={
@@ -123,7 +125,7 @@ export function SocialPopoverField({ config, editor, fieldLabels }: SocialPopove
             field={field}
             label={config.label}
             onChange={(value) => editor.setDraft(field, value)}
-            onCommit={() => void editor.commitAndCloseField(field)}
+            onCommit={() => detachPromise(editor.commitAndCloseField(field))}
             onDiscard={() => editor.handleEscape(field)}
             onPaste={handlePaste}
             placeholder={config.placeholder}
@@ -135,9 +137,9 @@ export function SocialPopoverField({ config, editor, fieldLabels }: SocialPopove
             disabled={isSaving}
             field={field}
             fieldLabels={fieldLabels}
-            onKeepHere={() => void editor.keepInCurrentField()}
-            onMove={() => void editor.acceptReroute({ replace: false })}
-            onReplace={() => void editor.acceptReroute({ replace: true })}
+            onKeepHere={() => detachPromise(editor.keepInCurrentField())}
+            onMove={() => detachPromise(editor.acceptReroute({ replace: false }))}
+            onReplace={() => detachPromise(editor.acceptReroute({ replace: true }))}
             suggestion={rerouteSuggestion}
           />
         ) : null}

@@ -45,59 +45,63 @@ import type {
   VCardPreparedContact,
 } from "./types.js";
 
-type _ScrapedWorkHistoryEntry = Assert<
+export type _ScrapedWorkHistoryEntry = Assert<
   IsEqual<ScrapedWorkHistoryEntry, z.infer<typeof scrapedWorkHistoryEntrySchema>>
 >;
-type _ScrapedEducationEntry = Assert<
+export type _ScrapedEducationEntry = Assert<
   IsEqual<ScrapedEducationEntry, z.infer<typeof scrapedEducationEntrySchema>>
 >;
-type _RedirectRequest = Assert<IsEqual<RedirectRequest, z.infer<typeof redirectRequestSchema>>>;
-type _EnrichContactRequest = Assert<
+export type _RedirectRequest = Assert<
+  IsEqual<RedirectRequest, z.infer<typeof redirectRequestSchema>>
+>;
+export type _EnrichContactRequest = Assert<
   IsEqual<EnrichContactRequest, z.infer<typeof enrichContactRequestSchema>>
 >;
-type _LinkedInDataRequest = Assert<
+export type _LinkedInDataRequest = Assert<
   IsEqual<LinkedInDataRequest, z.infer<typeof linkedInDataRequestSchema>>
 >;
-type _RedirectResponse = Assert<IsEqual<RedirectResponse, z.infer<typeof redirectResponseSchema>>>;
-type _LinkedInPreparedContact = Assert<
+export type _RedirectResponse = Assert<
+  IsEqual<RedirectResponse, z.infer<typeof redirectResponseSchema>>
+>;
+export type _LinkedInPreparedContact = Assert<
   IsEqual<LinkedInPreparedContact, z.infer<typeof linkedInPreparedContactSchema>>
 >;
-type _LinkedInParseResponse = Assert<
+export type _LinkedInParseResponse = Assert<
   IsEqual<LinkedInParseResponse, z.infer<typeof linkedInParseResponseSchema>>
 >;
-type _LinkedInImportCommitRequest = Assert<
+export type _LinkedInImportCommitRequest = Assert<
   IsEqual<LinkedInImportCommitRequest, z.infer<typeof linkedInImportCommitRequestSchema>>
 >;
-type _LinkedInImportCommitResponse = Assert<
+export type _LinkedInImportCommitResponse = Assert<
   IsEqual<LinkedInImportCommitResponse, z.infer<typeof linkedInImportCommitResponseSchema>>
 >;
-type _InstagramImportStrategy = Assert<
+export type _InstagramImportStrategy = Assert<
   IsEqual<InstagramImportStrategy, z.infer<typeof instagramImportStrategySchema>>
 >;
-type _InstagramImportSource = Assert<
+export type _InstagramImportSource = Assert<
   IsEqual<InstagramImportSource, z.infer<typeof instagramImportSourceSchema>>
 >;
-type _InstagramPreparedContact = Assert<
+export type _InstagramPreparedContact = Assert<
   IsEqual<InstagramPreparedContact, z.infer<typeof instagramPreparedContactSchema>>
 >;
-type _InstagramParseResponse = Assert<
+export type _InstagramParseResponse = Assert<
   IsEqual<InstagramParseResponse, z.infer<typeof instagramParseResponseSchema>>
 >;
-type _InstagramImportCommitRequest = Assert<
+export type _InstagramImportCommitRequest = Assert<
   IsEqual<InstagramImportCommitRequest, z.infer<typeof instagramImportCommitRequestSchema>>
 >;
-type _InstagramImportCommitResponse = Assert<
+export type _InstagramImportCommitResponse = Assert<
   IsEqual<InstagramImportCommitResponse, z.infer<typeof instagramImportCommitResponseSchema>>
 >;
-type _VCardPreparedContact = Assert<
+export type _VCardPreparedContact = Assert<
   IsEqual<VCardPreparedContact, z.infer<typeof vcardPreparedContactSchema>>
 >;
-type _VCardParseResponse = Assert<
+export type _VCardParseResponse = Assert<
   IsEqual<VCardParseResponse, z.infer<typeof vcardParseResponseSchema>>
 >;
-type _VCardImportCommitRequest = Assert<
+export type _VCardImportCommitRequest = Assert<
   IsEqual<VCardImportCommitRequest, z.infer<typeof vcardImportCommitRequestSchema>>
 >;
-type _VCardImportCommitResponse = Assert<
+export type _VCardImportCommitResponse = Assert<
   IsEqual<VCardImportCommitResponse, z.infer<typeof vcardImportCommitResponseSchema>>
 >;

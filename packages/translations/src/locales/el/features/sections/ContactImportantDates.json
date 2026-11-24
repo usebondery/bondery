@@ -1,0 +1,32 @@
+{
+  "AddAction": "Προσθήκη ημερομηνίας",
+  "AddHint": "Για να προσθέσεις νέα ημερομηνία, συμπλήρωσε όλα τα στοιχεία.",
+  "AddImportantDate": "Προσθήκη σημαντικής ημερομηνίας",
+  "BirthdayDateLabel": "Επίλεξε ημερομηνία γενεθλίων",
+  "DatePlaceholder": "Επίλεξε ημερομηνία",
+  "DeleteAction": "Διαγραφή",
+  "DraftIncompleteError": "Για να προσθέσεις νέα ημερομηνία, συμπλήρωσε όλα τα στοιχεία.",
+  "Empty": "Δεν υπάρχουν ακόμα σημαντικές ημερομηνίες.",
+  "ErrorTitle": "Σφάλμα",
+  "NotePlaceholder": "Προαιρετική σημείωση",
+  "NotifyDayBefore": "Ειδοποίηση {count} ημέρα πριν",
+  "NotifyDaysBefore": "Ειδοποίηση {count} ημέρες πριν",
+  "NotifyMe": "Ειδοποίησέ με",
+  "NotifyNone": "Χωρίς ειδοποίηση",
+  "SuccessTitle": "Επιτυχία",
+  "Title": "Σημαντικές ημερομηνίες",
+  "TypeDisabledBirthdateHint": "Υπάρχουν ήδη γενέθλια για: {firstName}",
+  "TypeDisabledHint": "Υπάρχουν ήδη γενέθλια ή ονομαστική εορτή για: {firstName}",
+  "TypeDisabledNamedateHint": "Υπάρχει ήδη ονομαστική εορτή για: {firstName}",
+  "TypePlaceholder": "Επίλεξε τύπο",
+  "Types": {
+    "anniversary": "Επέτειος",
+    "birthday": "Γενέθλια",
+    "graduation": "Αποφοίτηση",
+    "nameday": "Ονομαστική εορτή",
+    "other": "Άλλο"
+  },
+  "UniqueTypeError": "Μπορεί να προστεθεί μόνο μία φορά: {type}.",
+  "UpdateError": "Δεν ενημερώθηκαν οι σημαντικές ημερομηνίες",
+  "UpdateSuccess": "Οι σημαντικές ημερομηνίες ενημερώθηκαν"
+}

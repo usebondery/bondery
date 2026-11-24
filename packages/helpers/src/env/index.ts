@@ -20,6 +20,7 @@ export {
   type DokploySync,
   type DokploySyncRow,
   type DokploySyncTarget,
+  type DokploySyncTargetConfig,
   ENV_GROUP_GUIDES,
   ENV_MANIFEST,
   type EnvEnvironment,

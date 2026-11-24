@@ -1,0 +1,34 @@
+{
+  "AddPeopleToGroup": "Προσθήκη ατόμων στην ομάδα",
+  "ColorLabel": "Χρώμα",
+  "ContactCount": "Επαφές",
+  "DetailPageTitle": "Στοιχεία ομάδας",
+  "Empty": "Δεν έχουν συνδεθεί ακόμα επαφές με αυτή την ομάδα.",
+  "HeaderDescription": "Επισκόπηση των μελών της επιλεγμένης ομάδας.",
+  "NoContactsFound": "Δεν έχουν συνδεθεί ακόμα επαφές με αυτή την ομάδα.",
+  "NoContactsMatchSearch": "Δεν βρέθηκε τέτοια επαφή.",
+  "RemoveContact": {
+    "ErrorDescription": "Δεν αφαιρέθηκε η επαφή από την ομάδα. Δοκίμασε ξανά.",
+    "LoadingDescription": "Ενημέρωση μελών ομάδας...",
+    "LoadingTitle": "Αφαίρεση επαφής",
+    "SuccessDescription": "Η επαφή αφαιρέθηκε από την ομάδα"
+  },
+  "RemoveContacts": {
+    "ErrorDescription": "Δεν αφαιρέθηκαν οι επαφές από την ομάδα. Δοκίμασε ξανά.",
+    "LoadingDescription": "Ενημέρωση μελών ομάδας...",
+    "LoadingTitle": "Αφαίρεση επαφών",
+    "SuccessDescription": "Επαφές που αφαιρέθηκαν από την ομάδα: {count}"
+  },
+  "RemoveFromGroup": "Αφαίρεση από την ομάδα",
+  "Subtitle": "Επαφές που ανήκουν σε αυτή την ομάδα.",
+  "Table": {
+    "Avatar": "Avatar",
+    "LastInteraction": "Τελευταία αλληλεπίδραση",
+    "Location": "Τοποθεσία",
+    "Name": "Όνομα",
+    "Socials": "Κοινωνικά δίκτυα",
+    "Title": "Τίτλος"
+  },
+  "ThisContactFallback": "αυτή η επαφή",
+  "Title": "Ομάδα: {label}"
+}

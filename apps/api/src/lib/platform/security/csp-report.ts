@@ -19,12 +19,15 @@ const MAX_DIRECTIVE_LENGTH = 64;
 const MAX_DISPOSITION_LENGTH = 16;
 /** Longest path or file kept. Truncation is a data cap, not a validation rule. */
 const MAX_PATH_LENGTH = 512;
+/** A raw URL is capped at this many path lengths, so its query and host still fit before parsing. */
+const RAW_URL_LENGTH_FACTOR = 4;
 /** Longest host kept. 253 is the DNS maximum. */
 const MAX_HOST_LENGTH = 253;
 /** Bound on the work one request can cause. */
 const MAX_VIOLATIONS = 20;
+const QUERY_OR_FRAGMENT_PATTERN = /[?#]/;
 
-export type CompactedCspViolation = {
+type CompactedCspViolation = {
   blockedOriginPath?: string;
   disposition?: string;
   documentPath?: string;
@@ -33,7 +36,7 @@ export type CompactedCspViolation = {
   sourceFile?: string;
 };
 
-export type CompactedCspReport = {
+type CompactedCspReport = {
   siteHost: string;
   violations: CompactedCspViolation[];
 };
@@ -51,7 +54,7 @@ function capString(value: unknown, maxLength: number): string | undefined {
 
 /** Path only, with the query and fragment removed. */
 function toPath(value: unknown): string | undefined {
-  const raw = capString(value, MAX_PATH_LENGTH * 4);
+  const raw = capString(value, MAX_PATH_LENGTH * RAW_URL_LENGTH_FACTOR);
   if (!raw) {
     return undefined;
   }
@@ -59,7 +62,7 @@ function toPath(value: unknown): string | undefined {
     return new URL(raw).pathname.slice(0, MAX_PATH_LENGTH);
   } catch {
     // Not an absolute URL. Drop any query or fragment it carries.
-    return raw.split(/[?#]/)[0]?.slice(0, MAX_PATH_LENGTH);
+    return raw.split(QUERY_OR_FRAGMENT_PATTERN)[0]?.slice(0, MAX_PATH_LENGTH);
   }
 }
 
@@ -70,7 +73,7 @@ function toPath(value: unknown): string | undefined {
  * `data`), which have no origin, so those pass through unchanged.
  */
 function toOriginAndPath(value: unknown): string | undefined {
-  const raw = capString(value, MAX_PATH_LENGTH * 4);
+  const raw = capString(value, MAX_PATH_LENGTH * RAW_URL_LENGTH_FACTOR);
   if (!raw) {
     return undefined;
   }
@@ -78,7 +81,7 @@ function toOriginAndPath(value: unknown): string | undefined {
     const url = new URL(raw);
     return `${url.origin}${url.pathname}`.slice(0, MAX_PATH_LENGTH);
   } catch {
-    return raw.split(/[?#]/)[0]?.slice(0, MAX_PATH_LENGTH);
+    return raw.split(QUERY_OR_FRAGMENT_PATTERN)[0]?.slice(0, MAX_PATH_LENGTH);
   }
 }
 
@@ -91,7 +94,7 @@ function toLineNumber(value: unknown): number | undefined {
 }
 
 function hostOf(value: unknown): string | undefined {
-  const raw = capString(value, MAX_PATH_LENGTH * 4);
+  const raw = capString(value, MAX_PATH_LENGTH * RAW_URL_LENGTH_FACTOR);
   if (!raw) {
     return undefined;
   }
@@ -105,7 +108,7 @@ function hostOf(value: unknown): string | undefined {
 function compactLegacy(raw: Record<string, unknown>): CompactedCspViolation {
   return {
     blockedOriginPath: toOriginAndPath(raw["blocked-uri"]),
-    disposition: capString(raw.disposition, MAX_DISPOSITION_LENGTH),
+    disposition: capString(raw["disposition"], MAX_DISPOSITION_LENGTH),
     documentPath: toPath(raw["document-uri"]),
     effectiveDirective: capString(raw["effective-directive"], MAX_DIRECTIVE_LENGTH),
     lineNumber: toLineNumber(raw["line-number"]),
@@ -115,12 +118,12 @@ function compactLegacy(raw: Record<string, unknown>): CompactedCspViolation {
 
 function compactReportingApi(raw: Record<string, unknown>): CompactedCspViolation {
   return {
-    blockedOriginPath: toOriginAndPath(raw.blockedURL),
-    disposition: capString(raw.disposition, MAX_DISPOSITION_LENGTH),
-    documentPath: toPath(raw.documentURL),
-    effectiveDirective: capString(raw.effectiveDirective, MAX_DIRECTIVE_LENGTH),
-    lineNumber: toLineNumber(raw.lineNumber),
-    sourceFile: toPath(raw.sourceFile),
+    blockedOriginPath: toOriginAndPath(raw["blockedURL"]),
+    disposition: capString(raw["disposition"], MAX_DISPOSITION_LENGTH),
+    documentPath: toPath(raw["documentURL"]),
+    effectiveDirective: capString(raw["effectiveDirective"], MAX_DIRECTIVE_LENGTH),
+    lineNumber: toLineNumber(raw["lineNumber"]),
+    sourceFile: toPath(raw["sourceFile"]),
   };
 }
 
@@ -134,6 +137,8 @@ function prune(violation: CompactedCspViolation): CompactedCspViolation {
     Object.entries(violation).filter(([, value]) => value !== undefined),
   ) as CompactedCspViolation;
 }
+
+export type { CompactedCspReport, CompactedCspViolation };
 
 /**
  * Reads a report body in either supported shape.
@@ -159,11 +164,11 @@ export function compactCspReport(
         continue;
       }
       // A browser batches other report types into the same array.
-      if (entry.type !== undefined && entry.type !== "csp-violation") {
+      if (entry["type"] !== undefined && entry["type"] !== "csp-violation") {
         continue;
       }
-      const raw = isRecord(entry.body) ? entry.body : entry;
-      documentHost ??= hostOf(raw.documentURL);
+      const raw = isRecord(entry["body"]) ? entry["body"] : entry;
+      documentHost ??= hostOf(raw["documentURL"]);
       violations.push(compactReportingApi(raw));
       if (violations.length >= MAX_VIOLATIONS) {
         break;

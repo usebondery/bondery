@@ -1,28 +1,31 @@
 import { IconAlertTriangle } from "@tabler/icons-react";
 import { createElement, type ReactNode } from "react";
+import {
+  buildNotificationPayload,
+  type NotificationPayload,
+  type NotificationTemplateProps,
+} from "#Notifications/buildNotificationPayload.js";
 
-export interface WarningNotificationTemplateProps {
-  description: string;
+export type { NotificationAction } from "#Notifications/buildNotificationPayload.js";
+
+export interface WarningNotificationTemplateProps extends NotificationTemplateProps {
   icon?: ReactNode;
-  radius?: string | number;
-  title: string;
 }
 
-/**
- * Builds a consistent warning notification payload.
- */
+/** Builds a consistent warning notification payload. */
 export function warningNotificationTemplate({
+  action,
   title,
   description,
   radius = "xl",
   icon = createElement(IconAlertTriangle, { size: 18 }),
-}: WarningNotificationTemplateProps) {
-  return {
+}: WarningNotificationTemplateProps): NotificationPayload {
+  return buildNotificationPayload({
+    action,
     color: "yellow",
+    description,
     icon,
-    loading: false,
-    message: description,
     radius,
     title,
-  };
+  });
 }

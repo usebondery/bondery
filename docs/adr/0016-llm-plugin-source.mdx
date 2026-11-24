@@ -1,0 +1,51 @@
+---
+title: "ADR 0016: LLM plugin source"
+hidden: true
+last_updated: 2026-11-13
+---
+
+# ADR 0016: LLM plugin source
+
+**Status:** Accepted  
+**Date:** 2026-11-13
+
+## Context
+
+Bondery exposes one MCP server to two host directories.
+Claude and OpenAI each require a different package layout.
+Two edited trees drift.
+
+The root `package.json` holds the product version.
+A version key in the plugin config would diverge from that file.
+Claude publishes by a fast-forward of the git branch `claude-plugin`.
+OpenAI publishes by a ZIP that a human uploads.
+Portal Submit stays a human step.
+
+## Decision
+
+1. `llm-plugins/src` is the only edited source.
+2. A builder writes two committed packages: `llm-plugins/claude` and `llm-plugins/openai`.
+3. The root `package.json` supplies the version. The config has no version key.
+4. Claude publishes by a fast-forward of the git branch `claude-plugin`.
+5. OpenAI publishes by a human ZIP upload.
+6. Portal Submit stays human.
+
+## Alternatives
+
+| Alternative | Why not |
+|---|---|
+| One folder with both manifests | The hosts require different manifest paths. The hosts require different MCP types. One folder cannot meet both contracts. |
+| Upload the Claude archive and let the OpenAI portal convert it | OpenAI skill text must not contain the word Claude. A Claude archive is not the OpenAI package. |
+
+## Consequences
+
+- Edit `llm-plugins/src`.
+- Run `pnpm run build:llm-plugins`.
+- Commit `llm-plugins/claude` and `llm-plugins/openai`.
+- Do not edit the generated folders.
+- `pnpm run check:llm-plugins` fails when a generated tree drifts from source.
+
+## Related
+
+- [`bondery-llm-plugins`](../../.agents/skills/bondery-llm-plugins/SKILL.md)
+- [`docs/contributing/mcp.mdx`](../contributing/mcp.mdx)

@@ -12,7 +12,7 @@ const DUMP_KEY = "bondery:voyager-dump";
 
 const DEBUG = import.meta.env.DEV || import.meta.env.WXT_DEBUG === "true";
 
-export interface VoyagerCoverageRow {
+interface VoyagerCoverageRow {
   dom: string;
   field: string;
   kept: string;
@@ -21,7 +21,7 @@ export interface VoyagerCoverageRow {
 
 let dumpOwner: string | null = null;
 
-export function isVoyagerDumpEnabled(): boolean {
+function isVoyagerDumpEnabled(): boolean {
   if (!DEBUG) {
     return false;
   }
@@ -53,11 +53,15 @@ function labelForPath(path: string): string {
   return queryId ? `graphql ${queryId}` : "graphql";
 }
 
-function includedCount(body: Record<string, unknown> | null | undefined): number {
+interface VoyagerDumpBody {
+  included?: unknown;
+}
+
+function includedCount(body: VoyagerDumpBody | null | undefined): number {
   return Array.isArray(body?.included) ? body.included.length : 0;
 }
 
-export function beginVoyagerDump(handle: string): void {
+function beginVoyagerDump(handle: string): void {
   if (!isVoyagerDumpEnabled() || dumpOwner) {
     return;
   }
@@ -65,8 +69,8 @@ export function beginVoyagerDump(handle: string): void {
   console.groupCollapsed(`[bondery][voyager] ${handle}`);
 }
 
-export function logVoyagerExchange(details: {
-  body?: Record<string, unknown> | null;
+function logVoyagerExchange(details: {
+  body?: VoyagerDumpBody | null;
   error?: unknown;
   path: string;
   status: number | "error" | "no-jsession";
@@ -92,7 +96,7 @@ export function logVoyagerExchange(details: {
   console.groupEnd();
 }
 
-export function finishVoyagerDump(handle: string, rows: VoyagerCoverageRow[]): void {
+function finishVoyagerDump(handle: string, rows: VoyagerCoverageRow[]): void {
   if (dumpOwner !== handle) {
     return;
   }
@@ -104,3 +108,6 @@ export function finishVoyagerDump(handle: string, rows: VoyagerCoverageRow[]): v
   console.groupEnd();
   dumpOwner = null;
 }
+
+export type { VoyagerCoverageRow };
+export { beginVoyagerDump, finishVoyagerDump, isVoyagerDumpEnabled, logVoyagerExchange };

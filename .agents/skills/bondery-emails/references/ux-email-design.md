@@ -6,11 +6,11 @@ Email-specific UX rules. For voice and tone, inherit from [bondery-ux](../../bon
 
 Design every template for the person who opens it — not only for the logged-in Bondery user.
 
-| Audience | Who | Typical mail | UX implications |
-|----------|-----|--------------|-----------------|
-| **Account holders** | People with a Bondery account | Sign-in link, welcome, trial, digest, account deleted | Clear why-receiving; CTA into *their* app origin; digest gets “Manage these notifications” → Settings; no marketing unsubscribe |
-| **Third-party recipients** | Someone who was shared a contact; they may have never heard of Bondery | Share contact | Personal tone; contact card first; reply goes to the *sender*; no “manage in Bondery”; no assumption they have an account |
-| **Self-host operators and their users** | Operator’s SMTP, operator’s domains | Same templates on a private instance | From address and app/website URLs come from env; logo is still Bondery today. Legal HQ is off on transactional mail; if marketing mail later enables `showLegalEntity`, it would still print Sveetech (known gap — not white-label) |
+| Audience                                | Who                                                                    | Typical mail                                          | UX implications                                                                                                                                                                                                                     |
+| --------------------------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Account holders**                     | People with a Bondery account                                          | Sign-in link, welcome, trial, digest, account deleted | Clear why-receiving; CTA into _their_ app origin; digest gets “Manage these notifications” → Settings; no marketing unsubscribe                                                                                                     |
+| **Third-party recipients**              | Someone who was shared a contact; they may have never heard of Bondery | Share contact                                         | Personal tone; contact card first; reply goes to the _sender_; no “manage in Bondery”; no assumption they have an account                                                                                                           |
+| **Self-host operators and their users** | Operator’s SMTP, operator’s domains                                    | Same templates on a private instance                  | From address and app/website URLs come from env; logo is still Bondery today. Legal HQ is off on transactional mail; if marketing mail later enables `showLegalEntity`, it would still print Sveetech (known gap — not white-label) |
 
 If a line only makes sense for an account holder (Settings, “your trial”), do not put it on share-contact mail.
 

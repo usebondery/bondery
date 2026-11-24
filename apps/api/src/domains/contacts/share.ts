@@ -20,12 +20,13 @@ import {
   requireEmailConfig,
   sendRenderedEmail,
 } from "../../lib/notifications/transporter.js";
+import { blankToUndefined } from "../../lib/platform/blank-text.js";
 import { internal, notFound } from "../../lib/platform/errors/http-errors.js";
 import { resolveContactAvatarUrl } from "../../lib/storage/avatar-urls.js";
 import type { DomainContext } from "../_shared/context.js";
 import { domainDb } from "../_shared/domain-db.js";
 
-export type ShareContactInput = {
+type ShareContactInput = {
   message?: string;
   personId: string;
   recipientEmails: string[];
@@ -45,19 +46,6 @@ type EnrichedContact = FullContactExtras & {
 
 function unnamedContactFallback(): string {
   return "Unnamed contact";
-}
-
-export function buildContactSharePreview(
-  personId: string,
-  source: ShareableFieldPreviewSource,
-): ContactSharePreviewResponse {
-  const contactName =
-    [source.firstName, source.lastName].filter(Boolean).join(" ") || unnamedContactFallback();
-  return {
-    availableFields: buildShareableFieldPreviews(source),
-    contactId: personId,
-    contactName,
-  };
 }
 
 function sharePreviewSource(
@@ -120,6 +108,21 @@ async function loadEnrichedShareContact(ctx: ShareContext, personId: string) {
   }));
 
   return { enriched, importantDates };
+}
+
+export type { ShareContactInput };
+
+export function buildContactSharePreview(
+  personId: string,
+  source: ShareableFieldPreviewSource,
+): ContactSharePreviewResponse {
+  const contactName =
+    [source.firstName, source.lastName].filter(Boolean).join(" ") || unnamedContactFallback();
+  return {
+    availableFields: buildShareableFieldPreviews(source),
+    contactId: personId,
+    contactName,
+  };
 }
 
 /**
@@ -195,14 +198,15 @@ export async function shareContact(
     instagram: has("instagram") ? (enriched.instagram ?? undefined) : undefined,
     linkedin: has("linkedin") ? (enriched.linkedin ?? undefined) : undefined,
     location: has("location") ? (enriched.location ?? undefined) : undefined,
-    message: message || undefined,
+    message: blankToUndefined(message),
     notes: has("notes") ? (enriched.notes ?? undefined) : undefined,
     phones: phones?.map((phone) => ({
       prefix: phone.prefix || undefined,
       type: phone.type || undefined,
       value: phone.value,
     })),
-    recipientEmail: recipientEmails[0],
+    // The request schema requires at least one recipient, so the fallback is never used.
+    recipientEmail: recipientEmails.at(0) ?? "",
     senderAvatarUrl:
       resolveContactAvatarUrl(user.id, {
         avatarUpdatedAt: myselfContact?.avatarUpdatedAt,
@@ -216,7 +220,7 @@ export async function shareContact(
     whatsapp: has("whatsapp") ? (enriched.whatsapp ?? undefined) : undefined,
   };
 
-  const lng = await resolveEmailLocale(user.id);
+  const lng = (await resolveEmailLocale(user.id)).locale;
   const bundle = loadEmailNamespace(lng, "ShareContactEmailBody");
   const copy = buildShareContactCopy(bundle);
   const subject = readCopyString(bundle, "subject", {
@@ -240,8 +244,8 @@ export async function shareContact(
         copy,
       }),
     ));
-  } catch {
-    throw internal("contact_share_email_render_failed");
+  } catch (error) {
+    throw internal("contact_share_email_render_failed", error);
   }
 
   try {
@@ -254,8 +258,8 @@ export async function shareContact(
       text,
       to: recipientEmails.join(", "),
     });
-  } catch {
-    throw internal("contact_share_email_send_failed");
+  } catch (error) {
+    throw internal("contact_share_email_send_failed", error);
   }
 
   return { success: true };

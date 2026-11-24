@@ -23,7 +23,7 @@ on:
       - ".github/workflows/shared-promote-image-tag.yml"
       - ".github/workflows/stage-images.yml"
       - "deploy/ops/**"
-  workflow_dispatch:
+  workflow_dispatch: {}
 
 permissions:
   contents: read
@@ -105,14 +105,14 @@ jobs:
         BONDERY_INFRA_VERSION=${{ needs.resolve.outputs.version }}
 
   image_ready:
-    needs: [resolve, promote, build-push]
+    needs: [ resolve, promote, build-push ]
     if: ${{ always() && (needs.promote.result == 'success' || needs.build-push.result == 'success') }}
     runs-on: ubuntu-latest
     steps:
       - run: echo "Website image ready (sha-${{ needs.resolve.outputs.short_sha }})"
 
   smoke:
-    needs: [image_ready, promote, build-push]
+    needs: [ image_ready, promote, build-push ]
     if: ${{ always() && needs.image_ready.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
@@ -179,7 +179,7 @@ jobs:
         run: docker compose --env-file .env.smoke down -v || true
 
   notify-dokploy:
-    needs: [image_ready, smoke]
+    needs: [ image_ready, smoke ]
     if: ${{ always() && needs.smoke.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:

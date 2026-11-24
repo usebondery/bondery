@@ -12,7 +12,7 @@ export function serializeTagIdsQueryParam(tagIds: readonly string[]): string | u
 export function parseTagIdsQueryParam(
   value: string | readonly string[] | null | undefined,
 ): string[] {
-  if (value == null) {
+  if (value === null || value === undefined) {
     return [];
   }
 

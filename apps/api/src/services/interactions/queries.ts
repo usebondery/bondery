@@ -12,11 +12,11 @@ import { internal, notFound } from "../../lib/platform/errors/http-errors.js";
 import { loadFormattedInteractions } from "./format.js";
 import { buildInteractionListWhere } from "./list-where.js";
 
-export type { InteractionsListQuery };
-
 type ServiceLog = {
   error: (payload: unknown, message: string) => void;
 };
+
+export type { InteractionsListQuery };
 
 export async function listInteractions(
   ctx: DomainContext,
@@ -27,7 +27,7 @@ export async function listInteractions(
   const { user } = ctx;
   const { limit, offset } = parsePagination(query);
   const avatarOptions = extractAvatarOptions(query);
-  const contactId = query.contactId;
+  const { contactId } = query;
   const search = normalizeSearch(query.search);
 
   if (contactId) {
@@ -49,8 +49,8 @@ export async function listInteractions(
     userId: user.id,
   });
 
-  let interactions: Awaited<ReturnType<typeof loadFormattedInteractions>> = [];
-  let totalCount = 0;
+  let interactions: Awaited<ReturnType<typeof loadFormattedInteractions>>;
+  let totalCount: number;
 
   try {
     const [rows, count] = await Promise.all([

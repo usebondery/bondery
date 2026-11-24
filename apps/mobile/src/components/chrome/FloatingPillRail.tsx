@@ -3,7 +3,6 @@ import type { AccessibilityRole } from "react-native";
 import { View } from "react-native";
 import { MOBILE_LAYOUT } from "../../theme/layout";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
-import { Group } from "../ui/Group";
 import { FLOATING_PILL_SPACE } from "./floatingChromeTokens";
 
 interface FloatingPillRailProps {
@@ -43,9 +42,9 @@ export function FloatingPillRail({
         shadowRadius: 12,
       }}
     >
-      <Group align="center" className="gap-[10px]" style={{ gap: FLOATING_PILL_SPACE }}>
+      <View className="flex-row items-center" style={{ gap: FLOATING_PILL_SPACE }}>
         {children}
-      </Group>
+      </View>
     </View>
   );
 }

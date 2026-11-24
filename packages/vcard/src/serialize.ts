@@ -8,6 +8,10 @@ import type {
   VCardTextValue,
 } from "#model.js";
 
+const PATTERN_5B3A2C3B5D_RE = /[:,;]/;
+const PATTERN_5E5C737C5C73_RE = /^\s|\s$/;
+const DATA_BASE64_RE = /^data:([^;]+);base64,(.+)$/s;
+
 const UTF8_ENCODER = new TextEncoder();
 
 function getUtf8ByteLength(value: string): number {
@@ -27,7 +31,11 @@ function escapeTextList(values: string[]): string {
 }
 
 function encodeParameterValue(value: string): string {
-  if (/[:,;]/.test(value) || value.includes(",") || /^\s|\s$/.test(value)) {
+  if (
+    PATTERN_5B3A2C3B5D_RE.test(value) ||
+    value.includes(",") ||
+    PATTERN_5E5C737C5C73_RE.test(value)
+  ) {
     return `"${value}"`;
   }
   return value;
@@ -108,10 +116,9 @@ function pushMediaValues(lines: string[], name: string, values: VCardMedia[]): v
   for (const item of values) {
     if (item.source === "data-uri") {
       // Use ENCODING=b format for broad client compatibility (Google Contacts, etc.)
-      const dataUriMatch = item.uri.match(/^data:([^;]+);base64,(.+)$/s);
+      const dataUriMatch = item.uri.match(DATA_BASE64_RE);
       if (dataUriMatch) {
-        const mimeType = dataUriMatch[1];
-        const base64Data = dataUriMatch[2];
+        const [, mimeType = "", base64Data = ""] = dataUriMatch;
         const typeSubtype = (mimeType.split("/")[1] ?? "jpeg").toUpperCase();
         const parameters: VCardParameter[] = [
           { name: "ENCODING", values: ["b"] },

@@ -23,7 +23,9 @@
     "retry": "Retry",
     "save": "Save",
     "saveChanges": "Save changes",
-    "select": "Select"
+    "select": "Select",
+    "viewContacts": "View contacts",
+    "viewMergedContact": "View merged contact"
   },
   "app": {
     "description": "The open-source personal CRM for building better bonds."
@@ -230,11 +232,13 @@
     "deleting": "Deleting...",
     "duplicating": "Duplicating...",
     "errorTitle": "Error",
+    "mobileRuntimeError": "Mobile app runtime error",
     "noResults": "No results",
     "removing": "Removing...",
     "savedTitle": "Saved",
     "saving": "Saving...",
     "sending": "Sending...",
-    "successTitle": "Success"
+    "successTitle": "Success",
+    "unknownError": "Unknown error"
   }
 }

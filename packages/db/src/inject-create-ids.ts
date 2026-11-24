@@ -11,7 +11,16 @@ const RELATION_KEYS = new Set([
   "updateMany",
 ]);
 
+/**
+ * True for rows of a model that has no `id` column, recognised by their fields. Prisma
+ * rejects an unknown `id`, so every such model that is written through `create`,
+ * `createMany` or `upsert` needs a rule here.
+ */
 function usesCompositePrimaryKey(record: Record<string, unknown>): boolean {
+  // StripeWebhookEvent: keyed by `eventId`.
+  if ("eventId" in record && "eventType" in record) {
+    return true;
+  }
   if ("interactionId" in record && "personId" in record) {
     return true;
   }
@@ -31,7 +40,7 @@ function usesCompositePrimaryKey(record: Record<string, unknown>): boolean {
 }
 
 function shouldInjectId(record: Record<string, unknown>): boolean {
-  if (record.id !== undefined && record.id !== null) {
+  if (record["id"] !== undefined && record["id"] !== null) {
     return false;
   }
   if (usesCompositePrimaryKey(record)) {
@@ -63,7 +72,7 @@ function processRelationWrite(value: unknown, key: "create" | "createMany"): unk
     const createMany = value as Record<string, unknown>;
     return {
       ...createMany,
-      data: injectCreateIds(createMany.data),
+      data: injectCreateIds(createMany["data"]),
     };
   }
 
@@ -104,7 +113,7 @@ export function injectCreateIds<T>(data: T): T {
   }
 
   if (shouldInjectId(result)) {
-    result.id = generateId();
+    result["id"] = generateId();
   }
 
   return result as T;

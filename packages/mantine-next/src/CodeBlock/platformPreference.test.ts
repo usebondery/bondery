@@ -10,6 +10,8 @@ import {
   subscribeCodeBlockPlatform,
 } from "#CodeBlock/platformPreference.js";
 
+const BONDERY_CODE_PLATFORM_LINUX_RE = /^bondery_code_platform=linux\b/;
+
 type FakeDocument = { cookie: string };
 
 const globalScope = globalThis as { document?: FakeDocument };
@@ -74,7 +76,7 @@ describe("setCodeBlockPlatform", () => {
 
     setCodeBlockPlatform("linux");
 
-    assert.match(document.cookie, /^bondery_code_platform=linux\b/);
+    assert.match(document.cookie, BONDERY_CODE_PLATFORM_LINUX_RE);
     assert.equal(getCodeBlockPlatform(), "linux");
   });
 

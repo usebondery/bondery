@@ -1,5 +1,6 @@
 import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import type { ApiErrorType } from "@bondery/schemas/errors";
 
 const apiSrc = join(import.meta.dirname, "..", "src");
 const outPath = join(
@@ -65,7 +66,7 @@ function walk(dir: string) {
       addCode(m[1], 500, "internal");
     }
     for (const m of content.matchAll(new RegExp(`code:\\s*"(${CODE})"`, "g"))) {
-      const code = m[1];
+      const [, code] = m;
       if (code === "rate_limit_exceeded") {
         addCode(code, 429, "rateLimit");
       }
@@ -208,7 +209,7 @@ function httpStatusFor(code: string, meta: CodeMeta): number {
   return meta.httpStatus;
 }
 
-function typeFor(status: number): string {
+function typeFor(status: number): ApiErrorType {
   if (status === 400) {
     return "invalid_request_error";
   }

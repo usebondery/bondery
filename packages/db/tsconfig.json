@@ -1,5 +1,8 @@
 {
   "compilerOptions": {
+    // Prisma generate emits unannotated runtime re-exports. Annotating those
+    // files is overwritten on generate, so declaration emit walks them instead.
+    "isolatedDeclarations": false,
     "outDir": "./dist",
     "rootDir": "./src",
     "types": ["node"]

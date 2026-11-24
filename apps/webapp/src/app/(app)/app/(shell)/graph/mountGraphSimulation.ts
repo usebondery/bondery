@@ -13,7 +13,21 @@ import {
   select,
 } from "d3";
 import type { RefObject } from "react";
+import { eachSelected } from "./eachSelected";
 import type { HubSimNode } from "./mountGraphOverlays";
+
+type SavedPoint = {
+  pinned: boolean;
+  x: number;
+  y: number;
+};
+
+function linkCoord(endpoint: GraphSimLink["source"], axis: "x" | "y"): number {
+  if (typeof endpoint === "object" && endpoint) {
+    return endpoint[axis] ?? 0;
+  }
+  return 0;
+}
 
 export type PersonSim = SimulationNodeDatum & RelationshipGraphNode & { nodeKind: "person" };
 
@@ -29,19 +43,6 @@ export type GraphSimLink = SimulationLinkDatum<GraphSimNode> & {
   sourcePersonId: string;
   targetPersonId: string;
 };
-
-type SavedPoint = {
-  pinned: boolean;
-  x: number;
-  y: number;
-};
-
-function linkCoord(endpoint: GraphSimLink["source"], axis: "x" | "y"): number {
-  if (typeof endpoint === "object" && endpoint) {
-    return endpoint[axis] ?? 0;
-  }
-  return 0;
-}
 
 /** Relationship links stay stronger than spokes and the weak group pull. */
 export function startGraphSimulation(input: {
@@ -125,10 +126,10 @@ export function startGraphSimulation(input: {
       .attr("y1", (row) => linkCoord(row.source, "y"))
       .attr("x2", (row) => linkCoord(row.target, "x"))
       .attr("y2", (row) => linkCoord(row.target, "y"));
-    node.each(function placeNode(row) {
+    eachSelected(node, (element, row) => {
       const x = row.x ?? 0;
       const y = row.y ?? 0;
-      const group = select(this);
+      const group = select(element);
       group.select("circle.ring").attr("cx", x).attr("cy", y);
       group.select("circle.avatar").attr("cx", x).attr("cy", y);
       svg.select(`#graph-clip-${row.id} circle`).attr("cx", x).attr("cy", y);
@@ -144,12 +145,12 @@ export function startGraphSimulation(input: {
     });
     onTick();
     for (const row of simNodes) {
-      if (row.x == null || row.y == null) {
+      if (row.x === null || row.x === undefined || row.y === null || row.y === undefined) {
         continue;
       }
       const previous = positionsRef.current.get(row.id);
       positionsRef.current.set(row.id, {
-        pinned: previous?.pinned === true || row.fx != null,
+        pinned: previous?.pinned === true || (row.fx !== null && row.fx !== undefined),
         x: row.x,
         y: row.y,
       });

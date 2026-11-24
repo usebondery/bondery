@@ -6,11 +6,11 @@
 */
 @media (max-width: 47.99em) {
   .actions > * {
-    width: 100%;
+    inline-size: 100%;
   }
 
   .actions > [class*="mantine-ActionIcon-root"] {
     align-self: flex-end;
-    width: auto;
+    inline-size: auto;
   }
 }

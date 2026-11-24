@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { CHAT_MESSAGE_MAX_ACTIVITIES } from "#constants/index.js";
 import {
   createdAtSchema,
   entityAuditSchema,
@@ -61,7 +62,7 @@ export const chatToolActivitySchema: z.ZodType<ChatToolActivity> = z.object({
 export const chatMessageContentSchema = z.object({
   activities: z
     .array(chatToolActivitySchema)
-    .max(20)
+    .max(CHAT_MESSAGE_MAX_ACTIVITIES)
     .optional()
     .describe("Tools the assistant called during this turn"),
   status: z

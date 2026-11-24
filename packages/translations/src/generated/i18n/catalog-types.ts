@@ -144,6 +144,8 @@ export type CommonCatalog = {
     save: string;
     saveChanges: string;
     select: string;
+    viewContacts: string;
+    viewMergedContact: string;
   };
   app: {
     description: string;
@@ -232,6 +234,11 @@ export type CommonCatalog = {
       group_member_ids_search_failed: string;
       group_not_found: string;
       group_remove_members_invalid_body: string;
+      idempotency_key_in_progress: string;
+      idempotency_key_invalid: string;
+      idempotency_key_mismatch: string;
+      idempotency_key_unsupported: string;
+      idempotency_response_omitted: string;
       import: string;
       import_bondery_failed: string;
       import_bondery_invalid: string;
@@ -265,11 +272,6 @@ export type CommonCatalog = {
       onboarding_failed_to_dismiss_getting_started: string;
       onboarding_failed_to_update_import_follow_up: string;
       rate: string;
-      idempotency_key_in_progress: string;
-      idempotency_key_invalid: string;
-      idempotency_key_mismatch: string;
-      idempotency_key_unsupported: string;
-      idempotency_response_omitted: string;
       rate_limit_exceeded: string;
       relationship: string;
       relationship_already_exists: string;
@@ -350,12 +352,14 @@ export type CommonCatalog = {
     deleting: string;
     duplicating: string;
     errorTitle: string;
+    mobileRuntimeError: string;
     noResults: string;
     removing: string;
     savedTitle: string;
     saving: string;
     sending: string;
     successTitle: string;
+    unknownError: string;
   };
 };
 
@@ -586,6 +590,12 @@ export type ContactsTableCatalog = {
   MergeMenu: string;
   NoHiddenColumns: string;
   NoVisibleColumns: string;
+  OtherEmails: string;
+  OtherEmails_one: string;
+  OtherEmails_other: string;
+  OtherPhones: string;
+  OtherPhones_one: string;
+  OtherPhones_other: string;
   SearchPlaceholder: string;
   SelectAllTotalTemplate: string;
   SelectedCountTemplate: string;
@@ -673,6 +683,7 @@ export type EnrichRecommendationCardCatalog = {
 export type ExtensionPopupCatalog = {
   LoggedIn: {
     OpenBondery: string;
+    UnsupportedSiteMessage: string;
   };
   LoggedOut: {
     Description: string;
@@ -693,6 +704,12 @@ export type ExtensionPopupCatalog = {
   };
   Welcome: {
     ConnectButton: string;
+    Description: string;
+    SignInHint: string;
+    SuccessClose: string;
+    SuccessDescription: string;
+    SuccessTitle: string;
+    Title: string;
   };
 };
 
@@ -982,7 +999,9 @@ export type GroupsPageCatalog = {
     UpdateFailed: string;
   };
   EmojiEmptySearch: string;
+  EmojiLabel: string;
   EmojiSearchPlaceholder: string;
+  EmojiSelectPlaceholder: string;
   Empty: string;
   FallbackTitle: string;
   HeaderDescription: string;
@@ -1095,6 +1114,9 @@ export type ChatPageCatalog = {
   ageHoursShort: string;
   ageLessThanMinuteShort: string;
   cancel: string;
+  contactEmail: string;
+  contactLastInteraction: string;
+  contactPhone: string;
   copyMessage: string;
   copyMessageSuccess: string;
   deleteSession: string;
@@ -1118,6 +1140,7 @@ export type ChatPageCatalog = {
   dictateStart: string;
   dictateStop: string;
   followUpPlaceholder: string;
+  freeLimitAlertDescriptionDate: string;
   heroPrompt: string;
   inputPlaceholder: string;
   last30Days: string;
@@ -1338,9 +1361,33 @@ export type KeepInTouchCatalog = {
 };
 
 export type LanguagesCatalog = {
+  bg: string;
   cs: string;
+  da: string;
   de: string;
+  el: string;
   en: string;
+  es: string;
+  et: string;
+  fi: string;
+  fr: string;
+  hr: string;
+  hu: string;
+  it: string;
+  lt: string;
+  lv: string;
+  nb: string;
+  nl: string;
+  pl: string;
+  pt: string;
+  ro: string;
+  ru: string;
+  sk: string;
+  sl: string;
+  sr: string;
+  sv: string;
+  tr: string;
+  uk: string;
 };
 
 export type LinkedInDataCatalog = {
@@ -1560,6 +1607,7 @@ export type MobileColorPickerCatalog = {
 };
 
 export type MobileContactDetailCatalog = {
+  AddNotesPlaceholder: string;
   DeleteContact: string;
   DeleteContactConfirmTitle: string;
   DeleteFailed: string;
@@ -1574,6 +1622,7 @@ export type MobileContactDetailCatalog = {
   GroupsEdit: string;
   GroupsEditAccessibility: string;
   GroupsLoadError: string;
+  LastInteractionLabel: string;
   NoGroups: string;
   ShareContact: string;
   ShareContactViaEmail: string;
@@ -1650,6 +1699,8 @@ export type MobileContactsCatalog = {
   GroupFilterNewGroup: string;
   GroupFilterSheetTitle: string;
   Groups: string;
+  MentionEmptyCaption: string;
+  MentionEmptyTitle: string;
   MissingEmail: string;
   MissingPhone: string;
   MoreActions: string;
@@ -1761,6 +1812,12 @@ export type MobileSettingsCatalog = {
   AppVersionLatest: string;
   AppVersionUpdateAvailable: string;
   Changelog: string;
+  DateFormatDmy: string;
+  DateFormatLocale: string;
+  DateFormatMdy: string;
+  DateFormatSelectLabel: string;
+  DateFormatUpdatedDescription: string;
+  DateFormatYmd: string;
   Docs: string;
   External: string;
   FollowUs: string;
@@ -2180,9 +2237,11 @@ export type ReminderDigestEmailCatalog = {
     nameday: string;
     other: string;
   };
+  dayFew: string;
   dayMany: string;
   dayOne: string;
   description: string;
+  headingFew: string;
   headingMany: string;
   headingOne: string;
   preview: string;
@@ -2194,12 +2253,14 @@ export type ReminderDigestEmailCatalog = {
 
 export type SettingsPageCatalog = {
   AiAssistants: {
+    AddToClaudeButton: string;
+    ClientsLabel: string;
     CopiedButton: string;
     CopyButton: string;
     Description: string;
-    DocsHelpLabel: string;
     EmptyTitle: string;
     GrantedAt: string;
+    LearnMoreMcpDocs: string;
     McpJsonLabel: string;
     McpUrlLabel: string;
     PermissionField: string;
@@ -2212,6 +2273,7 @@ export type SettingsPageCatalog = {
     RevokeMessage: string;
     RevokeTitle: string;
     RevokeTooltip: string;
+    TileTooltip: string;
     Title: string;
   };
   ApiKeys: {
@@ -2304,6 +2366,8 @@ export type SettingsPageCatalog = {
       WrongFileLinkedIn: string;
       WrongFileVCard: string;
     };
+    CategoryContacts: string;
+    CategorySocials: string;
     DeleteAccount: string;
     DeleteAccountDescription: string;
     DeleteButton: string;
@@ -2349,6 +2413,7 @@ export type SettingsPageCatalog = {
     ImportSectionTitle: string;
     InstagramImport: {
       AlreadyExists: string;
+      AndMore: string;
       Back: string;
       Cancel: string;
       ChooseContactsHint: string;
@@ -2364,6 +2429,7 @@ export type SettingsPageCatalog = {
       FilesAlertTitle: string;
       FilesReady: string;
       HaveZipFile: string;
+      ImportAction: string;
       ImportError: string;
       ImportingProgress: string;
       ImportingTitle: string;
@@ -2399,11 +2465,14 @@ export type SettingsPageCatalog = {
       NoContactsSelected: string;
       ParseError: string;
       ParseUploaded: string;
+      PeopleToAdd: string;
+      PreviewDescription: string;
       ProcessingConnections: string;
       RequestedExport: string;
       SectionTitle: string;
       SelectedZip: string;
       SelectZipFile: string;
+      SkipLabel: string;
       StrategyCloseFriends: string;
       StrategyFollowers: string;
       StrategyFollowing: string;
@@ -2415,8 +2484,10 @@ export type SettingsPageCatalog = {
       StrategyMutualFollowing: string;
       SuccessTitle: string;
       Total: string;
+      TotalLabel: string;
       UploadAnother: string;
       Valid: string;
+      WillAddLabel: string;
       ZipInvalidExtension: string;
       ZipInvalidMime: string;
       ZipInvalidType: string;
@@ -2426,6 +2497,7 @@ export type SettingsPageCatalog = {
     };
     LinkedInImport: {
       AlreadyExists: string;
+      AndMore: string;
       Back: string;
       Cancel: string;
       ChooseContactsHint: string;
@@ -2440,6 +2512,7 @@ export type SettingsPageCatalog = {
       FilesAlertFileConnectionsBold: string;
       FilesAlertTitle: string;
       HaveZipFile: string;
+      ImportAction: string;
       ImportError: string;
       ImportingProgress: string;
       ImportingTitle: string;
@@ -2464,14 +2537,19 @@ export type SettingsPageCatalog = {
       NoContactsMatchSearch: string;
       NoContactsSelected: string;
       ParseError: string;
+      PeopleToAdd: string;
+      PreviewDescription: string;
       ProcessingConnections: string;
       RequestedExport: string;
       SectionTitle: string;
       SelectZipFile: string;
+      SkipLabel: string;
       SuccessTitle: string;
       Total: string;
+      TotalLabel: string;
       UploadAnother: string;
       Valid: string;
+      WillAddLabel: string;
     };
     PleaseWait: string;
     ProductAnalytics: {
@@ -2488,6 +2566,7 @@ export type SettingsPageCatalog = {
     Title: string;
     UpdateError: string;
     VCardImport: {
+      AndMore: string;
       Back: string;
       Cancel: string;
       ChooseContactsHint: string;
@@ -2496,6 +2575,7 @@ export type SettingsPageCatalog = {
       DropzoneTitle: string;
       ErrorTitle: string;
       HaveVcfFile: string;
+      ImportAction: string;
       ImportError: string;
       ImportingProgress: string;
       ImportingTitle: string;
@@ -2518,11 +2598,16 @@ export type SettingsPageCatalog = {
       NoContactsMatchSearch: string;
       NoContactsSelected: string;
       ParseError: string;
+      PeopleToAdd: string;
+      PreviewDescription: string;
       ProcessingContacts: string;
       SelectVcfFile: string;
+      SkipLabel: string;
       SuccessTitle: string;
       Total: string;
+      TotalLabel: string;
       Valid: string;
+      WillAddLabel: string;
     };
   };
   Integration: {
@@ -2543,16 +2628,21 @@ export type SettingsPageCatalog = {
     };
     ClickToLink: string;
     ClickToUnlink: string;
+    ConnectAction: string;
     Connected: string;
     Connecting: string;
     DesktopApp: string;
+    DesktopAppInstalledTooltip: string;
     ExtensionModalTitle: string;
     GitHub: string;
+    InstallAction: string;
     Installed: string;
+    InstalledTooltip: string;
     LinkError: string;
     LinkedButCannotUnlink: string;
     LinkedIn: string;
     LinkingAccount: string;
+    ManageAction: string;
     MustHaveOneMethod: string;
     NotConnected: string;
     NotInstalled: string;
@@ -2570,12 +2660,22 @@ export type SettingsPageCatalog = {
     };
     Unlink: string;
     UnlinkAccount: string;
+    UnlinkAction: string;
     UnlinkConfirmation: string;
     UnlinkError: string;
     UnlinkSuccess: string;
   };
   Preferences: {
     Dark: string;
+    DateFormat: string;
+    DateFormatDmy: string;
+    DateFormatLocale: string;
+    DateFormatMdy: string;
+    DateFormatSearch: string;
+    DateFormatTooltip: string;
+    DateFormatUpdateError: string;
+    DateFormatUpdateSuccess: string;
+    DateFormatYmd: string;
     DefaultPhoneCountry: string;
     DefaultPhoneCountrySearch: string;
     DefaultPhoneCountryTooltip: string;
@@ -2618,6 +2718,7 @@ export type SettingsPageCatalog = {
     Title: string;
     UpdateError: string;
     UpdateSuccess: string;
+    UpdatingDateFormat: string;
     UpdatingDefaultPhoneCountry: string;
     UpdatingLanguage: string;
     UpdatingReminderTime: string;
@@ -3005,6 +3106,474 @@ export type ValidationCatalog = {
   title: string;
 };
 
+export type WebsiteBlogCatalog = {
+  Categories: {
+    All: string;
+    Bonds: string;
+    Tech: string;
+    Updates: string;
+  };
+  CategoryTitle: string;
+  Descriptions: {
+    All: string;
+    Bonds: string;
+    Tech: string;
+    Updates: string;
+  };
+  EmptyCategory: string;
+  ReadingTime: string;
+  Title: string;
+  Tooltips: {
+    All: string;
+    Bonds: string;
+    Tech: string;
+    Updates: string;
+  };
+};
+
+export type WebsiteDocsCatalog = {
+  Api: {
+    AuthGuide: string;
+    AuthTitle: {
+      ApiKey: string;
+      ApiKeyOrSession: string;
+      Generic: string;
+      Session: string;
+    };
+    Deprecated: string;
+    HideChildParameters: string;
+    JsonResponseLabel: string;
+    MultipartNote: string;
+    OneOf: string;
+    ParameterGroup: {
+      Cookie: string;
+      Header: string;
+      Path: string;
+      Query: string;
+    };
+    Parameters: string;
+    RequestBody: string;
+    Required: string;
+    ResponseLabel: string;
+    Responses: string;
+    SampleRequest: string;
+    SendHeader: string;
+    ShowChildParameters: string;
+  };
+  ApiErrors: {
+    BaseUrl: string;
+  };
+  ApiGroups: {
+    Account: string;
+    Auth: string;
+    Billing: string;
+    BrowserExtension: string;
+    Chat: string;
+    Contacts: string;
+    Geocoding: string;
+    Groups: string;
+    Health: string;
+    Interactions: string;
+    MobileApp: string;
+    Sync: string;
+    Tags: string;
+    Webhooks: string;
+  };
+  Changelog: {
+    Changelog: string;
+    EarlierVersions: string;
+    GitHubRelease: string;
+    GitHubReleases: string;
+  };
+  Copy: {
+    CopyMarkdown: string;
+    FailedLinkDescription: string;
+    FailedMarkdownDescription: string;
+    FailedTitle: string;
+    HeadingCopied: string;
+    HeadingCopyLink: string;
+    HeadingCopyLinkAria: string;
+    LinkCopiedDescription: string;
+    LinkCopiedTitle: string;
+    LinkLabel: string;
+    MarkdownCopiedDescription: string;
+    MarkdownCopiedTitle: string;
+    MoreActions: string;
+    OpenOnGitHub: string;
+    ViewAsMarkdown: string;
+  };
+  ErrorGroups: {
+    Api: string;
+    Authentication: string;
+    Authorization: string;
+    Conflicts: string;
+    InvalidRequests: string;
+    NotFound: string;
+    RateLimits: string;
+    Retired: string;
+    ServiceUnavailable: string;
+  };
+  LastUpdated: string;
+  Navigation: {
+    CloseMenu: string;
+    DrawerTitle: string;
+    Next: string;
+    OnThisPage: string;
+    OpenMenu: string;
+    Previous: string;
+  };
+  NotFound: {
+    Description: string;
+    Introduction: string;
+    Title: string;
+  };
+  Og: {
+    ApiErrorTitle: string;
+    DefaultTitle: string;
+    Subtype: string;
+  };
+  Repo: {
+    Description: string;
+    Title: string;
+  };
+  Search: {
+    Close: string;
+    Label: string;
+    Navigate: string;
+    NoResults: string;
+    Open: string;
+    Placeholder: string;
+  };
+  Sidebar: {
+    PagesAria: string;
+    SearchLabel: string;
+    SectionAria: string;
+  };
+  Tabs: {
+    Develop: string;
+    Integrate: string;
+    Product: string;
+    SelfHost: string;
+  };
+};
+
+export type WebsiteLandingCatalog = {
+  About: {
+    StoryTitle: string;
+  };
+  AiClients: {
+    WorksWith: string;
+  };
+  Bento: {
+    Assistant: {
+      Description: string;
+      Title: string;
+    };
+    KeepInTouch: {
+      Description: string;
+      Title: string;
+    };
+    Network: {
+      Description: string;
+      Title: string;
+    };
+    Sources: {
+      Description: string;
+      Title: string;
+    };
+    Sync: {
+      Description: string;
+      Title: string;
+    };
+    Timeline: {
+      Description: string;
+      Title: string;
+    };
+  };
+  Contact: {
+    Discord: string;
+    Reddit: string;
+    Subtitle: string;
+    Title: string;
+  };
+  Cta: {
+    Button: string;
+    Title: string;
+  };
+  Faq: {
+    Items: {
+      Free: {
+        Answer: string;
+        Question: string;
+      };
+      Private: {
+        Answer: string;
+        Question: string;
+      };
+      SelfHost: {
+        Answer: string;
+        DocsLinkLabel: string;
+        Question: string;
+      };
+      WhatIs: {
+        Answer: string;
+        Question: string;
+      };
+    };
+    Title: string;
+  };
+  Features: {
+    Title: string;
+  };
+  Footer: {
+    Groups: {
+      Company: string;
+      Connect: string;
+      Legal: string;
+      Product: string;
+    };
+    Links: {
+      Blog: string;
+      Contact: string;
+      Docs: string;
+      Features: string;
+      Pricing: string;
+      Privacy: string;
+      Roadmap: string;
+      Security: string;
+      Status: string;
+      Terms: string;
+    };
+  };
+  GetStarted: string;
+  Header: {
+    Aria: {
+      CloseMenu: string;
+      CloseNavigationMenu: string;
+      MobileNavigation: string;
+      OpenNavigationMenu: string;
+      PrimaryNavigation: string;
+    };
+    LoginOrSignUp: string;
+    Nav: {
+      Blog: string;
+      Docs: string;
+      Features: string;
+      Pricing: string;
+    };
+    NavigationTitle: string;
+  };
+  Hero: {
+    ImageAlt: string;
+    LearnMore: string;
+    Subtitle: string;
+    Title: string;
+  };
+  Logo: {
+    HomepageAriaLabel: string;
+  };
+  Meta: {
+    ContactDescription: string;
+    ContactTitle: string;
+    HomeImageAlt: string;
+  };
+  Pricing: {
+    Free: {
+      Features: {
+        Contacts: string;
+        History: string;
+        Reminders: string;
+      };
+      Name: string;
+      Price: string;
+      Tagline: string;
+    };
+    Premium: {
+      Features: {
+        AiAssistant: string;
+        PrioritySupport: string;
+        SmartSearch: string;
+        WritingCopilot: string;
+      };
+      Name: string;
+      Period: string;
+      Price: string;
+      Tagline: string;
+    };
+    Title: string;
+  };
+  PrivacyBand: {
+    Points: {
+      EuHosted: string;
+      OpenSource: string;
+      SelfHostOrExport: string;
+    };
+    SelfHostingGuide: string;
+    Title: string;
+    ViewOnGitHub: string;
+  };
+  Team: {
+    Members: {
+      Sveetya: {
+        Description: string;
+        Role: string;
+      };
+    };
+    Title: string;
+  };
+};
+
+export type WebsiteLandingVisualsCatalog = {
+  Assistant: {
+    Logged: string;
+    Scenarios: {
+      Alan: {
+        Answer: string;
+        Question: string;
+      };
+      Grace: {
+        Answer: string;
+        Question: string;
+      };
+      Investors: {
+        Answer: string;
+        Question: string;
+      };
+      Katherine: {
+        Answer: string;
+        Question: string;
+      };
+      LogCoffee: {
+        Answer: string;
+        LoggedNote: string;
+        LoggedTitle: string;
+        Question: string;
+      };
+      Thailand: {
+        Answer: string;
+        Bangkok: string;
+        ChiangMai: string;
+        Question: string;
+      };
+      UxDesign: {
+        Answer: string;
+        Question: string;
+      };
+    };
+  };
+  Briefing: {
+    Answers: {
+      Catchup: string;
+      Saved: string;
+    };
+    DemoNote: string;
+    DueCatchUp: string;
+    InTouchToday: string;
+    LastTalked: string;
+    Questions: {
+      Catchup: string;
+      SaveCoffee: string;
+    };
+  };
+  Encryption: {
+    Birthday: string;
+    Note: string;
+  };
+  People: {
+    Ada: {
+      Birthday: string;
+      Headline: string;
+    };
+    Alan: {
+      Birthday: string;
+      Headline: string;
+    };
+    Grace: {
+      Headline: string;
+    };
+    Hedy: {
+      Headline: string;
+    };
+    John: {
+      Headline: string;
+    };
+    Katherine: {
+      Headline: string;
+    };
+    Limor: {
+      Headline: string;
+    };
+    Margaret: {
+      Headline: string;
+    };
+    Marissa: {
+      Headline: string;
+    };
+    Sheryl: {
+      Headline: string;
+    };
+    Whitney: {
+      Headline: string;
+    };
+  };
+  Reminders: {
+    Anniversary: string;
+    Birthday: string;
+    ComingUp: string;
+  };
+  Sources: {
+    FromSource: string;
+    Merged: string;
+    Soon: string;
+  };
+  Sync: {
+    NewCity: string;
+    NewPhoto: string;
+    NewTitle: string;
+  };
+  Timeline: {
+    Call: {
+      Date: string;
+      Note: string;
+      Title: string;
+    };
+    Coffee: {
+      Date: string;
+      Note: string;
+      Title: string;
+    };
+    Party: {
+      Date: string;
+      Note: string;
+      Title: string;
+    };
+  };
+};
+
+export type WebsiteLegalCatalog = {
+  Documents: {
+    Privacy: {
+      Description: string;
+      Title: string;
+    };
+    Security: {
+      Description: string;
+      Title: string;
+    };
+    Terms: {
+      Description: string;
+      Title: string;
+    };
+  };
+  LastUpdated: string;
+};
+
+export type WebsiteNotFoundCatalog = {
+  BackToHome: string;
+  Description: string;
+  Title: string;
+};
+
 export type WelcomeEmailCatalog = {
   body: string;
   getStarted: string;
@@ -3019,9 +3588,8 @@ export interface Catalog {
   "AccountDeletedEmail": AccountDeletedEmailCatalog;
   "AddPeopleToGroupSelectionModal": AddPeopleToGroupSelectionModalCatalog;
   "AppNavigation": AppNavigationCatalog;
-  "ChatPage": ChatPageCatalog;
-  "Checkout": CheckoutCatalog;
   "CommandPalette": CommandPaletteCatalog;
+  "common": CommonCatalog;
   "ContactActionMenu": ContactActionMenuCatalog;
   "ContactAddress": ContactAddressCatalog;
   "ContactIdentityFields": ContactIdentityFieldsCatalog;
@@ -3040,12 +3608,15 @@ export interface Catalog {
   "FeedbackEmail": FeedbackEmailCatalog;
   "FeedbackPage": FeedbackPageCatalog;
   "FixContactsPage": FixContactsPageCatalog;
+  "glossary": GlossaryCatalog;
   "GraphPage": GraphPageCatalog;
   "GroupDetailPage": GroupDetailPageCatalog;
   "GroupsPage": GroupsPageCatalog;
   "HomePage": HomePageCatalog;
-  "InteractionTypes": InteractionTypesCatalog;
+  "ChatPage": ChatPageCatalog;
+  "Checkout": CheckoutCatalog;
   "InteractionsPage": InteractionsPageCatalog;
+  "InteractionTypes": InteractionTypesCatalog;
   "KeepInTouch": KeepInTouchCatalog;
   "Languages": LanguagesCatalog;
   "LinkedInData": LinkedInDataCatalog;
@@ -3066,9 +3637,9 @@ export interface Catalog {
   "MobileSettings": MobileSettingsCatalog;
   "MobileShareContactEmail": MobileShareContactEmailCatalog;
   "MobileTags": MobileTagsCatalog;
-  "NotFoundPage": NotFoundPageCatalog;
   "NotesEditor": NotesEditorCatalog;
   "NotesSlashCommands": NotesSlashCommandsCatalog;
+  "NotFoundPage": NotFoundPageCatalog;
   "OAuthConsent": OAuthConsentCatalog;
   "Onboarding": OnboardingCatalog;
   "PageHeader": PageHeaderCatalog;
@@ -3086,8 +3657,12 @@ export interface Catalog {
   "TagsSettings": TagsSettingsCatalog;
   "TrialEndingEmail": TrialEndingEmailCatalog;
   "UnavailablePage": UnavailablePageCatalog;
-  "WelcomeEmail": WelcomeEmailCatalog;
-  "common": CommonCatalog;
-  "glossary": GlossaryCatalog;
   "validation": ValidationCatalog;
+  "WebsiteBlog": WebsiteBlogCatalog;
+  "WebsiteDocs": WebsiteDocsCatalog;
+  "WebsiteLanding": WebsiteLandingCatalog;
+  "WebsiteLandingVisuals": WebsiteLandingVisualsCatalog;
+  "WebsiteLegal": WebsiteLegalCatalog;
+  "WebsiteNotFound": WebsiteNotFoundCatalog;
+  "WelcomeEmail": WelcomeEmailCatalog;
 }

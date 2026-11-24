@@ -1,41 +1,34 @@
-﻿import { Box, Group, Paper, Skeleton, Stack } from "@mantine/core";
+import { Paper, Skeleton, Stack } from "@mantine/core";
+import classes from "@/components/contacts/MergeRecommendationCard.module.css";
 import { PageHeaderSkeleton } from "@/components/shell/PageHeaderSkeleton";
+import { PageWrapper } from "@/components/shell/PageWrapper";
 
 /**
  * Skeleton for a single merge recommendation card.
- * Mirrors: 2 PersonChips side-by-side + conflict field badges below.
+ * Mirrors: duplicate badge, two PersonChips around the "merge with" label, and
+ * the two action buttons.
  */
 function MergeRecommendationCardSkeleton({ opacity = 1 }: { opacity?: number }) {
   return (
-    <Paper p="md" radius="md" style={{ opacity }} withBorder>
-      <Stack gap="md">
-        <Group justify="space-between">
-          <Group gap="xl">
-            {/* Left person */}
-            <Group gap="xs">
-              <Skeleton height={32} radius="xl" width={32} />
-              <Skeleton height={14} radius="sm" width={110} />
-            </Group>
-            <Skeleton height={14} radius="sm" width={20} />
-            {/* Right person */}
-            <Group gap="xs">
-              <Skeleton height={32} radius="xl" width={32} />
-              <Skeleton height={14} radius="sm" width={110} />
-            </Group>
-          </Group>
-          {/* Action buttons */}
-          <Group gap="sm">
-            <Skeleton height={36} radius="sm" width={80} />
-            <Skeleton height={36} radius="sm" width={36} />
-          </Group>
-        </Group>
-        {/* Conflict field badges */}
-        <Group gap="xs">
-          <Skeleton height={22} radius="xl" width={70} />
-          <Skeleton height={22} radius="xl" width={55} />
-          <Skeleton height={22} radius="xl" width={80} />
-        </Group>
-      </Stack>
+    <Paper className={classes["card"]} p="md" radius="md" style={{ opacity }} withBorder>
+      <div className={classes["badge"]}>
+        <Skeleton height={18} radius="sm" width={72} />
+      </div>
+
+      <div className={classes["pair"]}>
+        <div className={classes["person"]}>
+          <Skeleton height={32} radius="xl" width={140} />
+        </div>
+        <Skeleton className={classes["label"]} height={14} radius="sm" width={64} />
+        <div className={classes["person"]}>
+          <Skeleton height={32} radius="xl" width={140} />
+        </div>
+      </div>
+
+      <div className={classes["actions"]}>
+        <Skeleton height={36} radius="sm" width={96} />
+        <Skeleton height={36} radius="sm" width={120} />
+      </div>
     </Paper>
   );
 }
@@ -46,7 +39,7 @@ function MergeRecommendationCardSkeleton({ opacity = 1 }: { opacity?: number }) 
  */
 export function FixPageSkeleton() {
   return (
-    <Box p="xl">
+    <PageWrapper>
       {/* Header: Active/Hidden SegmentedControl (~200px) + Refresh button (~100px) */}
       <PageHeaderSkeleton primaryActionWidth={100} secondaryActionWidth={200} />
 
@@ -64,6 +57,6 @@ export function FixPageSkeleton() {
           />
         ))}
       </Stack>
-    </Box>
+    </PageWrapper>
   );
 }

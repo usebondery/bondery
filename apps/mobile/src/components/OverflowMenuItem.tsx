@@ -5,9 +5,9 @@ import { MOBILE_LAYOUT } from "../theme/layout";
 import { useMobileThemeColors } from "../theme/useMobileThemeColors";
 import { Text } from "./ui/Text";
 
-export const OVERFLOW_MENU_RADIUS = MOBILE_LAYOUT.borderRadius.control;
+const OVERFLOW_MENU_RADIUS = MOBILE_LAYOUT.borderRadius.control;
 
-export interface OverflowMenuItemConfig {
+interface OverflowMenuItemConfig {
   disabled?: boolean;
   hint?: string;
   icon: ReactNode;
@@ -22,7 +22,7 @@ interface OverflowMenuItemProps extends OverflowMenuItemConfig {
   isLast?: boolean;
 }
 
-export function OverflowMenuItem({
+function OverflowMenuItem({
   icon,
   label,
   hint,
@@ -100,3 +100,6 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: OVERFLOW_MENU_RADIUS,
   },
 });
+
+export type { OverflowMenuItemConfig };
+export { OVERFLOW_MENU_RADIUS, OverflowMenuItem };

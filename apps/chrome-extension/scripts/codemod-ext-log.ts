@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
+const TS_FILE_EXT_RE = /\.(ts|tsx)$/;
 const root = "apps/chrome-extension/src";
 
 function walk(dir: string, files: string[] = []): string[] {
@@ -8,7 +9,7 @@ function walk(dir: string, files: string[] = []): string[] {
     const filePath = path.join(dir, entry.name);
     if (entry.isDirectory()) {
       walk(filePath, files);
-    } else if (/\.(ts|tsx)$/.test(entry.name) && !filePath.endsWith("lib/log.ts")) {
+    } else if (TS_FILE_EXT_RE.test(entry.name) && !filePath.endsWith("lib/log.ts")) {
       files.push(filePath);
     }
   }

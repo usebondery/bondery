@@ -4,7 +4,7 @@ Namespace-based i18n resources for Bondery (web, mobile, website).
 
 ## Layout
 
-```
+```text
 manifest.json          # namespace registry + preload groups
 src/locales/
   en/
@@ -17,6 +17,14 @@ src/locales/
     platform/mobile/…
   cs/…
   de/…
+  es/…
+  fr/…
+  hu/…
+  pl/…
+  pt/…
+  ru/…
+  sk/…
+  uk/…
 ```
 
 A **namespace** is the JSON filename without `.json` (folders are organizational only).
@@ -29,17 +37,19 @@ import {
   DEFAULT_LOCALE,
   SUPPORTED_LOCALES,
   i18nConfig,
-  loadNamespace,
   namespacesForPlatform,
   preloadGroup,
-  resourceLoader,
 } from "@bondery/translations";
+
+import { loadNamespace, resourceLoader } from "@bondery/translations/loader";
 ```
 
 Locale codes and `DEFAULT_LOCALE` are defined in `@bondery/schemas` (`supportedLocaleSchema`, `packages/schemas/locale/supported-locales.json`).
 
 - `defaultNS` is `"common"`.
-- `resourceLoader(locale, namespace)` loads one namespace.
+- `resourceLoader(locale, namespace)` loads one namespace. It lives on the
+  `@bondery/translations/loader` subpath because it imports every locale JSON
+  module.
 - `preloadGroup("web.shell")` returns namespace names for route/layout preloading.
 
 ## Direct JSON imports
@@ -47,6 +57,12 @@ Locale codes and `DEFAULT_LOCALE` are defined in `@bondery/schemas` (`supportedL
 ```typescript
 import about from "@bondery/translations/locales/en/features/pages/AboutPage.json";
 ```
+
+## English-only namespaces
+
+A namespace entry can set `"englishOnly": true`. It then exists only in the source locale, and the structure and usage checks expect no file in other locales. The loader serves the source locale, and the locale mirror used by `i18next-cli` copies it under every locale, so tools see a complete tree.
+
+The marketing website uses this for `platform/website/*`. Its copy is typed and extracted, but not translated yet. To translate a namespace, remove the flag and add the file to every locale in the same change.
 
 ## App hooks
 
@@ -84,11 +100,35 @@ Legacy generic hooks (`useWebTranslations`, `useMobileTranslations`, `getWebTran
 
 Defined in [`packages/schemas/locale/supported-locales.json`](https://github.com/usebondery/bondery/blob/main/packages/schemas/locale/supported-locales.json) and exported as `SUPPORTED_LOCALES`, `DEFAULT_LOCALE`, and `APP_LOCALE_METADATA` from `@bondery/schemas/locale` (re-exported by `@bondery/translations`).
 
-| Code | Language |
-|------|----------|
-| `en` | English (reference / `DEFAULT_LOCALE`) |
-| `cs` | Czech |
-| `de` | German |
+| Code | Language                                        |
+| ---- | ----------------------------------------------- |
+| `en` | English (reference / `DEFAULT_LOCALE`, `en-US`) |
+| `bg` | Bulgarian (`bg-BG`)                             |
+| `cs` | Czech (`cs-CZ`)                                 |
+| `da` | Danish (`da-DK`)                                |
+| `de` | German (`de-DE`)                                |
+| `el` | Greek (`el-GR`)                                 |
+| `es` | Spanish, Spain (`es-ES`)                        |
+| `et` | Estonian (`et-EE`)                              |
+| `fi` | Finnish (`fi-FI`)                               |
+| `fr` | French (`fr-FR`)                                |
+| `hr` | Croatian (`hr-HR`)                              |
+| `hu` | Hungarian (`hu-HU`)                             |
+| `it` | Italian (`it-IT`)                               |
+| `lt` | Lithuanian (`lt-LT`)                            |
+| `lv` | Latvian (`lv-LV`)                               |
+| `nb` | Norwegian, Bokmål (`nb-NO`)                     |
+| `nl` | Dutch, Netherlands (`nl-NL`)                    |
+| `pl` | Polish (`pl-PL`)                                |
+| `pt` | Portuguese, Portugal (`pt-PT`)                  |
+| `ro` | Romanian (`ro-RO`)                              |
+| `ru` | Russian (`ru-RU`)                               |
+| `sk` | Slovak (`sk-SK`)                                |
+| `sl` | Slovenian (`sl-SI`)                             |
+| `sr` | Serbian, Latin (`sr-Latn-RS`)                   |
+| `sv` | Swedish (`sv-SE`)                               |
+| `tr` | Turkish (`tr-TR`)                               |
+| `uk` | Ukrainian (`uk-UA`)                             |
 
 ## i18next-cli (lint, types, status)
 

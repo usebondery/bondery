@@ -1,0 +1,11 @@
+{
+  "ColorCopiedMessage": "Spalvos kodas nukopijuotas į iškarpinę",
+  "CopyAccessibilityLabel": "Kopijuoti spalvos kodą",
+  "CopyFailedMessage": "Nepavyko nukopijuoti spalvos kodo. Bandyk dar kartą.",
+  "CustomColorLabel": "Pasirinktinė spalva",
+  "HexPlaceholder": "#RRGGBB",
+  "InvalidHex": "Įvesk galiojančią šešioliktainę spalvą (pvz., #AE3EC9)",
+  "SheetTitle": "Spalva",
+  "SwatchesLabel": "Greitos spalvos",
+  "TriggerAccessibilityHint": "Atidaro spalvos parinkiklį"
+}

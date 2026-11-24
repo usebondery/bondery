@@ -1,4 +1,7 @@
 import { prisma } from "@bondery/db";
+import type { FastifyBaseLogger } from "fastify";
+import { isForeignKeyViolation, isUniqueViolation } from "../../domains/_shared/prisma-helpers.js";
+import { rpcSyncAiQuotaPeriod } from "../../lib/data/rpc.js";
 import { internal } from "../../lib/platform/errors/http-errors.js";
 
 export type SubscriptionMirrorFields = {
@@ -21,6 +24,9 @@ export async function findUserIdByEmail(email: string): Promise<string | null> {
   return user?.id ?? null;
 }
 
+/** `user_missing` means the user row is gone (deleted account), so nothing was written. */
+export type UpsertSubscriptionResult = "saved" | "user_missing";
+
 export async function upsertSubscription(
   userId: string,
   stripeCustomerId: string,
@@ -30,7 +36,7 @@ export async function upsertSubscription(
   currentPeriodEnd: Date | null,
   cancelAtPeriodEnd: boolean,
   mirror: SubscriptionMirrorFields = {},
-): Promise<void> {
+): Promise<UpsertSubscriptionResult> {
   const data = {
     billingInterval: mirror.billingInterval ?? null,
     cancelAtPeriodEnd,
@@ -49,22 +55,38 @@ export async function upsertSubscription(
     userId,
   };
 
-  const existing = await prisma.subscription.findFirst({
-    select: { id: true },
-    where: { userId },
-  });
-
   try {
+    const existing = await prisma.subscription.findFirst({
+      select: { id: true },
+      where: { userId },
+    });
+
     if (existing) {
       await prisma.subscription.update({
         data,
         where: { id: existing.id },
       });
-      return;
+      return "saved";
     }
 
-    await prisma.subscription.create({ data });
+    try {
+      await prisma.subscription.create({ data });
+    } catch (error) {
+      // Stripe delivers `checkout.session.completed` and `customer.subscription.created`
+      // together. The other delivery created the row first, so update it instead.
+      if (!isUniqueViolation(error)) {
+        throw error;
+      }
+      await prisma.subscription.update({
+        data,
+        where: { stripeSubscriptionId },
+      });
+    }
+    return "saved";
   } catch (error) {
+    if (isForeignKeyViolation(error)) {
+      return "user_missing";
+    }
     throw internal("billing_subscription_upsert_failed", error);
   }
 }
@@ -105,12 +127,43 @@ export async function deletePendingSubscription(email: string): Promise<void> {
   await prisma.pendingSubscription.deleteMany({ where: { email } });
 }
 
-export async function resetPaymentFailureCount(stripeSubscriptionId: string): Promise<void> {
+/**
+ * Point the AI usage period at the paid period end, so the usage screen and the
+ * chat gate name the same reset date as the renewal line above them.
+ *
+ * A new period end opens a new usage window. Stripe redelivers events, so the
+ * same end passes more than once and changes nothing after the first time.
+ */
+export async function syncAiQuotaPeriod(
+  userId: string,
+  periodEnd: Date,
+  log?: FastifyBaseLogger,
+): Promise<void> {
   try {
-    await prisma.subscription.update({
+    await rpcSyncAiQuotaPeriod(prisma, userId, periodEnd);
+  } catch (error) {
+    throw internal("billing_subscription_upsert_failed", error);
+  }
+
+  log?.info(
+    { periodEnd: periodEnd.toISOString(), userId },
+    "stripe-webhook: ai usage period synced",
+  );
+}
+
+/*
+ * The three updates below return how many rows changed instead of throwing when there
+ * is no row. Stripe does not order its events: an invoice event can arrive before the
+ * subscription event, and a buyer with no account yet only has a pending subscription.
+ */
+
+export async function resetPaymentFailureCount(stripeSubscriptionId: string): Promise<number> {
+  try {
+    const { count } = await prisma.subscription.updateMany({
       data: { paymentFailureCount: 0 },
       where: { stripeSubscriptionId },
     });
+    return count;
   } catch (error) {
     throw internal("billing_subscription_upsert_failed", error);
   }
@@ -119,23 +172,25 @@ export async function resetPaymentFailureCount(stripeSubscriptionId: string): Pr
 export async function setPaymentFailureCount(
   stripeSubscriptionId: string,
   attemptCount: number,
-): Promise<void> {
+): Promise<number> {
   try {
-    await prisma.subscription.update({
+    const { count } = await prisma.subscription.updateMany({
       data: { paymentFailureCount: attemptCount },
       where: { stripeSubscriptionId },
     });
+    return count;
   } catch (error) {
     throw internal("billing_subscription_upsert_failed", error);
   }
 }
 
-export async function markTrialEndingEmailSent(stripeSubscriptionId: string): Promise<void> {
+export async function markTrialEndingEmailSent(stripeSubscriptionId: string): Promise<number> {
   try {
-    await prisma.subscription.update({
+    const { count } = await prisma.subscription.updateMany({
       data: { trialEndingEmailSentAt: new Date() },
       where: { stripeSubscriptionId },
     });
+    return count;
   } catch (error) {
     throw internal("billing_subscription_upsert_failed", error);
   }

@@ -20,7 +20,7 @@ function isAllowedOrigin(origin: string | undefined, allowedOrigins: string[]): 
   if (!origin) {
     return true;
   }
-  return allowedOrigins.some((allowed) => allowed === origin);
+  return allowedOrigins.includes(origin);
 }
 
 export const syncWsRoutes: AppRoutePlugin = async (fastify): Promise<void> => {
@@ -43,16 +43,17 @@ export const syncWsRoutes: AppRoutePlugin = async (fastify): Promise<void> => {
       websocket: true,
     },
     async (socket, request) => {
-      const origin = request.headers.origin;
+      const { origin } = request.headers;
       if (!isAllowedOrigin(origin, allowedOrigins)) {
         socket.close(1008, "origin not allowed");
         return;
       }
 
-      const ticket =
+      const rawTicket =
         typeof request.query === "object" && request.query !== null
-          ? String((request.query as { ticket?: string }).ticket ?? "")
-          : "";
+          ? (request.query as { ticket?: unknown }).ticket
+          : undefined;
+      const ticket = typeof rawTicket === "string" ? rawTicket : "";
 
       if (!ticket) {
         socket.close(1008, "missing ticket");

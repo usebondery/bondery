@@ -10,7 +10,7 @@ import {
   useCombobox,
 } from "@mantine/core";
 import { IconChevronDown, IconX } from "@tabler/icons-react";
-import { type ReactNode, useEffect, useRef } from "react";
+import { type ReactElement, type ReactNode, useEffect, useRef } from "react";
 import Link, { hrefAssert } from "#nextjs/NextLink.js";
 import { PersonAvatarTooltip } from "#nextjs/PersonAvatar/PersonAvatarTooltip.js";
 import { PEOPLE_PICKER_DROPDOWN_WIDTH } from "#peoplePicker/constants.js";
@@ -20,6 +20,7 @@ import {
   type PeoplePickerOnSearch,
 } from "#peoplePicker/peoplePickerPagedList.js";
 import { usePeoplePickerPagedList } from "#peoplePicker/usePeoplePickerPagedList.js";
+import { nonEmpty } from "#utils/nonEmpty.js";
 import { PersonChip as PersonChipView } from "../../PersonChip/PersonChip.js";
 import { personChipSizes } from "../../PersonChip/personChipLayout.js";
 
@@ -70,9 +71,14 @@ type PersonChipBaseProps = {
   showChevronWhenEmpty?: boolean;
   showHoverCard?: boolean;
   size?: "sm" | "md";
+  /**
+   * Lets the chip shrink and ellipsize the name instead of holding its full
+   * content width. See `PersonChipProps.truncate`.
+   */
+  truncate?: boolean;
 };
 
-export type PersonChipProps = PersonChipBaseProps &
+type PersonChipProps = PersonChipBaseProps &
   (
     | {
         /** Async server-side search with offset paging. Empty field still lists prefetched `people`. */
@@ -86,7 +92,9 @@ export type PersonChipProps = PersonChipBaseProps &
       }
   );
 
-export function PersonChip({
+const NO_PEOPLE: PersonChipIdentity[] = [];
+
+function PersonChip({
   person,
   size = "md",
   color,
@@ -96,7 +104,7 @@ export function PersonChip({
   showChevronWhenEmpty = true,
   disabled = false,
   placeholder = "Select person",
-  people = [],
+  people = NO_PEOPLE,
   contactsHasMore = false,
   searchPlaceholder = "Search...",
   noResultsLabel = "No people found",
@@ -115,7 +123,8 @@ export function PersonChip({
   rightSection,
   onSearch,
   searchDebounceMs,
-}: PersonChipProps) {
+  truncate = false,
+}: PersonChipProps): ReactElement {
   const { chevronSize, clearSize } = personChipSizes(size);
 
   const getDisplayName = (candidate: PersonChipIdentity | null) => {
@@ -127,9 +136,8 @@ export function PersonChip({
   };
 
   const searchInputRef = useRef<HTMLInputElement | null>(null);
-  const matchQuery = (candidate: PersonChipIdentity, query: string) => {
-    return getDisplayName(candidate).toLowerCase().includes(query.toLowerCase());
-  };
+  const matchQuery = (candidate: PersonChipIdentity, query: string) =>
+    getDisplayName(candidate).toLowerCase().includes(query.toLowerCase());
 
   const {
     canLoadMore,
@@ -189,10 +197,10 @@ export function PersonChip({
   }, [visibleItems]);
 
   const fullName = getDisplayName(person);
-  const resolvedHref = href || (person ? `${WEBAPP_ROUTES.PERSON}/${person.id}` : undefined);
+  const resolvedHref =
+    nonEmpty(href) ?? (person ? `${WEBAPP_ROUTES.PERSON}/${person.id}` : undefined);
 
-  const shouldShowChevron =
-    isSelectable && !disabled && ((person && !onClear) || (!person && showChevronWhenEmpty));
+  const shouldShowChevron = isSelectable && !disabled && (person ? !onClear : showChevronWhenEmpty);
 
   const endSection =
     rightSection !== undefined ? (
@@ -227,15 +235,16 @@ export function PersonChip({
       avatar={person?.avatar}
       avatarEdge={avatarEdge}
       badgeVariant={badgeVariant}
-      color={person ? color || "branding-primary" : "gray"}
+      color={person ? (nonEmpty(color) ?? "branding-primary") : "gray"}
       disabled={disabled}
       firstName={person?.firstName ?? ""}
       hasPerson={Boolean(person)}
-      interactive={isSelectable || isClickable}
+      interactive={isSelectable ? true : isClickable}
       label={fullName}
       lastName={person?.lastName}
       rightSection={endSection}
       size={size}
+      truncate={truncate}
     />
   );
 
@@ -325,3 +334,6 @@ export function PersonChip({
     </Combobox>
   );
 }
+
+export type { PersonChipProps };
+export { PersonChip };

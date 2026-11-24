@@ -1,7 +1,7 @@
 "use client";
 
 import { ActionIcon, type ActionIconProps } from "@mantine/core";
-import type { ComponentPropsWithoutRef, MouseEventHandler, ReactNode } from "react";
+import type { ComponentPropsWithoutRef, MouseEventHandler, ReactElement, ReactNode } from "react";
 import {
   ACTION_ICON_GRAPHIC_SCALE,
   type ActionIconGraphic,
@@ -27,6 +27,6 @@ export function ActionIconButton({
   icon,
   iconScale = ACTION_ICON_GRAPHIC_SCALE,
   ...actionIconProps
-}: ActionIconButtonProps) {
+}: ActionIconButtonProps): ReactElement {
   return <ActionIcon {...actionIconProps}>{renderActionIconGraphic(icon, iconScale)}</ActionIcon>;
 }

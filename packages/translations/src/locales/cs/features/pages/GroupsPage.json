@@ -94,7 +94,9 @@
     "UpdateFailed": "Nepodařilo se aktualizovat skupinu"
   },
   "EmojiEmptySearch": "Žádná emoji nenalezena",
+  "EmojiLabel": "Emoji",
   "EmojiSearchPlaceholder": "Hledat emoji…",
+  "EmojiSelectPlaceholder": "Vyberte emoji",
   "Empty": "Zatím žádné skupiny. Vytvořte novou a začněte organizovat kontakty.",
   "FallbackTitle": "Skupina",
   "HeaderDescription": "Ve Skupinách můžete organizovat kontakty do vlastních skupin pro rychlejší práci.",

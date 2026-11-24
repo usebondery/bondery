@@ -23,6 +23,13 @@ function resolveBiomeBin() {
   return require.resolve("@biomejs/biome/bin/biome");
 }
 
+function biomeErrorMessage(summary, detail) {
+  if (!detail) {
+    return summary;
+  }
+  return `${summary}\n${detail}`;
+}
+
 /**
  * Serialize, write, then format in place.
  *
@@ -52,7 +59,7 @@ export function writeFormattedJson(absPath, value, { cwd }) {
   if (result.status !== 0) {
     const detail = [result.stderr, result.stdout].filter(Boolean).join("\n").trim();
     throw new Error(
-      `writeFormattedJson: Biome failed to format ${absPath}${detail ? `\n${detail}` : ""}`,
+      biomeErrorMessage(`writeFormattedJson: Biome failed to format ${absPath}`, detail),
     );
   }
 }
@@ -83,7 +90,7 @@ export function formatWrittenJson(absPath, { cwd }) {
   if (result.status !== 0) {
     const detail = [result.stderr, result.stdout].filter(Boolean).join("\n").trim();
     throw new Error(
-      `formatWrittenJson: Biome failed to format ${absPath}${detail ? `\n${detail}` : ""}`,
+      biomeErrorMessage(`formatWrittenJson: Biome failed to format ${absPath}`, detail),
     );
   }
 }
@@ -125,7 +132,7 @@ export function formatWrittenFiles(absPaths, { cwd }) {
   if (result.status !== 0) {
     const detail = [result.stderr, result.stdout].filter(Boolean).join("\n").trim();
     throw new Error(
-      `formatWrittenFiles: Biome failed on ${absPaths.length} file(s)${detail ? `\n${detail}` : ""}`,
+      biomeErrorMessage(`formatWrittenFiles: Biome failed on ${absPaths.length} file(s)`, detail),
     );
   }
 }

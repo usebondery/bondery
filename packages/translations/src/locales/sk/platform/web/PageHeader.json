@@ -1,0 +1,15 @@
+{
+  "Concepts": {
+    "FixAndMerge": "oprave a slučování",
+    "GroupDetail": "tejto skupíne",
+    "Groups": "skupinách",
+    "Home": "domovskej stránke",
+    "KeepInTouch": "udržování kontaktu",
+    "Map": "mape",
+    "People": "lidech",
+    "PersonDetails": "detailu osoby",
+    "Timeline": "událostech"
+  },
+  "HelpLabel": "Zjistit více",
+  "LearnMoreAbout": "Zjistit více o: {concept}"
+}

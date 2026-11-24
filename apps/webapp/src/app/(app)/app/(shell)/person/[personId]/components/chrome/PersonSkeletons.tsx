@@ -1,5 +1,6 @@
-import { Box, Group, Paper, Skeleton, Stack } from "@mantine/core";
+import { Group, Paper, Skeleton, Stack } from "@mantine/core";
 import { PageHeaderSkeleton } from "@/components/shell/PageHeaderSkeleton";
+import { PageWrapper } from "@/components/shell/PageWrapper";
 
 /**
  * Full-page skeleton for the person detail page (and myself alias).
@@ -7,7 +8,7 @@ import { PageHeaderSkeleton } from "@/components/shell/PageHeaderSkeleton";
  */
 export function PersonPageSkeleton() {
   return (
-    <Box p="xl">
+    <PageWrapper>
       <PageHeaderSkeleton primaryActionWidth={40} />
 
       <Stack gap="xl">
@@ -43,6 +44,6 @@ export function PersonPageSkeleton() {
           </Stack>
         </Paper>
       </Stack>
-    </Box>
+    </PageWrapper>
   );
 }

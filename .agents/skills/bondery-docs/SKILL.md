@@ -54,11 +54,11 @@ This skill adds the agent-facing parts: which folder, which sibling skill, and w
 
 ## Decision tree
 
-| Task | Read |
-|------|------|
-| Choose the folder, audience, register, or public URL for a page | [references/docs-map.md](references/docs-map.md) |
-| Write frontmatter, `meta.json`, an icon, or a page body | [references/page-anatomy.md](references/page-anatomy.md) |
-| Write or fix the `description` frontmatter field | [references/descriptions.md](references/descriptions.md) |
+| Task                                                              | Read                                                             |
+| ----------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Choose the folder, audience, register, or public URL for a page   | [references/docs-map.md](references/docs-map.md)                 |
+| Write frontmatter, `meta.json`, an icon, or a page body           | [references/page-anatomy.md](references/page-anatomy.md)         |
+| Write or fix the `description` frontmatter field                  | [references/descriptions.md](references/descriptions.md)         |
 | Change a product behavior, add a page, or place a changelog entry | [references/change-workflows.md](references/change-workflows.md) |
 
 Full index: [references/README.md](references/README.md).
@@ -67,19 +67,19 @@ Full index: [references/README.md](references/README.md).
 
 `bondery-docs` covers structure. These skills own the content.
 
-| Skill | Owns | Read when |
-|-------|------|-----------|
-| `bondery-writing` | Register, sentence rules, and the two style guides | Before any prose |
-| `bondery-ux` | Product flows, UI copy, empty and error states | Writing user pages under `getting-started`, `apps/`, `bondery/`, `concepts/` |
-| `bondery-api` | Route contracts, errors, pagination, MCP naming | Writing `api/` or `contributing/api-routes` |
-| `bondery-database` | Prisma, migrations, Postgres conventions | Writing `contributing/schemas` or a data-model page |
-| `bondery-core` | Monorepo boundaries and architecture | Writing `contributing/architecture`, `adr/` |
-| `bondery-security` | Tenant isolation, secrets, webhooks | Writing `deploy/secrets` or an auth page |
-| `bondery-changelog` | Release-note format and commit prefix | Adding a changelog entry |
-| `bondery-release` | CalVer, tags, deploy pin | Documenting a release step |
-| `bondery-analytics` | PostHog and Plausible conventions | Documenting an event |
-| `bondery-legal` | Policy claims and subprocessors | Any doc that names a vendor or a legal term |
-| `bondery-skill-authoring` | Skill file layout | Editing a `SKILL.md`, not a docs page |
+| Skill                     | Owns                                               | Read when                                                                    |
+| ------------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `bondery-writing`         | Register, sentence rules, and the two style guides | Before any prose                                                             |
+| `bondery-ux`              | Product flows, UI copy, empty and error states     | Writing user pages under `getting-started`, `apps/`, `bondery/`, `concepts/` |
+| `bondery-api`             | Route contracts, errors, pagination, MCP naming    | Writing `api/` or `contributing/api-routes`                                  |
+| `bondery-database`        | Prisma, migrations, Postgres conventions           | Writing `contributing/schemas` or a data-model page                          |
+| `bondery-core`            | Monorepo boundaries and architecture               | Writing `contributing/architecture`, `adr/`                                  |
+| `bondery-security`        | Tenant isolation, secrets, webhooks                | Writing `deploy/secrets` or an auth page                                     |
+| `bondery-changelog`       | Release-note format and commit prefix              | Adding a changelog entry                                                     |
+| `bondery-release`         | CalVer, tags, deploy pin                           | Documenting a release step                                                   |
+| `bondery-analytics`       | PostHog and Plausible conventions                  | Documenting an event                                                         |
+| `bondery-legal`           | Policy claims and subprocessors                    | Any doc that names a vendor or a legal term                                  |
+| `bondery-skill-authoring` | Skill file layout                                  | Editing a `SKILL.md`, not a docs page                                        |
 
 ## Gotchas
 
@@ -112,14 +112,14 @@ Full index: [references/README.md](references/README.md).
 
 ## Commands
 
-| Command | Purpose |
-|---------|---------|
-| `pnpm run check:docs` | Run the link, MDX, and description checks |
-| `pnpm run check:docs:descriptions` | Validate `description` length, presence, and the release-page rules only |
-| `pnpm run check:docs:descriptions:strict` | Treat the 120-140 warning band as a failure |
-| `pnpm run check:docs:api-routes` | Validate every API route named in docs against the OpenAPI spec |
-| `pnpm run generate:doc-links` | Regenerate `doc-links.generated.ts` from `docId` frontmatter |
-| `pnpm run generate:api-docs` | Regenerate the OpenAPI reference pages from `openapi.yaml` |
+| Command                                   | Purpose                                                                  |
+| ----------------------------------------- | ------------------------------------------------------------------------ |
+| `pnpm run check:docs`                     | Run the link, MDX, and description checks                                |
+| `pnpm run check:docs:descriptions`        | Validate `description` length, presence, and the release-page rules only |
+| `pnpm run check:docs:descriptions:strict` | Treat the 120-140 warning band as a failure                              |
+| `pnpm run check:docs:api-routes`          | Validate every API route named in docs against the OpenAPI spec          |
+| `pnpm run generate:doc-links`             | Regenerate `doc-links.generated.ts` from `docId` frontmatter             |
+| `pnpm run generate:api-docs`              | Regenerate the OpenAPI reference pages from `openapi.yaml`               |
 
 ## Pre-ship checklist
 

@@ -2,13 +2,12 @@
 "use client";
 
 import { getUserFacingError } from "@bondery/helpers/api";
-import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import { detachPromise } from "@bondery/helpers/async";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
   ModalTitle,
   type PeoplePickerOnSearch,
-  successNotificationTemplate,
 } from "@bondery/mantine-next";
 import type {
   Contact,
@@ -26,9 +25,10 @@ import { useEffect, useRef, useState } from "react";
 import { getMergeAvatarIdentity } from "@/lib/api/domains/contacts";
 import { useCommonTranslations, useMergeWithModalTranslations } from "@/lib/i18n/generated/hooks";
 import { bothHaveDefinedAvatars, hasMergeAvatarChoice } from "@/lib/merge/hasMergeAvatarChoice";
+import { showMergeSuccessNotification } from "@/lib/merge/showMergeSuccessNotification";
 import { createModalId, useModalDismiss } from "@/lib/modals";
 import { routePerson } from "@/lib/navigation/route/person";
-import { useMergeContactsMutation } from "@/lib/query/hooks/useContacts";
+import { useMergeContactsMutation } from "@/lib/query/hooks/useContactMutations";
 import {
   getAutoLastInteractionChoice,
   listMergeFieldConflicts,
@@ -57,52 +57,12 @@ const mergeRequestsInFlight = new Set<string>();
 const mergeRequestsCompleted = new Set<string>();
 
 function mergeRequestKey(leftPersonId: string, rightPersonId: string): string {
-  return [leftPersonId, rightPersonId].toSorted().join(":");
+  return [leftPersonId, rightPersonId].toSorted((a, b) => (a < b ? -1 : a > b ? 1 : 0)).join(":");
 }
 
 function MergeWithModalTitle() {
   const t = useMergeWithModalTranslations();
   return <ModalTitle icon={<IconArrowMerge size={22} />} text={t("ModalTitle")} />;
-}
-
-export function openMergeWithModal({
-  contacts,
-  contactsHasMore = false,
-  leftPersonId,
-  rightPersonId,
-  disableLeftPicker = true,
-  disableRightPicker = false,
-  redirectToMergedPerson = true,
-  onSearch,
-  onSuccess,
-  people,
-  initialConflictChoices,
-}: OpenMergeWithModalParams) {
-  const modalId = createModalId("merge-with");
-
-  modals.open({
-    children: (
-      <MergeWithModal
-        contacts={contacts}
-        contactsHasMore={contactsHasMore}
-        disableLeftPicker={disableLeftPicker}
-        disableRightPicker={disableRightPicker}
-        initialConflictChoices={initialConflictChoices}
-        initialLeftPersonId={leftPersonId}
-        initialRightPersonId={rightPersonId}
-        modalId={modalId}
-        onSearch={onSearch}
-        onSuccess={onSuccess}
-        people={people}
-        redirectToMergedPerson={redirectToMergedPerson}
-      />
-    ),
-    className: "min-h-80",
-    modalId,
-    size: "lg",
-    title: <MergeWithModalTitle />,
-    trapFocus: true,
-  });
 }
 
 interface MergeWithModalProps {
@@ -143,7 +103,7 @@ function MergeWithModal({
 
   const [step, setStep] = useState<Step>(shouldSkipPickStep ? "resolve" : "pick");
   const [leftPersonId, setLeftPersonId] = useState(initialLeftPersonId);
-  const [rightPersonId, setRightPersonId] = useState(initialRightPersonId || "");
+  const [rightPersonId, setRightPersonId] = useState(initialRightPersonId ?? "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const autoMergeRef = useRef(false);
   const knownContactsRef = useRef<Map<string, Contact>>(new Map());
@@ -175,16 +135,17 @@ function MergeWithModal({
     if (!onSearch) {
       return { contacts: [], hasMore: false };
     }
-    const page = await onSearch(query, paging);
-    const contacts = page.contacts.filter((c) => !c.myself && c.id !== leftPersonId);
-    for (const contact of contacts) {
+    const search: PeoplePickerOnSearch<ContactSelectable> = onSearch;
+    const page = await search(query, paging);
+    const pageContacts = page.contacts.filter((c) => !c.myself && c.id !== leftPersonId);
+    for (const contact of pageContacts) {
       const preview = toPersonPreview(contact);
       if (preview) {
         knownPeopleRef.current.set(contact.id, preview);
       }
     }
     return {
-      contacts,
+      contacts: pageContacts,
       hasMore: page.hasMore,
     };
   };
@@ -235,20 +196,23 @@ function MergeWithModal({
     let cancelled = false;
     setAvatarsHaveDistinctContents(false);
     const abort = new AbortController();
-    void getMergeAvatarIdentity(leftPersonId, rightPersonId, { signal: abort.signal })
-      .then((result) => {
-        if (!cancelled) {
-          setAvatarsHaveDistinctContents(!result.identical);
-        }
-      })
-      .catch((error: unknown) => {
+    detachPromise(
+      getMergeAvatarIdentity(leftPersonId, rightPersonId, { signal: abort.signal }).then(
+        (result) => {
+          if (!cancelled) {
+            setAvatarsHaveDistinctContents(!result.identical);
+          }
+        },
+      ),
+      (error: unknown) => {
         if (cancelled || (error instanceof Error && error.name === "AbortError")) {
           return;
         }
         if (!cancelled) {
           setAvatarsHaveDistinctContents(true);
         }
-      });
+      },
+    );
 
     return () => {
       cancelled = true;
@@ -261,12 +225,10 @@ function MergeWithModal({
     rightContact?.lastInteraction,
   );
 
-  const conflictResolutions = (() => {
-    return {
-      ...conflictChoices,
-      ...(autoLastInteractionChoice ? { lastInteraction: autoLastInteractionChoice } : {}),
-    };
-  })();
+  const conflictResolutions = (() => ({
+    ...conflictChoices,
+    ...(autoLastInteractionChoice ? { lastInteraction: autoLastInteractionChoice } : {}),
+  }))();
   const goToResolve = () => {
     if (!leftPersonId || !rightPersonId) {
       notifications.show(
@@ -289,7 +251,7 @@ function MergeWithModal({
     }
 
     if (conflicts.length === 0) {
-      void handleMerge();
+      detachPromise(handleMerge());
       return;
     }
 
@@ -334,18 +296,21 @@ function MergeWithModal({
 
       mergeRequestsCompleted.add(requestKey);
       notifications.hide(loadingNotificationId);
-      notifications.show(
-        successNotificationTemplate({
-          description: t("MergeSuccess"),
-          title: t("SuccessTitle"),
-        }),
-      );
 
       closeModalSync();
       onSuccess?.();
       if (redirectToMergedPerson) {
         router.push(routePerson(result.personId));
+        return;
       }
+
+      showMergeSuccessNotification({
+        actionLabel: tCommon("actions.viewMergedContact"),
+        description: t("MergeSuccess"),
+        navigate: (personId) => router.push(routePerson(personId)),
+        personId: result.personId,
+        title: t("SuccessTitle"),
+      });
     } catch (error) {
       notifications.hide(loadingNotificationId);
       notifications.show(
@@ -372,7 +337,7 @@ function MergeWithModal({
       !autoMergeRef.current
     ) {
       autoMergeRef.current = true;
-      void handleMerge();
+      detachPromise(handleMerge());
     }
   }, [
     shouldSkipPickStep,
@@ -443,7 +408,7 @@ function MergeWithModal({
           onCancel={closeModal}
           onChangeChoice={setConflictChoices}
           onMerge={() => {
-            void handleMerge();
+            detachPromise(handleMerge());
           }}
           rightContact={rightContact}
           showAvatarPicker={showAvatarPicker}
@@ -463,4 +428,44 @@ function MergeWithModal({
       ) : null}
     </Stack>
   );
+}
+
+export function openMergeWithModal({
+  contacts,
+  contactsHasMore = false,
+  leftPersonId,
+  rightPersonId,
+  disableLeftPicker = true,
+  disableRightPicker = false,
+  redirectToMergedPerson = true,
+  onSearch,
+  onSuccess,
+  people,
+  initialConflictChoices,
+}: OpenMergeWithModalParams) {
+  const modalId = createModalId("merge-with");
+
+  modals.open({
+    children: (
+      <MergeWithModal
+        contacts={contacts}
+        contactsHasMore={contactsHasMore}
+        disableLeftPicker={disableLeftPicker}
+        disableRightPicker={disableRightPicker}
+        initialConflictChoices={initialConflictChoices}
+        initialLeftPersonId={leftPersonId}
+        initialRightPersonId={rightPersonId}
+        modalId={modalId}
+        onSearch={onSearch}
+        onSuccess={onSuccess}
+        people={people}
+        redirectToMergedPerson={redirectToMergedPerson}
+      />
+    ),
+    className: "min-h-80",
+    modalId,
+    size: "lg",
+    title: <MergeWithModalTitle />,
+    trapFocus: true,
+  });
 }

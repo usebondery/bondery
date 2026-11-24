@@ -2,14 +2,13 @@ import { SOCIAL_PLATFORM_URL_DETAILS } from "#globals/social-platform-urls.js";
 import { combinePhoneNumber, normalizePhoneSocialStorage } from "#phone/index.js";
 import { normalizeWebsiteUrl } from "#socials/normalize-website-url.js";
 
+function escapeRegexValue(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 export interface SocialPlatformConfig {
   baseUrl: string;
   name: string;
   urlPattern: RegExp;
-}
-
-function escapeRegexValue(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 export const socialPlatforms: Record<string, SocialPlatformConfig> = {
@@ -52,14 +51,14 @@ export type ContactSocialFieldKey =
   | "whatsapp"
   | "signal";
 
-export const CONTACT_SOCIAL_FIELD_KEYS = [
+export const CONTACT_SOCIAL_FIELD_KEYS: readonly [
   "linkedin",
   "instagram",
   "facebook",
   "whatsapp",
   "signal",
   "website",
-] as const satisfies readonly ContactSocialFieldKey[];
+] = ["linkedin", "instagram", "facebook", "whatsapp", "signal", "website"];
 
 /**
  * Extracts username from a social media URL.

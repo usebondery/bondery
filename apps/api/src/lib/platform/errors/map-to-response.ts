@@ -6,7 +6,9 @@ import { SyncConflictError } from "../../sync/conflict.js";
 import { type ErrorCode, getErrorDefinition } from "./codes.js";
 import { buildApiErrorBody, toApiErrorResponse } from "./to-api-error-response.js";
 
-export interface MappedErrorResponse {
+const FIRST_TOKEN_PATTERN = /^([^\s]+)\s+/;
+
+interface MappedErrorResponse {
   body: ApiErrorResponse;
   statusCode: number;
 }
@@ -20,7 +22,7 @@ function wrap(body: ReturnType<typeof buildApiErrorBody>): ApiErrorResponse {
 }
 
 function validationParam(message: string): string | undefined {
-  const match = message.match(/^([^\s]+)\s+/);
+  const match = message.match(FIRST_TOKEN_PATTERN);
   return match?.[1];
 }
 
@@ -28,6 +30,8 @@ function codeTypeAndStatus(code: ErrorCode): { type: ApiErrorType; status: numbe
   const definition = getErrorDefinition(code);
   return { status: definition.httpStatus, type: definition.type };
 }
+
+export type { MappedErrorResponse };
 
 export function mapErrorToResponse(
   error: FastifyError & { retryAfter?: number; code?: string },
@@ -83,6 +87,22 @@ export function mapErrorToResponse(
   }
 
   const statusCode = error.statusCode ?? 500;
+
+  // A multipart file over its cap that no route handler translated. Report it as the client
+  // error it is, not as `internal_server_error`.
+  if (error.code === "FST_REQ_FILE_TOO_LARGE") {
+    return {
+      body: wrap(
+        buildApiErrorBody({
+          code: "validation_error",
+          message: "File too large.",
+          requestId: request.id,
+          type: "invalid_request_error",
+        }),
+      ),
+      statusCode: 413,
+    };
+  }
 
   if (statusCode === 429) {
     const rawCode = error.code ?? "";

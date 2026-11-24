@@ -11,6 +11,12 @@ import AdmZip from "adm-zip";
 import { parse as parseCsv } from "csv-parse/sync";
 import type { UploadFile } from "../../../lib/data/select-fragments.js";
 
+const UFEFF_PATTERN = /^\uFEFF/;
+const HTTP_PROTOCOL_PATTERN = /^https?:\/\//i;
+const QUERY_SUFFIX_PATTERN = /\?.*$/;
+const HASH_SUFFIX_PATTERN = /#.*$/;
+const R_N_PATTERN = /\r?\n/;
+
 const LINKEDIN_REQUIRED_HEADERS = [
   "First Name",
   "Last Name",
@@ -34,7 +40,7 @@ type RawLinkedInCsvRow = {
 };
 
 function normalizeHeader(value: string): string {
-  return value.replace(/^\uFEFF/, "").trim();
+  return value.replace(UFEFF_PATTERN, "").trim();
 }
 
 function normalizeNullableString(value: string | null | undefined): string | null {
@@ -47,27 +53,25 @@ function normalizeNullableString(value: string | null | undefined): string | nul
 }
 
 function parseLinkedInUsername(rawUrl: string): { username: string | null; normalizedUrl: string } {
-  const fallback = normalizeNullableString(rawUrl) || "";
+  const fallback = normalizeNullableString(rawUrl) ?? "";
 
   if (!fallback) {
     return { normalizedUrl: "", username: null };
   }
 
   try {
-    const withProtocol = /^https?:\/\//i.test(fallback) ? fallback : `https://${fallback}`;
+    const withProtocol = HTTP_PROTOCOL_PATTERN.test(fallback) ? fallback : `https://${fallback}`;
     const parsed = new URL(withProtocol);
     const segments = parsed.pathname.split("/").filter(Boolean);
 
-    let username: string | null = null;
     const inIndex = segments.findIndex((segment) => segment.toLowerCase() === "in");
+    const afterInSegment = segments[inIndex + 1];
+    const username: string | null =
+      inIndex >= 0 && afterInSegment ? afterInSegment : (segments.at(-1) ?? null);
 
-    if (inIndex >= 0 && segments[inIndex + 1]) {
-      username = segments[inIndex + 1];
-    } else if (segments.length > 0) {
-      username = segments[segments.length - 1];
-    }
-
-    const raw = normalizeNullableString(username?.replace(/\?.*$/, "").replace(/#.*$/, "")) || null;
+    const raw = normalizeNullableString(
+      username?.replace(QUERY_SUFFIX_PATTERN, "").replace(HASH_SUFFIX_PATTERN, ""),
+    );
 
     if (!raw) {
       return { normalizedUrl: fallback, username: null };
@@ -91,6 +95,10 @@ function parseLinkedInUsername(rawUrl: string): { username: string | null; norma
   }
 }
 
+/** LinkedIn writes "Connected On" as `month/day/year`. */
+const CONNECTED_ON_SLASH_SEGMENT_COUNT = 3;
+const MONTHS_PER_YEAR = 12;
+
 function parseConnectedOn(value: string): string | null {
   const normalized = normalizeNullableString(value);
   if (!normalized) {
@@ -103,7 +111,7 @@ function parseConnectedOn(value: string): string | null {
   }
 
   const slashParts = normalized.split("/");
-  if (slashParts.length === 3) {
+  if (slashParts.length === CONNECTED_ON_SLASH_SEGMENT_COUNT) {
     const [first, second, third] = slashParts;
     const month = Number(first);
     const day = Number(second);
@@ -114,7 +122,7 @@ function parseConnectedOn(value: string): string | null {
       Number.isInteger(day) &&
       Number.isInteger(year) &&
       month >= 1 &&
-      month <= 12 &&
+      month <= MONTHS_PER_YEAR &&
       day >= 1 &&
       day <= 31
     ) {
@@ -168,14 +176,11 @@ function validateLinkedInHeaders(headers: string[]): void {
 }
 
 function extractLinkedInCsvDataSection(csvContent: string): string {
-  const normalizedContent = csvContent.replace(/^\uFEFF/, "");
-  const lines = normalizedContent.split(/\r?\n/);
+  const normalizedContent = csvContent.replace(UFEFF_PATTERN, "");
+  const lines = normalizedContent.split(R_N_PATTERN);
 
   const headerIndex = lines.findIndex((line) => {
-    const normalizedLine = line
-      .replace(/^\uFEFF/, "")
-      .trim()
-      .toLowerCase();
+    const normalizedLine = line.replace(UFEFF_PATTERN, "").trim().toLowerCase();
     return normalizedLine === LINKEDIN_HEADER_SIGNATURE;
   });
 
@@ -216,7 +221,7 @@ export function parseLinkedInCsvUpload(files: UploadFile[]): LinkedInPreparedCon
   return parsedRows.map((row, index) => {
     const firstName = normalizeNameCase(
       stripNameTitles(
-        stripNameParentheticals(stripEmojis(normalizeNullableString(row["First Name"]) || "")),
+        stripNameParentheticals(stripEmojis(normalizeNullableString(row["First Name"]) ?? "")),
       ),
     );
     const rawLastName = stripNameTitles(
@@ -257,8 +262,8 @@ export function parseLinkedInCsvUpload(files: UploadFile[]): LinkedInPreparedCon
       isValid: issues.length === 0,
       lastName: cleanedLastName,
       linkedinUrl: normalizedUrl,
-      linkedinUsername: linkedinUsername || "",
-      middleName: cleanedMiddleName || null,
+      linkedinUsername: linkedinUsername ?? "",
+      middleName: cleanedMiddleName === "" ? null : cleanedMiddleName,
       position,
       tempId: `linkedin-row-${index + 1}`,
     };

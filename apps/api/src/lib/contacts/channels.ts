@@ -28,8 +28,8 @@ export function parsePhoneEntries(
       throw new Error(`phones[${index}] must be an object`);
     }
 
-    const maybePrefix = (item as Record<string, unknown>).prefix;
-    const maybeValue = (item as Record<string, unknown>).value;
+    const maybePrefix = (item as Record<string, unknown>)["prefix"];
+    const maybeValue = (item as Record<string, unknown>)["value"];
 
     if (typeof maybePrefix !== "string" || maybePrefix.trim().length === 0) {
       throw new Error(`phones[${index}].prefix is required`);
@@ -48,9 +48,9 @@ export function parsePhoneEntries(
     }
 
     return {
-      preferred: (item as Record<string, unknown>).preferred === true,
+      preferred: (item as Record<string, unknown>)["preferred"] === true,
       prefix: normalized.prefix,
-      type: normalizeContactType((item as Record<string, unknown>).type),
+      type: normalizeContactType((item as Record<string, unknown>)["type"]),
       value: normalized.value,
     };
   });
@@ -69,14 +69,14 @@ export function parseEmailEntries(input: unknown): EmailEntry[] {
       throw new Error(`emails[${index}] must be an object`);
     }
 
-    const maybeValue = (item as Record<string, unknown>).value;
+    const maybeValue = (item as Record<string, unknown>)["value"];
     if (typeof maybeValue !== "string" || maybeValue.trim().length === 0) {
       throw new Error(`emails[${index}].value is required`);
     }
 
     return {
-      preferred: (item as Record<string, unknown>).preferred === true,
-      type: normalizeContactType((item as Record<string, unknown>).type),
+      preferred: (item as Record<string, unknown>)["preferred"] === true,
+      type: normalizeContactType((item as Record<string, unknown>)["type"]),
       value: maybeValue.trim(),
     };
   });
@@ -90,7 +90,7 @@ export async function attachContactChannels<T extends ContactWithId>(
   userId: string,
   contacts: T[],
 ): Promise<Array<T & PersonChannelRows>> {
-  if (!contacts.length) {
+  if (contacts.length === 0) {
     return [];
   }
 
@@ -141,7 +141,7 @@ export async function attachContactChannels<T extends ContactWithId>(
   }
 
   return contacts.map((contact) => {
-    const channels = map.get(contact.id) || { emails: [], phones: [] };
+    const channels = map.get(contact.id) ?? { emails: [], phones: [] };
     return {
       ...contact,
       emails: channels.emails,

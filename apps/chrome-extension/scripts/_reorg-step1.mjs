@@ -1,4 +1,4 @@
-﻿import fs from "node:fs";
+import fs from "node:fs";
 import path from "node:path";
 
 const root = "C:/Users/msmar/Documents/GitHub/bondery/apps/chrome-extension/src";

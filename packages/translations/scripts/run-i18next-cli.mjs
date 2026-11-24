@@ -18,4 +18,4 @@ const result = spawnSync(process.execPath, [i18nextCliPath, ...args, "-c", confi
   stdio: "inherit",
 });
 
-process.exit(result.status ?? 1);
+process.exitCode = result.status ?? 1;

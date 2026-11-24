@@ -10,6 +10,7 @@ import { readBuildMetadata } from "@bondery/helpers/infra/build-metadata";
 import { type AuthInfo, createMcpHandler, McpServer } from "@modelcontextprotocol/server";
 import { createInsufficientScopeError } from "better-auth/oauth2";
 import type { JWTPayload } from "jose";
+import { BEARER_PREFIX } from "../../lib/auth/bearer-token-format.js";
 import { sendFetchResponse, toFetchRequest } from "../../lib/auth/fetch-bridge.js";
 import { MCP_WRITE_SCOPE } from "../../lib/auth/index.js";
 import { createBonderyMcpAuthHandler } from "../../lib/auth/mcp-protected-handler.js";
@@ -17,6 +18,7 @@ import { domainContextFromUser } from "../../lib/platform/domain-context.js";
 import type { AppRoutePlugin } from "../../lib/platform/fastify-types.js";
 import { MCP_TIER } from "../../lib/platform/rate-limit.js";
 import { MCP_SERVER_INSTRUCTIONS } from "./instructions.js";
+import { loadMcpSkills } from "./skills.js";
 import { rewriteMcpFetchResponse } from "./tool-error-response.js";
 import { registerContactMcpTools } from "./tools/contacts.js";
 import { registerFeedbackMcpTools } from "./tools/feedback.js";
@@ -63,6 +65,7 @@ const mcpHttpHandler = createMcpHandler(
     registerShareMcpTools(server, ctx, claims);
     registerTagMcpTools(server, ctx, claims);
     registerMcpPrompts(server);
+    (await loadMcpSkills()).attach(server);
     return server;
   },
   // MCP 2026-07-28 only (`@modelcontextprotocol/server` v2). Do not serve
@@ -72,11 +75,14 @@ const mcpHttpHandler = createMcpHandler(
 
 function authInfoFromClaims(request: Request, claims: JWTPayload, email: string): AuthInfo {
   const authorization = request.headers.get("authorization") ?? "";
-  const token = authorization.startsWith("Bearer ") ? authorization.slice(7).trim() : "";
-  const scopes = typeof claims.scope === "string" ? claims.scope.split(" ").filter(Boolean) : [];
+  const token = authorization.startsWith(BEARER_PREFIX)
+    ? authorization.slice(BEARER_PREFIX.length).trim()
+    : "";
+  const scopes =
+    typeof claims["scope"] === "string" ? claims["scope"].split(" ").filter(Boolean) : [];
   const clientId =
-    (typeof claims.client_id === "string" && claims.client_id) ||
-    (typeof claims.azp === "string" && claims.azp) ||
+    (typeof claims["client_id"] === "string" && claims["client_id"]) ||
+    (typeof claims["azp"] === "string" && claims["azp"]) ||
     "";
   return {
     clientId,
@@ -121,7 +127,7 @@ async function resolveMcpToolName(request: Request): Promise<string | null> {
 }
 
 function grantedScopes(claims: JWTPayload): string[] {
-  return typeof claims.scope === "string" ? claims.scope.split(" ").filter(Boolean) : [];
+  return typeof claims["scope"] === "string" ? claims["scope"].split(" ").filter(Boolean) : [];
 }
 
 const mcpAuthHandler = createBonderyMcpAuthHandler(async (request, claims) => {
@@ -134,7 +140,7 @@ const mcpAuthHandler = createBonderyMcpAuthHandler(async (request, claims) => {
   if (!userId) {
     return new Response(
       JSON.stringify({
-        error: { code: -32000, message: "invalid_token" },
+        error: { code: -32_000, message: "invalid_token" },
         id: null,
         jsonrpc: "2.0",
       }),
@@ -149,7 +155,7 @@ const mcpAuthHandler = createBonderyMcpAuthHandler(async (request, claims) => {
   if (!user?.email) {
     return new Response(
       JSON.stringify({
-        error: { code: -32000, message: "invalid_token" },
+        error: { code: -32_000, message: "invalid_token" },
         id: null,
         jsonrpc: "2.0",
       }),
@@ -165,9 +171,9 @@ const mcpAuthHandler = createBonderyMcpAuthHandler(async (request, claims) => {
 const MCP_POST_ONLY_HEADERS = { Allow: "POST" } as const;
 
 /** Authenticated GET/HEAD stay POST-only. Missing/invalid Bearer uses the same 401 as POST. */
-const mcpProbeHandler = createBonderyMcpAuthHandler(async () => {
-  return new Response(null, { headers: MCP_POST_ONLY_HEADERS, status: 405 });
-});
+const mcpProbeHandler = createBonderyMcpAuthHandler(
+  async () => new Response(null, { headers: MCP_POST_ONLY_HEADERS, status: 405 }),
+);
 
 function fetchResponseForMcpProbe(method: string, response: Response): Response {
   if (method !== "HEAD") {
@@ -182,6 +188,9 @@ function fetchResponseForMcpProbe(method: string, response: Response): Response 
 }
 
 export const mcpRoutes: AppRoutePlugin = async (fastify) => {
+  // Fail at startup, not on the first MCP request, when a skill is invalid.
+  await loadMcpSkills();
+
   fastify.post(
     "/",
     {
@@ -208,7 +217,7 @@ export const mcpRoutes: AppRoutePlugin = async (fastify) => {
     url: "/",
   });
 
-  fastify.delete("/", { schema: { hide: true } }, async (_request, reply) => {
-    return reply.header("Allow", "POST").code(405).send();
-  });
+  fastify.delete("/", { schema: { hide: true } }, async (_request, reply) =>
+    reply.header("Allow", "POST").code(405).send(),
+  );
 };

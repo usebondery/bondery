@@ -8,8 +8,10 @@ import { domainDb } from "../_shared/domain-db.js";
 import { isUniqueViolation, toSyncRow, toTagDto } from "../_shared/prisma-helpers.js";
 import { captureCurrentSyncTxid } from "../_shared/with-txid.js";
 
+const DEFAULT_TAG_COLOR = "#3B82F6";
+
 const TAG_COLORS = [
-  "#3B82F6",
+  DEFAULT_TAG_COLOR,
   "#10B981",
   "#F59E0B",
   "#EF4444",
@@ -23,7 +25,7 @@ const TAG_COLORS = [
 
 async function pickNextColor(db: PrismaClient, userId: string): Promise<string> {
   const count = await db.tag.count({ where: { userId } });
-  return TAG_COLORS[count % TAG_COLORS.length];
+  return TAG_COLORS[count % TAG_COLORS.length] ?? DEFAULT_TAG_COLOR;
 }
 
 export interface CreateTagInput {

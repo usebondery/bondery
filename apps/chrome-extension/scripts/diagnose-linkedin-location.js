@@ -4,11 +4,22 @@
  * Compares DOM topcard lines vs Voyager geo (embedded + GraphQL).
  * Share the printed JSON when reporting location scrape issues.
  */
+
+const LINKEDIN_IN_PATH_RE = /\/in\/([^/]+)/;
+const TOPCARD_URN_RE = /ref(ACo[A-Za-z0-9_-]+?)Topcard/;
+const HTML_COMMENT_WRAPPER_RE = /^<!--(.+)-->$/s;
+const JSESSIONID_COOKIE_RE = /JSESSIONID="?([^";]+)"?/;
 (async () => {
-  const handle = decodeURIComponent(location.pathname.match(/\/in\/([^/]+)/)?.[1] ?? "");
+  /**
+   * @param {unknown} value
+   * @returns {unknown}
+   */
+  const asUnknown = (value) => value;
+
+  const handle = decodeURIComponent(location.pathname.match(LINKEDIN_IN_PATH_RE)?.[1] ?? "");
   const topcard = document.querySelector('[componentkey*="Topcard"]');
   const componentkey = topcard?.getAttribute("componentkey") ?? null;
-  const urnMatch = componentkey?.match(/ref(ACo[A-Za-z0-9_-]+?)Topcard/);
+  const urnMatch = componentkey?.match(TOPCARD_URN_RE);
   const profileUrn = urnMatch ? `urn:li:fsd_profile:${urnMatch[1]}` : null;
 
   const domLines = topcard
@@ -25,9 +36,9 @@
       if (!raw) {
         return null;
       }
-      const m = raw.match(/^<!--(.+)-->$/s);
+      const m = raw.match(HTML_COMMENT_WRAPPER_RE);
       try {
-        return JSON.parse(m ? m[1] : raw);
+        return asUnknown(JSON.parse(m ? m[1] : raw));
       } catch {
         return null;
       }
@@ -44,7 +55,7 @@
   const profiles = entities.filter((e) => e.$type?.includes("identity.profile.Profile"));
   const geos = entities.filter((e) => e.$type?.includes("Geo"));
 
-  const csrf = document.cookie.match(/JSESSIONID="?([^";]+)"?/)?.[1];
+  const csrf = document.cookie.match(JSESSIONID_COOKIE_RE)?.[1];
   const voyagerFetch = async (path) => {
     if (!csrf) {
       return { error: "no csrf" };
@@ -120,4 +131,9 @@
   console.table(domLines);
   console.log(JSON.stringify(report, null, 2));
   return report;
-})();
+})().then(
+  () => undefined,
+  (error) => {
+    console.error(error);
+  },
+);

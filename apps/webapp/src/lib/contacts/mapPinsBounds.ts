@@ -10,24 +10,6 @@ const MAX_LAT = 90;
 const MIN_LNG = -180;
 const MAX_LNG = 180;
 
-/**
- * Canonical pin-fetch viewport height (matches MapClient map height).
- * Slight over-fetch vs a short viewport is OK.
- */
-export const MAP_PINS_VIEWPORT_HEIGHT_PX = 560;
-
-/**
- * Canonical pin-fetch viewport width — generous half of the shell grid.
- * Slight over-fetch is OK when the live map is narrower.
- */
-export const MAP_PINS_VIEWPORT_WIDTH_PX = 800;
-
-export type MapPinsCamera = {
-  latitude: number;
-  longitude: number;
-  zoom: number;
-};
-
 function roundCoord(value: number): number {
   const factor = 10 ** BOUNDS_DECIMALS;
   return Math.round(value * factor) / factor;
@@ -102,3 +84,21 @@ export function boundsFromMapCamera(
     minLon: Math.min(northWest.longitude, southEast.longitude),
   });
 }
+
+/**
+ * Canonical pin-fetch viewport height (matches MapClient map height).
+ * Slight over-fetch vs a short viewport is OK.
+ */
+export const MAP_PINS_VIEWPORT_HEIGHT_PX = 560;
+
+/**
+ * Canonical pin-fetch viewport width — generous half of the shell grid.
+ * Slight over-fetch is OK when the live map is narrower.
+ */
+export const MAP_PINS_VIEWPORT_WIDTH_PX = 800;
+
+export type MapPinsCamera = {
+  latitude: number;
+  longitude: number;
+  zoom: number;
+};

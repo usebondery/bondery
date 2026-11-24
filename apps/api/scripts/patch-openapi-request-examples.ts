@@ -44,7 +44,7 @@ export function patchOpenApiRequestExamples(spec: OpenApiSpec): void {
         continue;
       }
 
-      const schema = requestJson.schema;
+      const { schema } = requestJson;
       if (schema && typeof schema === "object" && "example" in schema) {
         requestJson.example = schema.example;
         delete schema.example;

@@ -11,7 +11,7 @@ import { ActionButtonShellPressable } from "../ui/ActionButtonShellPressable";
 import { ColorPickerSheet } from "./ColorPickerSheet";
 import { getContrastBorderColor, isValidHex, normalizeHex } from "./colorUtils";
 
-export interface ColorPickerInputProps {
+interface ColorPickerInputProps {
   accessibilityLabel?: string;
   compact?: boolean;
   disabled?: boolean;
@@ -25,7 +25,7 @@ export interface ColorPickerInputProps {
   value: string;
 }
 
-export function ColorPickerInput({
+function ColorPickerInput({
   value,
   onChange,
   label,
@@ -149,3 +149,6 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
 });
+
+export type { ColorPickerInputProps };
+export { ColorPickerInput };

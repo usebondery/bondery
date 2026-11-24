@@ -6,6 +6,8 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "./check-report.mjs";
 
+const TSX_JSX_RE = /\.(tsx?|jsx?)$/;
+
 const check = createCheck("check-docs-links");
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(__dirname, "../..");
@@ -31,7 +33,7 @@ function walk(dir, acc = []) {
         continue;
       }
       walk(full, acc);
-    } else if (/\.(tsx?|jsx?)$/.test(entry)) {
+    } else if (TSX_JSX_RE.test(entry)) {
       acc.push(full);
     }
   }
@@ -106,7 +108,7 @@ function main() {
       usedIds.add(match[1]);
     }
     for (const match of content.matchAll(/\bhelpDoc=\{([^}]+)\}/g)) {
-      const expr = match[1];
+      const [, expr] = match;
       for (const idMatch of expr.matchAll(/"([^"]+)"/g)) {
         if (idMatch[1].includes(".")) {
           usedIds.add(idMatch[1]);

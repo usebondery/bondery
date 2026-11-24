@@ -2,6 +2,7 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { generateIcons } from "@bondery/branding/icon-generator";
+import { detachPromise } from "@bondery/helpers/async";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -53,7 +54,7 @@ async function main(): Promise<void> {
   writeIconSvgModule(readFileSync(svgPath, "utf8"));
 }
 
-void main().catch((error: unknown) => {
+detachPromise(main(), (error: unknown) => {
   console.error("❌ Error writing login SVG module:", error);
-  process.exit(1);
+  process.exitCode = 1;
 });

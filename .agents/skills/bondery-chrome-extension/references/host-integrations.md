@@ -39,12 +39,12 @@ Entrypoint: `entrypoints/webapp.content/index.tsx`. **Matches always include:** 
 
 `features/webapp-bridge/index.ts` translates page `postMessage` ↔ background `sendMessage`:
 
-| Page → extension | Extension → page |
-|------------------|------------------|
-| `BONDERY_EXTENSION_PING` | `BONDERY_EXTENSION_PONG` (+ `version`) |
-| `BONDERY_AUTH_STATUS_REQUEST` | `BONDERY_AUTH_STATUS_RESPONSE` |
-| `BONDERY_ENRICH_REQUEST` | `BONDERY_ENRICH_RESULT` |
-| `BONDERY_OPEN_EXTENSIONS_PAGE` | `BONDERY_OPEN_EXTENSIONS_PAGE_ACK` |
+| Page → extension               | Extension → page                       |
+| ------------------------------ | -------------------------------------- |
+| `BONDERY_EXTENSION_PING`       | `BONDERY_EXTENSION_PONG` (+ `version`) |
+| `BONDERY_AUTH_STATUS_REQUEST`  | `BONDERY_AUTH_STATUS_RESPONSE`         |
+| `BONDERY_ENRICH_REQUEST`       | `BONDERY_ENRICH_RESULT`                |
+| `BONDERY_OPEN_EXTENSIONS_PAGE` | `BONDERY_OPEN_EXTENSIONS_PAGE_ACK`     |
 
 Webapp detector: `apps/webapp/src/lib/extension/detectBonderyChromeExtension.ts` (ping/pong, default 1200ms). Enrich calls `checkExtensionAuth` (ping first, then auth; missing ping is "not installed").
 

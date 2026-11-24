@@ -1,0 +1,18 @@
+{
+  "ContactNameFallback": "Контакт",
+  "FieldUpdated": "Поле «{label}» оновлено",
+  "FirstNamePlaceholder": "Ім’я",
+  "FirstNameSuccessLabel": "Ім’я",
+  "HeadlinePlaceholder": "Заголовок",
+  "HeadlineSuccessLabel": "Заголовок",
+  "LastNamePlaceholder": "Прізвище",
+  "LastNameSuccessLabel": "Прізвище",
+  "LocationPlaceholder": "Розташування",
+  "LocationSuccessLabel": "Розташування",
+  "LocationUpdated": "Розташування оновлено",
+  "MiddleNamePlaceholder": "По батькові",
+  "MiddleNameSuccessLabel": "По батькові",
+  "NameFieldUpdated": "Поле «{label}» оновлено",
+  "SavedTitle": "Збережено",
+  "UpdateFieldFailed": "Не вдалося оновити поле «{field}»"
+}

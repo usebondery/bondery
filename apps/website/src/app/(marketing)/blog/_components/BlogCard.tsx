@@ -27,11 +27,11 @@ export function BlogCard({ title, date, description, category, slug }: BlogCardP
         withBorder
       >
         <Flex align="flex-start" gap="lg">
-          {CategoryIcon && (
+          {CategoryIcon ? (
             <ThemeIcon radius="md" size="xl" variant="light">
               <CategoryIcon size={24} />
             </ThemeIcon>
-          )}
+          ) : null}
           <Flex direction="column" gap={4} style={{ flex: 1, minWidth: 0 }}>
             <Title lineClamp={1} order={3}>
               {title}

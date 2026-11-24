@@ -1,0 +1,18 @@
+{
+  "alreadySubscribedMessage": "У теб уже есть активная подписка Premium.",
+  "alreadySubscribedTitle": "Уже подписаны",
+  "errorMessage": "Что-то пошло не так. Опитай снова.",
+  "errorTitle": "Грешка оформления",
+  "errorUnauthorized": "Войдите и опитай снова.",
+  "intervalAnnual": "Ежегодно",
+  "intervalMonthly": "Ежемесячно",
+  "paymentBlockedAction": "Обновить оплату",
+  "paymentBlockedMessage": "Неуспешно обработать платёж после нескольких попыток. Обновите платёжные данные, чтобы восстановить Premium.",
+  "paymentBlockedTitle": "Требуется оплата",
+  "successMessage": "300 сообщений ИИ в месяц и все функции Premium.",
+  "successTitle": "У теб Premium!",
+  "upgradePendingMessage": "Аккаунт скоро перейдёт на Premium.",
+  "upgradePendingTitle": "Платёж получен",
+  "upgradesDisabledTooltip": "Переход на Premium пока недоступен. Загляните позже.",
+  "upgradeToPremium": "Перейти на Premium"
+}

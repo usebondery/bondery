@@ -1,0 +1,22 @@
+{
+  "AddError": "Kunde ikke tilføje etiket",
+  "AddNewTagTooltip": "Opret ny etiket",
+  "AddSuccess": "Etiket tillagd",
+  "AddTagTooltip": "Lägg till etiket",
+  "CreateError": "Kunde ikke opret etiket",
+  "CreateNewTagEmpty": "Opret ny etiket",
+  "CreateNewTagOption": "Opret ny etiket \"{label}\"",
+  "CreateTagCancel": "Annuller",
+  "CreateTagConfirm": "Opret og tilføj",
+  "CreateTagMessage": "Etiketen \"{name}\" finns ikke end. Vil du opret den og tilføje på kontakten?",
+  "CreateTagTitle": "Opret ny etiket?",
+  "Label": "Etiketer",
+  "NoTagsFound": "Inga etiketer blev fundet",
+  "Placeholder": "Lägg till etiketer...",
+  "RemoveError": "Kunde ikke slette etiket",
+  "RemoveTagTooltip": "Slet etiket",
+  "SearchPlaceholder": "Sök eller opret etiket...",
+  "TagAlreadyAddedMessage": "Etiketen \"{name}\" er redan tillagd på kontakten.",
+  "TagAlreadyAddedTitle": "Etiket redan tillagd",
+  "TagAlreadyAppliedTooltip": "Etiket redan tilldelad"
+}

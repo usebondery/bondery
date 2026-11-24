@@ -13,7 +13,7 @@ type ChildTable =
   | "people_tags";
 
 function upsertChange(table: SyncTableKey, row: Row): SyncChange {
-  const id = String(row.id);
+  const id = String(row["id"]);
   return { entityId: id, operation: "update", table, value: row };
 }
 
@@ -28,7 +28,7 @@ async function listChildIds(
   personId: string,
 ): Promise<string[]> {
   const rows = await loadChildRows(db, table, userId, personId);
-  return rows.map((row) => String(row.id));
+  return rows.map((row) => String(row["id"]));
 }
 
 async function loadChildRows(
@@ -114,7 +114,7 @@ export async function buildChildTableReplaceChanges(
   db: PrismaClient = prisma,
 ): Promise<SyncChange[]> {
   const rows = await loadChildRows(db, table, userId, personId);
-  const currentIds = new Set(rows.map((row) => String(row.id)));
+  const currentIds = new Set(rows.map((row) => String(row["id"])));
   const changes: SyncChange[] = [];
 
   for (const id of priorIds) {
@@ -164,7 +164,7 @@ export async function buildPeopleGroupsChanges(
 
   return rows.map((row) => {
     const syncRow = toSyncRow(row);
-    const id = String(syncRow.id);
+    const id = String(syncRow["id"]);
     if (operation === "delete") {
       return deleteChange("people_groups", id);
     }

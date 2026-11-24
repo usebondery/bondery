@@ -7,15 +7,27 @@ function attrString(value: unknown): string {
   return typeof value === "string" ? value : "";
 }
 
+export type PersonMentionAttrs = {
+  avatar?: string | null;
+  firstName?: string | null;
+  headline?: string | null;
+  id?: string | null;
+  label?: string | null;
+  lastName?: string | null;
+  location?: string | null;
+  mentionSuggestionChar?: string | null;
+};
+
 /**
  * Inline NodeView for the Mention extension.
  * Renders the mentioned person as a PersonChip Badge directly in the editor.
  */
 export function MentionNodeView({ node }: NodeViewProps) {
-  const firstName = attrString(node.attrs.firstName);
-  const lastName = attrString(node.attrs.lastName);
-  const label = attrString(node.attrs.label);
-  const id = attrString(node.attrs.id);
+  const attrs = node.attrs as PersonMentionAttrs;
+  const firstName = attrString(attrs.firstName);
+  const lastName = attrString(attrs.lastName);
+  const label = attrString(attrs.label);
+  const id = attrString(attrs.id);
 
   return (
     <NodeViewWrapper
@@ -27,12 +39,12 @@ export function MentionNodeView({ node }: NodeViewProps) {
         isClickable={true}
         openInNewTab={true}
         person={{
-          avatar: attrString(node.attrs.avatar) || null,
+          avatar: attrString(attrs.avatar) || null,
           firstName: firstName || label || id,
-          headline: attrString(node.attrs.headline) || null,
+          headline: attrString(attrs.headline) || null,
           id,
           lastName: lastName || null,
-          location: attrString(node.attrs.location) || null,
+          location: attrString(attrs.location) || null,
         }}
         showHoverCard={true}
         size="sm"

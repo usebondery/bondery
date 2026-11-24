@@ -9,12 +9,15 @@ function callSplashFn(fn: unknown): void {
   try {
     const result = (fn as () => unknown)();
     if (
-      result != null &&
+      result !== null &&
+      result !== undefined &&
       typeof result === "object" &&
       "catch" in result &&
       typeof result.catch === "function"
     ) {
-      result.catch(() => {});
+      result.catch(() => {
+        // Native splash promise can reject during Fast Refresh or a stale binary.
+      });
     }
   } catch {
     // Native splash methods can be missing during Fast Refresh or a stale binary.

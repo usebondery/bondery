@@ -1,0 +1,11 @@
+{
+  "ActionsButton": "Åtgärder",
+  "CannotDeleteMyself": "Du kan inte ta bort din egen kontaktkort",
+  "CannotMergeMyself": "Du kan inte slå ihop din egen kontaktkort med andra",
+  "DeleteContact": "Ta bort kontakt",
+  "DownloadVCard": "Ladda ner vCard",
+  "ExportError": "Fel",
+  "ExportErrorDescription": "Kunde inte exportera kontakten. Försök igen.",
+  "ExportSuccess": "Klart",
+  "ExportSuccessDescription": "Kontakten exporterad som vCard"
+}

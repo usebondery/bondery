@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 
 import { loadTestEnv } from "./load-test-env.js";
 
-describe("GET /health/ready", () => {
+describe("gET /health/ready", () => {
   it("returns 200 without auth", async () => {
     loadTestEnv();
 

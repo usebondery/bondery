@@ -59,8 +59,8 @@ export function useContactPhotoUpload({
         // Pull downloads the stored JPEG if the local copy fails.
       }
       onAvatarUpdated(avatarUrl);
-    } catch (err) {
-      showErrorToast(err);
+    } catch (error) {
+      showErrorToast(error);
     } finally {
       setIsPhotoBusy(false);
     }
@@ -92,7 +92,7 @@ export function useContactPhotoUpload({
       return;
     }
 
-    const asset = result.assets[0];
+    const [asset] = result.assets;
     const mimeType = asset.mimeType ?? "image/jpeg";
 
     if (
@@ -126,8 +126,8 @@ export function useContactPhotoUpload({
       }
       onAvatarUpdated(null);
       setRemoveConfirmOpen(false);
-    } catch (err) {
-      showErrorToast(err);
+    } catch (error) {
+      showErrorToast(error);
     } finally {
       setIsPhotoBusy(false);
     }

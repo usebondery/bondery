@@ -8,6 +8,12 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "../../../scripts/check/check-report.mjs";
 
+const JS_TS_EXTENSION = /\.(tsx?|jsx?)$/;
+const USE_A_Z_MODAL = /\buse[A-Z]\w*Modal\(/;
+const MODAL = /<Modal[\s>]/;
+const FUNCTION_MODAL_FUNCTION_FORM_MODALBODY = /function\s+\w+Modal|function\s+\w+Form|ModalBody/;
+const CONTACTSTABLE = /<ContactsTable[\s>]/;
+
 const check = createCheck("check-modal-patterns");
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -48,7 +54,7 @@ function walk(dir: string, acc: string[] = []): string[] {
         continue;
       }
       walk(full, acc);
-    } else if (/\.(tsx?|jsx?)$/.test(entry)) {
+    } else if (JS_TS_EXTENSION.test(entry)) {
       acc.push(full);
     }
   }
@@ -64,7 +70,7 @@ function hasModalBlockingHelper(content: string): boolean {
     return true;
   }
   // Hooks that own dismiss/blocking for their modal body (see useInstagramImportModal).
-  return /\buse[A-Z]\w*Modal\(/.test(content);
+  return USE_A_Z_MODAL.test(content);
 }
 
 function checkFile(absPath: string): Violation[] {
@@ -72,7 +78,7 @@ function checkFile(absPath: string): Violation[] {
   const content = readFileSync(absPath, "utf8");
   const violations: Violation[] = [];
 
-  if (/<Modal[\s>]/.test(content) && !ALLOWED_DECLARATIVE_MODAL_FILES.has(rel)) {
+  if (MODAL.test(content) && !ALLOWED_DECLARATIVE_MODAL_FILES.has(rel)) {
     violations.push({
       detail:
         "Use modals.open via open*Modal helpers; OnboardingClient is the only <Modal> exception",
@@ -118,7 +124,7 @@ function checkFile(absPath: string): Violation[] {
   if (
     BLOCKING_STATE_PATTERN.test(content) &&
     content.includes("modalId") &&
-    /function\s+\w+Modal|function\s+\w+Form|ModalBody/.test(content) &&
+    FUNCTION_MODAL_FUNCTION_FORM_MODALBODY.test(content) &&
     !hasModalBlockingHelper(content) &&
     !rel.includes("openStandardConfirmModal")
   ) {
@@ -131,7 +137,7 @@ function checkFile(absPath: string): Violation[] {
   }
 
   if (
-    /<ContactsTable[\s>]/.test(content) &&
+    CONTACTSTABLE.test(content) &&
     content.includes("ModalFooter") &&
     !content.includes("ModalScrollLayout")
   ) {

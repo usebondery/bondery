@@ -10,7 +10,7 @@ import type {
   useCreateContactRelationshipMutation,
   useDeleteContactRelationshipMutation,
   useUpdateContactRelationshipMutation,
-} from "@/lib/query/hooks/useContacts";
+} from "@/lib/query/hooks/useContactMutations";
 
 type CreateRelationshipMutation = ReturnType<typeof useCreateContactRelationshipMutation>;
 type UpdateRelationshipMutation = ReturnType<typeof useUpdateContactRelationshipMutation>;

@@ -1,0 +1,57 @@
+{
+  "AddInteraction": "Žurnāla mijiedarbība",
+  "AddPerson": "Izveidot personu",
+  "ExtensionNudge": {
+    "Description": "Importē kontaktus tieši no LinkedIn un Instagram profiliem un bez piepūles uzturi tīklu aktuālu.",
+    "InstallButton": "Instalēt paplašinājumu",
+    "Title": "Pastiprini Bondery ar mūsu Chrome paplašinājumu"
+  },
+  "HeaderDescription": "Sākumā vari ātri pārskatīt savu tīklu, atgādinājumus un nesenās mijiedarbības.",
+  "NoRecentlyAdded": "Vēl nav pievienota neviena persona.",
+  "NoRecentlyInteracted": "Vēl nav nevienas nesenas mijiedarbības.",
+  "NotificationInDays": "Pēc {count} dienām",
+  "NotificationSent": "Jau nosūtīts",
+  "NotificationToday": "Šodien",
+  "NotificationTomorrow": "rīt",
+  "NotificationTooltipInDays": "Tu saņemsi paziņojumu pēc {count} dienām",
+  "NotificationTooltipSentAt": "Paziņojums jau tika nosūtīts uz {sentAt}",
+  "NotificationTooltipToday": "Tu saņemsi paziņojumu šodien",
+  "NotificationTooltipTomorrow": "Tu saņemsi paziņojumu rīt",
+  "NoUpcomingReminders": "Nākamo 30 dienu laikā nav gaidāmu atgādinājumu.",
+  "ProgressRail": {
+    "AwaitingExport": "Tavs {platform} tiek eksportēts. Eksports parasti tiek piegādāts 5–15 minūšu laikā.",
+    "ChoosePlatform": "Atlasīt platformu, no kuras importēt",
+    "Dismiss": "Atlaist",
+    "HaveZipFile": "Man ir fails",
+    "Instagram": "Instagram",
+    "LinkedIn": "LinkedIn",
+    "Progress": "{completed} no {total} pabeigts",
+    "SkipImport": "Izlaist importēšanu",
+    "Tasks": {
+      "AddContacts": "Pievienot savus pirmos kontaktus",
+      "ImportContacts": "Importēt savus kontaktus",
+      "LogInteraction": "Reģistrēt savu pirmo mijiedarbību",
+      "SetReminder": "Iestatīt atgādinājumu"
+    },
+    "Title": "Darba sākšana"
+  },
+  "RecentlyAddedTitle": "Nesen pievienots",
+  "RecentlyAddedTooltip": "5 jaunākie tavs tīklā pievienotie personas.",
+  "RecentlyInteractedTitle": "Nesen sazinājās",
+  "RecentlyInteractedTooltip": "5 personas, ar kurām pēdējā laikā sazinājāties.",
+  "Stats": {
+    "InteractionsTitle": "Šī mēneša mijiedarbības",
+    "InteractionsTooltip": "Mijiedarbības gadījumu skaits, ko veicāt {month} mēnesī.",
+    "NewContactsTitle": "Jauni kontaktus šogad",
+    "NewContactsTooltip": "Cik cilvēku tika pievienoti tavs tīklam pašreizējā gadā ({year}).",
+    "TotalContactsTitle": "Kopējais kontaktu skaits",
+    "TotalContactsTooltip": "Lietotāju skaits tavs tīklā Bondery."
+  },
+  "TimelinePreviewTitle": "Mijiedarbība",
+  "TimelinePreviewTooltip": "Tavs 5 pēdējās mijiedarbības. Noklikšķini, lai redzētu visas mijiedarbības.",
+  "Title": "Sākums",
+  "UnknownPerson": "Nezināma persona",
+  "UpcomingRemindersMonthInfo": "Tiek rādīti atgādinājumi ar paziņojumiem nākamo 30 dienu laikā.",
+  "UpcomingRemindersTitle": "Gaidāmie atgādinājumi",
+  "UpcomingRemindersTooltip": "Šie ir tavs gaidāmie atgādinājumi, kas jāveic nākamo 30 dienu laikā."
+}

@@ -7,29 +7,12 @@ import type { OAuthProvidersBitmap } from "@bondery/schemas/oauth-providers";
 import { emailConfigFromNodeEnv } from "../notifications/transporter.js";
 import logger from "../platform/logger.js";
 
-export function isOAuthAppConfigured(
-  clientId: string | undefined,
-  clientSecret: string | undefined,
-): boolean {
-  return Boolean(clientId?.trim() && clientSecret?.trim());
-}
-
-/** True when exactly one of id/secret is non-empty after trim. */
-export function isOAuthCredentialPairIncomplete(
-  clientId: string | undefined,
-  clientSecret: string | undefined,
-): boolean {
-  const hasId = Boolean(clientId?.trim());
-  const hasSecret = Boolean(clientSecret?.trim());
-  return hasId !== hasSecret;
-}
-
-export type OAuthSocialProvidersConfig = {
+type OAuthSocialProvidersConfig = {
   github?: { clientId: string; clientSecret: string };
   linkedin?: { clientId: string; clientSecret: string };
 };
 
-export type OAuthProviderSnapshot = {
+type OAuthProviderSnapshot = {
   incomplete: { github: boolean; linkedin: boolean };
   oauthProviders: OAuthProvidersBitmap;
   socialProviders: OAuthSocialProvidersConfig;
@@ -49,13 +32,42 @@ function configuredPair(
   };
 }
 
+const snapshot = resolveOAuthProviderSnapshot();
+
+logger.info(
+  {
+    incomplete: snapshot.incomplete,
+    oauthProviders: snapshot.oauthProviders,
+  },
+  "oauth provider snapshot",
+);
+
+export type { OAuthProviderSnapshot, OAuthSocialProvidersConfig };
+
+export function isOAuthAppConfigured(
+  clientId: string | undefined,
+  clientSecret: string | undefined,
+): boolean {
+  return Boolean(clientId?.trim() && clientSecret?.trim());
+}
+
+/** True when exactly one of id/secret is non-empty after trim. */
+export function isOAuthCredentialPairIncomplete(
+  clientId: string | undefined,
+  clientSecret: string | undefined,
+): boolean {
+  const hasId = Boolean(clientId?.trim());
+  const hasSecret = Boolean(clientSecret?.trim());
+  return hasId !== hasSecret;
+}
+
 export function resolveOAuthProviderSnapshot(
   env: NodeJS.ProcessEnv = process.env,
 ): OAuthProviderSnapshot {
-  const githubId = env.BONDERY_PRIVATE_AUTH_GITHUB_CLIENT_ID;
-  const githubSecret = env.BONDERY_PRIVATE_AUTH_GITHUB_CLIENT_SECRET;
-  const linkedinId = env.BONDERY_PRIVATE_AUTH_LINKEDIN_CLIENT_ID;
-  const linkedinSecret = env.BONDERY_PRIVATE_AUTH_LINKEDIN_CLIENT_SECRET;
+  const githubId = env["BONDERY_PRIVATE_AUTH_GITHUB_CLIENT_ID"];
+  const githubSecret = env["BONDERY_PRIVATE_AUTH_GITHUB_CLIENT_SECRET"];
+  const linkedinId = env["BONDERY_PRIVATE_AUTH_LINKEDIN_CLIENT_ID"];
+  const linkedinSecret = env["BONDERY_PRIVATE_AUTH_LINKEDIN_CLIENT_SECRET"];
 
   const githubPair = configuredPair(githubId, githubSecret);
   const linkedinPair = configuredPair(linkedinId, linkedinSecret);
@@ -82,18 +94,8 @@ export function resolveOAuthProviderSnapshot(
   };
 }
 
-const snapshot = resolveOAuthProviderSnapshot();
-
-logger.info(
-  {
-    incomplete: snapshot.incomplete,
-    oauthProviders: snapshot.oauthProviders,
-  },
-  "oauth provider snapshot",
-);
-
 /** Frozen public bitmap — booleans only, no secrets. */
-export const oauthProviders = snapshot.oauthProviders;
+export const { oauthProviders } = snapshot;
 
 /** Better Auth `socialProviders` — omit unconfigured IdPs entirely. */
 export const oauthSocialProviders = snapshot.socialProviders;

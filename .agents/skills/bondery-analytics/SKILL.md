@@ -21,17 +21,17 @@ Router and contract enforcer for **Plausible** (marketing) and **PostHog** (prod
 - Wiring Plausible (`apps/website`) or PostHog (`apps/webapp`, API, future mobile)
 - Server vs client capture, `distinct_id`, identity linking (`identify` / `reset`)
 - Analytics env vars, runtime config, CSP for analytics scripts
-- PostHog session replay, feature flags, or logs (when adopted)
+- PostHog API logs and error tracking (enabled), session replay or feature flags (when adopted)
 - Debugging events not appearing (ad blockers, missing env, dev vs prod)
 
 ## When not to use
 
-| Topic | Skill |
-|-------|-------|
-| Privacy policy copy, subprocessors, consent UX | `bondery-legal` |
-| PII in API payloads, auth, tenant isolation | `bondery-security` |
-| Plausible CE infra deploy (Traefik, Postgres) | `deploy/plausible/` |
-| Application error logging outside PostHog Logs | ops runbooks |
+| Topic                                          | Skill               |
+| ---------------------------------------------- | ------------------- |
+| Privacy policy copy, subprocessors, consent UX | `bondery-legal`     |
+| PII in API payloads, auth, tenant isolation    | `bondery-security`  |
+| Plausible CE infra deploy (Traefik, Postgres)  | `deploy/plausible/` |
+| Application error logging outside PostHog Logs | ops runbooks        |
 
 ## Architecture
 
@@ -59,35 +59,35 @@ PostHog’s generic advice is one project for website + app. **Bondery intention
 
 ## Tool router
 
-| Question | Tool | Surface |
-|----------|------|---------|
-| Marketing traffic, campaigns, referrers? | Plausible | `apps/website` |
-| Feature usage, funnels, retention? | PostHog | webapp, mobile, API |
-| Admin DAU / WAU / MAU / NPS? | PostHog product UI | operators use PostHog, not a Bondery page |
-| Feature flags, replay, logs? | PostHog (gated) | see [references/posthog-flags-replay-logs.md](references/posthog-flags-replay-logs.md) |
+| Question                                 | Tool               | Surface                                                                                |
+| ---------------------------------------- | ------------------ | -------------------------------------------------------------------------------------- |
+| Marketing traffic, campaigns, referrers? | Plausible          | `apps/website`                                                                         |
+| Feature usage, funnels, retention?       | PostHog            | webapp, mobile, API                                                                    |
+| Admin DAU / WAU / MAU / NPS?             | PostHog product UI | operators use PostHog, not a Bondery page                                              |
+| Feature flags, replay, logs?             | PostHog (gated)    | see [references/posthog-flags-replay-logs.md](references/posthog-flags-replay-logs.md) |
 
 ## Server vs client capture
 
-| Client (`captureEvent`) | Server (`captureServerEvent` / API) |
-|-------------------------|-------------------------------------|
-| UI interactions where partial data is OK | Signup, subscribe, delete, billing |
-| Clicks, modal opens, client-only flows | Events that must match DB truth |
-| Extension-enriched UX signals | Webhooks, background jobs |
+| Client (`captureEvent`)                  | Server (`captureServerEvent` / API) |
+| ---------------------------------------- | ----------------------------------- |
+| UI interactions where partial data is OK | Signup, subscribe, delete, billing  |
+| Clicks, modal opens, client-only flows   | Events that must match DB truth     |
+| Extension-enriched UX signals            | Webhooks, background jobs           |
 
 `captureServerEvent` uses Next.js `after()` to flush after the response. API routes need their own flush pattern if capturing server-side.
 
 ## Decision tree
 
-| Task | Read |
-|------|------|
-| Marketing pageviews / Plausible | [references/plausible-website.md](references/plausible-website.md) |
-| PostHog naming convention | [references/naming-and-schema.md](references/naming-and-schema.md) |
-| Canonical event list | [references/event-catalog.md](references/event-catalog.md) |
-| Where / how to capture | [references/posthog-capture.md](references/posthog-capture.md) |
-| Identity, PII, internal users | [references/identity-and-privacy.md](references/identity-and-privacy.md) |
-| Env vars and runtime config | [references/env-and-runtime-config.md](references/env-and-runtime-config.md) |
-| Replay, flags, logs (future) | [references/posthog-flags-replay-logs.md](references/posthog-flags-replay-logs.md) |
-| Prove events work | [references/verification.md](references/verification.md) |
+| Task                                                          | Read                                                                               |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Marketing pageviews / Plausible                               | [references/plausible-website.md](references/plausible-website.md)                 |
+| PostHog naming convention                                     | [references/naming-and-schema.md](references/naming-and-schema.md)                 |
+| Canonical event list                                          | [references/event-catalog.md](references/event-catalog.md)                         |
+| Where / how to capture                                        | [references/posthog-capture.md](references/posthog-capture.md)                     |
+| Identity, PII, internal users                                 | [references/identity-and-privacy.md](references/identity-and-privacy.md)           |
+| Env vars and runtime config                                   | [references/env-and-runtime-config.md](references/env-and-runtime-config.md)       |
+| API logs and error tracking (enabled); replay, flags (future) | [references/posthog-flags-replay-logs.md](references/posthog-flags-replay-logs.md) |
+| Prove events work                                             | [references/verification.md](references/verification.md)                           |
 
 Full index: [references/README.md](references/README.md).
 
@@ -95,15 +95,15 @@ Cross-skills: `bondery-legal`, `bondery-security`, `bondery-verification-loop`.
 
 ## Repo map (quick)
 
-| Concern | Location |
-|---------|----------|
-| Plausible website | `apps/website/src/app/layout.tsx`, `apps/website/proxy.ts` |
-| Plausible deploy | `deploy/plausible/compose.yml`, `deploy/plausible/README.md` |
-| PostHog client init | `apps/webapp/instrumentation-client.ts` |
-| Client wrapper | `apps/webapp/src/lib/analytics/client.ts` |
-| Server wrapper | `apps/webapp/src/lib/analytics/server.ts` |
-| Runtime config schema | `packages/schemas/src/runtime-config.ts` |
-| Env manifest | `packages/helpers/src/env/manifest.ts` |
+| Concern               | Location                                                     |
+| --------------------- | ------------------------------------------------------------ |
+| Plausible website     | `apps/website/src/app/layout.tsx`, `apps/website/proxy.ts`   |
+| Plausible deploy      | `deploy/plausible/compose.yml`, `deploy/plausible/README.md` |
+| PostHog client init   | `apps/webapp/instrumentation-client.ts`                      |
+| Client wrapper        | `apps/webapp/src/lib/analytics/client.ts`                    |
+| Server wrapper        | `apps/webapp/src/lib/analytics/server.ts`                    |
+| Runtime config schema | `packages/schemas/src/runtime-config.ts`                     |
+| Env manifest          | `packages/helpers/src/env/manifest.ts`                       |
 
 ## Adding a new product event (workflow)
 

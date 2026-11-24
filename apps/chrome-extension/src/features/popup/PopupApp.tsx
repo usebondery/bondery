@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import { useCallback, useEffect, useState } from "react";
 import { browser } from "wxt/browser";
 import { extLog } from "../../lib/log";
@@ -39,13 +40,14 @@ export default function PopupApp() {
   const [loginLoading, setLoginLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const checkAuthAndPreview = useCallback(async () => {
+  const checkAuthAndPreview = useCallback(async (versionResponse?: VersionCheckResponse) => {
     try {
-      // Check if an update is required before proceeding
-      const versionResponse: VersionCheckResponse = await browser.runtime.sendMessage({
-        type: "VERSION_CHECK_REQUEST",
-      });
-      if (versionResponse.payload.updateRequired) {
+      const resolvedVersion: VersionCheckResponse =
+        versionResponse ??
+        (await browser.runtime.sendMessage({
+          type: "VERSION_CHECK_REQUEST",
+        }));
+      if (resolvedVersion.payload.updateRequired) {
         setState("update-required");
         return;
       }
@@ -101,16 +103,14 @@ export default function PopupApp() {
         });
 
         if (contextResponse.payload.supported) {
+          setShowUnsupportedSiteMessage(false);
           if (contextResponse.payload.existed && contextResponse.payload.preview) {
-            setShowUnsupportedSiteMessage(false);
             setPreview(contextResponse.payload.preview);
             setState("preview");
           } else if (contextResponse.payload.profile) {
-            setShowUnsupportedSiteMessage(false);
             setActiveProfile(contextResponse.payload.profile);
             setState("import");
           } else {
-            setShowUnsupportedSiteMessage(false);
             setState("logged-in");
           }
         } else {
@@ -118,14 +118,26 @@ export default function PopupApp() {
           setState("logged-in");
         }
       }
-    } catch (err) {
-      extLog.error("[popup] Init error:", err);
+    } catch (error_) {
+      extLog.error("[popup] Init error:", error_);
       setState("logged-out");
     }
   }, []);
 
   useEffect(() => {
-    void checkAuthAndPreview();
+    const versionRequest: Promise<VersionCheckResponse> = browser.runtime.sendMessage({
+      type: "VERSION_CHECK_REQUEST",
+    });
+
+    detachPromise(
+      versionRequest.then((versionResponse: VersionCheckResponse) => {
+        detachPromise(checkAuthAndPreview(versionResponse));
+      }),
+      (error_: unknown) => {
+        extLog.error("[popup] Init error:", error_);
+        setState("logged-out");
+      },
+    );
   }, [checkAuthAndPreview]);
 
   async function handleLogin() {
@@ -142,8 +154,8 @@ export default function PopupApp() {
       } else {
         setError(result.payload.error ?? "Login failed");
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : "Login failed");
     } finally {
       setLoginLoading(false);
     }
@@ -162,23 +174,23 @@ export default function PopupApp() {
         setShowUnsupportedSiteMessage(false);
         setState("logged-out");
       }
-    } catch (err) {
-      extLog.error("[popup] Logout error:", err);
+    } catch (error_) {
+      extLog.error("[popup] Logout error:", error_);
     }
   }
 
   function openBondery() {
-    void openWebappHomeTab();
+    detachPromise(openWebappHomeTab());
     window.close();
   }
 
   function openPerson(contactId: string) {
-    void openWebappPersonTab(contactId);
+    detachPromise(openWebappPersonTab(contactId));
     window.close();
   }
 
   function openPersonWithAddInteraction(contactId: string) {
-    void openWebappPersonAddInteractionTab(contactId);
+    detachPromise(openWebappPersonAddInteractionTab(contactId));
     window.close();
   }
 
@@ -238,8 +250,8 @@ export default function PopupApp() {
       } else {
         setError(result.payload.error ?? "Import failed");
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Import failed");
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : "Import failed");
     } finally {
       setLoginLoading(false);
     }

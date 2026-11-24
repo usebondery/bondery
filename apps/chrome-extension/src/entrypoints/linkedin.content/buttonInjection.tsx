@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import type ReactDOM from "react-dom/client";
 import type { ShadowRootContentScriptUi } from "wxt/utils/content-script-ui/shadow-root";
 import type { ContentScriptContext } from "#imports";
@@ -14,7 +15,7 @@ let isInjecting = false;
 /**
  * Removes the injected button when SPA navigation lands on a different profile.
  */
-export function clearStaleButtonIfNeeded(newUsername: string | null): void {
+function clearStaleButtonIfNeeded(newUsername: string | null): void {
   if (currentUi && currentInjectedUsername !== newUsername) {
     currentUi.remove();
     currentUi = null;
@@ -59,12 +60,7 @@ function findProfileActionButton(): HTMLButtonElement | null {
 
   const artdecoButtons = Array.from(
     profileSection.querySelectorAll<HTMLButtonElement>("button.artdeco-button"),
-  ).filter((btn) => {
-    if (btn.closest("[class*='nt-edge']")) {
-      return false;
-    }
-    return true;
-  });
+  ).filter((btn) => !btn.closest("[class*='nt-edge']"));
 
   const firstArtdeco = artdecoButtons.find((btn) => !!btn.textContent?.trim());
   if (firstArtdeco) {
@@ -109,7 +105,7 @@ function findLinkedInAnchor(): Element | null {
   return actionButtonsContainer;
 }
 
-export async function injectBonderyButton(ctx: ContentScriptContext) {
+async function injectBonderyButton(ctx: ContentScriptContext) {
   if (isInjecting) {
     return;
   }
@@ -154,22 +150,33 @@ export async function injectBonderyButton(ctx: ContentScriptContext) {
   }
 
   isInjecting = true;
+  await mountLinkedInButton(ctx, anchor, username);
+}
+
+async function mountLinkedInButton(
+  ctx: ContentScriptContext,
+  anchor: Element,
+  username: string,
+): Promise<void> {
   try {
-    currentUi = await renderInShadowRoot(ctx, {
+    const ui = await renderInShadowRoot(ctx, {
       anchor,
       append: "after",
       name: "bondery-linkedin",
       position: "inline",
       render: () => <LinkedInButton username={username} />,
     });
+    currentUi = ui;
     currentInjectedUsername = username;
     extLog.debug("Bondery Extension: Button injected successfully on LinkedIn");
+  } catch (error) {
+    extLog.error("Bondery Extension: Button injection failed on LinkedIn", error);
   } finally {
     isInjecting = false;
   }
 }
 
-export function setupObserver(ctx: ContentScriptContext) {
+function setupObserver(ctx: ContentScriptContext) {
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   const observer = new MutationObserver(() => {
@@ -196,7 +203,7 @@ export function setupObserver(ctx: ContentScriptContext) {
       debounceTimer = null;
       const username = getLinkedInUsername();
       if (username && !document.querySelector("bondery-linkedin")) {
-        injectBonderyButton(ctx);
+        detachPromise(injectBonderyButton(ctx));
       }
     }, 300);
   });
@@ -222,7 +229,7 @@ function isProfileReady(): boolean {
   return !!findProfileActionButton();
 }
 
-export function _waitForProfileReady(timeoutMs: number): Promise<void> {
+function _waitForProfileReady(timeoutMs: number): Promise<void> {
   return new Promise((resolve) => {
     if (isProfileReady()) {
       resolve();
@@ -245,3 +252,5 @@ export function _waitForProfileReady(timeoutMs: number): Promise<void> {
     observer.observe(document.body, { childList: true, subtree: true });
   });
 }
+
+export { _waitForProfileReady, clearStaleButtonIfNeeded, injectBonderyButton, setupObserver };

@@ -1,7 +1,6 @@
 import { Prisma, prisma } from "@bondery/db";
 import { ReminderDigestEmail } from "@bondery/emails";
 import type { ReminderDigestRequest, ReminderDigestUser } from "@bondery/schemas";
-import type { SupportedLocale } from "@bondery/schemas/locale/supported-locale";
 import {
   appSettingsUrl,
   emailDocumentProps,
@@ -10,6 +9,8 @@ import {
 import { buildReminderDigestCopy } from "../../lib/notifications/email-copy-builders.js";
 import { formatEmailFrom } from "../../lib/notifications/email-from.js";
 import {
+  defaultEmailFormatContext,
+  type EmailFormatContext,
   formatEmailDateFromIso,
   getPreloadedCopy,
   interpolateCopy,
@@ -24,7 +25,7 @@ import {
   sendRenderedEmail,
 } from "../../lib/notifications/transporter.js";
 
-export type ReminderDigestResult = {
+type ReminderDigestResult = {
   success: boolean;
   targetDate: string;
   sentUsers: number;
@@ -32,10 +33,10 @@ export type ReminderDigestResult = {
   failures: Array<{ userId: string; email: string; error: string }>;
 };
 
-export type SendOneUserDigestContext = {
+type SendOneUserDigestContext = {
   defaultTargetDate: string;
+  formatByUserId: Map<string, EmailFormatContext>;
   namespaceCache: ReturnType<typeof preloadEmailNamespaces>;
-  localeByUserId: Map<string, string>;
 };
 
 function getDaysRemaining(targetDate: string, date: string): number | null {
@@ -106,6 +107,8 @@ async function recordDispatchLog(
   }
 }
 
+export type { ReminderDigestResult, SendOneUserDigestContext };
+
 export async function sendOneUserDigest(
   user: ReminderDigestUser,
   ctx: SendOneUserDigestContext,
@@ -120,11 +123,12 @@ export async function sendOneUserDigest(
 
   const config = requireEmailConfig();
   const userTargetDate = user.targetDate ?? ctx.defaultTargetDate;
-  const lng = (ctx.localeByUserId.get(user.userId) ?? "en") as SupportedLocale;
+  const formatCtx = ctx.formatByUserId.get(user.userId) ?? defaultEmailFormatContext();
+  const lng = formatCtx.locale;
   const bundle = getPreloadedCopy(ctx.namespaceCache, lng);
   const copy = buildReminderDigestCopy(bundle);
-  const formattedHeadingDate = formatEmailDateFromIso(userTargetDate, lng, "long");
-  const subject = readCopyString(bundle, "subject", { targetDate: userTargetDate });
+  const formattedHeadingDate = formatEmailDateFromIso(userTargetDate, formatCtx, "long");
+  const subject = readCopyString(bundle, "subject", { targetDate: formattedHeadingDate });
 
   try {
     const { html, text } = await renderEmailParts(
@@ -135,11 +139,11 @@ export async function sendOneUserDigest(
         formattedHeadingDate,
         manageNotificationsUrl: appSettingsUrl(),
         reminders: user.reminders.map((reminder) => {
-          const type = reminder.type;
+          const { type } = reminder;
           const typeLabel = copy.dateTypes[type];
           return {
             date: reminder.date,
-            dateLabel: formatEmailDateFromIso(reminder.date, lng),
+            dateLabel: formatEmailDateFromIso(reminder.date, formatCtx),
             note: reminder.note ?? null,
             notifyDaysBefore: reminder.notifyDaysBefore,
             notifyOn: reminder.notifyOn,
@@ -220,10 +224,10 @@ export async function sendReminderDigest(
   }
 
   const namespaceCache = preloadEmailNamespaces("ReminderDigestEmail");
-  const localeByUserId = await resolveEmailLocalesForUsers(users.map((user) => user.userId));
+  const formatByUserId = await resolveEmailLocalesForUsers(users.map((user) => user.userId));
   const ctx: SendOneUserDigestContext = {
     defaultTargetDate: targetDate,
-    localeByUserId,
+    formatByUserId,
     namespaceCache,
   };
 

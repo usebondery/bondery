@@ -1,0 +1,13 @@
+{
+  "Create": "Додати до Bondery",
+  "Creating": "Створення особи...",
+  "ErrorDescription": "Під час створення цієї особ і сталася помилка.",
+  "ErrorTitle": "Не вдалося створити особу",
+  "FullNameLabel": "П.ІБ.",
+  "FullNamePlaceholder": "наприклад, Іван Іваненко",
+  "InvalidName": "Додайте дійсне ім’я",
+  "NameRequired": "Додайте ім’я",
+  "SuccessDescription": "Нову особу додаале до ваших контактів.",
+  "SuccessTitle": "Створеале особу",
+  "Title": "Створити особу"
+}

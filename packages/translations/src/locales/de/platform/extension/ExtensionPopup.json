@@ -1,6 +1,7 @@
 {
   "LoggedIn": {
-    "OpenBondery": "Bondery öffnen"
+    "OpenBondery": "Bondery öffnen",
+    "UnsupportedSiteMessage": "Besuchen Sie ein Profil auf Instagram oder LinkedIn, um weitere Aktionen und Funktionen der Erweiterung zu sehen."
   },
   "LoggedOut": {
     "Description": "Verbinden Sie Ihr Konto, um Kontakte aus sozialen Medien zu speichern.",
@@ -20,6 +21,12 @@
     "Title": "Update erforderlich"
   },
   "Welcome": {
-    "ConnectButton": "Bondery-Konto verbinden"
+    "ConnectButton": "Bondery-Konto verbinden",
+    "Description": "Verbinden Sie Ihr Bondery-Konto, um Kontakte direkt aus Profilen in sozialen Medien zu speichern.",
+    "SignInHint": "Sie werden aufgefordert, sich bei Ihrem Bondery-Konto anzumelden und die Erweiterung zu autorisieren.",
+    "SuccessClose": "Sie können diesen Tab jetzt schließen.",
+    "SuccessDescription": "Ihr Bondery-Konto ist jetzt verbunden. Besuchen Sie ein beliebiges Instagram- oder LinkedIn-Profil, um Kontakte zu speichern.",
+    "SuccessTitle": "Alles bereit!",
+    "Title": "Willkommen bei Bondery"
   }
 }

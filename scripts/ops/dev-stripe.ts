@@ -20,7 +20,8 @@ function main() {
   if (cliFailure) {
     log.error(cliFailure.error);
     log.info(cliFailure.hint);
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   const forwardTo = stripeListenForwardUrl();

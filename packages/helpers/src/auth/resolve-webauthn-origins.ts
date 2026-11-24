@@ -1,3 +1,63 @@
+const PATTERN_5E5B302D3941_RE = /^[0-9A-F]+$/;
+const PATTERN_5C2F2B24_RE = /\/+$/;
+const PATTERN_5E5C647B312C_RE = /^\d{1,3}(\.\d{1,3}){3}$/;
+
+const SHA256_HEX_LENGTH = 64;
+
+function shouldIncludeWebsiteOrigin(
+  websiteOrigin: string,
+  webappOrigin: string,
+  rpID: string,
+): boolean {
+  if (websiteOrigin === webappOrigin) {
+    return false;
+  }
+
+  let hostname: string;
+  try {
+    hostname = new URL(websiteOrigin).hostname.toLowerCase();
+  } catch {
+    return false;
+  }
+
+  if (!hostname || hostname === "localhost" || isIpHostname(hostname)) {
+    return false;
+  }
+
+  return hostname === rpID.toLowerCase() || hostname.endsWith(`.${rpID.toLowerCase()}`);
+}
+
+function parseHttpsOrHttpOrigin(value: string | undefined): string | null {
+  if (!value?.trim()) {
+    return null;
+  }
+
+  try {
+    const parsed = new URL(value.trim());
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+      return null;
+    }
+    if (!parsed.hostname) {
+      return null;
+    }
+    return `${parsed.protocol}//${parsed.host}`.replace(PATTERN_5C2F2B24_RE, "");
+  } catch {
+    return null;
+  }
+}
+
+function stripTrailingSlash(value: string): string {
+  return value.replace(PATTERN_5C2F2B24_RE, "");
+}
+
+function isIpHostname(hostname: string): boolean {
+  if (hostname.includes(":")) {
+    return true;
+  }
+
+  return PATTERN_5E5C647B312C_RE.test(hostname);
+}
+
 export type ResolveWebAuthnAllowedOriginsInput = {
   /** Colon-separated SHA-256 fingerprints from the Android signing certs. */
   androidSha256Fingerprints?: readonly string[] | undefined;
@@ -5,8 +65,6 @@ export type ResolveWebAuthnAllowedOriginsInput = {
   webappOrigin: string;
   websiteUrl?: string | undefined;
 };
-
-const SHA256_HEX_LENGTH = 64;
 
 /**
  * WebAuthn `expectedOrigin` list: webapp, native associated-domain host, and
@@ -66,64 +124,10 @@ export function toAndroidApkKeyHashOrigin(fingerprint: string): string | null {
 
 export function normalizeSha256Fingerprint(value: string): string | null {
   const hex = value.trim().replaceAll(":", "").toUpperCase();
-  if (hex.length !== SHA256_HEX_LENGTH || !/^[0-9A-F]+$/.test(hex)) {
+  if (hex.length !== SHA256_HEX_LENGTH || !PATTERN_5E5B302D3941_RE.test(hex)) {
     return null;
   }
 
   const pairs = hex.match(/.{2}/g);
   return pairs ? pairs.join(":") : null;
-}
-
-function shouldIncludeWebsiteOrigin(
-  websiteOrigin: string,
-  webappOrigin: string,
-  rpID: string,
-): boolean {
-  if (websiteOrigin === webappOrigin) {
-    return false;
-  }
-
-  let hostname: string;
-  try {
-    hostname = new URL(websiteOrigin).hostname.toLowerCase();
-  } catch {
-    return false;
-  }
-
-  if (!hostname || hostname === "localhost" || isIpHostname(hostname)) {
-    return false;
-  }
-
-  return hostname === rpID.toLowerCase() || hostname.endsWith(`.${rpID.toLowerCase()}`);
-}
-
-function parseHttpsOrHttpOrigin(value: string | undefined): string | null {
-  if (!value?.trim()) {
-    return null;
-  }
-
-  try {
-    const parsed = new URL(value.trim());
-    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
-      return null;
-    }
-    if (!parsed.hostname) {
-      return null;
-    }
-    return `${parsed.protocol}//${parsed.host}`.replace(/\/+$/, "");
-  } catch {
-    return null;
-  }
-}
-
-function stripTrailingSlash(value: string): string {
-  return value.replace(/\/+$/, "");
-}
-
-function isIpHostname(hostname: string): boolean {
-  if (hostname.includes(":")) {
-    return true;
-  }
-
-  return /^\d{1,3}(\.\d{1,3}){3}$/.test(hostname);
 }

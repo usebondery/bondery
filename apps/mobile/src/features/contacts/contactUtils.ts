@@ -1,13 +1,17 @@
 import { abbreviateLocationCountry, formatAddressLabel } from "@bondery/helpers/address";
 import { formatContactName } from "@bondery/helpers/contact";
+import { formatUserDate } from "@bondery/helpers/date";
 import { combinePhoneNumber, formatPhoneNumber } from "@bondery/helpers/phone";
 import type { Contact, ContactAddressEntry, EmailEntry, PhoneEntry } from "@bondery/schemas";
 import { MS_PER_DAY } from "../../lib/config";
 import i18n from "../../lib/i18n/i18n";
+import {
+  mobileDateTimeFormatContext,
+  useMobilePreferences,
+} from "../../lib/preferences/useMobilePreferences";
+import { nonEmpty } from "../../lib/text";
 import { AVATAR_COLOR_PALETTE_HEX } from "../../theme/colors";
 import { formatImportantDate, isYearlessDate, resolveDateLocale } from "./importantDateUtils";
-
-export { formatContactName };
 
 type PersonNameFields = {
   firstName?: string | null;
@@ -17,15 +21,15 @@ type PersonNameFields = {
 /**
  * Returns 2 initials (first + last name) for an avatar, matching the webapp behaviour.
  */
-export function getContactInitials(contact: PersonNameFields): string {
+function getContactInitials(contact: PersonNameFields): string {
   const first = contact.firstName?.trim().charAt(0).toUpperCase() ?? "";
   const last = contact.lastName?.trim().charAt(0).toUpperCase() ?? "";
   return first + last || first || "#";
 }
 
 function getAvatarHash(first: string | null | undefined, last: string | null | undefined): number {
-  const a = (first || "").trim().toLowerCase();
-  const b = (last || "").trim().toLowerCase();
+  const a = (first ?? "").trim().toLowerCase();
+  const b = (last ?? "").trim().toLowerCase();
   const normalized = `${a} ${b}`.trim();
   if (!normalized) {
     return 0;
@@ -33,6 +37,7 @@ function getAvatarHash(first: string | null | undefined, last: string | null | u
   let hash = 0;
   for (let i = 0; i < normalized.length; i++) {
     hash = (hash << 5) - hash + normalized.charCodeAt(i);
+    // biome-ignore lint/nursery/useMathTrunc: 32-bit wrap keeps the avatar color hash stable
     hash |= 0;
   }
   return Math.abs(hash);
@@ -42,9 +47,12 @@ function getAvatarHash(first: string | null | undefined, last: string | null | u
  * Returns a deterministic hex color for a contact avatar, using the same
  * hash algorithm and palette as the webapp's getAvatarColorFromName.
  */
-export function getAvatarColorHex(contact: PersonNameFields): string {
+function getAvatarColorHex(contact: PersonNameFields): (typeof AVATAR_COLOR_PALETTE_HEX)[number] {
   const hash = getAvatarHash(contact.firstName, contact.lastName);
-  return AVATAR_COLOR_PALETTE_HEX[hash % AVATAR_COLOR_PALETTE_HEX.length];
+  // The hash is a non-negative integer, so the index is always in range; the fallback only satisfies the checker.
+  return (
+    AVATAR_COLOR_PALETTE_HEX[hash % AVATAR_COLOR_PALETTE_HEX.length] ?? AVATAR_COLOR_PALETTE_HEX[0]
+  );
 }
 
 function parsePhones(phones: Contact["phones"]): PhoneEntry[] {
@@ -75,29 +83,29 @@ function parseEmails(emails: Contact["emails"]): EmailEntry[] {
   });
 }
 
-export function getPrimaryPhone(contact: Contact): string | null {
+function getPrimaryPhone(contact: Contact): string | null {
   const phone =
     parsePhones(contact.phones).find((entry) => entry.preferred) || parsePhones(contact.phones)[0];
 
   return phone?.value || null;
 }
 
-export function getPrimaryPhoneEntry(contact: Contact): PhoneEntry | null {
+function getPrimaryPhoneEntry(contact: Contact): PhoneEntry | null {
   const phones = parseContactPhones(contact);
   return phones.find((entry) => entry.preferred) ?? phones[0] ?? null;
 }
 
-export function getPrimaryEmail(contact: Contact): string | null {
+function getPrimaryEmail(contact: Contact): string | null {
   const email = getPrimaryEmailEntry(contact);
-  return email?.value || null;
+  return nonEmpty(email?.value) ?? null;
 }
 
-export function getPrimaryEmailEntry(contact: Contact): EmailEntry | null {
+function getPrimaryEmailEntry(contact: Contact): EmailEntry | null {
   const emails = parseContactEmails(contact);
   return emails.find((entry) => entry.preferred) ?? emails[0] ?? null;
 }
 
-export function contactMatchesQuery(contact: Contact, query: string): boolean {
+function contactMatchesQuery(contact: Contact, query: string): boolean {
   const normalizedQuery = query.trim().toLowerCase();
 
   if (!normalizedQuery) {
@@ -110,11 +118,13 @@ export function contactMatchesQuery(contact: Contact, query: string): boolean {
 }
 
 /** Whole days elapsed since an ISO date string (local calendar day diff). */
-export function daysSince(dateStr: string): number {
+function daysSince(dateStr: string): number {
   return Math.floor((Date.now() - new Date(dateStr).getTime()) / MS_PER_DAY);
 }
 
-export function formatRelativeDate(dateStr: string): string {
+const DAYS_PER_WEEK = 7;
+
+function formatRelativeDate(dateStr: string): string {
   const diffDays = daysSince(dateStr);
   if (diffDays === 0) {
     return "Today";
@@ -122,10 +132,10 @@ export function formatRelativeDate(dateStr: string): string {
   if (diffDays === 1) {
     return "Yesterday";
   }
-  if (diffDays < 7) {
+  if (diffDays < DAYS_PER_WEEK) {
     return `${diffDays} days ago`;
   }
-  const weeks = Math.floor(diffDays / 7);
+  const weeks = Math.floor(diffDays / DAYS_PER_WEEK);
   if (diffDays < 30) {
     return `${weeks} week${weeks > 1 ? "s" : ""} ago`;
   }
@@ -137,22 +147,18 @@ export function formatRelativeDate(dateStr: string): string {
   return `${years} year${years > 1 ? "s" : ""} ago`;
 }
 
-export function formatAbsoluteDate(dateStr: string): string {
-  const locale = resolveDateLocale(i18n.language);
+function formatAbsoluteDate(dateStr: string): string {
+  const ctx = mobileDateTimeFormatContext(useMobilePreferences.getState());
 
   if (isYearlessDate(dateStr)) {
-    return formatImportantDate(dateStr, locale);
+    return formatImportantDate(dateStr, ctx);
   }
 
-  return new Date(dateStr).toLocaleDateString(locale, {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+  return formatUserDate(new Date(dateStr), ctx, "short");
 }
 
 /** Relative timestamp for notes "last edited" — fine-grained for recent edits, shared day logic beyond. */
-export function formatRelativeEditedAt(dateStr: string): string {
+function formatRelativeEditedAt(dateStr: string): string {
   const diffMs = Date.now() - new Date(dateStr).getTime();
   const diffMin = Math.floor(diffMs / 60_000);
   if (diffMin < 1) {
@@ -190,18 +196,18 @@ function parseAddresses(addresses: Contact["addresses"]): ContactAddressEntry[] 
   });
 }
 
-export function getContactAddresses(contact: Contact): ContactAddressEntry[] {
+function getContactAddresses(contact: Contact): ContactAddressEntry[] {
   return parseAddresses(contact.addresses).filter(
     (address) => formatDisplayAddress(address).length > 0,
   );
 }
 
-export function formatDisplayPhone(phone: PhoneEntry): string {
+function formatDisplayPhone(phone: PhoneEntry): string {
   const combined = combinePhoneNumber(phone.prefix || "+1", phone.value);
   return formatPhoneNumber(combined) || combined;
 }
 
-export function formatDisplayAddress(address: ContactAddressEntry): string {
+function formatDisplayAddress(address: ContactAddressEntry): string {
   if (address.addressFormatted?.trim()) {
     return address.addressFormatted.trim();
   }
@@ -219,10 +225,10 @@ export function formatDisplayAddress(address: ContactAddressEntry): string {
     return formatted;
   }
 
-  return address.value?.trim() ?? "";
+  return address.value.trim();
 }
 
-export interface AddressCardLines {
+interface AddressCardLines {
   cityLine: string;
   countryCode: string | null;
   countryName: string | null;
@@ -243,7 +249,7 @@ function getCountryDisplayName(countryCode: string | null | undefined): string |
   }
 }
 
-export function formatAddressCardLines(address: ContactAddressEntry): AddressCardLines {
+function formatAddressCardLines(address: ContactAddressEntry): AddressCardLines {
   const streetParts = [address.addressLine1?.trim(), address.addressLine2?.trim()].filter(
     Boolean,
   ) as string[];
@@ -271,15 +277,38 @@ export function formatAddressCardLines(address: ContactAddressEntry): AddressCar
   };
 }
 
-export function formatContactLocation(contact: Contact): string | null {
+function formatContactLocation(contact: Contact): string | null {
   const abbreviated = abbreviateLocationCountry(contact.location);
   return abbreviated || null;
 }
 
-export function parseContactPhones(contact: Contact): PhoneEntry[] {
+function parseContactPhones(contact: Contact): PhoneEntry[] {
   return parsePhones(contact.phones).filter((phone) => phone.value.trim().length > 0);
 }
 
-export function parseContactEmails(contact: Contact): EmailEntry[] {
+function parseContactEmails(contact: Contact): EmailEntry[] {
   return parseEmails(contact.emails).filter((email) => email.value.trim().length > 0);
 }
+
+export type { AddressCardLines };
+export {
+  contactMatchesQuery,
+  daysSince,
+  formatAbsoluteDate,
+  formatAddressCardLines,
+  formatContactLocation,
+  formatContactName,
+  formatDisplayAddress,
+  formatDisplayPhone,
+  formatRelativeDate,
+  formatRelativeEditedAt,
+  getAvatarColorHex,
+  getContactAddresses,
+  getContactInitials,
+  getPrimaryEmail,
+  getPrimaryEmailEntry,
+  getPrimaryPhone,
+  getPrimaryPhoneEntry,
+  parseContactEmails,
+  parseContactPhones,
+};

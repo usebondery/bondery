@@ -1,6 +1,7 @@
 "use client";
 
 import { getUserFacingError } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
@@ -19,13 +20,6 @@ import {
 } from "./hooks/usePhotoUploadTranslations";
 import { PhotoConfirmModal } from "./PhotoConfirmModal";
 import { PhotoUploadModal } from "./PhotoUploadModal";
-
-export type { PhotoUploadVariant } from "./hooks/usePhotoUploadTranslations";
-
-export interface OpenPhotoUploadModalOptions {
-  uploadFile: (file: File) => Promise<void>;
-  variant: PhotoUploadVariant;
-}
 
 interface PhotoUploadFlowBodyProps extends OpenPhotoUploadModalOptions {
   modalId: string;
@@ -134,7 +128,7 @@ function PhotoUploadFlowBody({ modalId, uploadFile, variant }: PhotoUploadFlowBo
       onBack={handleBack}
       onCancel={handleCancel}
       onConfirm={() => {
-        void handleConfirm();
+        detachPromise(handleConfirm());
       }}
       preview={preview}
       variant={variant}
@@ -151,4 +145,11 @@ export function openPhotoUploadModal({ uploadFile, variant }: OpenPhotoUploadMod
     size: "lg",
     title: <PhotoUploadModalTitle variant={variant} />,
   });
+}
+
+export type { PhotoUploadVariant } from "./hooks/usePhotoUploadTranslations";
+
+export interface OpenPhotoUploadModalOptions {
+  uploadFile: (file: File) => Promise<void>;
+  variant: PhotoUploadVariant;
 }

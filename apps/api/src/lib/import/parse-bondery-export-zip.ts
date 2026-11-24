@@ -19,12 +19,16 @@ import {
 } from "@bondery/schemas";
 import AdmZip from "adm-zip";
 import type { FastifyBaseLogger } from "fastify";
-import { validateImageMagicBytes } from "../platform/config.js";
+import { BYTES_PER_MIB, validateImageMagicBytes } from "../platform/config.js";
 import { badRequest } from "../platform/errors/http-errors.js";
+
+const A_ZA_Z_PATTERN = /^[a-zA-Z]:/;
+const TRAILING_SLASH_PATTERN = /\/$/;
 
 const MAX_NON_PHOTO_ZIP_ENTRIES = 32;
 const MAX_PHOTO_ZIP_FILES = 10_000;
-const MAX_UNCOMPRESSED_BYTES = 200 * 1024 * 1024;
+const MAX_UNCOMPRESSED_MIB = 200;
+const MAX_UNCOMPRESSED_BYTES = MAX_UNCOMPRESSED_MIB * BYTES_PER_MIB;
 const MAX_PHOTO_BYTES = AVATAR_UPLOAD.maxFileSizeBytes;
 
 const FOLLOWERS_JSON_PATTERN = /^followers(?:_\d+)?\.json$/;
@@ -34,21 +38,21 @@ const REQUIRED_ROOT_FILES = new Set<string>([
   ...BONDERY_EXPORT_FILE_ENTRIES.map((entry) => entry.name),
 ]);
 
-export type ParsedGroupMembership = {
+type ParsedGroupMembership = {
   createdAt: string;
   groupId: string;
   id: string;
   personId: string;
 };
 
-export type ParsedTagMembership = {
+type ParsedTagMembership = {
   createdAt: string;
   id: string;
   personId: string;
   tagId: string;
 };
 
-export type ParsedBonderyExport = {
+type ParsedBonderyExport = {
   bonderyVersion: string;
   groupMemberships: ParsedGroupMembership[];
   groups: ExportGroupRecord[];
@@ -73,7 +77,7 @@ function normalizeZipPath(entryName: string): string {
 function zipBaseName(entryName: string): string {
   const normalized = normalizeZipPath(entryName);
   const parts = normalized.split("/").filter(Boolean);
-  return (parts[parts.length - 1] ?? normalized).toLowerCase();
+  return (parts.at(-1) ?? normalized).toLowerCase();
 }
 
 function isUnsafeZipPath(entryName: string): boolean {
@@ -81,15 +85,18 @@ function isUnsafeZipPath(entryName: string): boolean {
   if (normalized.includes("..") || normalized.startsWith("/")) {
     return true;
   }
-  return /^[a-zA-Z]:/.test(entryName);
+  return A_ZA_Z_PATTERN.test(entryName);
 }
 
 function isNestedFilePath(entryName: string): boolean {
-  return normalizeZipPath(entryName).replace(/\/$/, "").includes("/");
+  return normalizeZipPath(entryName).replace(TRAILING_SLASH_PATTERN, "").includes("/");
 }
 
+/** A ZIP local-file or archive header starts with a four-byte signature: `PK` plus two bytes. */
+const ZIP_SIGNATURE_LENGTH = 4;
+
 function isZipMagic(buffer: Buffer): boolean {
-  if (buffer.length < 4) {
+  if (buffer.length < ZIP_SIGNATURE_LENGTH) {
     return false;
   }
   const third = buffer[2] ?? -1;
@@ -142,6 +149,8 @@ function photoSourcePersonId(entryName: string): string | null {
   return sourcePersonId;
 }
 
+export type { ParsedBonderyExport, ParsedGroupMembership, ParsedTagMembership };
+
 /**
  * Validates a Bondery export ZIP in memory and returns the typed CRM graph.
  * Never writes the archive to disk.
@@ -174,7 +183,7 @@ export function parseBonderyExportZip(
   const entryNames: string[] = [];
 
   for (const entry of entries) {
-    const entryName = entry.entryName;
+    const { entryName } = entry;
     entryNames.push(entryName);
 
     if (isUnsafeZipPath(entryName)) {

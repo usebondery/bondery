@@ -232,8 +232,8 @@ export function FitMarkersController({
       return;
     }
 
-    if (fitMarkers.length === 1) {
-      const only = fitMarkers[0];
+    const [only] = fitMarkers;
+    if (fitMarkers.length === 1 && only) {
       map.flyTo({
         center: [only.longitude, only.latitude],
         zoom: defaultZoom,

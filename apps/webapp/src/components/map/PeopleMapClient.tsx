@@ -83,13 +83,13 @@ export function PeopleMapClient({
 }: PeopleMapClientProps) {
   // Default center over the Atlantic so both USA and Europe are visible at low zoom.
   // PeopleMap API keeps Leaflet order: [latitude, longitude].
-  const defaultCenter = center || ([35, -25] as [number, number]);
+  const defaultCenter = center ?? ([35, -25] as [number, number]);
   const [isMapReady, setIsMapReady] = useState(false);
   const onReadyRef = useRef(onReady);
   onReadyRef.current = onReady;
-  const didNotifyReadyRef = useRef(false);
+  const didNotifyReadyRef = useRef<boolean>(false);
 
-  const showSkeleton = loading || !isMapReady;
+  const showSkeleton = loading === true || !isMapReady;
   const showZoomControls = !hideZoomControls && isMapReady && !loading;
 
   const handleMapLoad = () => {

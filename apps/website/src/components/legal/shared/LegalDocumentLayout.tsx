@@ -1,7 +1,11 @@
+import legal from "@bondery/translations/locales/en/platform/website/WebsiteLegal.json" with {
+  type: "json",
+};
 import { Box, Paper, Text, Title } from "@mantine/core";
 import type { ReactNode } from "react";
 import { PageToc } from "@/components/docs/PageToc";
 import { SiteShell } from "@/components/site-shell";
+import { formatMessage } from "@/lib/i18n/message";
 
 const LEGAL_TOC_SELECTOR = "h2[id]";
 
@@ -24,7 +28,7 @@ export function LegalDocumentLayout({ title, lastUpdated, children }: LegalDocum
           {title}
         </Title>
         <Text c="dimmed" mb="xl" size="sm">
-          Last Updated: {lastUpdated}
+          {formatMessage(legal.LastUpdated, { date: lastUpdated })}
         </Text>
 
         <Box hiddenFrom="lg" mb="xl">

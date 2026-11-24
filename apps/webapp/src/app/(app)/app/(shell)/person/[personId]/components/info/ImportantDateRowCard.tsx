@@ -5,7 +5,8 @@ import type { ImportantDateType } from "@bondery/schemas";
 import { Card, Group, Loader, TextInput } from "@mantine/core";
 import { IconBell, IconCalendarEvent, IconTrash } from "@tabler/icons-react";
 import { DatePickerWithPresets } from "@/components/interactions/DatePickerWithPresets";
-import { getDateFormat, normalizePickerDate } from "../../utils/importantDateUtils";
+import { useDateFormatter } from "@/lib/i18n/useDateFormatter";
+import { normalizePickerDate } from "../../utils/importantDateUtils";
 
 export type DateTypeOption = {
   value: string;
@@ -68,7 +69,9 @@ export function ImportantDateRowCard({
   hideNotifySelect = false,
   leftAction,
 }: ImportantDateRowCardProps) {
-  const dateFormat = getDateFormat(date);
+  const formatter = useDateFormatter();
+  const isRecurringDate = date?.getFullYear() === 1904;
+  const dateFormat = formatter.dateInputValueFormat({ withYear: !isRecurringDate });
   const dateTypeOptions = typeOptions.map((option) => {
     if (!option.disabled) {
       return option;

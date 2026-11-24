@@ -2,7 +2,7 @@
 
 ## Title format
 
-```
+```text
 ^\[(Bug|Chore|Feature|Research|Business Ops)\] .+
 ```
 
@@ -12,21 +12,23 @@ Titles should mirror the `## Outcome` sentence in the description. When the Outc
 
 ### Examples
 
-| Type | Example |
-|------|---------|
-| Bug | `[Bug] Fix avatar upload failing on slow connections` |
-| Chore | `[Chore] Upgrade Redis to v8 for connection pooling` |
-| Feature | `[Feature] Let users bulk-export contacts as CSV` |
-| Research | `[Research] Evaluate Prisma 8 migration path` |
+| Type         | Example                                                     |
+| ------------ | ----------------------------------------------------------- |
+| Bug          | `[Bug] Fix avatar upload failing on slow connections`       |
+| Chore        | `[Chore] Upgrade Redis to v8 for connection pooling`        |
+| Feature      | `[Feature] Let users bulk-export contacts as CSV`           |
+| Research     | `[Research] Evaluate Prisma 8 migration path`               |
 | Business Ops | `[Business Ops] File annual tax return for Sveetech s.r.o.` |
 
 ## Standard task description
 
 ```markdown
 ## Outcome
+
 [What changes for the user or operator — one sentence]
 
 ## Sanity check
+
 - **Who is the user?** [persona or operator/founder]
 - **What pain or opportunity?** [one sentence]
 - **How do we know?** [support, churn, usage, founder, ROADMAP vote, agent, analytics, …]
@@ -34,6 +36,7 @@ Titles should mirror the `## Outcome` sentence in the description. When the Outc
 - **How will we know it worked?** [metric, qualitative signal, or "unblocks X"]
 
 ## Roadmap
+
 [Optional] ROADMAP-n — [title]. Link: https://usebondery.com/roadmap
 ```
 
@@ -41,7 +44,7 @@ Titles should mirror the `## Outcome` sentence in the description. When the Outc
 
 Do **not** add a `## Blocked` section to the description. Post a **comment** when moving to Blocked:
 
-```
+```text
 Blocked: [who/what] — need [what unblocks]. Since YYYY-MM-DD.
 ```
 

@@ -11,21 +11,15 @@
 import { prisma } from "@bondery/db";
 import type { DomainContext } from "../../domains/_shared/context.js";
 import { domainDb } from "../../domains/_shared/domain-db.js";
-import { rpcCheckAndIncrementAiMessages } from "../../lib/data/rpc.js";
+import { rpcCheckAndIncrementAiMessages, rpcGetAiQuota } from "../../lib/data/rpc.js";
 import { hasPremiumAccess } from "../billing/entitlements.js";
 
-/** Number of free AI messages available to unsubscribed users (lifetime). */
-export const FREE_MESSAGE_LIMIT = 5;
-
-/** Monthly AI message cap for premium subscribers. */
-export const PREMIUM_MESSAGE_LIMIT = 300;
-
-export interface QuotaCheckResult {
+interface QuotaCheckResult {
   allowed: boolean;
   limit: number;
   messagesUsed: number;
   plan: "free" | "premium";
-  /** ISO timestamp of the period END — when the monthly counter resets (premium only). */
+  /** ISO timestamp of the period END — when the monthly counter resets. */
   resetAt: string | null;
 }
 
@@ -53,12 +47,20 @@ async function resolvePremiumAccess(
   );
 }
 
+export type { QuotaCheckResult };
+
+/** Monthly AI messages for an account without Premium. Resets each period. */
+export const FREE_MESSAGE_LIMIT = 5;
+
+/** Monthly AI message cap for premium subscribers. */
+export const PREMIUM_MESSAGE_LIMIT = 300;
+
 /**
  * Atomically checks quota and increments the message counter.
  *
- * For premium users the monthly counter is used; for free users the lifetime
- * counter is used. Both happen in a single atomic DB UPDATE to prevent
- * concurrent requests from bypassing the limit.
+ * Both plans share one monthly counter and one limit check; only the limit
+ * differs. The check and the increment run in a single DB statement, so
+ * concurrent requests cannot bypass the limit.
  *
  * IMPORTANT: Because this increments unconditionally, the caller MUST check
  * `result.allowed` and abort streaming if false. The increment is not rolled
@@ -71,7 +73,7 @@ export async function checkAndIncrementQuota(ctx: DomainContext): Promise<QuotaC
   const isPremium = await resolvePremiumAccess(db, user.id);
   const limit = isPremium ? PREMIUM_MESSAGE_LIMIT : FREE_MESSAGE_LIMIT;
 
-  const row = await rpcCheckAndIncrementAiMessages(db, user.id, limit, isPremium);
+  const row = await rpcCheckAndIncrementAiMessages(db, user.id, limit);
 
   return {
     allowed: row.allowed,
@@ -86,6 +88,10 @@ export async function checkAndIncrementQuota(ctx: DomainContext): Promise<QuotaC
  * Read-only quota check — does NOT increment. Used by GET /api/subscriptions
  * to report current usage to the frontend without consuming a message.
  *
+ * Both the usage and the reset instant come from `get_ai_quota`, the same SQL
+ * function that gates the chat route. A date computed here instead would drift
+ * from the number the chat 403 reports.
+ *
  * @param _client Unused legacy parameter — kept for route signature compatibility.
  * @param userId The authenticated user's ID
  */
@@ -95,49 +101,13 @@ export async function checkChatQuota(
 ): Promise<QuotaCheckResult> {
   const db = prisma;
   const isPremium = await resolvePremiumAccess(db, userId, isPremiumOverride);
-
-  if (isPremium) {
-    const settings = await db.userSettings.findUnique({
-      select: {
-        aiMessagesMonthResetAt: true,
-        aiMessagesThisMonth: true,
-      },
-      where: { userId },
-    });
-
-    const rawUsed = settings?.aiMessagesThisMonth ?? 0;
-    const rawResetAt = settings?.aiMessagesMonthResetAt ?? null;
-
-    const periodExpired =
-      rawResetAt != null && Date.now() > rawResetAt.getTime() + 30 * 24 * 60 * 60 * 1000;
-
-    const messagesUsed = periodExpired ? 0 : rawUsed;
-    const resetAt =
-      periodExpired || !rawResetAt
-        ? null
-        : new Date(rawResetAt.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
-
-    return {
-      allowed: messagesUsed < PREMIUM_MESSAGE_LIMIT,
-      limit: PREMIUM_MESSAGE_LIMIT,
-      messagesUsed,
-      plan: "premium",
-      resetAt,
-    };
-  }
-
-  const settings = await db.userSettings.findUnique({
-    select: { aiMessagesUsed: true },
-    where: { userId },
-  });
-
-  const messagesUsed = settings?.aiMessagesUsed ?? 0;
+  const { messagesUsed, resetAt } = await rpcGetAiQuota(db, userId);
 
   return {
-    allowed: messagesUsed < FREE_MESSAGE_LIMIT,
-    limit: FREE_MESSAGE_LIMIT,
+    allowed: messagesUsed < (isPremium ? PREMIUM_MESSAGE_LIMIT : FREE_MESSAGE_LIMIT),
+    limit: isPremium ? PREMIUM_MESSAGE_LIMIT : FREE_MESSAGE_LIMIT,
     messagesUsed,
-    plan: "free",
-    resetAt: null,
+    plan: isPremium ? "premium" : "free",
+    resetAt,
   };
 }

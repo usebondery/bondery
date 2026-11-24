@@ -2,12 +2,11 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { S3Storage } from "../lib/storage/s3.js";
 
-describe("S3Storage", () => {
+describe("s3Storage", () => {
   it("builds path-style public URLs per logical bucket", () => {
     const storage = new S3Storage({
       accessKeyId: "test",
       endpoint: "http://127.0.0.1:8333",
-      forcePathStyle: true,
       publicBaseUrl: "https://storage.example.com",
       region: "eu-central-1",
       secretAccessKey: "test",

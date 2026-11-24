@@ -1,21 +1,12 @@
 import { countryCodes } from "#phone/country-codes.js";
 import { getCountryCodeForTimezone } from "#phone/phone-default-country.js";
 
-export type NormalizedPhone = {
+const PATTERN_5E30302B_RE = /^00+/;
+
+type NormalizedPhone = {
   identityKey: string;
   prefix: string;
   value: string;
-};
-
-export type NormalizePhoneError = {
-  error: "empty" | "invalid" | "missing_default_country";
-};
-
-export type NormalizePhoneResult = NormalizedPhone | NormalizePhoneError;
-
-export type DefaultPhoneCountrySettings = {
-  defaultPhoneCountry?: string | null;
-  timezone?: string | null;
 };
 
 const STRIP_LEADING_ZERO_COUNTRIES = new Set([
@@ -71,23 +62,9 @@ function digitsOnly(value: string): string {
 }
 
 /** Canonical E.164-style prefix for storage and matching (`+1-268` → `+1268`). */
-export function canonicalizeDialCode(dialCode: string): string {
+function canonicalizeDialCode(dialCode: string): string {
   const digits = digitsOnly(dialCode);
   return digits ? `+${digits}` : "";
-}
-
-/** Human-readable calling code (`+1-268` → `+1 268`, `+420` → `+420`). */
-export function formatDialCodeForDisplay(dialCode: string): string {
-  const digits = digitsOnly(dialCode);
-  if (!digits) {
-    return "";
-  }
-
-  if (digits.startsWith("1") && digits.length > 1) {
-    return `+1 ${digits.slice(1)}`;
-  }
-
-  return `+${digits}`;
 }
 
 function normalizeDialCodeDisplay(dialCode: string): string {
@@ -138,7 +115,7 @@ function stripNationalTrunkZero(nationalDigits: string, countryCode: string | nu
 
 function validateNationalLength(dialDigits: string, nationalDigits: string): boolean {
   const rule = NATIONAL_LENGTH_BY_DIAL[dialDigits] ?? DEFAULT_NATIONAL_LENGTH;
-  const length = nationalDigits.length;
+  const { length } = nationalDigits;
   return length >= rule.min && length <= rule.max;
 }
 
@@ -158,6 +135,41 @@ function matchInternationalDigits(allDigits: string): NormalizedPhone | null {
   }
 
   return null;
+}
+
+/**
+ * Digits-only identity for merge/dedup (no `+`, no formatting).
+ */
+function phoneIdentityKey(prefix: string, value: string): string {
+  return digitsOnly(prefix) + digitsOnly(value);
+}
+
+export type { NormalizedPhone };
+export { canonicalizeDialCode, phoneIdentityKey };
+
+export type NormalizePhoneError = {
+  error: "empty" | "invalid" | "missing_default_country";
+};
+
+export type NormalizePhoneResult = NormalizedPhone | NormalizePhoneError;
+
+export type DefaultPhoneCountrySettings = {
+  defaultPhoneCountry?: string | null;
+  timezone?: string | null;
+};
+
+/** Human-readable calling code (`+1-268` → `+1 268`, `+420` → `+420`). */
+export function formatDialCodeForDisplay(dialCode: string): string {
+  const digits = digitsOnly(dialCode);
+  if (!digits) {
+    return "";
+  }
+
+  if (digits.startsWith("1") && digits.length > 1) {
+    return `+1 ${digits.slice(1)}`;
+  }
+
+  return `+${digits}`;
 }
 
 /**
@@ -208,13 +220,6 @@ export function resolveDefaultPhoneCountry(settings: DefaultPhoneCountrySettings
 }
 
 /**
- * Digits-only identity for merge/dedup (no `+`, no formatting).
- */
-export function phoneIdentityKey(prefix: string, value: string): string {
-  return digitsOnly(prefix) + digitsOnly(value);
-}
-
-/**
  * Normalizes free-form phone input using an optional default country for national numbers.
  */
 export function normalizePhoneInput(
@@ -232,7 +237,7 @@ export function normalizePhoneInput(
   if (hasInternationalMarker) {
     let allDigits = digitsOnly(trimmed);
     if (trimmed.trimStart().startsWith("00")) {
-      allDigits = allDigits.replace(/^00+/, "");
+      allDigits = allDigits.replace(PATTERN_5E30302B_RE, "");
     }
 
     const matched = matchInternationalDigits(allDigits);

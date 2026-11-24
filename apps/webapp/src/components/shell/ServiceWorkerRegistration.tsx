@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { useEffect } from "react";
 
 /**
@@ -13,7 +14,7 @@ export function ServiceWorkerRegistration() {
       return;
     }
 
-    void navigator.serviceWorker.register("/sw.js").catch(() => {
+    detachPromise(navigator.serviceWorker.register("/sw.js"), () => {
       // SW registration failures are non-fatal; the app works fine without it.
     });
   }, []);

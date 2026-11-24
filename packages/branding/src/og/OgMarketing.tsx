@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { OG_BACKGROUND, OG_FONT_FAMILY } from "#og/constants.js";
 import { Logotype } from "#og/Logotype.js";
 
@@ -10,7 +11,7 @@ type OgMarketingProps = {
  * Default branded OG card — centered logotype on the shared brand wash.
  * Used for website and webapp root opengraph-image routes.
  */
-export function OgMarketing({ tagline }: OgMarketingProps) {
+export function OgMarketing({ tagline }: OgMarketingProps): ReactElement {
   return (
     <div
       style={{

@@ -1,4 +1,5 @@
-﻿import { browser } from "wxt/browser";
+import { detachPromise } from "@bondery/helpers/async";
+import { browser } from "wxt/browser";
 import { getTokens, isAuthenticated, refreshAccessToken } from "../../lib/auth";
 import { extLog } from "../../lib/log";
 import type { ExtensionMessage } from "../../lib/messaging/types";
@@ -18,7 +19,7 @@ import { checkVersionCompatibility } from "./version-check";
 export function initBackground(): void {
   browser.runtime.onInstalled.addListener(async (details) => {
     if (details.reason === "install") {
-      const welcomeUrl = chrome.runtime.getURL("welcome.html");
+      const welcomeUrl = browser.runtime.getURL("/welcome.html");
       await browser.tabs.create({ url: welcomeUrl });
     } else if (details.reason === "update") {
       await browser.storage.local.remove("updateRequired");
@@ -56,7 +57,7 @@ export function initBackground(): void {
 
   browser.runtime.onMessage.addListener(
     (message: ExtensionMessage, sender, sendResponse: (response: unknown) => void) => {
-      void handleMessage(message, sender, sendResponse);
+      detachPromise(handleMessage(message, sender, sendResponse));
       return true;
     },
   );
@@ -64,7 +65,7 @@ export function initBackground(): void {
   browser.alarms.create("token-refresh", { periodInMinutes: 15 });
   browser.alarms.create("version-check", { periodInMinutes: 60 });
 
-  void checkVersionCompatibility();
+  detachPromise(checkVersionCompatibility());
 
   browser.alarms.onAlarm.addListener(async (alarm) => {
     if (alarm.name === "version-check") {
@@ -99,7 +100,7 @@ export function initBackground(): void {
     }
   });
 
-  void restorePendingEnrichIfAny();
+  detachPromise(restorePendingEnrichIfAny());
 
   extLog.debug("[background] Service worker initialized");
 }

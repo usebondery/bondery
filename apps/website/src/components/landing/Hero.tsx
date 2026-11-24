@@ -1,12 +1,15 @@
 import { ButtonLink } from "@bondery/mantine-next";
+import landing from "@bondery/translations/locales/en/platform/website/WebsiteLanding.json" with {
+  type: "json",
+};
 import { Box, Container, Flex, Image, Stack, Text, Title } from "@mantine/core";
 import { IconArrowDown, IconTopologyStar } from "@tabler/icons-react";
 import NextImage from "next/image";
 import { PageTopSpacer } from "@/components/page-top-spacer";
 import { hrefWebappLogin } from "@/lib/navigation/href/webapp";
+import { LANDING_SECTION_IDS } from "./sectionIds";
 
-const HERO_DASHBOARD_ALT =
-  "Bondery home dashboard with interactions timeline, contact stats, and reminders";
+const HERO_DASHBOARD_ALT = landing.Hero.ImageAlt;
 
 /** Source asset: 16:9 desktop capture at native resolution. */
 const HERO_DASHBOARD_WIDTH = 2880;
@@ -28,21 +31,23 @@ export function Hero() {
           <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-12 xl:gap-14">
             <Stack className="items-center lg:items-stretch" gap="lg">
               <Title
-                className="text-4xl font-extrabold leading-tight md:text-5xl lg:text-6xl"
+                fw={800}
+                fz={{ base: "2.25rem", lg: "3.75rem", md: "3rem" }}
+                lh={1.25}
                 order={1}
                 ta={{ base: "center", lg: "left" }}
               >
-                Build stronger bonds that grow your network
+                {landing.Hero.Title}
               </Title>
 
               <Text
                 c="var(--mantine-color-text)"
                 maw={540}
+                mx={{ base: "auto", lg: 0 }}
                 size="lg"
                 ta={{ base: "center", lg: "left" }}
               >
-                Bondery is an open-source personal CRM that puts everyone you know in one place.
-                Stay in touch on purpose: context, last conversation, reminders to reach out.
+                {landing.Hero.Subtitle}
               </Text>
 
               <Flex
@@ -59,28 +64,28 @@ export function Hero() {
                   leftSection={<IconTopologyStar size={20} />}
                   size="lg"
                 >
-                  Get started
+                  {landing.GetStarted}
                 </ButtonLink>
                 <ButtonLink
                   className="w-full! md:w-auto!"
-                  href="#features"
+                  href={`#${LANDING_SECTION_IDS.features}`}
                   leftSection={<IconArrowDown size={20} />}
                   size="lg"
                   variant="default"
                 >
-                  Learn more
+                  {landing.Hero.LearnMore}
                 </ButtonLink>
               </Flex>
             </Stack>
 
-            <Box className="w-full min-w-0">
-              <Box
-                className="w-full overflow-hidden rounded-xl border border-[var(--mantine-color-default-border)] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.45)] lg:rounded-2xl lg:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.55)]"
+            <div className="w-full min-w-0">
+              <div
+                className="border-line shadow-hero lg:shadow-hero-lg w-full overflow-hidden rounded-xl border lg:rounded-2xl"
                 style={{ lineHeight: 0 }}
               >
                 <Image
                   alt={HERO_DASHBOARD_ALT}
-                  className="h-auto w-full object-contain object-left-top"
+                  className="h-auto w-full object-contain object-top-left"
                   component={NextImage}
                   fetchPriority="high"
                   height={HERO_DASHBOARD_HEIGHT}
@@ -89,8 +94,8 @@ export function Hero() {
                   src="/images/hero-app-dashboard.png"
                   width={HERO_DASHBOARD_WIDTH}
                 />
-              </Box>
-            </Box>
+              </div>
+            </div>
           </div>
         </Container>
       </Box>

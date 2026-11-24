@@ -10,11 +10,11 @@ import type { JWTPayload } from "jose";
 import { CIMD_CLIENT_DISCOVERY_ID } from "./index.js";
 
 function oauthClientIdFromAccessToken(payload: JWTPayload): string | null {
-  if (typeof payload.client_id === "string" && payload.client_id) {
-    return payload.client_id;
+  if (typeof payload["client_id"] === "string" && payload["client_id"]) {
+    return payload["client_id"];
   }
-  if (typeof payload.azp === "string" && payload.azp) {
-    return payload.azp;
+  if (typeof payload["azp"] === "string" && payload["azp"]) {
+    return payload["azp"];
   }
   return null;
 }

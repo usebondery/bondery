@@ -2,7 +2,7 @@
 
 import type { ContactPreview } from "@bondery/schemas";
 import { Tooltip } from "@mantine/core";
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 import { PersonCard } from "#nextjs/PersonCard/index.js";
 
 type PersonAvatarTooltipIdentity = ContactPreview & {
@@ -32,8 +32,8 @@ export function PersonAvatarTooltip({
   children,
   opened,
   clipRoot,
-}: PersonAvatarTooltipProps) {
-  const clipped = clipRoot != null;
+}: PersonAvatarTooltipProps): ReactElement {
+  const clipped = clipRoot !== null && clipRoot !== undefined;
   return (
     <Tooltip
       closeDelay={50}

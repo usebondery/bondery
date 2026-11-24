@@ -1,4 +1,5 @@
 import { IconDotsVertical } from "@tabler/icons-react-native";
+import { cn } from "cn";
 import { type ComponentRef, Fragment, useRef, useState } from "react";
 import { Dimensions, type LayoutRectangle, Modal, StyleSheet, View } from "react-native";
 import Animated from "react-native-reanimated";
@@ -11,7 +12,6 @@ import {
   OverflowMenuItem,
   type OverflowMenuItemConfig,
 } from "./OverflowMenuItem";
-import { joinClassNames } from "./ui/joinClassNames";
 import { Paper } from "./ui/Paper";
 import { usePressSqueeze } from "./ui/usePressSqueeze";
 
@@ -38,7 +38,7 @@ function menuPosition(anchor: LayoutRectangle & { windowWidth: number }) {
   return { left, top, width: menuWidth };
 }
 
-export function OverflowMenu({
+function OverflowMenu({
   items,
   accessibilityLabel,
   disabled = false,
@@ -100,9 +100,9 @@ export function OverflowMenu({
             accessibilityLabel={accessibilityLabel}
             accessibilityRole="button"
             accessibilityState={{ disabled, expanded: open }}
-            className={joinClassNames(
+            className={cn(
               "items-center justify-center overflow-hidden",
-              isRowTrigger ? undefined : "rounded-[10px]",
+              !isRowTrigger && "rounded-control",
             )}
             disabled={disabled}
             hitSlop={isRowTrigger ? MOBILE_HIT_SLOP.icon : MOBILE_HIT_SLOP.nav}
@@ -117,7 +117,7 @@ export function OverflowMenu({
             style={[
               styles.menuButton,
               !isRowTrigger && open ? { backgroundColor: colors.surfacePressed } : undefined,
-              !isRowTrigger && !open ? { backgroundColor: "transparent" } : undefined,
+              !isRowTrigger && !open ? { backgroundColor: colors.transparent } : undefined,
             ]}
           >
             <IconDotsVertical size={iconSize} stroke={iconColor} />
@@ -141,7 +141,6 @@ export function OverflowMenu({
           />
           {menuLayout ? (
             <Paper
-              className="absolute shadow-md"
               radius={OVERFLOW_MENU_RADIUS}
               style={[
                 menuLayout,
@@ -150,7 +149,8 @@ export function OverflowMenu({
                   borderColor: colors.border,
                   borderWidth: 1,
                   elevation: 8,
-                  shadowColor: "#000",
+                  position: "absolute",
+                  shadowColor: colors.shadow,
                   shadowOffset: { height: 4, width: 0 },
                   shadowOpacity: 0.12,
                   shadowRadius: 12,
@@ -202,3 +202,5 @@ const styles = StyleSheet.create({
     height: StyleSheet.hairlineWidth,
   },
 });
+
+export { OverflowMenu };

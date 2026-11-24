@@ -1,82 +1,85 @@
+# Brand asset placement
+
 The brand assets were used in the following places:
 
 ---
+
 Here is **only the list**, in your requested structure, with **simple bullets and no values**.
 
 ---
 
-# Socials
+## Socials
 
-## LinkedIn
+### LinkedIn
 
-* Company profile image
-* Banner
-* OAuth branding
+- Company profile image
+- Banner
+- OAuth branding
 
-## X
+### X
 
-* Profile image
-* Banner
+- Profile image
+- Banner
 
-## Instagram
+### Instagram
 
-* Profile image
+- Profile image
 
-## Facebook
+### Facebook
 
-* Profile image
-* Cover image
+- Profile image
+- Cover image
 
 ---
 
-# Other platforms
+## Other platforms
 
-## Website
+### Website
 
-* Logo
-* Favicons
-* Icons
-* Meta images
-* OpenGraph image
+- Logo
+- Favicons
+- Icons
+- Meta images
+- OpenGraph image
 
-## GitHub
+### GitHub
 
-* Organization profile image
-* Social preview image
-* README logo
-* OAuth branding
+- Organization profile image
+- Social preview image
+- README logo
+- OAuth branding
 
-## Chrome Extension
+### Chrome Extension
 
-* Extension logo
-* Extension icon
+- Extension logo
+- Extension icon
 
-## Authentication (OAuth)
+### Authentication (OAuth)
 
-* GitHub branding
-* LinkedIn branding
-* Google branding
+- GitHub branding
+- LinkedIn branding
+- Google branding
 
-## OpenStatus
+### OpenStatus
 
-* Status logo
-* Custom domain branding
+- Status logo
+- Custom domain branding
 
-## Plane
+### Plane
 
-* Plane logo placement
+- Plane logo placement
 
-## Figma
+### Figma
 
-* Logo set
-* Icon set
-* Brand assets
+- Logo set
+- Icon set
+- Brand assets
 
-## GitBook
+### GitBook
 
-* GitBook logo
-* OpenAPI branding
+- GitBook logo
+- OpenAPI branding
 
-## /contact page
+### /contact page
 
-* Site logo
+- Site logo

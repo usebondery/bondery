@@ -9,15 +9,46 @@ const GEOCODE_CACHE_TTL_DAYS = 180;
 
 /** Read at call time — env is populated by @fastify/env after module load. */
 function getMapsKey(): string {
-  return process.env.BONDERY_PRIVATE_MAPS_KEY || "";
+  return process.env["BONDERY_PRIVATE_MAPS_KEY"] || "";
 }
 
 function getMapsUrl(): string {
-  return process.env.BONDERY_PUBLIC_MAPS_URL || MAPS_BASE_URL;
+  return process.env["BONDERY_PUBLIC_MAPS_URL"] || MAPS_BASE_URL;
+}
+
+/**
+ * The geocoding calls an address-enriching import needs.
+ *
+ * A vCard import resolves every address through Mapy.com, so the parse depends on network access
+ * and an API key. A test injects a deterministic stand-in through `setGeocoderForTests`.
+ */
+type Geocoder = {
+  cachedGeocodeLocation: (location: string) => Promise<CachedGeocodeResult | null>;
+  timezoneForCoordinates: (lat: number, lon: number) => Promise<string | null>;
+  validateStreet: (query: string, expectedCity: string) => Promise<GeocodeResult | null>;
+};
+
+const defaultGeocoder: Geocoder = {
+  cachedGeocodeLocation: (location) => cachedGeocodeLinkedInLocation(location),
+  timezoneForCoordinates: (lat, lon) => getTimezoneForCoordinates(lat, lon),
+  validateStreet: (query, expectedCity) => validateStreetAddress(query, expectedCity),
+};
+
+let activeGeocoder: Geocoder | null = null;
+
+/** The process geocoder. Production leaves the default, which calls Mapy.com. */
+function getGeocoder(): Geocoder {
+  activeGeocoder ??= defaultGeocoder;
+  return activeGeocoder;
+}
+
+/** Test hook: inject a geocoder, or `null` to restore the Mapy.com client. */
+function setGeocoderForTests(geocoder: Geocoder | null): void {
+  activeGeocoder = geocoder;
 }
 
 /** Structured result from geocoding a LinkedIn location string. */
-export interface GeocodeResult {
+interface GeocodeResult {
   city: string | null;
   country: string | null;
   countryCode: string | null;
@@ -45,16 +76,20 @@ function parseLinkedInLocation(location: string): { query: string; locality?: st
     .map((s) => s.trim())
     .filter(Boolean);
 
-  if (parts.length === 0) {
+  const [query, ...rest] = parts;
+  if (query === undefined) {
     return { query: trimmed };
   }
 
-  if (parts.length === 1) {
-    return { query: parts[0] };
+  const locality = rest.at(-1);
+  if (locality === undefined) {
+    return { query };
   }
 
-  return { locality: parts[parts.length - 1], query: parts[0] };
+  return { locality, query };
 }
+
+export type { GeocodeResult };
 
 /**
  * Geocodes a LinkedIn-scraped location string using the Mapy.com /v1/geocode API.
@@ -102,8 +137,8 @@ export async function geocodeLinkedInLocation(location: string): Promise<Geocode
       return null;
     }
 
-    const item = items[0];
-    const position = item.position;
+    const [item] = items;
+    const { position } = item;
 
     if (!position || typeof position.lat !== "number" || typeof position.lon !== "number") {
       return null;
@@ -123,7 +158,7 @@ export async function geocodeLinkedInLocation(location: string): Promise<Geocode
 
     for (const entry of regional) {
       if (entry.type === "regional.municipality" || entry.type === "regional.municipality_part") {
-        if (!city) {
+        if (city === null || city === "") {
           city = entry.name;
         }
       } else if (entry.type === "regional.region") {
@@ -147,8 +182,8 @@ export async function geocodeLinkedInLocation(location: string): Promise<Geocode
       state,
       stateCode,
     };
-  } catch (err) {
-    logger.error({ err, location: trimmed }, "[mapy] Geocode error");
+  } catch (error) {
+    logger.error({ err: error, location: trimmed }, "[mapy] Geocode error");
     return null;
   }
 }
@@ -182,8 +217,8 @@ export async function getTimezoneForCoordinates(lat: number, lon: number): Promi
     const timezoneName = payload?.timezone?.timezoneName;
 
     return typeof timezoneName === "string" && timezoneName.length > 0 ? timezoneName : null;
-  } catch (err) {
-    logger.error({ err }, "[mapy] Timezone lookup error");
+  } catch (error) {
+    logger.error({ err: error }, "[mapy] Timezone lookup error");
     return null;
   }
 }
@@ -227,8 +262,8 @@ export async function validateStreetAddress(
       return null;
     }
 
-    const item = items[0];
-    const position = item.position;
+    const [item] = items;
+    const { position } = item;
 
     if (!position || typeof position.lat !== "number" || typeof position.lon !== "number") {
       return null;
@@ -260,7 +295,7 @@ export async function validateStreetAddress(
 
     for (const entry of regional) {
       if (entry.type === "regional.municipality" || entry.type === "regional.municipality_part") {
-        if (!city) {
+        if (city === null || city === "") {
           city = entry.name;
         }
       } else if (entry.type === "regional.region") {
@@ -295,8 +330,8 @@ export async function validateStreetAddress(
       state,
       stateCode,
     };
-  } catch (err) {
-    logger.error({ address: trimmed, err }, "[mapy] Address validation error");
+  } catch (error) {
+    logger.error({ address: trimmed, err: error }, "[mapy] Address validation error");
     return null;
   }
 }
@@ -331,7 +366,7 @@ export async function cachedGeocodeLinkedInLocation(
         return null;
       }
 
-      if (cached.lat == null || cached.lon == null || cached.locationEwkt == null) {
+      if (cached.lat === null || cached.lon === null || cached.locationEwkt === null) {
         return null;
       }
 
@@ -357,8 +392,8 @@ export async function cachedGeocodeLinkedInLocation(
         timezone: cached.timezone ?? null,
       };
     }
-  } catch (err) {
-    logger.error({ err }, "[mapy] Cache read failed, falling through to live geocode");
+  } catch (error) {
+    logger.error({ err: error }, "[mapy] Cache read failed, falling through to live geocode");
   }
 
   const mapsKeyConfigured = !!getMapsKey();
@@ -419,8 +454,8 @@ export async function cachedGeocodeLinkedInLocation(
         where: { placeKey },
       });
     }
-  } catch (err) {
-    logger.error({ err }, "[mapy] Cache upsert failed");
+  } catch (error) {
+    logger.error({ err: error }, "[mapy] Cache upsert failed");
   }
 
   if (!geo) {
@@ -429,3 +464,6 @@ export async function cachedGeocodeLinkedInLocation(
 
   return { geo, timezone };
 }
+
+export type { Geocoder };
+export { getGeocoder, setGeocoderForTests };

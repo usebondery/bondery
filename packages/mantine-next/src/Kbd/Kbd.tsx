@@ -7,6 +7,7 @@ import {
   type KbdProps as MantineKbdProps,
 } from "@mantine/core";
 import { useOs } from "@mantine/hooks";
+import type { ReactElement } from "react";
 import { resolveShortcutKeyLabel, type ShortcutKeyToken } from "#Kbd/resolveShortcutKeyLabel.js";
 
 export type { ShortcutKeyToken };
@@ -22,17 +23,18 @@ export interface KbdProps extends Omit<MantineKbdProps, "children"> {
  * Platform-aware keyboard shortcut display built on Mantine's `Kbd`.
  * Uses `useOs` to swap modifier labels (Ctrl vs ⌘) while keeping letter keys stable.
  */
-export function Kbd({ keys, gap = 4, ...kbdProps }: KbdProps) {
+export function Kbd({ keys, gap = 4, ...kbdProps }: KbdProps): ReactElement | null {
   const os = useOs();
 
-  if (keys.length === 0) {
+  const [firstKey] = keys;
+  if (firstKey === undefined) {
     return null;
   }
 
   if (keys.length === 1) {
     return (
       <MantineKbd {...kbdProps} suppressHydrationWarning>
-        {resolveShortcutKeyLabel(keys[0], os)}
+        {resolveShortcutKeyLabel(firstKey, os)}
       </MantineKbd>
     );
   }

@@ -1,3 +1,8 @@
+function normalizeFirstName(firstName: string | null | undefined): string {
+  const trimmed = (firstName ?? "").trim();
+  return trimmed.length > 0 ? trimmed : "contact";
+}
+
 export type SocialActionKey =
   | "phone"
   | "email"
@@ -16,11 +21,6 @@ export const SOCIAL_ACTION_ORDER: SocialActionKey[] = [
   "facebook",
   "signal",
 ];
-
-function normalizeFirstName(firstName: string | null | undefined): string {
-  const trimmed = String(firstName || "").trim();
-  return trimmed.length > 0 ? trimmed : "contact";
-}
 
 /**
  * Returns consistent social-action tooltip wording across person view and table rows.

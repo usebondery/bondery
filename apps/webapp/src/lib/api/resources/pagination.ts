@@ -9,13 +9,13 @@ export function normalizePaginatedList<T, K extends string>(
 ): { items: T[]; pagination: PaginationMeta } {
   const record = raw as Record<string, unknown>;
   const items = (record[key] as T[] | undefined) ?? [];
-  const pagination = record.pagination as PaginationMeta | undefined;
+  const pagination = record["pagination"] as PaginationMeta | undefined;
 
   if (pagination) {
     return { items, pagination };
   }
 
-  const legacyTotalCount = record.totalCount;
+  const legacyTotalCount = record["totalCount"];
   const totalCount =
     typeof legacyTotalCount === "number" && Number.isFinite(legacyTotalCount)
       ? legacyTotalCount

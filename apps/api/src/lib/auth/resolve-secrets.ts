@@ -1,9 +1,11 @@
-export type BetterAuthSecretVersion = {
+type BetterAuthSecretVersion = {
   version: number;
   value: string;
 };
 
 const MIN_SECRET_LENGTH = 32;
+
+export type { BetterAuthSecretVersion };
 
 export function parseBetterAuthSecretsString(raw: string): BetterAuthSecretVersion[] {
   const trimmed = raw.trim();
@@ -60,7 +62,7 @@ export function parseBetterAuthSecretsString(raw: string): BetterAuthSecretVersi
 export function resolveBetterAuthSecrets(
   env: NodeJS.ProcessEnv = process.env,
 ): BetterAuthSecretVersion[] {
-  const raw = env.BONDERY_PRIVATE_BETTER_AUTH_SECRETS;
+  const raw = env["BONDERY_PRIVATE_BETTER_AUTH_SECRETS"];
   if (!raw?.trim()) {
     throw new Error(
       "Missing BONDERY_PRIVATE_BETTER_AUTH_SECRETS (format: version:secret[,version:secret...])",

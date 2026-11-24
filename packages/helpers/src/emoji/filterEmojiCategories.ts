@@ -15,7 +15,7 @@ export function filterEmojiCategories(query: string): [string, EmojiData[]][] {
   const searchLower = trimmedQuery.toLowerCase();
   const filtered: [string, EmojiData[]][] = [];
 
-  Object.entries(EMOJI_CATEGORIES).forEach(([category, emojis]) => {
+  for (const [category, emojis] of Object.entries(EMOJI_CATEGORIES)) {
     const matchedEmojis = emojis.filter((item) =>
       item.keywords.some((keyword) => keyword.includes(searchLower)),
     );
@@ -23,7 +23,7 @@ export function filterEmojiCategories(query: string): [string, EmojiData[]][] {
     if (matchedEmojis.length > 0) {
       filtered.push([category, matchedEmojis]);
     }
-  });
+  }
 
   return filtered;
 }

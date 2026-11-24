@@ -6,6 +6,10 @@ import {
   buildReconfirmSettingsUrl,
 } from "./callback-urls.js";
 
+const LOGIN_PATH = /\/login/;
+const HAS_RETURNED = /has_returned=/;
+const AUTH_START = /\/auth\/start/;
+
 const ORIGIN = "https://app.usebondery.com";
 const REVOKE_KEY_ID = "11111111-1111-4111-8111-111111111111";
 
@@ -14,10 +18,10 @@ describe("buildReconfirmMagicLinkUrls", () => {
     const urls = buildReconfirmMagicLinkUrls(ORIGIN, "add_passkey");
     assert.equal(urls.callbackURL, `${ORIGIN}/confirm?action=add_passkey&has_returned=1`);
     assert.equal(urls.errorCallbackURL, urls.callbackURL);
-    assert.doesNotMatch(urls.callbackURL, /\/auth\/start/);
-    assert.doesNotMatch(urls.errorCallbackURL, /\/auth\/start/);
-    assert.doesNotMatch(urls.callbackURL, /\/login/);
-    assert.doesNotMatch(urls.errorCallbackURL, /\/login/);
+    assert.doesNotMatch(urls.callbackURL, AUTH_START);
+    assert.doesNotMatch(urls.errorCallbackURL, AUTH_START);
+    assert.doesNotMatch(urls.callbackURL, LOGIN_PATH);
+    assert.doesNotMatch(urls.errorCallbackURL, LOGIN_PATH);
   });
 
   it("keeps unlink, delete, and revoke target on the confirm query", () => {
@@ -56,8 +60,8 @@ describe("buildReconfirmMagicLinkUrls", () => {
       buildReconfirmSettingsUrl(ORIGIN, "revoke_api_key", REVOKE_KEY_ID),
       `${ORIGIN}/app/settings?action=revoke_api_key&target=${REVOKE_KEY_ID}`,
     );
-    assert.doesNotMatch(buildReconfirmSettingsUrl(ORIGIN, "delete_account"), /has_returned=/);
-    assert.doesNotMatch(buildReconfirmSettingsUrl(ORIGIN, "delete_account"), /\/auth\/start/);
-    assert.doesNotMatch(buildReconfirmSettingsUrl(ORIGIN, "delete_account"), /\/login/);
+    assert.doesNotMatch(buildReconfirmSettingsUrl(ORIGIN, "delete_account"), HAS_RETURNED);
+    assert.doesNotMatch(buildReconfirmSettingsUrl(ORIGIN, "delete_account"), AUTH_START);
+    assert.doesNotMatch(buildReconfirmSettingsUrl(ORIGIN, "delete_account"), LOGIN_PATH);
   });
 });

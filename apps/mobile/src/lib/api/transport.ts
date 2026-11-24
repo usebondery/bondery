@@ -1,11 +1,11 @@
 import { buildApiErrorFromResponse } from "@bondery/helpers/api";
-import { getAccessToken } from "../auth/client";
-import { AuthRequiredError, endLocalSession } from "../auth/session";
+import { endLocalSession, readLocalAccessToken } from "../auth/local-session";
+import { AuthRequiredError } from "../auth/session";
 import { API_URL } from "../config";
 import { throwTransportUnavailableError } from "./transport-unavailable-error";
 
 export async function getBearerHeaders(): Promise<Record<string, string>> {
-  const accessToken = await getAccessToken();
+  const accessToken = await readLocalAccessToken();
 
   if (!accessToken) {
     throw new AuthRequiredError("missing_local_session");
@@ -49,11 +49,11 @@ export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T
 
   const headers: Record<string, string> = {
     ...(authHeaders as Record<string, string>),
-    ...((init?.headers as Record<string, string>) || {}),
+    ...(init?.headers as Record<string, string> | undefined),
   };
 
-  if (hasJsonBody && headers["Content-Type"] === undefined) {
-    headers["Content-Type"] = "application/json";
+  if (hasJsonBody) {
+    headers["Content-Type"] ??= "application/json";
   }
 
   const response = await mobileFetch(`${API_URL}${path}`, {

@@ -1,7 +1,12 @@
 "use client";
 
 import { Combobox, Group, Text } from "@mantine/core";
+import { cn } from "cn";
 import type { CSSProperties, ReactNode } from "react";
+
+function flagIconClass(code: string): string {
+  return `fi-${code}`;
+}
 
 export function selectedComboboxOptionStyle(isSelected: boolean): CSSProperties | undefined {
   if (!isSelected) {
@@ -88,7 +93,9 @@ export function SearchableComboboxPickerOption({
     <Combobox.Option style={selectedComboboxOptionStyle(isSelected)} value={value}>
       <Group gap="xs" justify="space-between" w="100%" wrap="nowrap">
         <Group gap="xs" style={{ flex: 1, minWidth: 0 }} wrap="nowrap">
-          {flag ? <span className={`fi fi-${flag}`} style={{ flexShrink: 0, width: 20 }} /> : null}
+          {flag ? (
+            <span className={cn("fi", flagIconClass(flag))} style={{ flexShrink: 0, width: 20 }} />
+          ) : null}
           <SearchableComboboxItemText
             main={main}
             supporting={supporting}
@@ -139,7 +146,7 @@ export function SearchableComboboxTargetItem({
       wrap="nowrap"
     >
       <Group gap="xs" style={{ flex: 1, minWidth: 0 }} wrap="nowrap">
-        {flag ? <span className={`fi fi-${flag}`} style={{ flexShrink: 0 }} /> : null}
+        {flag ? <span className={cn("fi", flagIconClass(flag))} style={{ flexShrink: 0 }} /> : null}
         <SearchableComboboxItemText
           main={main}
           supporting={supporting}

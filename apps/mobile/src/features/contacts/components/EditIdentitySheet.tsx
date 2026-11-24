@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import type { Contact } from "@bondery/schemas";
 import { updateContactIdentitySchema } from "@bondery/schemas";
 import { IconBriefcase, IconCheck, IconTrash } from "@tabler/icons-react-native";
@@ -32,7 +33,7 @@ interface EditIdentitySheetProps {
   open: boolean;
 }
 
-export function EditIdentitySheet({
+function EditIdentitySheet({
   open,
   contact,
   isMyselfMode = false,
@@ -61,7 +62,7 @@ export function EditIdentitySheet({
     formState: { isDirty, isValid },
   } = useSheetForm({
     getDefaultValues: () => ({
-      firstName: contact.firstName ?? "",
+      firstName: contact.firstName,
       headline: contact.headline ?? "",
       lastName: contact.lastName ?? "",
       middleName: contact.middleName ?? "",
@@ -91,7 +92,7 @@ export function EditIdentitySheet({
       setAvatarUri(url);
       onContactUpdated({ ...contactRef.current, avatar: url });
       if (isMyselfMode) {
-        void fetchSettings();
+        detachPromise(fetchSettings());
       }
     },
   });
@@ -112,7 +113,7 @@ export function EditIdentitySheet({
   const headlineLeadingIcon = <IconBriefcase size={18} stroke={colors.iconSecondary} />;
 
   function performSave(values: Parameters<typeof updateContact>[1]) {
-    return updateContact(contact.id, values, contact.updatedAt ?? undefined);
+    return updateContact(contact.id, values, contact.updatedAt);
   }
 
   const { isSubmitting, submit } = useSheetLocalSubmit(handleSubmit, {
@@ -161,16 +162,18 @@ export function EditIdentitySheet({
             <PersonAvatar
               accessibilityLabel={tMobileContactIdentity("ChangePhoto")}
               disabled={isBusy}
-              onPress={() => void choosePhotoFromLibrary()}
+              onPress={() => detachPromise(choosePhotoFromLibrary())}
               person={contact}
               size={MOBILE_LAYOUT.avatar.editor}
-              skipLocalFile={avatarUri != null && !isHttpAvatarUri(avatarUri)}
+              skipLocalFile={
+                avatarUri !== null && avatarUri !== undefined && !isHttpAvatarUri(avatarUri)
+              }
               uri={avatarUri}
             />
 
             <AvatarPhotoOverlayControls
               disabled={isBusy}
-              onChangePhoto={() => void choosePhotoFromLibrary()}
+              onChangePhoto={() => detachPromise(choosePhotoFromLibrary())}
               onRemovePhoto={() => setRemoveConfirmOpen(true)}
               showRemove={hasAvatar}
             />
@@ -236,7 +239,7 @@ export function EditIdentitySheet({
             label: tMobileContactIdentity("RemovePhoto"),
             loading: isPhotoBusy,
             loadingText: t("feedback.removing"),
-            onPress: () => void removePhoto(),
+            onPress: () => detachPromise(removePhoto()),
             tone: "danger",
             variant: "filled",
           },
@@ -257,3 +260,5 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
 });
+
+export { EditIdentitySheet };

@@ -5,6 +5,7 @@ import { WEBSITE_URL } from "@/lib/config";
 import { discoveryCorsPreflight, withDiscoveryCors } from "@/lib/discovery-cors";
 import websitePackage from "../../../package.json" with { type: "json" };
 
+const TRAILING_SLASHES_RE = /\/+$/;
 /**
  * MCP Server Card (experimental `server-card` extension).
  *
@@ -24,7 +25,7 @@ const SUPPORTED_PROTOCOL_VERSIONS = ["2026-07-28"] as const;
 /** Request-time so Docker build placeholders are not frozen into beta/prod catalogs. */
 export function GET() {
   const version = readBuildMetadata().version ?? websitePackage.version;
-  const origin = WEBSITE_URL.replace(/\/+$/, "");
+  const origin = WEBSITE_URL.replace(TRAILING_SLASHES_RE, "");
 
   return Response.json(
     {

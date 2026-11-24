@@ -40,7 +40,7 @@ export function parseContentBlocks(text: string): ContentBlock[] {
       if (!match) {
         continue;
       }
-      const itemContent = match[1];
+      const itemContent = match[1] ?? "";
 
       if (currentList && currentList.listType === listType) {
         currentList.items.push(itemContent);

@@ -59,15 +59,15 @@ export async function enrichContact(
 
   try {
     await uploadAllLinkedInLogos(user.id, workHistory, educationHistory);
-  } catch (err) {
-    log?.error({ err }, "[enrich] Logo upload failed, continuing");
+  } catch (error) {
+    log?.error({ err: error }, "[enrich] Logo upload failed, continuing");
   }
 
   if (profileImageUrl) {
     try {
       await updateContactPhoto(personId, user.id, profileImageUrl);
-    } catch (err) {
-      log?.error({ err }, "[enrich] Photo update failed, continuing");
+    } catch (error) {
+      log?.error({ err: error }, "[enrich] Photo update failed, continuing");
     }
   }
 
@@ -105,8 +105,8 @@ export async function enrichContact(
           fieldUpdates.timezone = tz;
         }
       }
-    } catch (err) {
-      log?.error({ err }, "[enrich] Geocode failed, continuing without coordinates");
+    } catch (error) {
+      log?.error({ err: error }, "[enrich] Geocode failed, continuing without coordinates");
     }
   }
 

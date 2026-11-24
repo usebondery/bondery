@@ -1,3 +1,5 @@
+import { ACTION_BUTTON_SIZE_MD_PX } from "../ui/actionButtonTokens";
+
 /** Space between pill buttons and inner rail padding. */
 export const FLOATING_PILL_SPACE = 10;
 
@@ -6,8 +8,6 @@ export const FLOATING_DOCK_SPACE = 16;
 
 /** Extra gap under the pill, added on top of the system inset. */
 export const FLOATING_DOCK_BOTTOM = 24;
-
-import { ACTION_BUTTON_SIZE_MD_PX } from "../ui/actionButtonTokens";
 
 /** Pill button size; matches ActionButton `md`. */
 export const FLOATING_PILL_BUTTON_SIZE = ACTION_BUTTON_SIZE_MD_PX;

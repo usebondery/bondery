@@ -6,7 +6,7 @@ import {
   type ButtonProps,
   type MantineColor,
 } from "@mantine/core";
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import type { ButtonHTMLAttributes, ReactElement, ReactNode } from "react";
 
 export type CornerLabeledButtonProps = ButtonProps &
   Omit<ButtonHTMLAttributes<HTMLButtonElement>, keyof ButtonProps | "color"> & {
@@ -32,7 +32,7 @@ export function CornerLabeledButton({
   fullWidth,
   w,
   ...buttonProps
-}: CornerLabeledButtonProps) {
+}: CornerLabeledButtonProps): ReactElement {
   return (
     <Box display={fullWidth ? "block" : "inline-block"} pos="relative" w={fullWidth ? "100%" : w}>
       <Button fullWidth={fullWidth} w={w} {...buttonProps} />

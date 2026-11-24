@@ -1,3 +1,6 @@
+/** A past-due subscriber keeps premium access until this many payment attempts have failed. */
+export const PAST_DUE_ACCESS_FAILURE_LIMIT = 3;
+
 export type SubscriptionEntitlementInput = {
   paymentFailureCount: number;
   status: string;
@@ -17,7 +20,10 @@ export function hasPremiumAccess(subscription: SubscriptionEntitlementInput | nu
     return true;
   }
 
-  if (subscription.status === "past_due" && subscription.paymentFailureCount < 3) {
+  if (
+    subscription.status === "past_due" &&
+    subscription.paymentFailureCount < PAST_DUE_ACCESS_FAILURE_LIMIT
+  ) {
     return true;
   }
 

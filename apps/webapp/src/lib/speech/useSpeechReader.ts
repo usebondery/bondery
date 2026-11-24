@@ -1,19 +1,9 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { useCallback, useEffect, useSyncExternalStore } from "react";
 import type { SpeechErrorCode } from "@/lib/speech/speechEngine";
 import { getSpeechEngine } from "@/lib/speech/speechEngine";
-
-export type SpeechStatus = "idle" | "preparing" | "speaking" | "paused";
-
-export interface SpeechReaderState {
-  error: SpeechErrorCode | null;
-  messageId: string | null;
-  status: SpeechStatus;
-}
-
-/** Builds the spoken text and the language tag once the query cache is warm. */
-export type SpeechPrepare = () => Promise<{ lang: string; text: string }>;
 
 const IDLE_STATE: SpeechReaderState = { error: null, messageId: null, status: "idle" };
 
@@ -86,6 +76,17 @@ function bindHandlers(): void {
     },
   });
 }
+
+export type SpeechStatus = "idle" | "preparing" | "speaking" | "paused";
+
+export interface SpeechReaderState {
+  error: SpeechErrorCode | null;
+  messageId: string | null;
+  status: SpeechStatus;
+}
+
+/** Builds the spoken text and the language tag once the query cache is warm. */
+export type SpeechPrepare = () => Promise<{ lang: string; text: string }>;
 
 /** Clears a reported error so the next click starts a fresh attempt. */
 export function clearSpeechError(): void {
@@ -165,7 +166,7 @@ export function useSpeechReader(messageId: string, prepare: SpeechPrepare): UseS
         if (!isOwner && state.messageId !== null) {
           cancel();
         }
-        void start();
+        detachPromise(start());
         return;
       }
     }
@@ -173,13 +174,14 @@ export function useSpeechReader(messageId: string, prepare: SpeechPrepare): UseS
 
   // A closed session or a route change unmounts the message. Speech then stops
   // instead of resuming later on another page.
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       if (state.messageId === messageId) {
         cancel();
       }
-    };
-  }, [messageId]);
+    },
+    [messageId],
+  );
 
   return {
     error: isOwner ? snapshot.error : null,

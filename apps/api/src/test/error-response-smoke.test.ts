@@ -3,6 +3,10 @@ import { describe, it } from "node:test";
 import { API_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers";
 import { loadTestEnv } from "./load-test-env.js";
 
+const DOCS_API_ERRORS_AUTH_REQUIRED_PATTERN = /\/docs\/api\/errors\/auth_required$/;
+const TRAILING_SLASHES_PATTERN = /\/+$/;
+const MCP_PATTERN = /\/mcp$/;
+
 describe("error response smoke", () => {
   it("returns 401 with auth_required for unauthenticated session route", async () => {
     loadTestEnv();
@@ -17,7 +21,7 @@ describe("error response smoke", () => {
     assert.equal(body.error.code, "auth_required");
     assert.ok(body.error.message);
     assert.ok(body.error.request_id);
-    assert.match(body.error.doc_url, /\/docs\/api\/errors\/auth_required$/);
+    assert.match(body.error.doc_url, DOCS_API_ERRORS_AUTH_REQUIRED_PATTERN);
     await app.close();
   });
 
@@ -26,7 +30,7 @@ describe("error response smoke", () => {
 
     const { createTestApp } = await import("./create-test-app.js");
     const app = await createTestApp();
-    const expected = `${process.env.BONDERY_PUBLIC_WEBSITE_URL?.replace(/\/+$/, "")}${WEBSITE_ROUTES.DOCS_API_REFERENCE}`;
+    const expected = `${process.env["BONDERY_PUBLIC_WEBSITE_URL"]?.replace(TRAILING_SLASHES_PATTERN, "")}${WEBSITE_ROUTES.DOCS_API_REFERENCE}`;
 
     for (const url of [API_ROUTES.API_REFERENCE, API_ROUTES.DOCS_API]) {
       for (const method of ["GET", "HEAD"] as const) {
@@ -49,7 +53,7 @@ describe("error response smoke", () => {
       url: API_ROUTES.WELL_KNOWN_MCP,
     });
     assert.equal(response.statusCode, 308);
-    assert.match(String(response.headers.location ?? ""), /\/mcp$/);
+    assert.match(String(response.headers.location ?? ""), MCP_PATTERN);
     await app.close();
   });
 

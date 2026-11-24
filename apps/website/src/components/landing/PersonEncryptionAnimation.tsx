@@ -1,15 +1,24 @@
 "use client";
 
-import { Avatar, Card } from "@mantine/core";
+import visuals from "@bondery/translations/locales/en/platform/website/WebsiteLandingVisuals.json" with {
+  type: "json",
+};
+import { Avatar } from "@mantine/core";
 import { IconCalendarEvent, IconMessageCircle, IconPhone } from "@tabler/icons-react";
 import { motion } from "motion/react";
 
+/** Sample contact for the encryption demo. Name and phone are fixture data. */
+const DEMO_PERSON = {
+  birthday: visuals.Encryption.Birthday,
+  name: "Sarah Jenkins",
+  note: visuals.Encryption.Note,
+  phone: "+1 (555) 123-4567",
+} as const;
+
 export function PersonEncryptionAnimation() {
   return (
-    <Card
-      className="mx-auto w-full max-w-125 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 shadow-xl overflow-hidden relative"
-      p="xl"
-      radius="lg"
+    <div
+      className="border-line bg-surface-demo relative mx-auto w-full max-w-125 overflow-hidden rounded-2xl border p-8 shadow-xl"
       style={{
         alignItems: "center",
         aspectRatio: "4/3",
@@ -18,51 +27,48 @@ export function PersonEncryptionAnimation() {
         justifyContent: "center",
       }}
     >
-      <div className="absolute inset-0 bg-linear-to-br from-gray-50 to-gray-100 dark:from-zinc-900 dark:to-zinc-950 -z-10" />
+      <div className="from-canvas to-canvas-strong absolute inset-0 -z-10 bg-linear-to-br" />
 
-      <div className="relative z-10 w-full max-w-[320px] rounded-xl border border-gray-100 bg-white p-3 shadow-sm dark:border-zinc-700 dark:bg-zinc-800 sm:p-4">
-        <div className="flex flex-col items-center gap-3 pb-4 border-b border-gray-100 dark:border-zinc-700">
+      <div className="border-subtle-line bg-surface relative z-10 w-full max-w-xs rounded-xl border p-3 shadow-sm sm:p-4">
+        <div className="border-subtle-line flex flex-col items-center gap-3 border-b pb-4">
           <motion.div animate={{ scale: 1 }} transition={{ duration: 0.4 }}>
             <Avatar
-              className="border-4 border-white shadow-md dark:border-zinc-800"
+              bd="4px solid light-dark(var(--mantine-color-white), var(--mantine-color-dark-6))"
               radius={120}
               size={104}
               src="/images/persons/person_birthday.jpg"
+              style={{ boxShadow: "var(--mantine-shadow-md)" }}
             />
           </motion.div>
 
-          <div className="text-center text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">
-            Sarah Jenkins
+          <div className="text-heading text-center text-xl font-bold sm:text-2xl">
+            {DEMO_PERSON.name}
           </div>
         </div>
 
-        <div className="pt-4 space-y-3">
+        <div className="space-y-3 pt-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg text-blue-500">
+            <div className="bg-phone-soft text-phone rounded-lg p-2">
               <IconPhone size={18} />
             </div>
-            <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              +1 (555) 123-4567
-            </div>
+            <div className="text-demo-text text-sm font-medium">{DEMO_PERSON.phone}</div>
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-pink-50 dark:bg-pink-900/30 rounded-lg text-pink-500">
+            <div className="bg-date-soft text-date rounded-lg p-2">
               <IconCalendarEvent size={18} />
             </div>
-            <div className="text-sm font-medium text-gray-700 dark:text-gray-300">March 3</div>
+            <div className="text-demo-text text-sm font-medium">{DEMO_PERSON.birthday}</div>
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-violet-50 dark:bg-violet-900/30 rounded-lg text-violet-500">
+            <div className="bg-note-soft text-note rounded-lg p-2">
               <IconMessageCircle size={18} />
             </div>
-            <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Loves hiking and sci-fi books
-            </div>
+            <div className="text-demo-text text-sm font-medium">{DEMO_PERSON.note}</div>
           </div>
         </div>
       </div>
-    </Card>
+    </div>
   );
 }

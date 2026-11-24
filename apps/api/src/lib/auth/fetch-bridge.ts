@@ -32,8 +32,6 @@ import { resolveBetterAuthIssuerUrl } from "./index.js";
 
 const FETCH_BRIDGE_ALLOWED_ORIGINS = resolveRuntimeTrustedOrigins();
 
-export const CANONICAL_ORIGIN = resolveBetterAuthIssuerUrl();
-
 function getContentType(headers: FastifyRequest["headers"]): string | undefined {
   const value = headers["content-type"];
   if (Array.isArray(value)) {
@@ -90,7 +88,7 @@ function serializeFastifyBody(body: unknown, contentType: string | undefined): s
 }
 
 function applyResolvedClientIp(request: FastifyRequest): void {
-  const ip = request.ip;
+  const { ip } = request;
   if (!ip) {
     return;
   }
@@ -110,6 +108,8 @@ function applyRequestId(request: FastifyRequest): void {
   request.headers["x-request-id"] = requestId;
   request.raw.headers["x-request-id"] = requestId;
 }
+
+export const CANONICAL_ORIGIN = resolveBetterAuthIssuerUrl();
 
 export function toFetchRequest(request: FastifyRequest): Request {
   applyResolvedClientIp(request);

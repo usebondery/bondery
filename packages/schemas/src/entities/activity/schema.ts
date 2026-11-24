@@ -16,6 +16,30 @@ import type {
   UpdateInteractionInput,
 } from "./types.js";
 
+const interactionParticipantSchema: z.ZodType<InteractionParticipant> = z.object({
+  avatar: z.string().nullable().describe("Avatar image URL, or null when unset"),
+  firstName: z.string().describe("Given name"),
+  headline: z.string().nullable().describe("Short role or description line"),
+  id: z.string().describe("Contact identifier"),
+  lastName: z.string().nullable().describe("Family name"),
+  location: z.string().nullable().describe("Free-text location"),
+  middleName: z.string().nullable().describe("Middle name"),
+  updatedAt: updatedAtSchema.optional(),
+});
+
+const interactionDetailSchema = z
+  .object({
+    date: createdAtSchema.describe("When the interaction happened"),
+    description: z.string().nullable().describe("Free-text notes about the interaction"),
+    id: z.string().describe("Interaction identifier"),
+    participants: z.array(interactionParticipantSchema).describe("People who took part"),
+    title: z.string().nullable().describe("Short summary line"),
+    type: z.string().describe("Interaction category"),
+  })
+  .extend(entityAuditSchema.shape);
+
+export { interactionParticipantSchema };
+
 export const interactionTypeSchema: z.ZodType<InteractionType> = z
   .enum([
     "Call",
@@ -32,17 +56,6 @@ export const interactionTypeSchema: z.ZodType<InteractionType> = z
     "Custom",
   ])
   .describe("Interaction category");
-
-export const interactionParticipantSchema: z.ZodType<InteractionParticipant> = z.object({
-  avatar: z.string().nullable().describe("Avatar image URL, or null when unset"),
-  firstName: z.string().describe("Given name"),
-  headline: z.string().nullable().describe("Short role or description line"),
-  id: z.string().describe("Contact identifier"),
-  lastName: z.string().nullable().describe("Family name"),
-  location: z.string().nullable().describe("Free-text location"),
-  middleName: z.string().nullable().describe("Middle name"),
-  updatedAt: updatedAtSchema.optional(),
-});
 
 export const interactionSchema: z.ZodType<Interaction> = entityIdentitySchema
   .extend({
@@ -92,17 +105,6 @@ export const updateInteractionInputSchema: z.ZodType<UpdateInteractionInput> = z
 
 export const interactionsListResponseSchema: z.ZodType<InteractionsListResponse> =
   makePaginatedListResponseSchema("interactions", interactionSchema);
-
-const interactionDetailSchema = z
-  .object({
-    date: createdAtSchema.describe("When the interaction happened"),
-    description: z.string().nullable().describe("Free-text notes about the interaction"),
-    id: z.string().describe("Interaction identifier"),
-    participants: z.array(interactionParticipantSchema).describe("People who took part"),
-    title: z.string().nullable().describe("Short summary line"),
-    type: z.string().describe("Interaction category"),
-  })
-  .extend(entityAuditSchema.shape);
 
 export const interactionResponseSchema = z.object({
   interaction: interactionDetailSchema.describe("Interaction record"),

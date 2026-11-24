@@ -1,21 +1,63 @@
+import { spawnSync } from "node:child_process";
+import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { generateIcons } from "@bondery/branding/icon-generator";
+import { detachPromise } from "@bondery/helpers/async";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+const repoRoot = join(__dirname, "../../..");
+const pluginConfigPath = join(repoRoot, "llm-plugins/src/plugin.config.json");
+// The website image is a pruned tree and does not contain the plugin source.
+const includePluginIcon = existsSync(pluginConfigPath);
 
 const icons = [
   { format: "ico" as const, name: "favicon.ico", outDir: "../src/app", size: 48 },
   { format: "png" as const, name: "icon.png", outDir: "../src/app/icons", size: 512 },
   { format: "png" as const, name: "apple-icon.png", outDir: "../src/app/icons", size: 180 },
   { format: "svg" as const, name: "logo.svg", outDir: "../public" },
+  ...(includePluginIcon
+    ? [
+        {
+          format: "png" as const,
+          name: "icon.png",
+          outDir: "../../../llm-plugins/src/assets",
+          size: 512,
+        },
+      ]
+    : []),
 ];
 
 const svgPath = join(__dirname, "../../../packages/branding/src/assets/icon.svg");
 
-generateIcons({
-  baseDir: __dirname,
-  icons,
-  svgPath,
+async function main(): Promise<void> {
+  await generateIcons({
+    baseDir: __dirname,
+    icons,
+    svgPath,
+  });
+
+  if (!includePluginIcon) {
+    return;
+  }
+
+  // Copy the source icon into llm-plugins/claude and llm-plugins/openai.
+  const build = spawnSync(process.execPath, [join(repoRoot, "scripts/pkg/build-llm-plugins.mjs")], {
+    cwd: repoRoot,
+    stdio: "inherit",
+  });
+  if (build.error) {
+    console.error(build.error.message);
+    process.exitCode = 1;
+    return;
+  }
+  if (build.status !== 0) {
+    process.exitCode = build.status ?? 1;
+  }
+}
+
+detachPromise(main(), (error: unknown) => {
+  console.error(error);
+  process.exitCode = 1;
 });

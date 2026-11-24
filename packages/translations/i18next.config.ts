@@ -87,8 +87,6 @@ export default {
     ignore: [
       ...extractIgnore,
       "**/lib/sync/**",
-      // Marketing site copy is not yet wired to locale files; webapp/mobile are linted strictly.
-      "apps/website/**",
       // CWS listing frames are hardcoded EN marketing copy (see ADR 0007).
       "apps/webapp/src/app/(app)/dev/store-shots/**",
       "**/dev/store-shots/**",

@@ -4,13 +4,13 @@ import type { DomainContext } from "../../domains/_shared/context.js";
 import { domainContextFromRequest } from "./domain-context.js";
 import type { AppRouteHandler } from "./fastify-types.js";
 
-export type DomainRouteSchemas = {
+type DomainRouteSchemas = {
   body?: z.ZodTypeAny;
   params?: z.ZodTypeAny;
   query?: z.ZodTypeAny;
 };
 
-export type DomainRouteInput<T extends DomainRouteSchemas> = {
+type DomainRouteInput<T extends DomainRouteSchemas> = {
   [K in keyof T as T[K] extends z.ZodTypeAny ? K : never]: T[K] extends z.ZodTypeAny
     ? z.infer<T[K]>
     : never;
@@ -52,6 +52,8 @@ function parseDomainRouteInput<T extends DomainRouteSchemas>(
 
   return route;
 }
+
+export type { DomainRouteInput, DomainRouteSchemas };
 
 /** Bridge return: response typing is enforced by route `schema.response`, not handler inference. */
 // biome-ignore lint/suspicious/noExplicitAny: overload return must be assignable to every Zod OpenAPI route handler slot under TS 7

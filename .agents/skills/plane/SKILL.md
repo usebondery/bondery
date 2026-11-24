@@ -17,13 +17,11 @@ argument-hint: "Describe what you want to do in Plane (e.g. 'create a bug for th
 
 ## Mandatory First Step
 
-**All `mcp_plane_*` tools are deferred.** Before calling any of them, load the tools with:
+Project MCP config (`.agents/mcp/mcp.json`, synced to `.mcp.json` and `.cursor/mcp.json`) runs Plane over stdio (`scripts/dev/plane-mcp-stdio.mjs`). Credentials live in gitignored `.agents/mcp/plane.env.local` (`PLANE_API_KEY`, `PLANE_WORKSPACE_SLUG`); copy `plane.env.local.example` or run `pnpm run setup:worktree`.
 
-```
-tool_search_tool_regex("mcp_plane")
-```
+**Claude Code:** `mcp_plane_*` tools are deferred. Load them once with `tool_search_tool_regex("mcp_plane")`.
 
-Do this once at the start. Calling a deferred tool without loading it will fail silently.
+**Cursor:** Discover tools with MCP search for `plane` (or list the `plane` namespace) before the first call.
 
 ---
 

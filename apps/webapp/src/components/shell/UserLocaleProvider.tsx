@@ -1,33 +1,39 @@
 "use client";
 
-import {
-  i18nConfig,
-  resourceLoader,
-  SUPPORTED_LOCALES,
-  type SupportedLocale,
-} from "@bondery/translations";
+import type { DateFormatPreference } from "@bondery/schemas";
+import { i18nConfig, SUPPORTED_LOCALES, type SupportedLocale } from "@bondery/translations";
 import { DatesProvider } from "@mantine/dates";
 import type { Resource } from "i18next";
-import resourcesToBackend from "i18next-resources-to-backend";
 import { I18nProvider } from "next-i18next/client";
-import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from "react";
-
-export interface UserLocaleSettings {
-  applyUserLocale: (
-    patch: Partial<Pick<UserLocaleSettings, "locale" | "timezone" | "timeFormat">>,
-  ) => void;
-  locale: SupportedLocale;
-  timeFormat: "24h" | "12h";
-  timezone: string;
-}
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
+import "@/lib/i18n/loadDayjsLocales";
 
 const UserLocaleContext = createContext<UserLocaleSettings | null>(null);
 
 /** Module ref so settings mutations can patch locale without hook context. */
 let applyUserLocaleRef: UserLocaleSettings["applyUserLocale"] | null = null;
 
+interface LocaleProviderProps {
+  children: ReactNode;
+  dateFormat: DateFormatPreference;
+  locale: SupportedLocale;
+  resources: Resource;
+  timeFormat: "24h" | "12h";
+  timezone: string;
+}
+
+export interface UserLocaleSettings {
+  applyUserLocale: (
+    patch: Partial<Pick<UserLocaleSettings, "locale" | "timezone" | "timeFormat" | "dateFormat">>,
+  ) => void;
+  dateFormat: DateFormatPreference;
+  locale: SupportedLocale;
+  timeFormat: "24h" | "12h";
+  timezone: string;
+}
+
 export function applyUserLocaleFromRef(
-  patch: Partial<Pick<UserLocaleSettings, "locale" | "timezone" | "timeFormat">>,
+  patch: Partial<Pick<UserLocaleSettings, "locale" | "timezone" | "timeFormat" | "dateFormat">>,
 ): void {
   applyUserLocaleRef?.(patch);
 }
@@ -45,14 +51,6 @@ export function useCurrentLocale(): SupportedLocale {
   return useUserLocale().locale;
 }
 
-interface LocaleProviderProps {
-  children: ReactNode;
-  locale: SupportedLocale;
-  resources: Resource;
-  timeFormat: "24h" | "12h";
-  timezone: string;
-}
-
 /**
  * Provides i18n translations (next-i18next) and user locale preferences
  * (timezone, time format) for all routes under the (app) group.
@@ -62,44 +60,78 @@ export function LocaleProvider({
   locale: initialLocale,
   timezone: initialTimezone,
   timeFormat: initialTimeFormat,
+  dateFormat: initialDateFormat,
   resources,
 }: LocaleProviderProps) {
   const [locale, setLocale] = useState(initialLocale);
   const [timezone, setTimezone] = useState(initialTimezone);
   const [timeFormat, setTimeFormat] = useState<"24h" | "12h">(initialTimeFormat);
+  const [dateFormat, setDateFormat] = useState<DateFormatPreference>(initialDateFormat);
 
-  useEffect(() => {
+  // New server props replace the local copy. Adjusting during render avoids the extra
+  // render pass that an effect would add.
+  const [serverLocale, setServerLocale] = useState({
+    dateFormat: initialDateFormat,
+    locale: initialLocale,
+    timeFormat: initialTimeFormat,
+    timezone: initialTimezone,
+  });
+  if (
+    serverLocale.dateFormat !== initialDateFormat ||
+    serverLocale.locale !== initialLocale ||
+    serverLocale.timeFormat !== initialTimeFormat ||
+    serverLocale.timezone !== initialTimezone
+  ) {
+    setServerLocale({
+      dateFormat: initialDateFormat,
+      locale: initialLocale,
+      timeFormat: initialTimeFormat,
+      timezone: initialTimezone,
+    });
     setLocale(initialLocale);
     setTimezone(initialTimezone);
     setTimeFormat(initialTimeFormat);
-  }, [initialLocale, initialTimezone, initialTimeFormat]);
+    setDateFormat(initialDateFormat);
+  }
 
-  const applyUserLocale = (
-    patch: Partial<Pick<UserLocaleSettings, "locale" | "timezone" | "timeFormat">>,
-  ) => {
-    if (patch.locale) {
-      setLocale(patch.locale);
-    }
-    if (patch.timezone) {
-      setTimezone(patch.timezone);
-    }
-    if (patch.timeFormat) {
-      setTimeFormat(patch.timeFormat);
-    }
-  };
-
-  const applyRef = useRef(applyUserLocale);
-  applyRef.current = applyUserLocale;
+  const applyUserLocale = useCallback(
+    (
+      patch: Partial<Pick<UserLocaleSettings, "locale" | "timezone" | "timeFormat" | "dateFormat">>,
+    ) => {
+      const localeChanged = patch.locale !== undefined && patch.locale !== locale;
+      if (patch.locale) {
+        setLocale(patch.locale);
+      }
+      if (patch.timezone) {
+        setTimezone(patch.timezone);
+      }
+      if (patch.timeFormat) {
+        setTimeFormat(patch.timeFormat);
+      }
+      if (patch.dateFormat) {
+        setDateFormat(patch.dateFormat);
+      }
+      // The client bundle holds only the current locale. The strings of another
+      // locale arrive from the server, so a language change reloads the page.
+      // Callers persist the settings mutation before they call this function.
+      if (localeChanged) {
+        window.location.reload();
+      }
+    },
+    [locale],
+  );
 
   useEffect(() => {
-    applyUserLocaleRef = (patch) => applyRef.current(patch);
+    applyUserLocaleRef = applyUserLocale;
     return () => {
       applyUserLocaleRef = null;
     };
-  }, []);
+  }, [applyUserLocale]);
 
   return (
-    <UserLocaleContext.Provider value={{ applyUserLocale, locale, timeFormat, timezone }}>
+    <UserLocaleContext.Provider
+      value={{ applyUserLocale, dateFormat, locale, timeFormat, timezone }}
+    >
       <I18nProvider
         defaultNS={i18nConfig.defaultNS}
         fallbackLng={i18nConfig.fallbackLng}
@@ -107,12 +139,10 @@ export function LocaleProvider({
           interpolation: i18nConfig.interpolation,
           keySeparator: i18nConfig.keySeparator,
           nsSeparator: i18nConfig.nsSeparator,
-          partialBundledLanguages: true,
         }}
         language={locale}
         resources={resources}
         supportedLngs={[...SUPPORTED_LOCALES]}
-        use={[resourcesToBackend(resourceLoader)]}
       >
         <DatesProvider settings={{ locale }}>{children}</DatesProvider>
       </I18nProvider>

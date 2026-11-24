@@ -3,6 +3,8 @@ import { describe, it } from "node:test";
 import { CSP_REPORT_GROUP } from "./csp.js";
 import { buildSecurityHeaders } from "./headers.js";
 
+const GEOLOCATION_SELF_RE = /geolocation=\(self\)/;
+
 const CSP = "default-src 'self'";
 
 describe("buildSecurityHeaders", () => {
@@ -13,7 +15,9 @@ describe("buildSecurityHeaders", () => {
     assert.equal(headers["X-Content-Type-Options"], "nosniff");
     assert.equal(headers["Referrer-Policy"], "strict-origin-when-cross-origin");
     assert.equal(headers["Cross-Origin-Opener-Policy"], "same-origin");
-    assert.match(headers["Permissions-Policy"], /geolocation=\(self\)/);
+    const permissionsPolicy = headers["Permissions-Policy"];
+    assert.ok(permissionsPolicy);
+    assert.match(permissionsPolicy, GEOLOCATION_SELF_RE);
   });
 
   it("never writes X-Frame-Options", () => {

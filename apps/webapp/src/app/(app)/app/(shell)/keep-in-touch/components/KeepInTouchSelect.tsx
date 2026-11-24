@@ -3,8 +3,8 @@
 import { DescribedSelect } from "@bondery/mantine-next";
 import { Stack, Text } from "@mantine/core";
 import { IconHeartHandshake } from "@tabler/icons-react";
-import { useCurrentLocale as useLocale } from "@/components/shell/UserLocaleProvider";
 import { useKeepInTouchTranslations } from "@/lib/i18n/generated/hooks";
+import { useDateFormatter } from "@/lib/i18n/useDateFormatter";
 import { KEEP_IN_TOUCH_PRESETS } from "../utils/keepInTouchConfig";
 
 interface KeepInTouchSelectProps {
@@ -39,7 +39,7 @@ export function KeepInTouchSelect({
   ariaLabel,
 }: KeepInTouchSelectProps) {
   const t = useKeepInTouchTranslations();
-  const locale = useLocale();
+  const formatter = useDateFormatter();
 
   const data = [
     ...KEEP_IN_TOUCH_PRESETS.map((preset) => ({
@@ -68,18 +68,16 @@ export function KeepInTouchSelect({
     return select;
   }
 
-  const formattedNextDue = nextDueDate
-    ? new Intl.DateTimeFormat(locale || "en-US", { dateStyle: "short" }).format(nextDueDate)
-    : null;
+  const formattedNextDue = nextDueDate ? formatter.formatDate(nextDueDate, "short") : null;
 
   return (
     <Stack gap={4}>
       {select}
-      {formattedNextDue && (
+      {formattedNextDue ? (
         <Text c="dimmed" size="xs">
           {t("NextDue")}: {formattedNextDue}
         </Text>
-      )}
+      ) : null}
     </Stack>
   );
 }

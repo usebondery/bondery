@@ -1,10 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
-import localeCatalog from "@bondery/schemas/locale/supported-locales.json" with { type: "json" };
+import { localesForNamespace } from "./lib/namespace-locales.mjs";
 
 const ROOT = path.resolve(".");
 const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, "manifest.json"), "utf8"));
-const locales = localeCatalog.supported.map((entry) => entry.code);
 const outPath = path.join(ROOT, "src", "generated", "resources.ts");
 
 const imports = [];
@@ -14,7 +13,7 @@ let importIndex = 0;
 
 for (const [namespace, entry] of Object.entries(manifest.namespaces)) {
   const localeEntries = [];
-  for (const locale of locales) {
+  for (const locale of localesForNamespace(entry)) {
     const filePath = `../locales/${locale}/${entry.path.replace(/\\/g, "/")}`;
     const varName = `r${importIndex++}`;
     imports.push(`import ${varName} from "${filePath}" with { type: "json" };`);
@@ -37,9 +36,13 @@ ${imports.join("\n")}
 
 import type { SupportedLocale } from "@bondery/schemas/locale/supported-locale";
 
-export const resourcesByNamespace = {
+/** An englishOnly namespace lists the source locale alone. The loader falls back to it. */
+export const resourcesByNamespace: Record<
+  string,
+  Partial<Record<SupportedLocale, Record<string, unknown>>>
+> = {
 ${mapEntries.join("\n")}
-} satisfies Record<string, Record<SupportedLocale, Record<string, unknown>>>;
+};
 
 void localeWatchStamp;
 `;

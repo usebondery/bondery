@@ -87,7 +87,7 @@ export async function subscriptionCheckoutRoutes(fastify: FastifyInstance): Prom
         const session = await stripe.checkout.sessions.create(
           {
             allow_promotion_codes: true,
-            customer_email: user.email ?? undefined,
+            customer_email: user.email,
             line_items: [{ price: priceId, quantity: 1 }],
             metadata: {
               bondery_user_id: user.id,
@@ -110,9 +110,12 @@ export async function subscriptionCheckoutRoutes(fastify: FastifyInstance): Prom
         }
 
         return reply.send({ clientSecret: session.client_secret });
-      } catch (err) {
-        request.log.error({ err, userId: user.id }, "Failed to create Stripe checkout session");
-        throw internal("failed_to_create_checkout_session");
+      } catch (error) {
+        request.log.error(
+          { err: error, userId: user.id },
+          "Failed to create Stripe checkout session",
+        );
+        throw internal("failed_to_create_checkout_session", error);
       }
     },
   );

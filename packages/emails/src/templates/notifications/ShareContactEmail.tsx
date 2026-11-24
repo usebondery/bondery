@@ -1,5 +1,5 @@
 import { BRAND_PRIMARY_COLOR } from "@bondery/branding";
-import type { ReactNode } from "react";
+import type { JSX, ReactNode } from "react";
 import { Column, Img, Link, Row, Section, Text } from "react-email";
 import { defaultShareContactCopy } from "#fixtures/default-copy.js";
 import { clipEmailPreview, type EmailDocumentProps } from "#shared/chrome.js";
@@ -7,71 +7,12 @@ import { EmailBody } from "#shared/EmailBody.js";
 import { EmailWrapper } from "#shared/EmailWrapper.js";
 import { EMAIL_MUTED, EMAIL_TEXT } from "#shared/email-styles.js";
 
-export interface ShareContactEmailPhone {
+const PATTERN_5C732B_RE = /\s+/;
+
+interface ShareContactEmailPhone {
   prefix?: string;
   type?: string;
   value: string;
-}
-
-export interface ShareContactEmailEntry {
-  type?: string;
-  value: string;
-}
-
-export interface ShareContactEmailAddress {
-  formatted?: string;
-}
-
-export interface ShareContactEmailDate {
-  date: string;
-  label: string;
-  type: string;
-}
-
-export interface ShareContactEmailCopy {
-  description: string;
-  footerNotes: string;
-  importantDateLine: string;
-  labels: {
-    phone: string;
-    email: string;
-    location: string;
-    address: string;
-    linkedin: string;
-    instagram: string;
-    facebook: string;
-    website: string;
-    whatsapp: string;
-    signal: string;
-    notes: string;
-    importantDates: string;
-  };
-  previewFallback: string;
-  replyCta: string;
-}
-
-export interface ShareContactEmailProps extends EmailDocumentProps {
-  addresses?: ShareContactEmailAddress[];
-  contactAvatarUrl?: string;
-  contactName: string;
-  copy?: ShareContactEmailCopy;
-  emails?: ShareContactEmailEntry[];
-  facebook?: string;
-  headline?: string;
-  importantDates?: ShareContactEmailDate[];
-  instagram?: string;
-  linkedin?: string;
-  location?: string;
-  message?: string;
-  notes?: string;
-  phones?: ShareContactEmailPhone[];
-  recipientEmail: string;
-  senderAvatarUrl?: string;
-  senderEmail: string;
-  senderName: string;
-  signal?: string;
-  website?: string;
-  whatsapp?: string;
 }
 
 function InfoRow({ label, children }: { label: string; children: ReactNode }) {
@@ -96,7 +37,7 @@ function InfoRow({ label, children }: { label: string; children: ReactNode }) {
 function getInitials(name: string | undefined): string {
   return (name ?? "")
     .trim()
-    .split(/\s+/)
+    .split(PATTERN_5C732B_RE)
     .filter(Boolean)
     .slice(0, 2)
     .map((part) => part.charAt(0).toUpperCase())
@@ -135,7 +76,8 @@ function AvatarDisplay({ avatarUrl, name }: { avatarUrl?: string; name: string }
 }
 
 function toTelHref(prefix: string | undefined, value: string): string {
-  return `tel:${`${prefix ?? ""}${value}`.replace(/[^\d+]/g, "")}`;
+  const dialable = `${prefix ?? ""}${value}`.replace(/[^\d+]/g, "");
+  return `tel:${dialable}`;
 }
 
 function previewFromMessage(message: string | undefined, fallback: string): string {
@@ -147,6 +89,14 @@ function previewFromMessage(message: string | undefined, fallback: string): stri
   return clipEmailPreview(trimmed);
 }
 
+const PREVIEW_EMAILS: ShareContactEmailEntry[] = [{ type: "work", value: "jane@example.com" }];
+const PREVIEW_IMPORTANT_DATES: ShareContactEmailDate[] = [
+  { date: "March 15", label: "Birthday", type: "birthday" },
+];
+const PREVIEW_PHONES: ShareContactEmailPhone[] = [
+  { prefix: "+1", type: "mobile", value: "555 010 2030" },
+];
+
 export default function ShareContactEmail({
   addresses,
   chrome,
@@ -154,17 +104,17 @@ export default function ShareContactEmail({
   contactName = "Jane Doe",
   copy = defaultShareContactCopy,
   dir,
-  emails = [{ type: "work", value: "jane@example.com" }],
+  emails = PREVIEW_EMAILS,
   facebook,
   headline,
-  importantDates = [{ date: "March 15", label: "Birthday", type: "birthday" }],
+  importantDates = PREVIEW_IMPORTANT_DATES,
   instagram,
   lang,
   linkedin = "jane-doe",
   location = "Prague, Czechia",
   message,
   notes = "Met at a conference last year.",
-  phones = [{ prefix: "+1", type: "mobile", value: "555 010 2030" }],
+  phones = PREVIEW_PHONES,
   recipientEmail: _recipientEmail = "friend@example.com",
   senderAvatarUrl: _senderAvatarUrl,
   senderEmail = "alex@example.com",
@@ -174,7 +124,7 @@ export default function ShareContactEmail({
   website = "https://example.com",
   websiteUrl,
   whatsapp,
-}: ShareContactEmailProps) {
+}: ShareContactEmailProps): JSX.Element {
   const customMessage = message?.trim();
   const resolvedHeadline = headline?.trim();
   const preview = previewFromMessage(customMessage, copy.previewFallback);
@@ -398,4 +348,67 @@ export default function ShareContactEmail({
       </EmailBody>
     </EmailWrapper>
   );
+}
+
+export type { ShareContactEmailPhone };
+
+export interface ShareContactEmailEntry {
+  type?: string;
+  value: string;
+}
+
+export interface ShareContactEmailAddress {
+  formatted?: string;
+}
+
+export interface ShareContactEmailDate {
+  date: string;
+  label: string;
+  type: string;
+}
+
+export interface ShareContactEmailCopy {
+  description: string;
+  footerNotes: string;
+  importantDateLine: string;
+  labels: {
+    phone: string;
+    email: string;
+    location: string;
+    address: string;
+    linkedin: string;
+    instagram: string;
+    facebook: string;
+    website: string;
+    whatsapp: string;
+    signal: string;
+    notes: string;
+    importantDates: string;
+  };
+  previewFallback: string;
+  replyCta: string;
+}
+
+export interface ShareContactEmailProps extends EmailDocumentProps {
+  addresses?: ShareContactEmailAddress[];
+  contactAvatarUrl?: string;
+  contactName: string;
+  copy?: ShareContactEmailCopy;
+  emails?: ShareContactEmailEntry[];
+  facebook?: string;
+  headline?: string;
+  importantDates?: ShareContactEmailDate[];
+  instagram?: string;
+  linkedin?: string;
+  location?: string;
+  message?: string;
+  notes?: string;
+  phones?: ShareContactEmailPhone[];
+  recipientEmail: string;
+  senderAvatarUrl?: string;
+  senderEmail: string;
+  senderName: string;
+  signal?: string;
+  website?: string;
+  whatsapp?: string;
 }

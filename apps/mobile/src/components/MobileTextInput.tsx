@@ -1,4 +1,4 @@
-import { forwardRef, type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, type Ref, useEffect, useState } from "react";
 import {
   type StyleProp,
   StyleSheet,
@@ -50,35 +50,38 @@ function splitContainerStyle(containerStyle: StyleProp<ViewStyle>) {
     return { fillsWrapper: false, innerContainerStyle: undefined, wrapperStyle: undefined };
   }
 
-  const wrapperStyle: Record<string, unknown> = {};
-  const innerContainerStyle: Record<string, unknown> = {};
+  const wrapperEntries: [string, unknown][] = [];
+  const innerEntries: [string, unknown][] = [];
 
   for (const [key, value] of Object.entries(flat)) {
-    if (value == null) {
+    if (value === null || value === undefined) {
       continue;
     }
 
     if (WRAPPER_LAYOUT_KEYS.has(key as keyof ViewStyle)) {
-      wrapperStyle[key] = value;
+      wrapperEntries.push([key, value]);
     } else {
-      innerContainerStyle[key] = value;
+      innerEntries.push([key, value]);
     }
   }
 
+  const wrapperStyle = Object.fromEntries(wrapperEntries) as ViewStyle;
+  const innerContainerStyle = Object.fromEntries(innerEntries) as ViewStyle;
+
   const fillsWrapper =
-    wrapperStyle.flex != null ||
-    wrapperStyle.flexGrow != null ||
+    (wrapperStyle.flex !== null && wrapperStyle.flex !== undefined) ||
+    (wrapperStyle.flexGrow !== null && wrapperStyle.flexGrow !== undefined) ||
     wrapperStyle.width === "100%" ||
     wrapperStyle.alignSelf === "stretch";
 
   return {
     fillsWrapper,
-    innerContainerStyle: innerContainerStyle as ViewStyle,
-    wrapperStyle: wrapperStyle as ViewStyle,
+    innerContainerStyle,
+    wrapperStyle,
   };
 }
 
-export type MobileTextInputProps = TextInputProps & {
+type MobileTextInputProps = TextInputProps & {
   error?: boolean;
   errorMessage?: string;
   description?: string;
@@ -90,144 +93,141 @@ export type MobileTextInputProps = TextInputProps & {
   size?: MobileTextInputSize;
   unfocusedBorderColor?: string;
   backgroundColor?: string;
+  ref?: Ref<NativeTextInputRef>;
 };
 
-export const MobileTextInput = forwardRef<NativeTextInputRef, MobileTextInputProps>(
-  function MobileTextInput(
-    {
-      error = false,
-      errorMessage,
-      description,
-      leadingIcon,
-      trailingAccessory,
-      showMaxLengthCounter = true,
-      containerStyle,
-      size = "default",
-      unfocusedBorderColor,
-      backgroundColor,
-      style,
-      onFocus,
-      onBlur,
-      editable = true,
-      placeholderTextColor,
-      maxLength,
-      value,
-      defaultValue,
-      ...rest
-    },
-    ref,
-  ) {
-    const colors = useMobileThemeColors();
-    const focusProgress = useSharedValue(0);
-    const [isFocused, setIsFocused] = useState(false);
-    const idleBorderColor = unfocusedBorderColor ?? colors.border;
-    const fieldBackgroundColor = backgroundColor ?? colors.inputBackground;
+function MobileTextInput({
+  error = false,
+  errorMessage,
+  description,
+  leadingIcon,
+  trailingAccessory,
+  showMaxLengthCounter = true,
+  containerStyle,
+  size = "default",
+  unfocusedBorderColor,
+  backgroundColor,
+  style,
+  onFocus,
+  onBlur,
+  editable = true,
+  placeholderTextColor,
+  maxLength,
+  value,
+  defaultValue,
+  ref,
+  ...rest
+}: MobileTextInputProps) {
+  const colors = useMobileThemeColors();
+  const focusProgress = useSharedValue(0);
+  const [isFocused, setIsFocused] = useState(false);
+  const idleBorderColor = unfocusedBorderColor ?? colors.border;
+  const fieldBackgroundColor = backgroundColor ?? colors.inputBackground;
 
-    const currentLength = String(value ?? defaultValue ?? "").length;
-    const shouldShowMaxLengthCounter =
-      showMaxLengthCounter &&
-      isFocused &&
-      typeof maxLength === "number" &&
-      Number.isFinite(maxLength);
+  const currentLength = String(value ?? defaultValue ?? "").length;
+  const shouldShowMaxLengthCounter =
+    showMaxLengthCounter &&
+    isFocused &&
+    typeof maxLength === "number" &&
+    Number.isFinite(maxLength);
 
-    useEffect(() => {
-      if (error) {
-        focusProgress.value = 0;
-      }
-    }, [error, focusProgress]);
+  useEffect(() => {
+    if (error) {
+      focusProgress.set(0);
+    }
+  }, [error, focusProgress]);
 
-    const animatedContainerStyle = useAnimatedStyle(() => {
-      if (error) {
-        return { borderColor: colors.dangerAccent };
-      }
+  const animatedContainerStyle = useAnimatedStyle(() => {
+    if (error) {
+      return { borderColor: colors.dangerAccent };
+    }
 
-      return {
-        borderColor: interpolateColor(
-          focusProgress.value,
-          [0, 1],
-          [idleBorderColor, colors.primary],
-        ),
-      };
-    }, [error, idleBorderColor, colors.dangerAccent, colors.primary]);
+    return {
+      borderColor: interpolateColor(focusProgress.value, [0, 1], [idleBorderColor, colors.primary]),
+    };
+  }, [error, idleBorderColor, colors.dangerAccent, colors.primary]);
 
-    function handleFocus(event: Parameters<NonNullable<TextInputProps["onFocus"]>>[0]) {
-      setIsFocused(true);
-      if (!error && editable !== false) {
-        focusProgress.value = withTiming(1, {
+  function handleFocus(event: Parameters<NonNullable<TextInputProps["onFocus"]>>[0]) {
+    setIsFocused(true);
+    if (!error && editable !== false) {
+      focusProgress.set(
+        withTiming(1, {
           duration: UI_TIMING_MS.inputFocusTransition,
-        });
-      }
-      onFocus?.(event);
+        }),
+      );
     }
+    onFocus?.(event);
+  }
 
-    function handleBlur(event: Parameters<NonNullable<TextInputProps["onBlur"]>>[0]) {
-      setIsFocused(false);
-      focusProgress.value = withTiming(0, {
+  function handleBlur(event: Parameters<NonNullable<TextInputProps["onBlur"]>>[0]) {
+    setIsFocused(false);
+    focusProgress.set(
+      withTiming(0, {
         duration: UI_TIMING_MS.inputFocusTransition,
-      });
-      onBlur?.(event);
-    }
+      }),
+    );
+    onBlur?.(event);
+  }
 
-    const trailingContent =
-      shouldShowMaxLengthCounter || trailingAccessory ? (
-        <View style={styles.trailingSection}>
-          {shouldShowMaxLengthCounter ? (
-            <Text style={[styles.maxLengthCounter, { color: colors.textMuted }]}>
-              {currentLength}/{maxLength}
-            </Text>
-          ) : null}
-          {trailingAccessory ? (
-            <View style={styles.trailingAccessory}>{trailingAccessory}</View>
-          ) : null}
-        </View>
-      ) : null;
-
-    const { wrapperStyle, innerContainerStyle, fillsWrapper } = splitContainerStyle(containerStyle);
-
-    return (
-      <View style={[styles.wrapper, wrapperStyle as never]}>
-        <Animated.View
-          style={[
-            styles.container,
-            size === "compact" ? styles.containerCompact : styles.containerDefault,
-            { backgroundColor: fieldBackgroundColor },
-            fillsWrapper ? styles.containerFill : null,
-            animatedContainerStyle as never,
-            innerContainerStyle as never,
-          ]}
-        >
-          {leadingIcon ? <View style={styles.leadingIcon}>{leadingIcon}</View> : null}
-
-          <TextInput
-            ref={ref}
-            {...rest}
-            defaultValue={defaultValue}
-            editable={editable}
-            maxLength={maxLength}
-            onBlur={handleBlur}
-            onFocus={handleFocus}
-            placeholderTextColor={placeholderTextColor ?? colors.textMuted}
-            style={[
-              styles.input,
-              size === "compact" ? styles.inputCompact : styles.inputDefault,
-              { color: colors.textPrimary },
-              style,
-            ]}
-            value={value}
-          />
-
-          {trailingContent}
-        </Animated.View>
-
-        {errorMessage ? (
-          <Text style={[styles.errorMessage, { color: colors.dangerText }]}>{errorMessage}</Text>
-        ) : description ? (
-          <Text style={[styles.description, { color: colors.textMuted }]}>{description}</Text>
+  const trailingContent =
+    shouldShowMaxLengthCounter || trailingAccessory ? (
+      <View style={styles.trailingSection}>
+        {shouldShowMaxLengthCounter ? (
+          <Text style={[styles.maxLengthCounter, { color: colors.textMuted }]}>
+            {currentLength}/{maxLength}
+          </Text>
+        ) : null}
+        {trailingAccessory ? (
+          <View style={styles.trailingAccessory}>{trailingAccessory}</View>
         ) : null}
       </View>
-    );
-  },
-);
+    ) : null;
+
+  const { wrapperStyle, innerContainerStyle, fillsWrapper } = splitContainerStyle(containerStyle);
+
+  return (
+    <View style={[styles.wrapper, wrapperStyle as never]}>
+      <Animated.View
+        style={[
+          styles.container,
+          size === "compact" ? styles.containerCompact : styles.containerDefault,
+          { backgroundColor: fieldBackgroundColor },
+          fillsWrapper ? styles.containerFill : null,
+          animatedContainerStyle as never,
+          innerContainerStyle as never,
+        ]}
+      >
+        {leadingIcon ? <View style={styles.leadingIcon}>{leadingIcon}</View> : null}
+
+        <TextInput
+          ref={ref}
+          {...rest}
+          defaultValue={defaultValue}
+          editable={editable}
+          maxLength={maxLength}
+          onBlur={handleBlur}
+          onFocus={handleFocus}
+          placeholderTextColor={placeholderTextColor ?? colors.textMuted}
+          style={[
+            styles.input,
+            size === "compact" ? styles.inputCompact : styles.inputDefault,
+            { color: colors.textPrimary },
+            style,
+          ]}
+          value={value}
+        />
+
+        {trailingContent}
+      </Animated.View>
+
+      {errorMessage ? (
+        <Text style={[styles.errorMessage, { color: colors.dangerText }]}>{errorMessage}</Text>
+      ) : description ? (
+        <Text style={[styles.description, { color: colors.textMuted }]}>{description}</Text>
+      ) : null}
+    </View>
+  );
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -286,3 +286,6 @@ const styles = StyleSheet.create({
     gap: 4,
   },
 });
+
+export type { MobileTextInputProps };
+export { MobileTextInput };

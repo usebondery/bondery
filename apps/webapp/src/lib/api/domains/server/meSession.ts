@@ -9,11 +9,6 @@ import {
 } from "@/lib/api/resources/meSession";
 import { serverApiFetch } from "@/lib/api/server";
 
-export type MeSessionProbeResult =
-  | { status: "ok"; session: MeSessionData }
-  | { status: "unauthorized" }
-  | { status: "unavailable" };
-
 async function probeMeSessionResponse(response: Response): Promise<MeSessionProbeResult> {
   if (response.status === 401) {
     return { status: "unauthorized" };
@@ -33,6 +28,11 @@ async function probeMeSessionResponse(response: Response): Promise<MeSessionProb
 
   return { status: "unavailable" };
 }
+
+export type MeSessionProbeResult =
+  | { status: "ok"; session: MeSessionData }
+  | { status: "unauthorized" }
+  | { status: "unavailable" };
 
 /** Routing probe with an explicit bearer token (avoids resolveServerSession recursion). */
 export async function probeMeSessionWithAccessToken(

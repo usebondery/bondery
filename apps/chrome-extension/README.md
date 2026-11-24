@@ -21,7 +21,7 @@ For full setup instructions see [docs/contributing/local-setup.mdx](../../docs/c
 
 If you see:
 
-```
+```text
 Authorization page could not be loaded … redirect URI exact match (https://<extension-id>.chromiumapp.org/)
 ```
 
@@ -47,4 +47,3 @@ export const MIN_EXTENSION_VERSION = "99.0.0";
 ## Beta zip (RC)
 
 GitHub prereleases for `vX.Y.Z-rc.N` attach a staging-baked zip. Disable the Chrome Web Store listing (same id), unzip, Load unpacked. Production GitHub releases do not include a zip.
-

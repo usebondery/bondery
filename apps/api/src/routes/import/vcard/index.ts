@@ -8,6 +8,7 @@ import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { domainDb } from "../../../domains/_shared/domain-db.js";
 import { commitVCardImport } from "../../../domains/import/vcard.js";
 import { loadDefaultPhoneCountryForUser } from "../../../lib/me/default-phone-country.js";
+import { UPLOAD_LIMITS } from "../../../lib/platform/config.js";
 import { domainContextFromRequest } from "../../../lib/platform/domain-context.js";
 import { badRequest } from "../../../lib/platform/errors/http-errors.js";
 import type { AppRoutePlugin } from "../../../lib/platform/fastify-types.js";
@@ -36,7 +37,7 @@ export const vcardImportRoutes: AppRoutePlugin = async (fastify) => {
       try {
         const files: Array<{ fileName: string; content: Buffer }> = [];
 
-        for await (const part of request.parts()) {
+        for await (const part of request.parts({ limits: { fileSize: UPLOAD_LIMITS.vcard } })) {
           if (part.type !== "file") {
             continue;
           }

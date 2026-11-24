@@ -1,4 +1,5 @@
 import { IconChevronRight, IconExternalLink } from "@tabler/icons-react-native";
+import { cn } from "cn";
 import type { Href } from "expo-router";
 import type { ReactNode } from "react";
 import { useState } from "react";
@@ -8,7 +9,6 @@ import { Pressable } from "@/components/ui/Pressable";
 import { useAppNavigation } from "../../lib/navigation/useAppNavigation";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { Divider } from "./Divider";
-import { joinClassNames } from "./joinClassNames";
 import { Text } from "./Text";
 import { usePressSqueeze } from "./usePressSqueeze";
 
@@ -28,25 +28,25 @@ type NavLinkBaseProps = {
   withDivider?: boolean;
 };
 
-export type NavLinkWithHrefProps = NavLinkBaseProps & {
+type NavLinkWithHrefProps = NavLinkBaseProps & {
   href: Href;
   navigationMode?: "navigate" | "push";
   onPress?: never;
 };
 
-export type NavLinkWithPressProps = NavLinkBaseProps & {
+type NavLinkWithPressProps = NavLinkBaseProps & {
   href?: never;
   navigationMode?: never;
   onPress: () => void;
 };
 
-export type NavLinkProps = NavLinkWithHrefProps | NavLinkWithPressProps;
+type NavLinkProps = NavLinkWithHrefProps | NavLinkWithPressProps;
 
 function isNavLinkWithHref(props: NavLinkProps): props is NavLinkWithHrefProps {
   return "href" in props && props.href !== undefined;
 }
 
-export function NavLink(props: NavLinkProps) {
+function NavLink(props: NavLinkProps) {
   const {
     accessibilityHint,
     accessibilityLabel,
@@ -70,7 +70,7 @@ export function NavLink(props: NavLinkProps) {
   const showChevron = withChevron && !external;
 
   const hasHref = isNavLinkWithHref(props);
-  const isDisabled = disabled || (hasHref && isNavigationLocked);
+  const isDisabled = disabled === true || (hasHref && isNavigationLocked);
 
   const handlePress = () => {
     if (isDisabled) {
@@ -78,7 +78,7 @@ export function NavLink(props: NavLinkProps) {
     }
 
     if (hasHref) {
-      const href = props.href;
+      const { href } = props;
       const mode = props.navigationMode ?? "push";
       if (mode === "navigate") {
         navigateTo(href);
@@ -99,9 +99,9 @@ export function NavLink(props: NavLinkProps) {
           accessibilityLabel={resolvedLabel}
           accessibilityRole="button"
           accessibilityState={{ disabled: isDisabled }}
-          className={joinClassNames(
-            "min-h-[52px] flex-row items-center gap-2.5 px-3.5",
-            isDisabled ? "opacity-45" : undefined,
+          className={cn(
+            "min-h-touch-lg flex-row items-center gap-2.5 px-3.5",
+            isDisabled && "opacity-45",
             className,
           )}
           data-disabled={isDisabled ? "true" : undefined}
@@ -161,3 +161,6 @@ export function NavLink(props: NavLinkProps) {
     </>
   );
 }
+
+export type { NavLinkProps, NavLinkWithHrefProps, NavLinkWithPressProps };
+export { NavLink };

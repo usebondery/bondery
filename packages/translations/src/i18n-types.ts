@@ -2,17 +2,6 @@ import type { TFunction } from "i18next";
 import type { NamespacePrefixes } from "./generated/i18n/catalog-prefixes.js";
 import type { Catalog } from "./generated/i18n/catalog-types.js";
 
-export type * from "./generated/i18n/catalog-prefixes.js";
-export type { NamespacePrefixes } from "./generated/i18n/catalog-prefixes.js";
-export type { Catalog } from "./generated/i18n/catalog-types.js";
-
-/** Manifest namespace name. */
-export type NamespaceKey = keyof Catalog;
-
-export type WebNamespace = import("./generated/i18n/namespaces.js").WebNamespace;
-export type MobileNamespace = import("./generated/i18n/namespaces.js").MobileNamespace;
-export type ExtensionNamespace = import("./generated/i18n/namespaces.js").ExtensionNamespace;
-
 /** Dot-joined nested key paths for a namespace JSON tree. */
 type JoinKeys<Prefix extends string, Key extends string> = Prefix extends ""
   ? Key
@@ -49,6 +38,17 @@ type SubtreeAtPrefix<T, Prefix extends string | undefined> = Prefix extends stri
     : never
   : T;
 
+export type * from "./generated/i18n/catalog-prefixes.js";
+export type { NamespacePrefixes } from "./generated/i18n/catalog-prefixes.js";
+export type { Catalog } from "./generated/i18n/catalog-types.js";
+
+/** Manifest namespace name. */
+export type NamespaceKey = keyof Catalog;
+
+export type WebNamespace = import("./generated/i18n/namespaces.js").WebNamespace;
+export type MobileNamespace = import("./generated/i18n/namespaces.js").MobileNamespace;
+export type ExtensionNamespace = import("./generated/i18n/namespaces.js").ExtensionNamespace;
+
 /** Translation keys available under an optional keyPrefix within a namespace. */
 export type PrefixedKeys<
   NS extends NamespaceKey,
@@ -58,8 +58,16 @@ export type PrefixedKeys<
 /** Valid keyPrefix values for a namespace (object branch paths in the JSON tree). */
 export type BranchPrefixFor<NS extends NamespaceKey> = NamespacePrefixes[NS];
 
-/** Bivariant translate fn for utilities that accept dynamic or cross-section keys. */
-export type LooseTranslateFn = (key: string, options?: Record<string, unknown>) => string;
+/**
+ * Bivariant translate fn for utilities that accept dynamic or cross-section keys.
+ *
+ * Declared as a method on purpose. i18next 27 types `t()` as an overload list whose parameters
+ * are tuple unions, and a plain function type no longer overlaps it, so `t as LooseTranslateFn`
+ * fails with TS2352. A method signature compares bivariantly and keeps the cast working.
+ */
+export type LooseTranslateFn = {
+  bivarianceHack(key: string, options?: Record<string, unknown>): string;
+}["bivarianceHack"];
 
 /** Namespace-scoped translate function with optional prefix narrowing. */
 export type TranslateFn<

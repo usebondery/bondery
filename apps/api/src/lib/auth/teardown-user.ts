@@ -8,7 +8,7 @@ import {
   listStorageKeys,
 } from "../storage/get-storage.js";
 
-export type UserDeletionSnapshot = {
+type UserDeletionSnapshot = {
   email: string;
   id: string;
   language?: SupportedLocale | null;
@@ -16,15 +16,6 @@ export type UserDeletionSnapshot = {
 };
 
 const pendingDeletionEmails = new Map<string, UserDeletionSnapshot>();
-
-export function snapshotUserForDeletion(user: UserDeletionSnapshot): void {
-  pendingDeletionEmails.set(user.id, {
-    email: user.email,
-    id: user.id,
-    language: user.language ?? null,
-    name: user.name ?? null,
-  });
-}
 
 function takeDeletionSnapshot(userId: string): UserDeletionSnapshot | undefined {
   const snapshot = pendingDeletionEmails.get(userId);
@@ -42,14 +33,6 @@ async function deleteUserStorageFiles(userId: string): Promise<void> {
   if (logoKeys.length > 0) {
     await deleteStorageObjects(LINKEDIN_LOGOS_BUCKET, logoKeys);
   }
-}
-
-export async function deleteOAuthArtifactsForUser(userId: string): Promise<void> {
-  await prisma.$transaction([
-    prisma.oauthAccessToken.deleteMany({ where: { userId } }),
-    prisma.oauthRefreshToken.deleteMany({ where: { userId } }),
-    prisma.oauthConsent.deleteMany({ where: { userId } }),
-  ]);
 }
 
 async function cancelStripeSubscriptionIfAny(
@@ -79,6 +62,25 @@ async function cancelStripeSubscriptionIfAny(
       "Failed to cancel Stripe subscription during account deletion",
     );
   }
+}
+
+export type { UserDeletionSnapshot };
+
+export function snapshotUserForDeletion(user: UserDeletionSnapshot): void {
+  pendingDeletionEmails.set(user.id, {
+    email: user.email,
+    id: user.id,
+    language: user.language ?? null,
+    name: user.name ?? null,
+  });
+}
+
+export async function deleteOAuthArtifactsForUser(userId: string): Promise<void> {
+  await prisma.$transaction([
+    prisma.oauthAccessToken.deleteMany({ where: { userId } }),
+    prisma.oauthRefreshToken.deleteMany({ where: { userId } }),
+    prisma.oauthConsent.deleteMany({ where: { userId } }),
+  ]);
 }
 
 export async function runUserDeleteBefore(

@@ -1,0 +1,14 @@
+{
+  "Call": "Arama",
+  "Coffee": "Kahve",
+  "CompetitionHackathon": "Yarışma/Hackathon",
+  "Custom": "Özel",
+  "Email": "E-posta",
+  "Meal": "Yemek",
+  "Meeting": "Buluşma",
+  "NetworkingEvent": "Networking etkinliği",
+  "Note": "Not",
+  "Other": "Diğer",
+  "PartySocial": "Parti/Sosyal etkinlik",
+  "TextMessaging": "Kısa mesaj"
+}

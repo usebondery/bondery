@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import type { Group } from "@bondery/schemas";
 import { internal } from "../../lib/platform/errors/http-errors.js";
 import { buildGroupRowChange } from "../../lib/sync/build-changes.js";
@@ -43,7 +44,7 @@ export async function createGroup(
         syncEmitMetaFromContext(ctx),
       )) ?? 0;
 
-    void maybeCaptureActivation(ctx, "first_group");
+    detachPromise(maybeCaptureActivation(ctx, "first_group"));
 
     return { data: { group }, serverSequence, txid };
   } catch (error) {

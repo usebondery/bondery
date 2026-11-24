@@ -14,7 +14,6 @@ import {
 } from "@tabler/icons-react-native";
 import { useEffect, useState } from "react";
 import { useWatch } from "react-hook-form";
-import { useTranslation } from "react-i18next";
 import { StyleSheet, Text, View } from "react-native";
 import { Pressable } from "@/components/ui/Pressable";
 import {
@@ -28,6 +27,7 @@ import { INPUT_MAX_LENGTHS } from "../../../lib/config";
 import { useSheetForm } from "../../../lib/forms/useSheetForm";
 import { useSheetLocalAction } from "../../../lib/forms/useSheetLocalAction";
 import { useSheetLocalSubmit } from "../../../lib/forms/useSheetLocalSubmit";
+import { useMobileDateTimeFormatContext } from "../../../lib/preferences/useMobilePreferences";
 import { syncEffectState } from "../../../lib/react/syncEffectState";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
@@ -35,7 +35,6 @@ import {
   createTodayImportantDateIso,
   defaultWithoutYearForType,
   formatImportantDate,
-  resolveDateLocale,
 } from "../importantDateUtils";
 import { ImportantDateWheelPickerSheet } from "./ImportantDateWheelPickerSheet";
 
@@ -102,7 +101,7 @@ function NotifyBellIcon({ muted, color }: { muted: boolean; color: string }) {
   );
 }
 
-export function EditImportantDateSheet({
+function EditImportantDateSheet({
   open,
   mode,
   initialEntry,
@@ -117,9 +116,8 @@ export function EditImportantDateSheet({
   const tContactImportantDates = useContactImportantDatesTranslations();
   const tMobileContactIdentity = useMobileContactIdentityTranslations();
   const t = useCommonTranslations();
-  const { i18n } = useTranslation();
   const colors = useMobileThemeColors();
-  const dateLocale = resolveDateLocale(i18n.language);
+  const formatCtx = useMobileDateTimeFormatContext();
   const {
     control,
     handleSubmit,
@@ -134,7 +132,7 @@ export function EditImportantDateSheet({
         notifyDaysBefore: entry.notifyDaysBefore
           ? (String(entry.notifyDaysBefore) as ImportantDateSheetInput["notifyDaysBefore"])
           : "none",
-        type: entry.type ?? "other",
+        type: entry.type,
       };
     },
     mode: "onChange",
@@ -179,8 +177,9 @@ export function EditImportantDateSheet({
     return true;
   }).map((value) => {
     const meta = IMPORTANT_DATE_TYPE_META[value];
+    const typeLabel = tContactImportantDates(`Types.${value}` as never);
     return {
-      label: `${meta.emoji} ${tContactImportantDates(`Types.${value}` as never)}`,
+      label: `${meta.emoji} ${typeLabel}`,
       value,
     };
   });
@@ -235,7 +234,7 @@ export function EditImportantDateSheet({
 
   const isBusy = isSubmitting || isDeleting;
   const canSubmit = isValid && !isBusy;
-  const dateLabel = formatImportantDate(dateIso, dateLocale);
+  const dateLabel = formatImportantDate(dateIso, formatCtx);
 
   const primaryAction: SheetAction = {
     disabled: !canSubmit,
@@ -407,3 +406,5 @@ const styles = StyleSheet.create({
     width: 16,
   },
 });
+
+export { EditImportantDateSheet };

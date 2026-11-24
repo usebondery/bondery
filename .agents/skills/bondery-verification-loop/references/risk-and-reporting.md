@@ -4,19 +4,19 @@
 
 Transform the task into verifiable checks. Format from `bondery-core` AGENTS.md:
 
-```
+```text
 1. [Step] → verify: [command or manual check]
 2. [Step] → verify: [command or manual check]
 ```
 
 Examples:
 
-| Task | Success criteria |
-|------|----------------|
-| Add validation | Unit test for invalid input passes → `npm test -w @bondery/helpers` (if helper changed) |
-| Fix API bug | Repro test passes → targeted `test:sync` or optional `test:api` when DB-backed |
-| New route | OpenAPI in sync → `pnpm run check:openapi` |
-| Mobile sync change | Pattern lint clean → `pnpm run check-sync-patterns -w mobile` |
+| Task               | Success criteria                                                                        |
+| ------------------ | --------------------------------------------------------------------------------------- |
+| Add validation     | Unit test for invalid input passes → `npm test -w @bondery/helpers` (if helper changed) |
+| Fix API bug        | Repro test passes → targeted `test:sync` or optional `test:api` when DB-backed          |
+| New route          | OpenAPI in sync → `pnpm run check:openapi`                                              |
+| Mobile sync change | Pattern lint clean → `pnpm run check-sync-patterns -w mobile`                           |
 
 Architect plans should include `→ verify:` on each implementation task without running commands.
 
@@ -59,12 +59,12 @@ Run verification:
 
 ## Mutating vs read-only commands
 
-| Read-only (preferred for verify) | Mutating (review diff after) |
-|----------------------------------|------------------------------|
-| `pnpm exec biome check <files>` | `pnpm run lint` (writes whole repo) |
-| `biome ci .` | `pnpm run generate:openapi` |
-| `pnpm run check:types` | `pnpm run env -- --check` (may regenerate examples) |
-| `pnpm run test:*` | Translation `i18n:types` / build steps that emit files |
+| Read-only (preferred for verify) | Mutating (review diff after)                           |
+| -------------------------------- | ------------------------------------------------------ |
+| `pnpm exec biome check <files>`  | `pnpm run lint` (writes whole repo)                    |
+| `biome ci .`                     | `pnpm run generate:openapi`                            |
+| `pnpm run check:types`           | `pnpm run env -- --check` (may regenerate examples)    |
+| `pnpm run test:*`                | Translation `i18n:types` / build steps that emit files |
 
 ## Report format
 

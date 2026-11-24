@@ -35,10 +35,19 @@
 
 - Prefer code that explains what it does through types and names.
 - Add comments for the **why**: compatibility constraints, non-obvious invariants, security boundaries, or intentional deviations.
-- Write comments and JSDoc in ASD-100 ([`bondery-writing`](../../bondery-writing/references/asd-100.md)). This file still decides *when* a comment exists.
+- Write comments and JSDoc in ASD-100 ([`bondery-writing`](../../bondery-writing/references/asd-100.md)). This file still decides _when_ a comment exists.
 - Add JSDoc to shared or public functions when callers need behavior, parameter, return, side-effect, or failure guarantees that types do not express.
 - Update the nearest README or architecture documentation when a public workflow, package contract, environment variable, or contributor procedure changes.
 - Do not leave commented-out code or TODOs without an owner and actionable context.
+
+## Error and diagnostic messages
+
+- A message that reports a problem must also name the fix. Name the function, file, command, constant, or value the reader should change.
+- Put identifiers, paths, and commands in backticks so they read as code: "Use `constantTimeEqual()`", not "use a constant time compare".
+- Name the remedy instead of the rule number. The reader wants to fix the line, not look up the rule.
+- Start the remedy with an imperative: "Add…", "Use…", "Run…", "Remove…".
+- State the required value when the fix is a value: "`UPLOAD_LIMITS.default` must stay at or below 10 MB."
+- `scripts/check/check-diagnostic-messages.mjs` enforces this for every `check.add()`, `fail()` and Biome plugin message. When the remedy comes from an interpolated value, mark the line `diagnostic-message: remedy-in-value <where>` and name the function that builds it.
 
 ## Code smells
 
@@ -62,3 +71,4 @@ Challenge the change when you see:
 - [ ] Async dependencies are explicit and independent work is not serialized
 - [ ] Errors are recovered, mapped, or rethrown intentionally
 - [ ] Comments and JSDoc explain contracts or reasons, not syntax
+- [ ] Every diagnostic message names the fix, not only the violation

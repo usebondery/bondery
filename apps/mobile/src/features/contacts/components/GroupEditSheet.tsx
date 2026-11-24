@@ -53,7 +53,7 @@ type GroupEditSheetProps =
       onDeleted: () => void;
     };
 
-export function GroupEditSheet(props: GroupEditSheetProps) {
+function GroupEditSheet(props: GroupEditSheetProps) {
   const tMobileGroups = useMobileGroupsTranslations();
   const t = useCommonTranslations();
   const { mode, open, onOpenChange } = props;
@@ -310,3 +310,5 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 });
+
+export { GroupEditSheet };

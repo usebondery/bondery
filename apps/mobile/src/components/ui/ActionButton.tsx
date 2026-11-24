@@ -19,7 +19,7 @@ import {
 import { type ActionButtonSize, getActionButtonSizePx } from "./actionButtonTokens";
 import { usePressSqueeze } from "./usePressSqueeze";
 
-export type ActionButtonProps = {
+type ActionButtonProps = {
   accessibilityHint?: string;
   accessibilityLabel: string;
   accessibilityRole?: AccessibilityRole;
@@ -49,7 +49,7 @@ function AnimatedShell({
   return <Animated.View style={style}>{children}</Animated.View>;
 }
 
-export function ActionButton({
+function ActionButton({
   accessibilityHint,
   accessibilityLabel,
   accessibilityRole = "button",
@@ -70,7 +70,7 @@ export function ActionButton({
   const colors = useMobileThemeColors();
   const { pressIn, pressOut, squeezeStyle } = usePressSqueeze("subtle");
   const [isPressed, setIsPressed] = useState(false);
-  const isDisabled = disabled || loading;
+  const isDisabled = disabled === true || loading === true;
   const dimension = getActionButtonSizePx(size);
   const spinnerColor = indicatorColor ?? colors.iconSecondary;
 
@@ -132,8 +132,11 @@ export function ActionButton({
         style={sharedStyle}
         testID={testID}
       >
-        {loading ? <ActivityIndicator color={spinnerColor} size="small" /> : children}
+        {loading ? <ActivityIndicator color={spinnerColor} size="small" /> : <>{children}</>}
       </Pressable>
     </AnimatedShell>
   );
 }
+
+export type { ActionButtonProps };
+export { ActionButton };

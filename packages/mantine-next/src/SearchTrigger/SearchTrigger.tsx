@@ -3,7 +3,7 @@
 import { Group, Text, Tooltip, UnstyledButton } from "@mantine/core";
 import { useHover } from "@mantine/hooks";
 import { IconSearch } from "@tabler/icons-react";
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 import { Kbd, type ShortcutKeyToken } from "#Kbd/index.js";
 
 const ROW_PADDING = {
@@ -33,7 +33,7 @@ export function SearchTrigger({
   label,
   onClick,
   shortcut,
-}: SearchTriggerProps) {
+}: SearchTriggerProps): ReactElement {
   const { hovered, ref } = useHover<HTMLButtonElement>();
   const shortcutKeys = shortcut && shortcut.length > 0 ? <Kbd keys={shortcut} size="xs" /> : null;
 

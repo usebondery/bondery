@@ -268,12 +268,78 @@ $$;
 
 -- ---------------------------------------------------------------------------
 -- AI chat quota
+--
+-- One allowance of N messages per month for every plan. Premium has a larger N;
+-- the rule is the same. Both tiers read and write ai_messages_this_month, and
+-- the period ends at ai_messages_month_reset_at.
+--
+-- user_settings.ai_messages_month_reset_at is the EXCLUSIVE end of the current
+-- usage period, stored as timestamptz. The Stripe mirror writes it from
+-- subscriptions.current_period_end, so a paid quota window follows the billing
+-- cycle the invoice shows. A free account keeps the month its own signup opened.
+--
+-- One period rule, used by every caller: the current period holds messages only
+-- while reset_at is in the future. A read after the period ended reports no
+-- usage, because the next period starts when Stripe renews.
+--
+-- user_settings.ai_messages_used is the lifetime total. It is still written for
+-- reporting, and no quota decision reads it.
 -- ---------------------------------------------------------------------------
+
+create or replace function get_ai_quota(
+  p_user_id uuid
+)
+returns table (messages_used int, reset_at timestamptz)
+language plpgsql
+stable
+as $$
+declare
+  v_row user_settings%rowtype;
+begin
+  select * into v_row from user_settings where user_id = p_user_id;
+
+  if not found then
+    return query select 0, null::timestamptz;
+    return;
+  end if;
+
+  if v_row.ai_messages_month_reset_at > now() then
+    return query select coalesce(v_row.ai_messages_this_month, 0), v_row.ai_messages_month_reset_at;
+  else
+    return query select 0, null::timestamptz;
+  end if;
+end;
+$$;
+
+-- Called by the Stripe webhook mirror. The counter clears only when the stored
+-- window had already ended, which is the single moment a new period starts.
+-- That makes a redelivered event a no-op and keeps the counter when Stripe
+-- corrects a period end mid-window.
+create or replace function sync_ai_quota_period(
+  p_user_id uuid,
+  p_period_end timestamptz
+)
+returns void
+language sql
+as $$
+  update user_settings
+  set ai_messages_this_month =
+        case
+          when ai_messages_month_reset_at <= now() then 0
+          else ai_messages_this_month
+        end,
+      ai_messages_month_reset_at = p_period_end
+  where user_id = p_user_id;
+$$;
+
+-- The limit is the only difference between plans, so the plan flag is gone. It
+-- used to short-circuit the check for premium subscribers and let them past the
+-- 300-message cap.
+drop function if exists check_and_increment_ai_messages(uuid, int, boolean);
 
 create or replace function check_and_increment_ai_messages(
   p_user_id uuid,
-  p_limit int,
-  p_is_premium boolean
+  p_limit int
 )
 returns table (allowed boolean, messages_used int, reset_at timestamptz)
 language plpgsql
@@ -283,27 +349,36 @@ declare
 begin
   select * into v_row from user_settings where user_id = p_user_id for update;
 
-  if v_row.ai_messages_month_reset_at < now() then
+  if not found then
+    return query select false, 0, null::timestamptz;
+    return;
+  end if;
+
+  -- Stripe can deliver the renewal event after the period ended. Roll the window
+  -- forward from its own end date, not from now(), so the next period keeps the
+  -- billing anchor and the mirror agrees with it on arrival.
+  if v_row.ai_messages_month_reset_at <= now() then
+    while v_row.ai_messages_month_reset_at <= now() loop
+      v_row.ai_messages_month_reset_at := v_row.ai_messages_month_reset_at + interval '1 month';
+    end loop;
+
     update user_settings
     set ai_messages_this_month = 0,
-        ai_messages_month_reset_at = now() + interval '1 month'
+        ai_messages_month_reset_at = v_row.ai_messages_month_reset_at
     where user_id = p_user_id
     returning * into v_row;
   end if;
 
-  if p_is_premium or v_row.ai_messages_this_month < p_limit then
+  if v_row.ai_messages_this_month < p_limit then
     update user_settings
     set ai_messages_this_month = ai_messages_this_month + 1,
         ai_messages_used = ai_messages_used + 1
     where user_id = p_user_id
     returning * into v_row;
 
-    -- user_settings.ai_messages_month_reset_at is TIMESTAMP (no time zone).
-    -- RETURNS TABLE declares timestamptz; uncast RETURN QUERY fails with
-    -- "structure of query does not match function result type".
-    return query select true, v_row.ai_messages_this_month, v_row.ai_messages_month_reset_at::timestamptz;
+    return query select true, v_row.ai_messages_this_month, v_row.ai_messages_month_reset_at;
   else
-    return query select false, v_row.ai_messages_this_month, v_row.ai_messages_month_reset_at::timestamptz;
+    return query select false, v_row.ai_messages_this_month, v_row.ai_messages_month_reset_at;
   end if;
 end;
 $$;

@@ -8,18 +8,22 @@ import {
   ButtonLink,
   hrefAssert,
 } from "@bondery/mantine-next";
+import landing from "@bondery/translations/locales/en/platform/website/WebsiteLanding.json" with {
+  type: "json",
+};
 import { Box, Burger, Drawer, Flex, Group, Paper, Stack } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconBrandGithub, IconTopologyStar, IconX } from "@tabler/icons-react";
 import { Logo } from "@/components/Logo";
 import { siteFrameProps } from "@/components/site-shell";
 import { routeAssert } from "@/lib/navigation/route/assert";
+import { LANDING_SECTION_IDS } from "./sectionIds";
 
 const navLinks: { href: AppHref; label: string }[] = [
-  { href: "/#features", label: "Features" },
-  { href: "/#pricing", label: "Pricing" },
-  { href: WEBSITE_ROUTES.BLOG, label: "Blog" },
-  { href: routeAssert(WEBSITE_ROUTES.DOCS), label: "Docs" },
+  { href: `/#${LANDING_SECTION_IDS.features}`, label: landing.Header.Nav.Features },
+  { href: `/#${LANDING_SECTION_IDS.pricing}`, label: landing.Header.Nav.Pricing },
+  { href: WEBSITE_ROUTES.BLOG, label: landing.Header.Nav.Blog },
+  { href: routeAssert(WEBSITE_ROUTES.DOCS), label: landing.Header.Nav.Docs },
 ];
 type HeaderClientProps = {
   initialStars: number;
@@ -31,15 +35,15 @@ export function HeaderClient({ initialStars, webappUrl }: HeaderClientProps) {
   const loginHref = hrefAssert(`${webappUrl}/login`);
 
   return (
-    <Box className="sticky top-6 z-50 " component="header">
-      <Paper className="rounded-full!" {...siteFrameProps} px={"xs"} py={"md"} shadow="md">
+    <Box className="sticky top-6 z-50" component="header">
+      <Paper {...siteFrameProps} px="xs" py="md" radius={9999} shadow="md">
         <Flex align="center" px="md" visibleFrom="sm">
           <Box style={{ flex: 1 }}>
             <Logo size={32} />
           </Box>
 
           <Group
-            aria-label="Primary navigation"
+            aria-label={landing.Header.Aria.PrimaryNavigation}
             component="nav"
             gap="xl"
             style={{ flex: "0 0 auto" }}
@@ -64,10 +68,10 @@ export function HeaderClient({ initialStars, webappUrl }: HeaderClientProps) {
             <ButtonLink
               href={loginHref}
               leftSection={<IconTopologyStar size={20} />}
-              radius={"xl"}
+              radius="xl"
               size="md"
             >
-              Login or Sign up
+              {landing.Header.LoginOrSignUp}
             </ButtonLink>
           </Flex>
         </Flex>
@@ -75,7 +79,11 @@ export function HeaderClient({ initialStars, webappUrl }: HeaderClientProps) {
         <Flex align="center" hiddenFrom="sm" justify="space-between" px="md">
           <Logo size={32} />
           <Burger
-            aria-label={drawerOpened ? "Close navigation menu" : "Open navigation menu"}
+            aria-label={
+              drawerOpened
+                ? landing.Header.Aria.CloseNavigationMenu
+                : landing.Header.Aria.OpenNavigationMenu
+            }
             onClick={toggleDrawer}
             opened={drawerOpened}
           />
@@ -92,18 +100,23 @@ export function HeaderClient({ initialStars, webappUrl }: HeaderClientProps) {
         <Drawer.Overlay />
         <Drawer.Content>
           <Drawer.Header>
-            <Drawer.Title>Navigation</Drawer.Title>
+            <Drawer.Title>{landing.Header.NavigationTitle}</Drawer.Title>
             <ActionIconButton
-              aria-label="Close menu"
+              aria-label={landing.Header.Aria.CloseMenu}
               icon={<IconX />}
-              mt={"md"}
+              mt="md"
               onClick={closeDrawer}
               size="xl"
               variant="default"
             />
           </Drawer.Header>
           <Drawer.Body>
-            <Flex aria-label="Mobile navigation" component="nav" direction="column" gap="lg">
+            <Flex
+              aria-label={landing.Header.Aria.MobileNavigation}
+              component="nav"
+              direction="column"
+              gap="lg"
+            >
               {navLinks.map((link) => (
                 <AnchorLink
                   c="var(--mantine-color-default-color)"
@@ -133,7 +146,7 @@ export function HeaderClient({ initialStars, webappUrl }: HeaderClientProps) {
                   leftSection={<IconTopologyStar size={20} />}
                   size="md"
                 >
-                  Login or Sign up
+                  {landing.Header.LoginOrSignUp}
                 </ButtonLink>
               </Stack>
             </Flex>

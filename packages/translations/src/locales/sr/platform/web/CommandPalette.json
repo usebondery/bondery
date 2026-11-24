@@ -1,0 +1,22 @@
+{
+  "ActionsGroup": "Radnje",
+  "AddPerson": "Dodaj osobu",
+  "AddPersonDescription": "Napravi novi kontakt u mreži",
+  "ContactUs": "Kontaktiraj nas",
+  "ContactUsDescription": "Javi se Bondery timu",
+  "Documentation": "Dokumentacija",
+  "DocumentationDescription": "Pročitaj Bondery dokumentaciju",
+  "ExportData": "Izvezi podatke",
+  "ExportDataDescription": "Sačuvaj kopiju Bondery podataka",
+  "FindPerson": "Pronađi osobu",
+  "FindPersonDescription": "Pretraži mrežu po imenu",
+  "GoToDescription": "Idi na {label}",
+  "HelpGroup": "Pomoć",
+  "ImportData": "Uvezi podatke",
+  "ImportDataDescription": "Uvezi Bondery JSON ZIP",
+  "LogInteraction": "Zabeleži interakciju",
+  "LogInteractionDescription": "Zabeleži novi sastanak, poziv ili poruku",
+  "NavigateGroup": "Navigacija",
+  "NothingFound": "Nema pronađenih radnji",
+  "SearchPlaceholder": "Pretraži radnje ili idi na stranicu…"
+}

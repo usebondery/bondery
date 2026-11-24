@@ -1,4 +1,5 @@
-import type { CSSProperties } from "react";
+import { cn } from "cn";
+import type { CSSProperties, ReactElement } from "react";
 import { BonderyIcon } from "#react/BonderyIcon.js";
 import { BonderyIconWhite } from "#react/BonderyIconWhite.js";
 import { BonderyLogotypeBlack } from "#react/BonderyLogotypeBlack.js";
@@ -14,17 +15,6 @@ import {
   BRAND_WORDMARK,
 } from "#typography.js";
 
-export type BonderyDynamicLogotypeProps = {
-  /** Optional class on the outer span. */
-  className?: string;
-  /** Icon height in pixels. Label font size scales with this. */
-  height?: number;
-  /** Label beside the icon (e.g. `"Bondery Docs"`). Omit for icon-only. */
-  text?: string;
-  /** Color scheme for icon and label. */
-  theme: "light" | "dark";
-};
-
 const TEXT_COLORS = {
   dark: "#ffffff",
   light: "#000000",
@@ -34,6 +24,17 @@ const clipContainerStyle: CSSProperties = {
   display: "inline-block",
   lineHeight: 0,
   overflow: "hidden",
+};
+
+export type BonderyDynamicLogotypeProps = {
+  /** Optional class on the outer span. */
+  className?: string;
+  /** Icon height in pixels. Label font size scales with this. */
+  height?: number;
+  /** Label beside the icon (e.g. `"Bondery Docs"`). Omit for icon-only. */
+  text?: string;
+  /** Color scheme for icon and label. */
+  theme: "light" | "dark";
 };
 
 /**
@@ -46,7 +47,7 @@ export function BonderyDynamicLogotype({
   theme,
   height = 20,
   className,
-}: BonderyDynamicLogotypeProps) {
+}: BonderyDynamicLogotypeProps): ReactElement {
   const label = text?.trim();
   const isDefaultWordmark = label === BRAND_WORDMARK;
   const isIconOnly = !label;
@@ -77,10 +78,7 @@ export function BonderyDynamicLogotype({
   const Icon = theme === "dark" ? BonderyIconWhite : BonderyIcon;
 
   return (
-    <span
-      className={["inline-flex items-center", className].filter(Boolean).join(" ")}
-      style={{ color }}
-    >
+    <span className={cn("inline-flex items-center", className)} style={{ color }}>
       <Icon aria-hidden height={iconSize} width={iconSize} />
       <span
         className="leading-none"

@@ -6,11 +6,11 @@ Bondery follows [PostHog product analytics best practices](https://posthog.com/d
 
 Use the **category:object_action** framework:
 
-| Part | Meaning | Examples |
-|------|---------|----------|
-| **category** | Context where the event occurred | `contacts`, `signup_flow`, `account_settings`, `enrichment` |
-| **object** | Noun — component or location | `contact`, `pricing_page`, `forgot_password_button` |
-| **action** | Present-tense verb — what happened | `click`, `create`, `view`, `delete` |
+| Part         | Meaning                            | Examples                                                    |
+| ------------ | ---------------------------------- | ----------------------------------------------------------- |
+| **category** | Context where the event occurred   | `contacts`, `signup_flow`, `account_settings`, `enrichment` |
+| **object**   | Noun — component or location       | `contact`, `pricing_page`, `forgot_password_button`         |
+| **action**   | Present-tense verb — what happened | `click`, `create`, `view`, `delete`                         |
 
 **Full examples (from PostHog):**
 
@@ -60,10 +60,10 @@ Preserves historical data while enabling before/after comparison.
 
 ## Property names
 
-| Pattern | Examples |
-|---------|----------|
-| `object_adjective` | `user_id`, `item_count`, `activity_type` |
-| `is_*` / `has_*` for booleans | `is_subscribed`, `has_general_feedback` |
+| Pattern                            | Examples                                     |
+| ---------------------------------- | -------------------------------------------- |
+| `object_adjective`                 | `user_id`, `item_count`, `activity_type`     |
+| `is_*` / `has_*` for booleans      | `is_subscribed`, `has_general_feedback`      |
 | `*_date` / `*_timestamp` for dates | `user_creation_date`, `last_login_timestamp` |
 
 ### Property rules
@@ -76,19 +76,19 @@ Preserves historical data while enabling before/after comparison.
 
 Use consistent categories so events group in PostHog:
 
-| Category | Use for |
-|----------|---------|
-| `contacts` | Contact CRUD, bulk delete |
-| `tags` | Tag CRUD |
-| `groups` | Group CRUD |
-| `interactions` | Activities / interactions |
-| `enrichment` | LinkedIn / batch enrich flows |
-| `feedback` | NPS, product feedback |
-| `signup_flow` | Registration, activation (growth) |
-| `account_settings` | Settings, preferences |
-| `auth` | Sign-in and session lifecycle |
-| `navigation` | Page views, shell navigation |
-| `billing` | Subscription, checkout (server-preferred) |
+| Category           | Use for                                   |
+| ------------------ | ----------------------------------------- |
+| `contacts`         | Contact CRUD, bulk delete                 |
+| `tags`             | Tag CRUD                                  |
+| `groups`           | Group CRUD                                |
+| `interactions`     | Activities / interactions                 |
+| `enrichment`       | LinkedIn / batch enrich flows             |
+| `feedback`         | NPS, product feedback                     |
+| `signup_flow`      | Registration, activation (growth)         |
+| `account_settings` | Settings, preferences                     |
+| `auth`             | Sign-in and session lifecycle             |
+| `navigation`       | Page views, shell navigation              |
+| `billing`          | Subscription, checkout (server-preferred) |
 
 Add a new category only when the context is genuinely distinct — avoid one-off categories.
 

@@ -10,7 +10,10 @@ const UUID_NAMESPACE_DNS = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
  * Bondery import remap namespace. Stable UUID v5 of `bondery.import.remap` in the
  * DNS namespace. **Never change** — crash+retry and re-import must hit the same PKs.
  */
-export const BONDERY_IMPORT_REMAP_NAMESPACE = uuidv5("bondery.import.remap", UUID_NAMESPACE_DNS);
+export const BONDERY_IMPORT_REMAP_NAMESPACE: string = uuidv5(
+  "bondery.import.remap",
+  UUID_NAMESPACE_DNS,
+);
 
 /** Stable snake_case table names matching DB / sync keys where those exist. */
 export type ImportRemapTable =

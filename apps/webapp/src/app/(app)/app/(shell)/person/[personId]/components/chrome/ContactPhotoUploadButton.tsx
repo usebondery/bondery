@@ -1,7 +1,7 @@
 "use client";
 
 import { openPhotoUploadModal } from "@/components/photo/openPhotoUploadModal";
-import { useUploadContactPhotoMutation } from "@/lib/query/hooks/useContacts";
+import { useUploadContactPhotoMutation } from "@/lib/query/hooks/useContactMutations";
 import { ContactAvatar } from "./ContactAvatar";
 
 interface ContactPhotoUploadButtonProps {
@@ -40,12 +40,12 @@ export function ContactPhotoUploadButton({
   return (
     <ContactAvatar
       avatarUrl={avatarUrl}
-      className="cursor-pointer rounded-full!"
       contactName={contactName}
       firstName={firstName}
       lastName={lastName}
       onClick={handleOpenUploadModal}
       size={128}
+      style={{ borderRadius: "100%", cursor: "pointer" }}
     />
   );
 }

@@ -2,11 +2,11 @@
 
 `typedRoutes` is on. Prefer the `route*` / `href*` / `redirect*` map:
 
-| Prefix | Folder | Use |
-|--------|--------|-----|
-| `route*` | `route/` | Same-origin path → `Route` (`Link`, `push`, `redirect`) |
-| `href*` | (mantine-next) | Link URL that may leave the origin (`hrefAssert`) |
-| `redirect*` | `redirect/` | Server redirect |
+| Prefix      | Folder         | Use                                                     |
+| ----------- | -------------- | ------------------------------------------------------- |
+| `route*`    | `route/`       | Same-origin path → `Route` (`Link`, `push`, `redirect`) |
+| `href*`     | (mantine-next) | Link URL that may leave the origin (`hrefAssert`)       |
+| `redirect*` | `redirect/`    | Server redirect                                         |
 
 **No barrel files.** Import the leaf module (e.g. `@/lib/navigation/route/person`, `@/lib/navigation/redirect/route`).
 

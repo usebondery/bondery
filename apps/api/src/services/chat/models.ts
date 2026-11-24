@@ -1,3 +1,13 @@
+type ChatModelId = (typeof CHAT_MODEL_IDS)[number];
+
+/** Anthropic Messages API ids for each public id. */
+const ANTHROPIC_MODEL_BY_ID: Record<ChatModelId, string> = {
+  "anthropic/claude-haiku-5.5": "claude-haiku-5-5",
+  "anthropic/claude-sonnet-5.5": "claude-sonnet-5-5",
+  auto: "claude-haiku-5-5",
+};
+
+export type { ChatModelId };
 /**
  * Public chat model ids and their Anthropic counterparts.
  *
@@ -13,8 +23,6 @@ export const CHAT_MODEL_IDS = [
   "anthropic/claude-sonnet-5.5",
 ] as const;
 
-export type ChatModelId = (typeof CHAT_MODEL_IDS)[number];
-
 /**
  * The model a new session starts on. `auto` is the product default and, for
  * now, resolves to the same model as this constant.
@@ -23,13 +31,6 @@ export const DEFAULT_CHAT_MODEL_ID: ChatModelId = "auto";
 
 /** The fast model. Used by title generation and by `auto`. */
 export const FAST_CHAT_MODEL_ID: ChatModelId = "anthropic/claude-haiku-5.5";
-
-/** Anthropic Messages API ids for each public id. */
-const ANTHROPIC_MODEL_BY_ID: Record<ChatModelId, string> = {
-  "anthropic/claude-haiku-5.5": "claude-haiku-5-5",
-  "anthropic/claude-sonnet-5.5": "claude-sonnet-5-5",
-  auto: "claude-haiku-5-5",
-};
 
 export function isChatModelId(value: unknown): value is ChatModelId {
   return typeof value === "string" && CHAT_MODEL_IDS.includes(value as ChatModelId);

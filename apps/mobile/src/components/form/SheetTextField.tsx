@@ -2,6 +2,7 @@ import type { ReactNode, Ref } from "react";
 import { type Control, Controller, type FieldPath, type FieldValues } from "react-hook-form";
 import type { ViewStyle } from "react-native";
 import type { NativeTextInputRef } from "../../lib/native-host-refs";
+import { nonEmpty } from "../../lib/text";
 import { TextInput, type TextInputProps } from "../ui/TextInput";
 
 type SheetTextFieldLegacyProps = {
@@ -56,7 +57,7 @@ export function SheetTextField<TFieldValues extends FieldValues>({
           ? fieldState.invalid && fieldState.isTouched
           : fieldState.invalid;
         const resolvedError =
-          externalErrorMessage || (showError ? fieldState.error?.message : undefined);
+          nonEmpty(externalErrorMessage) ?? (showError ? fieldState.error?.message : undefined);
         return (
           <TextInput
             {...inputProps}

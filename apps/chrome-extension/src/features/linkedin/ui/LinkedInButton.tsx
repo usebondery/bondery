@@ -11,7 +11,7 @@ import { profileCache, scrapeLinkedInProfile } from "../scrape/scrapeProfile";
 import { getTopcard } from "../scrape/sduiProfile";
 import { toApiWorkHistory } from "../scrape/workExperience";
 
-export { profileCache };
+const PROFILE_PHOTO_URL_RE = /profile|displayphoto|shrink/i;
 
 interface LinkedInButtonProps {
   username: string;
@@ -20,7 +20,7 @@ interface LinkedInButtonProps {
 /**
  * Extracts the profile photo URL from the SDUI topcard.
  */
-export function extractProfilePhotoUrl(): string | null {
+function extractProfilePhotoUrl(): string | null {
   const topcard = getTopcard();
   if (!topcard) {
     return null;
@@ -32,11 +32,7 @@ export function extractProfilePhotoUrl(): string | null {
   }
 
   for (const img of topcard.querySelectorAll<HTMLImageElement>("img")) {
-    if (
-      img.src &&
-      !img.src.includes("data:image") &&
-      /profile|displayphoto|shrink/i.test(img.src)
-    ) {
+    if (img.src && !img.src.includes("data:image") && PROFILE_PHOTO_URL_RE.test(img.src)) {
       return img.src;
     }
   }
@@ -44,19 +40,32 @@ export function extractProfilePhotoUrl(): string | null {
   return null;
 }
 
-const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
+function LinkedInButton({ username }: LinkedInButtonProps) {
   const t = useExtensionSocialButtonsTranslations("LinkedIn");
   const [isLoading, setIsLoading] = useState(false);
-  const [isPreloading, setIsPreloading] = useState(!profileCache.has(username));
+  const [preloadedUsername, setPreloadedUsername] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const isPreloading = !profileCache.has(username) && preloadedUsername !== username;
 
   useEffect(() => {
     if (profileCache.has(username)) {
-      setIsPreloading(false);
       return;
     }
-    setIsPreloading(true);
-    scrapeLinkedInProfile(username).finally(() => setIsPreloading(false));
+
+    let cancelled = false;
+    scrapeLinkedInProfile(username)
+      .catch((error) => {
+        extLog.error("[linkedin] Profile preload failed", error);
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setPreloadedUsername(username);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [username]);
 
   const handleClick = async (e: React.MouseEvent) => {
@@ -120,13 +129,14 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
           {t("OpenInBondery")}
         </Button>
       </div>
-      {statusMessage && (
+      {statusMessage ? (
         <Text c="dimmed" mt={4} size="xs" ta="center">
           {statusMessage}
         </Text>
-      )}
+      ) : null}
     </>
   );
-};
+}
 
+export { extractProfilePhotoUrl, profileCache };
 export default LinkedInButton;

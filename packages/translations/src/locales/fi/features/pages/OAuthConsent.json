@@ -1,0 +1,30 @@
+{
+  "Approve": "Hyväksy",
+  "ChromeExtensionClientName": "Bondery Chrome -laajennus",
+  "Deny": "Kiellä",
+  "Description": "{clientName} haluaa käyttää Bondery-tiliäsi.",
+  "ErrorTitle": "Valtuutusvirhe",
+  "InvalidRequest": "Virheellinen valtuutuspyyntö.",
+  "LoopbackWarning": "Tämä sovellus toimii tällä tietokoneella (localhost). Jatka vain, jos käynnistit sen itse.",
+  "MissingAuthorizationId": "Valtuutuspyyntö puuttuu. Yritä uudelleen sovelluksen kautta.",
+  "PermissionFullDescription": "Voi myös luoda, päivittää ja poistaa yhteystietoja ja niiden tietoja.",
+  "PermissionFullLabel": "Täysi käyttöoikeus",
+  "PermissionLabel": "Käyttöoikeus",
+  "PermissionReadDescription": "Hakee ja lukee yhteystietojasi ja niiden tietoja.",
+  "PermissionReadLabel": "Vain luku",
+  "RequestedPermissions": "Pyydetyt käyttöoikeudet",
+  "Scopes": {
+    "api:access": "Käyttää Bondery API:a puolestasi",
+    "email": "Näyttää sähköpostiosoitteesi",
+    "mcp:read": "Näyttää yhteystietosi ja niiden tiedot",
+    "mcp:write": "Luo, päivittää ja poistaa yhteystietoja ja niiden tietoja",
+    "offline_access": "Pysyy kirjautuneena, kunnes peruutat käyttöoikeuden",
+    "openid": "Vahvistaa henkilöllisyytesi",
+    "phone": "Näyttää puhelinnumerosi",
+    "profile": "Näyttää profiilitietosi"
+  },
+  "Title": "Valtuuta sovellus",
+  "UnexpectedError": "Tapahtui odottamaton virhe. Yritä uudelleen.",
+  "UnknownClientName": "Tuntematon sovellus",
+  "WebappClientName": "Bondery"
+}

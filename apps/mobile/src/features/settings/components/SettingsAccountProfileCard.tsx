@@ -7,6 +7,7 @@ import { Text } from "../../../components/ui/Text";
 import { MOBILE_LAYOUT } from "../../../theme/tokens";
 import { formatContactName } from "../../contacts/contactUtils";
 
+const WHITESPACE_RE = /\s+/;
 interface SettingsAccountProfileCardProps {
   contact: Contact | null;
   email: string | null;
@@ -15,7 +16,7 @@ interface SettingsAccountProfileCardProps {
 }
 
 function buildFallbackContact(name: string): Contact {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
+  const parts = name.trim().split(WHITESPACE_RE).filter(Boolean);
   const firstName = parts[0] ?? "";
   const lastName = parts.length > 1 ? parts.slice(1).join(" ") : null;
 
@@ -69,32 +70,34 @@ export function SettingsAccountProfileCard({
 
   return (
     <Paper withBorder>
-      <Group className="px-4 py-4">
-        <PersonAvatar
-          initials={profileContact ? undefined : "?"}
-          person={{
-            firstName: profileContact?.firstName ?? null,
-            id: personId,
-            lastName: profileContact?.lastName ?? null,
-          }}
-          size={MOBILE_LAYOUT.avatar.profile}
-          skipLocalFile={personId === "account-profile-fallback"}
-          uri={avatarUrl}
-        />
+      <View className="p-4">
+        <Group>
+          <PersonAvatar
+            initials={profileContact ? undefined : "?"}
+            person={{
+              firstName: profileContact?.firstName ?? null,
+              id: personId,
+              lastName: profileContact?.lastName ?? null,
+            }}
+            size={MOBILE_LAYOUT.avatar.profile}
+            skipLocalFile={personId === "account-profile-fallback"}
+            uri={avatarUrl}
+          />
 
-        <View className="min-w-0 flex-1 gap-0.5">
-          {displayName ? (
-            <Text fw={600} numberOfLines={1} size="xl">
-              {displayName}
-            </Text>
-          ) : null}
-          {email ? (
-            <Text c="secondary" numberOfLines={1}>
-              {email}
-            </Text>
-          ) : null}
-        </View>
-      </Group>
+          <View className="min-w-0 flex-1 gap-0.5">
+            {displayName ? (
+              <Text fw={600} numberOfLines={1} size="xl">
+                {displayName}
+              </Text>
+            ) : null}
+            {email ? (
+              <Text c="secondary" numberOfLines={1}>
+                {email}
+              </Text>
+            ) : null}
+          </View>
+        </Group>
+      </View>
     </Paper>
   );
 }

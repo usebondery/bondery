@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import { WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 import { IconFileText, IconShieldLock } from "@tabler/icons-react-native";
 import { useRouter } from "expo-router";
@@ -9,7 +10,6 @@ import { Stack } from "../../components/ui/Stack";
 import { ThemeIcon } from "../../components/ui/ThemeIcon";
 import { WEBSITE_URL } from "../../lib/config";
 import {
-  useCommonTranslations,
   useLoginPageTranslations,
   useMobileSettingsTranslations,
 } from "../../lib/i18n/generated/hooks";
@@ -21,7 +21,6 @@ import { openExternalUrl } from "./openExternalUrl";
 export function SettingsLegalScreen() {
   const tLoginPage = useLoginPageTranslations();
   const tMobileSettings = useMobileSettingsTranslations();
-  const _t = useCommonTranslations();
   const router = useRouter();
   const colors = useMobileThemeColors();
   const privacyLabel = tLoginPage("PrivacyPolicy");
@@ -57,7 +56,7 @@ export function SettingsLegalScreen() {
                 </ThemeIcon>
               }
               onPress={() => {
-                void openExternalUrl(`${WEBSITE_URL}${WEBSITE_ROUTES.PRIVACY}`);
+                detachPromise(openExternalUrl(`${WEBSITE_URL}${WEBSITE_ROUTES.PRIVACY}`));
               }}
             />
             <NavLink
@@ -70,7 +69,7 @@ export function SettingsLegalScreen() {
                 </ThemeIcon>
               }
               onPress={() => {
-                void openExternalUrl(`${WEBSITE_URL}${WEBSITE_ROUTES.TERMS}`);
+                detachPromise(openExternalUrl(`${WEBSITE_URL}${WEBSITE_ROUTES.TERMS}`));
               }}
               withDivider={false}
             />

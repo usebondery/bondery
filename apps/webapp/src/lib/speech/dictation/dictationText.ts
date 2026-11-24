@@ -1,22 +1,3 @@
-/**
- * Pure text merging for one dictation session.
- *
- * The composer holds one string. Dictation owns only the slice between the
- * captured prefix and suffix, so text before and after the insertion point
- * never changes.
- */
-
-export interface DictationInsertion {
-  /** Final results accepted this session. */
-  committed: string;
-  /** The in-progress guess. The next event replaces it. Empty when none. */
-  interim: string;
-  /** Field text before the insertion point, captured at session start. */
-  prefix: string;
-  /** Field text after the insertion point. */
-  suffix: string;
-}
-
 const WHITESPACE_RUN_RE = /\s+/g;
 const LEADING_WHITESPACE_RE = /^\s+/;
 const TRAILING_WHITESPACE_RE = /\s+$/;
@@ -70,6 +51,25 @@ function composeDictation(insertion: DictationInsertion): ComposedDictation {
   const beforeCaret = `${prefix}${sepBefore}${spoken}`;
 
   return { caret: beforeCaret.length, value: `${beforeCaret}${sepAfter}${suffix}` };
+}
+
+/**
+ * Pure text merging for one dictation session.
+ *
+ * The composer holds one string. Dictation owns only the slice between the
+ * captured prefix and suffix, so text before and after the insertion point
+ * never changes.
+ */
+
+export interface DictationInsertion {
+  /** Final results accepted this session. */
+  committed: string;
+  /** The in-progress guess. The next event replaces it. Empty when none. */
+  interim: string;
+  /** Field text before the insertion point, captured at session start. */
+  prefix: string;
+  /** Field text after the insertion point. */
+  suffix: string;
 }
 
 /** The field value after this insertion. */

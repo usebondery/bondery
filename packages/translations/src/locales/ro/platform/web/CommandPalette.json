@@ -1,0 +1,22 @@
+{
+  "ActionsGroup": "Actions",
+  "AddPerson": "Adaugă persoană",
+  "AddPersonDescription": "Creează un contact nou în rețeaua ta",
+  "ContactUs": "Contact",
+  "ContactUsDescription": "Scrie echipei Bondery",
+  "Documentation": "Documentation",
+  "DocumentationDescription": "Citește documentația Bondery",
+  "ExportData": "Exportă date",
+  "ExportDataDescription": "Salvează o copie a datelor tale Bondery",
+  "FindPerson": "Găsește persoană",
+  "FindPersonDescription": "Caută în rețeaua ta după nume",
+  "GoToDescription": "Mergi la {label}",
+  "HelpGroup": "Ajutor",
+  "ImportData": "Importă date",
+  "ImportDataDescription": "Importă un ZIP Bondery JSON",
+  "LogInteraction": "Înregistrează o interacțiune",
+  "LogInteractionDescription": "Înregistrează o întâlnire, apel sau mesaj nou",
+  "NavigateGroup": "Navigare",
+  "NothingFound": "Nu s-au găsit acțiuni",
+  "SearchPlaceholder": "Caută acțiuni sau navighează…"
+}

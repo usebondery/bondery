@@ -4,18 +4,11 @@ import { BONDERY_STEP_UP_HEADER } from "@bondery/helpers/globals/paths";
 import { requireRedisCommands } from "../data/redis.js";
 import { forbidden } from "../platform/errors/http-errors.js";
 
-export const STEP_UP_TTL_SECONDS = 10 * 60;
 const STEP_UP_REDIS_PREFIX = "bondery:step-up:" as const;
+const STEP_UP_TOKEN_BYTES = 32;
 
 function stepUpKey(userId: string): string {
   return `${STEP_UP_REDIS_PREFIX}${userId}`;
-}
-
-export async function mintStepUpToken(userId: string): Promise<string> {
-  const token = randomBytes(32).toString("base64url");
-  const redis = requireRedisCommands();
-  await redis.set(stepUpKey(userId), token, "EX", STEP_UP_TTL_SECONDS);
-  return token;
 }
 
 function presentedStepUpToken(header: string | string[] | undefined): string | null {
@@ -25,6 +18,15 @@ function presentedStepUpToken(header: string | string[] | undefined): string | n
   }
   const trimmed = raw.trim();
   return trimmed.length > 0 ? trimmed : null;
+}
+
+export const STEP_UP_TTL_SECONDS = 10 * 60;
+
+export async function mintStepUpToken(userId: string): Promise<string> {
+  const token = randomBytes(STEP_UP_TOKEN_BYTES).toString("base64url");
+  const redis = requireRedisCommands();
+  await redis.set(stepUpKey(userId), token, "EX", STEP_UP_TTL_SECONDS);
+  return token;
 }
 
 /** One-shot GETDEL. Missing, mismatch, expired, and replay all 403. */

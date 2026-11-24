@@ -1,0 +1,35 @@
+{
+  "email": {
+    "invalid": "enter a valid email address",
+    "invalidTitle": "Érvénytelen e-mail"
+  },
+  "fields": {
+    "firstName": {
+      "maxLength": "Eesnimi must be at most {max} characters",
+      "required": "Eesnimi on kohustuslik."
+    },
+    "generic": {
+      "maxLength": "Az érték legfeljebb {max} karakter lehet"
+    },
+    "headline": {
+      "maxLength": "Pealkiri must be at most {max} characters"
+    },
+    "label": {
+      "maxLength": "A(z) {field} legfeljebb {max} karakter lehet",
+      "required": "{field} on kohustuslik."
+    },
+    "lastName": {
+      "maxLength": "Perekonnanimi must be at most {max} characters"
+    },
+    "location": {
+      "maxLength": "Asukoht must be at most {max} characters"
+    },
+    "middleName": {
+      "maxLength": "Teine eesnimi must be at most {max} characters"
+    }
+  },
+  "interaction": {
+    "titleRequired": "Pealkiri on kohustuslik."
+  },
+  "title": "Validation Viga"
+}

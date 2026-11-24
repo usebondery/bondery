@@ -3,6 +3,11 @@
 import dynamic from "next/dynamic";
 import type { MapSelfLocation } from "./useMapGeolocation";
 
+const PeopleMapClient = dynamic(
+  () => import("./PeopleMapClient").then((mod) => mod.PeopleMapClient),
+  { ssr: false },
+);
+
 export interface PeopleMapMarker {
   avatarUrl?: string | null;
   firstName?: string;
@@ -54,7 +59,7 @@ export interface PeopleMapMyLocationControl {
   onClick: () => void;
 }
 
-interface PeopleMapProps {
+export interface PeopleMapProps {
   center?: [number, number];
   disableAutoFit?: boolean;
   disableChipNavigation?: boolean;
@@ -78,11 +83,6 @@ interface PeopleMapProps {
   selfMarker?: PeopleMapSelfMarker | null;
   zoom?: number;
 }
-
-const PeopleMapClient = dynamic(
-  () => import("./PeopleMapClient").then((mod) => mod.PeopleMapClient),
-  { ssr: false },
-);
 
 export function PeopleMap({
   markers,

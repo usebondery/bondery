@@ -1,5 +1,15 @@
+const TRAILING_SLASHES_PATTERN = /\/+$/;
 const LOCAL_DEV_ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
 const CHROME_EXTENSION_ID = /^[a-p]{32}$/;
+
+function originMatchesWildcard(origin: string, pattern: string): boolean {
+  if (!pattern.includes("*")) {
+    return origin === pattern;
+  }
+
+  const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*");
+  return new RegExp(`^${escaped}$`).test(origin);
+}
 
 export function chromeExtensionOrigin(extensionId: string | undefined): string | undefined {
   const id = extensionId?.trim();
@@ -29,8 +39,8 @@ export function resolveTrustedOrigins(options: {
   allowLocalDevOrigins?: boolean;
 }): string[] {
   const origins = [
-    options.webappUrl?.replace(/\/+$/, ""),
-    options.websiteUrl?.replace(/\/+$/, ""),
+    options.webappUrl?.replace(TRAILING_SLASHES_PATTERN, ""),
+    options.websiteUrl?.replace(TRAILING_SLASHES_PATTERN, ""),
     "bondery://",
     chromeExtensionOrigin(options.chromeExtensionId),
     ...parseExtraAllowedOrigins(options.extraAllowedOrigins),
@@ -82,23 +92,14 @@ export function isAllowedRequestOrigin(
   );
 }
 
-function originMatchesWildcard(origin: string, pattern: string): boolean {
-  if (!pattern.includes("*")) {
-    return origin === pattern;
-  }
-
-  const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*");
-  return new RegExp(`^${escaped}$`).test(origin);
-}
-
 /** Shared env-derived allowlist for CORS, Better Auth trustedOrigins, and WS origin checks. */
 export function resolveRuntimeTrustedOrigins(): string[] {
   return resolveTrustedOrigins({
-    allowLocalDevOrigins: process.env.NODE_ENV !== "production",
-    chromeExtensionId: process.env.BONDERY_INFRA_CHROME_EXTENSION_ID,
-    extraAllowedOrigins: process.env.BONDERY_PUBLIC_EXTRA_ALLOWED_ORIGINS,
-    webappUrl: process.env.BONDERY_PUBLIC_WEBAPP_URL,
-    websiteUrl: process.env.BONDERY_PUBLIC_WEBSITE_URL,
+    allowLocalDevOrigins: process.env["NODE_ENV"] !== "production",
+    chromeExtensionId: process.env["BONDERY_INFRA_CHROME_EXTENSION_ID"],
+    extraAllowedOrigins: process.env["BONDERY_PUBLIC_EXTRA_ALLOWED_ORIGINS"],
+    webappUrl: process.env["BONDERY_PUBLIC_WEBAPP_URL"],
+    websiteUrl: process.env["BONDERY_PUBLIC_WEBSITE_URL"],
   });
 }
 

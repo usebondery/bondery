@@ -1,6 +1,9 @@
 "use client";
 
 import { SearchTrigger } from "@bondery/mantine-next";
+import docs from "@bondery/translations/locales/en/platform/website/WebsiteDocs.json" with {
+  type: "json",
+};
 import { Box, Paper, ScrollArea, Stack, Text } from "@mantine/core";
 import { spotlight } from "@mantine/spotlight";
 import type * as PageTree from "fumadocs-core/page-tree";
@@ -53,7 +56,7 @@ function DocsSidebarNodes({
         return null;
       }
       return (
-        <Text className={classes.groupLabel} component="p" key={key}>
+        <Text className={classes["groupLabel"]} component="p" key={key}>
           {node.name}
         </Text>
       );
@@ -129,21 +132,21 @@ export function DocsSidebar({
       <Stack gap="xs">
         <SearchTrigger
           height={36}
-          label="Search"
+          label={docs.Sidebar.SearchLabel}
           onClick={() => spotlight.open()}
           shortcut={["mod", "k"]}
         />
         <DocsTabs pathname={pathname} tabs={tabs} />
       </Stack>
       <ScrollArea
-        className={classes.scroll}
+        className={classes["scroll"]}
         flex="1 1 auto"
         mih={0}
         offsetScrollbars={false}
         type="hover"
         viewportProps={{ style: { height: "100%" } }}
       >
-        <Box aria-label="Documentation pages" className={classes.nav} component="nav">
+        <Box aria-label={docs.Sidebar.PagesAria} className={classes["nav"]} component="nav">
           <DocsSidebarNodes activeRef={activeRef} nodes={tree.children} pathname={pathname} />
         </Box>
       </ScrollArea>

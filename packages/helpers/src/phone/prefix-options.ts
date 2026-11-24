@@ -1,3 +1,4 @@
+import { displayRegionName } from "#locale/display-names.js";
 import { countryCodes } from "#phone/country-codes.js";
 import { canonicalizeDialCode, formatDialCodeForDisplay } from "#phone/phone-normalize.js";
 import { DEFAULT_PHONE_REACT_MASK_EXPRESSION, type TelephonePrefixOption } from "#phone/types.js";
@@ -8,14 +9,14 @@ export function compareTelephonePrefixByDialDigits(a: string, b: string): number
   return dialDigits(a).localeCompare(dialDigits(b));
 }
 
-export const TELEPHONE_PREFIX_OPTIONS: ReadonlyArray<TelephonePrefixOption> = Array.from(
+export const TELEPHONE_PREFIX_OPTIONS: readonly TelephonePrefixOption[] = Array.from(
   (() => {
     const map = new Map<string, TelephonePrefixOption>();
 
-    countryCodes.forEach((country) => {
+    for (const country of countryCodes) {
       const value = canonicalizeDialCode(country.dialCode);
       if (!value || map.has(value)) {
-        return;
+        continue;
       }
 
       map.set(value, {
@@ -23,10 +24,12 @@ export const TELEPHONE_PREFIX_OPTIONS: ReadonlyArray<TelephonePrefixOption> = Ar
         displayPrefix: formatDialCodeForDisplay(country.dialCode),
         flag: country.flag,
         label: country.name,
-        reactMaskExpression: country.reactMaskExpression || DEFAULT_PHONE_REACT_MASK_EXPRESSION,
+        reactMaskExpression: country.reactMaskExpression
+          ? country.reactMaskExpression
+          : DEFAULT_PHONE_REACT_MASK_EXPRESSION,
         value,
       });
-    });
+    }
 
     const sorted = Array.from(map.values()).sort((a, b) =>
       compareTelephonePrefixByDialDigits(a.value, b.value),
@@ -51,8 +54,23 @@ export function findTelephonePrefixOption(prefix: string): TelephonePrefixOption
   return TELEPHONE_PREFIX_OPTIONS.find((option) => option.value === value);
 }
 
-export function getTelephonePrefixSearchTexts(option: TelephonePrefixOption): string[] {
+export function localizeTelephonePrefixLabel(
+  option: TelephonePrefixOption,
+  locale?: string,
+): string {
+  if (!locale) {
+    return option.label;
+  }
+
+  return displayRegionName(option.countryCode, locale) ?? option.label;
+}
+
+export function getTelephonePrefixSearchTexts(
+  option: TelephonePrefixOption,
+  locale?: string,
+): string[] {
   return [
+    localizeTelephonePrefixLabel(option, locale),
     option.label,
     option.displayPrefix,
     option.value,
@@ -63,5 +81,7 @@ export function getTelephonePrefixSearchTexts(option: TelephonePrefixOption): st
 
 export function getTelephoneReactMaskExpression(prefix: string): string {
   const option = findTelephonePrefixOption(prefix);
-  return option?.reactMaskExpression || DEFAULT_PHONE_REACT_MASK_EXPRESSION;
+  return option?.reactMaskExpression
+    ? option.reactMaskExpression
+    : DEFAULT_PHONE_REACT_MASK_EXPRESSION;
 }

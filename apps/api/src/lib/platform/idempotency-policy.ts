@@ -7,6 +7,22 @@ import { createHash } from "node:crypto";
 import { Readable } from "node:stream";
 import { API_ROUTES, BETTER_AUTH_BASE_PATH } from "@bondery/helpers/globals/paths";
 
+const PRINTABLE_ASCII_KEY = /^[\x21-\x7E]{1,255}$/;
+
+type IdempotencyCompletion = "release" | "store";
+
+function isStreamPayload(payload: unknown): boolean {
+  if (payload instanceof Readable) {
+    return true;
+  }
+  if (typeof payload !== "object" || payload === null) {
+    return false;
+  }
+  return typeof (payload as { getReader?: unknown }).getReader === "function";
+}
+
+export type { IdempotencyCompletion };
+
 /** Lease length passed to `claim_idempotency_key` and `refresh_idempotency_lease`. */
 export const IDEMPOTENCY_LEASE_SECONDS = 60;
 
@@ -21,11 +37,7 @@ export const IDEMPOTENCY_REPLAYED_HEADER = "Idempotent-Replayed";
 /** Routes that reject `Idempotency-Key`. SSE chat cannot store a replay body. */
 export const IDEMPOTENCY_EXEMPT_ROUTES = [{ method: "POST", url: API_ROUTES.CHAT }] as const;
 
-const PRINTABLE_ASCII_KEY = /^[\x21-\x7E]{1,255}$/;
-
 export const EMPTY_BODY_SHA256 = sha256Hex(Buffer.alloc(0));
-
-export type IdempotencyCompletion = "release" | "store";
 
 export function sha256Hex(value: string | Uint8Array): string {
   return createHash("sha256").update(value).digest("hex");
@@ -137,7 +149,8 @@ export function responseForStorage(payload: unknown): { body: unknown; omitted: 
   }
 
   try {
-    const text = JSON.stringify(payload);
+    // `JSON.stringify` returns `undefined` for `undefined`, functions and symbols, but is typed as `string`.
+    const text: string | undefined = JSON.stringify(payload);
     if (text === undefined || Buffer.byteLength(text) > IDEMPOTENCY_MAX_RESPONSE_BYTES) {
       return { body: null, omitted: true };
     }
@@ -145,14 +158,4 @@ export function responseForStorage(payload: unknown): { body: unknown; omitted: 
   } catch {
     return { body: null, omitted: true };
   }
-}
-
-function isStreamPayload(payload: unknown): boolean {
-  if (payload instanceof Readable) {
-    return true;
-  }
-  if (typeof payload !== "object" || payload === null) {
-    return false;
-  }
-  return typeof (payload as { getReader?: unknown }).getReader === "function";
 }

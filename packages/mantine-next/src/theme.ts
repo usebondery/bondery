@@ -1,6 +1,6 @@
-import { createTheme } from "@mantine/core";
+import { createTheme, type MantineThemeOverride } from "@mantine/core";
 
-export const bonderyTheme = createTheme({
+export const bonderyTheme: MantineThemeOverride = createTheme({
   colors: {
     "branding-primary": [
       "#faedff",

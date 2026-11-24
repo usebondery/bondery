@@ -1,0 +1,57 @@
+{
+  "AddInteraction": "Καταγραφή αλληλεπίδρασης",
+  "AddPerson": "Δημιουργία ατόμου",
+  "ExtensionNudge": {
+    "Description": "Εισήγαγε επαφές απευθείας από προφίλ LinkedIn και Instagram και κράτα το δίκτυό σου ενημερωμένο χωρίς κόπο.",
+    "InstallButton": "Εγκατάσταση επέκτασης",
+    "Title": "Απογείωσε το Bondery με την επέκτασή μας για Chrome"
+  },
+  "HeaderDescription": "Στην Αρχική βλέπεις μια γρήγορη επισκόπηση του δικτύου σου, των υπενθυμίσεων και των πρόσφατων αλληλεπιδράσεων.",
+  "NoRecentlyAdded": "Δεν έχουν προστεθεί ακόμα άτομα.",
+  "NoRecentlyInteracted": "Δεν υπάρχουν ακόμα πρόσφατες αλληλεπιδράσεις.",
+  "NotificationInDays": "Σε {count} ημέρες",
+  "NotificationSent": "Στάλθηκε ήδη",
+  "NotificationToday": "Σήμερα",
+  "NotificationTomorrow": "Αύριο",
+  "NotificationTooltipInDays": "Θα λάβεις ειδοποίηση σε {count} ημέρες",
+  "NotificationTooltipSentAt": "Η ειδοποίηση στάλθηκε ήδη στις {sentAt}",
+  "NotificationTooltipToday": "Θα λάβεις ειδοποίηση σήμερα",
+  "NotificationTooltipTomorrow": "Θα λάβεις ειδοποίηση αύριο",
+  "NoUpcomingReminders": "Δεν υπάρχουν υπενθυμίσεις για τις επόμενες 30 ημέρες.",
+  "ProgressRail": {
+    "AwaitingExport": "Η εξαγωγή σου από {platform} είναι καθ' οδόν. Οι εξαγωγές φτάνουν συνήθως σε 5–15 λεπτά.",
+    "ChoosePlatform": "Διάλεξε πλατφόρμα για εισαγωγή",
+    "Dismiss": "Απόκρυψη",
+    "HaveZipFile": "Έχω το αρχείο",
+    "Instagram": "Instagram",
+    "LinkedIn": "LinkedIn",
+    "Progress": "Ολοκληρώθηκαν {completed} από {total}",
+    "SkipImport": "Παράλειψη εισαγωγής",
+    "Tasks": {
+      "AddContacts": "Πρόσθεσε τις πρώτες σου επαφές",
+      "ImportContacts": "Εισήγαγε τις επαφές σου",
+      "LogInteraction": "Κατάγραψε την πρώτη σου αλληλεπίδραση",
+      "SetReminder": "Ρύθμισε μια υπενθύμιση"
+    },
+    "Title": "Πρώτα βήματα"
+  },
+  "RecentlyAddedTitle": "Προστέθηκαν πρόσφατα",
+  "RecentlyAddedTooltip": "Τα 5 άτομα που προστέθηκαν πιο πρόσφατα στο δίκτυό σου.",
+  "RecentlyInteractedTitle": "Πρόσφατες αλληλεπιδράσεις",
+  "RecentlyInteractedTooltip": "Τα 5 άτομα με τα οποία αλληλεπίδρασες πιο πρόσφατα.",
+  "Stats": {
+    "InteractionsTitle": "Αλληλεπιδράσεις αυτού του μήνα",
+    "InteractionsTooltip": "Ο αριθμός των αλληλεπιδράσεών σου μέσα στον μήνα {month}.",
+    "NewContactsTitle": "Νέες επαφές φέτος",
+    "NewContactsTooltip": "Πόσα άτομα προστέθηκαν στο δίκτυό σου την τρέχουσα χρονιά ({year}).",
+    "TotalContactsTitle": "Σύνολο επαφών",
+    "TotalContactsTooltip": "Ο αριθμός των ατόμων στο δίκτυό σου στο Bondery."
+  },
+  "TimelinePreviewTitle": "Αλληλεπιδράσεις",
+  "TimelinePreviewTooltip": "Οι 5 πιο πρόσφατες αλληλεπιδράσεις σου. Κάνε κλικ για να δεις όλες τις αλληλεπιδράσεις.",
+  "Title": "Αρχική",
+  "UnknownPerson": "Άγνωστο άτομο",
+  "UpcomingRemindersMonthInfo": "Εμφανίζονται υπενθυμίσεις με ειδοποιήσεις μέσα στις επόμενες 30 ημέρες.",
+  "UpcomingRemindersTitle": "Επερχόμενες υπενθυμίσεις",
+  "UpcomingRemindersTooltip": "Αυτές είναι οι υπενθυμίσεις σου για τις επόμενες 30 ημέρες."
+}

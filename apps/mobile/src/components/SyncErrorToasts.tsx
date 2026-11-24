@@ -6,11 +6,13 @@ import { useShowErrorToast } from "../lib/toast/useShowErrorToast";
 export function SyncErrorToasts() {
   const showErrorToast = useShowErrorToast();
 
-  useEffect(() => {
-    return subscribeSyncErrors((error) => {
-      showErrorToast(error);
-    });
-  }, [showErrorToast]);
+  useEffect(
+    () =>
+      subscribeSyncErrors((error) => {
+        showErrorToast(error);
+      }),
+    [showErrorToast],
+  );
 
   return null;
 }

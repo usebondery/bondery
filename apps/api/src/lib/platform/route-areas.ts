@@ -28,19 +28,6 @@ type AuditedRoute = {
 
 let routeSecurityAudit: AuditedRoute[] | null = null;
 
-/** Enable route metadata collection (used by route-security-audit.test.ts). */
-export function enableRouteSecurityAudit(): void {
-  routeSecurityAudit = [];
-}
-
-export function getRouteSecurityAudit(): AuditedRoute[] {
-  return routeSecurityAudit ?? [];
-}
-
-export function disableRouteSecurityAudit(): void {
-  routeSecurityAudit = null;
-}
-
 function recordAuditedRoute(routeOptions: RouteOptions, area: OpenApiRouteArea): void {
   if (!routeSecurityAudit) {
     return;
@@ -56,6 +43,19 @@ function recordAuditedRoute(routeOptions: RouteOptions, area: OpenApiRouteArea):
       url,
     });
   }
+}
+
+/** Enable route metadata collection (used by route-security-audit.test.ts). */
+export function enableRouteSecurityAudit(): void {
+  routeSecurityAudit = [];
+}
+
+export function getRouteSecurityAudit(): AuditedRoute[] {
+  return routeSecurityAudit ?? [];
+}
+
+export function disableRouteSecurityAudit(): void {
+  routeSecurityAudit = null;
 }
 
 /** Integration routes: session or API key auth with route/method policy. */

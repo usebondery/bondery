@@ -1,4 +1,8 @@
 import { formatCalendarDate } from "@bondery/helpers";
+import docs from "@bondery/translations/locales/en/platform/website/WebsiteDocs.json" with {
+  type: "json",
+};
+import { formatMessage } from "@/lib/i18n/message";
 
 export interface DocsLastUpdatedProps {
   /** Calendar date from the page frontmatter, e.g. `2026-09-30`. */
@@ -19,5 +23,5 @@ export function DocsLastUpdated({ date }: DocsLastUpdatedProps) {
     return null;
   }
 
-  return <span>Last updated {formatted}</span>;
+  return <span>{formatMessage(docs.LastUpdated, { date: formatted })}</span>;
 }

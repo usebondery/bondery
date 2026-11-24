@@ -46,8 +46,8 @@ export async function uploadContactPhoto(
 
   try {
     await uploadContactAvatarAndSetFlag(db, user.id, contactId, buffer, mimeType);
-  } catch {
-    throw internal("contact_failed_to_upload_photo");
+  } catch (error) {
+    throw internal("contact_failed_to_upload_photo", error);
   }
 
   const peopleChange = await buildPeopleRowChange(user.id, contactId, db);

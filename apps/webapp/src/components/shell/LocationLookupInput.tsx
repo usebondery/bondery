@@ -1,6 +1,7 @@
 "use client";
 
 import { GEOCODE_SUGGEST_MIN_QUERY_LENGTH } from "@bondery/helpers/address";
+import { detachPromise } from "@bondery/helpers/async";
 import {
   geocodeSuggestionDisplayKey,
   geocodeSuggestionDisplayLabel,
@@ -8,9 +9,12 @@ import {
 import type { ContactAddressEntry } from "@bondery/schemas";
 import { Autocomplete, Group } from "@mantine/core";
 import { IconCompass } from "@tabler/icons-react";
+import { cn } from "cn";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { fetchGeocodeSuggestions } from "@/lib/api/geocode";
 import { DEBOUNCE_MS } from "@/lib/platform/config";
+
+const A_Z_2 = /^[a-z]{2}$/;
 
 interface LocationLookupInputProps {
   ariaLabel?: string;
@@ -29,6 +33,10 @@ interface LocationLookupInputProps {
   value: string;
 }
 
+function flagIconClass(code: string): string {
+  return `fi-${code}`;
+}
+
 function getSuggestionCountryFlag(entry: ContactAddressEntry): string {
   const iso = entry.addressCountryCode?.toLowerCase();
   return iso && iso.length === 2 ? iso : "aq";
@@ -41,7 +49,7 @@ function getSuggestionCountryFlag(entry: ContactAddressEntry): string {
  */
 function extractCountryCodeFromLabel(label: string): string | null {
   const lastSegment = label.split(",").pop()?.trim().toLowerCase();
-  return lastSegment && /^[a-z]{2}$/.test(lastSegment) ? lastSegment : null;
+  return lastSegment && A_Z_2.test(lastSegment) ? lastSegment : null;
 }
 
 export function LocationLookupInput({
@@ -67,7 +75,7 @@ export function LocationLookupInput({
   const optionTextByKey = useRef<Record<string, string>>({});
   const optionFlagByLabel = useRef<Record<string, string>>({});
   /** Tracks whether the user has actively changed the input value. */
-  const userHasTyped = useRef(false);
+  const userHasTyped = useRef<boolean>(false);
   const activeQueryRef = useRef<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -101,61 +109,63 @@ export function LocationLookupInput({
       abortControllerRef.current = controller;
       activeQueryRef.current = text;
 
-      void (async () => {
-        setLoading(true);
-        try {
-          const items = await fetchGeocodeSuggestions(text, mode, controller.signal);
-          if (activeQueryRef.current !== text) {
-            return;
-          }
-
-          const dictionary: Record<string, ContactAddressEntry> = {};
-          const flags: Record<string, string> = {};
-          const flagsByLabel: Record<string, string> = {};
-          const textsByKey: Record<string, string> = {};
-          const labels: Array<{ label: string; value: string }> = [];
-          const seen = new Set<string>();
-
-          for (const item of items) {
-            const displayLabel = geocodeSuggestionDisplayLabel(item);
-            const key = geocodeSuggestionDisplayKey(item);
-            if (seen.has(key)) {
-              continue;
+      detachPromise(
+        (async () => {
+          setLoading(true);
+          try {
+            const items = await fetchGeocodeSuggestions(text, mode, controller.signal);
+            if (activeQueryRef.current !== text) {
+              return;
             }
-            seen.add(key);
-            const flag = getSuggestionCountryFlag(item);
-            dictionary[key] = item;
-            flags[key] = flag;
-            flagsByLabel[displayLabel] ??= flag;
-            textsByKey[key] = displayLabel;
-            labels.push({ label: displayLabel, value: key });
-          }
 
-          suggestionsByKey.current = dictionary;
-          optionFlagByKey.current = flags;
-          optionFlagByLabel.current = flagsByLabel;
-          optionTextByKey.current = textsByKey;
-          setOptions(labels);
-        } catch (error) {
-          if (error instanceof Error && error.name === "AbortError") {
-            return;
+            const dictionary: Record<string, ContactAddressEntry> = {};
+            const flags: Record<string, string> = {};
+            const flagsByLabel: Record<string, string> = {};
+            const textsByKey: Record<string, string> = {};
+            const labels: Array<{ label: string; value: string }> = [];
+            const seen = new Set<string>();
+
+            for (const item of items) {
+              const displayLabel = geocodeSuggestionDisplayLabel(item);
+              const key = geocodeSuggestionDisplayKey(item);
+              if (seen.has(key)) {
+                continue;
+              }
+              seen.add(key);
+              const flag = getSuggestionCountryFlag(item);
+              dictionary[key] = item;
+              flags[key] = flag;
+              flagsByLabel[displayLabel] ??= flag;
+              textsByKey[key] = displayLabel;
+              labels.push({ label: displayLabel, value: key });
+            }
+
+            suggestionsByKey.current = dictionary;
+            optionFlagByKey.current = flags;
+            optionFlagByLabel.current = flagsByLabel;
+            optionTextByKey.current = textsByKey;
+            setOptions(labels);
+          } catch (error) {
+            if (error instanceof Error && error.name === "AbortError") {
+              return;
+            }
+            if (activeQueryRef.current === text) {
+              setOptions([]);
+              suggestionsByKey.current = {};
+              optionFlagByKey.current = {};
+              optionFlagByLabel.current = {};
+              optionTextByKey.current = {};
+            }
+          } finally {
+            if (activeQueryRef.current === text) {
+              setLoading(false);
+            }
+            if (abortControllerRef.current === controller) {
+              abortControllerRef.current = null;
+            }
           }
-          if (activeQueryRef.current === text) {
-            setOptions([]);
-            suggestionsByKey.current = {};
-            optionFlagByKey.current = {};
-            optionFlagByLabel.current = {};
-            optionTextByKey.current = {};
-          }
-        } finally {
-          if (activeQueryRef.current === text) {
-            setLoading(false);
-          }
-          if (abortControllerRef.current === controller) {
-            abortControllerRef.current = null;
-          }
-        }
-      })();
+        })(),
+      );
     }, DEBOUNCE_MS.locationSuggest);
 
     return () => {
@@ -193,7 +203,7 @@ export function LocationLookupInput({
       renderOption={({ option }) => (
         <Group gap="xs" wrap="nowrap">
           <span
-            className={`fi fi-${optionFlagByKey.current[option.value] || "aq"}`}
+            className={cn("fi", flagIconClass(optionFlagByKey.current[option.value] || "aq"))}
             style={{ flexShrink: 0, width: 18 }}
           />
           <span>{optionTextByKey.current[option.value] ?? option.value}</span>
@@ -201,7 +211,7 @@ export function LocationLookupInput({
       )}
       rightSection={
         selectedFlag ? (
-          <span className={`fi fi-${selectedFlag}`} style={{ width: 18 }} />
+          <span className={cn("fi", flagIconClass(selectedFlag))} style={{ width: 18 }} />
         ) : undefined
       }
       rightSectionPointerEvents="none"

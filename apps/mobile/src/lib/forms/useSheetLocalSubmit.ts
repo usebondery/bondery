@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import { useState } from "react";
 import type { FieldValues, UseFormHandleSubmit } from "react-hook-form";
 
@@ -23,23 +24,25 @@ export function useSheetLocalSubmit<TFieldValues extends FieldValues, TResult>(
 
   function submit() {
     setIsSubmitting(true);
-    void handleSubmit((values) => {
-      try {
-        const result = perform(values);
-        onClose();
-        onSuccess?.(result);
-      } catch (error) {
-        onError?.(error);
-      } finally {
-        setIsSubmitting(false);
-      }
-    })()
-      .catch(() => {
-        // RHF validation failed — sheet stays open.
-      })
-      .finally(() => {
-        setIsSubmitting(false);
-      });
+    detachPromise(
+      handleSubmit((values) => {
+        try {
+          const result = perform(values);
+          onClose();
+          onSuccess?.(result);
+        } catch (error) {
+          onError?.(error);
+        } finally {
+          setIsSubmitting(false);
+        }
+      })()
+        .catch(() => {
+          // RHF validation failed — sheet stays open.
+        })
+        .finally(() => {
+          setIsSubmitting(false);
+        }),
+    );
   }
 
   return { isSubmitting, submit };

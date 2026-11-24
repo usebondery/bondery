@@ -16,9 +16,9 @@
 // Types
 // ---------------------------------------------------------------------------
 
-export type InlineTokenType = "person" | "interaction" | "group" | "tag" | "date" | "action";
+type InlineTokenType = "person" | "interaction" | "group" | "tag" | "date" | "action";
 
-export type InlineToken =
+type InlineToken =
   | { type: "person"; id: string }
   | { type: "interaction"; id: string }
   | { type: "group"; id: string }
@@ -33,7 +33,7 @@ export type InlineToken =
 // ---------------------------------------------------------------------------
 
 /** Matches `[[bp:type:value]]` tokens. */
-export const BP_TOKEN_RE = /\[\[bp:(\w+):([^\]]+)\]\]/g;
+const BP_TOKEN_RE: RegExp = /\[\[bp:(\w+):([^\]]+)\]\]/g;
 
 /** Matches standard markdown links `[label](url)`. */
 const MD_LINK_RE = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
@@ -50,6 +50,40 @@ const VALID_TYPES = new Set<InlineTokenType>([
   "date",
   "action",
 ]);
+
+/**
+ * Converts a bp token type + value into a typed InlineToken.
+ */
+function bpTokenToInlineToken(rawType: string, value: string): InlineToken {
+  const tokenType = rawType as InlineTokenType;
+
+  if (!VALID_TYPES.has(tokenType)) {
+    // Unknown type — treat as plain text so nothing is silently lost
+    return { type: "text", value: `[[bp:${rawType}:${value}]]` };
+  }
+
+  switch (tokenType) {
+    case "person":
+      return { id: value, type: "person" };
+    case "interaction":
+      return { id: value, type: "interaction" };
+    case "group":
+      return { id: value, type: "group" };
+    case "tag":
+      return { id: value, type: "tag" };
+    case "date":
+      return { iso: value, type: "date" };
+    case "action": {
+      const pipeIdx = value.indexOf("|");
+      const name = pipeIdx === -1 ? value : value.slice(0, pipeIdx);
+      const id = pipeIdx === -1 ? "" : value.slice(pipeIdx + 1);
+      return { id, name, type: "action" };
+    }
+  }
+}
+
+export type { InlineToken, InlineTokenType };
+export { BP_TOKEN_RE };
 
 // ---------------------------------------------------------------------------
 // Parsing
@@ -103,37 +137,6 @@ export function parseInlineTokens(text: string): InlineToken[] {
   }
 
   return tokens;
-}
-
-/**
- * Converts a bp token type + value into a typed InlineToken.
- */
-function bpTokenToInlineToken(rawType: string, value: string): InlineToken {
-  const tokenType = rawType as InlineTokenType;
-
-  if (!VALID_TYPES.has(tokenType)) {
-    // Unknown type — treat as plain text so nothing is silently lost
-    return { type: "text", value: `[[bp:${rawType}:${value}]]` };
-  }
-
-  switch (tokenType) {
-    case "person":
-      return { id: value, type: "person" };
-    case "interaction":
-      return { id: value, type: "interaction" };
-    case "group":
-      return { id: value, type: "group" };
-    case "tag":
-      return { id: value, type: "tag" };
-    case "date":
-      return { iso: value, type: "date" };
-    case "action": {
-      const pipeIdx = value.indexOf("|");
-      const name = pipeIdx === -1 ? value : value.slice(0, pipeIdx);
-      const id = pipeIdx === -1 ? "" : value.slice(pipeIdx + 1);
-      return { id, name, type: "action" };
-    }
-  }
 }
 
 // ---------------------------------------------------------------------------

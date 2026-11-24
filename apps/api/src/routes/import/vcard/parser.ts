@@ -2,15 +2,127 @@ import { formatAddressLabel } from "@bondery/helpers";
 import type { VCardPreparedContact } from "@bondery/schemas";
 import { parseVCards, vCardToContactDraft } from "@bondery/vcard";
 import type { UploadFile } from "../../../lib/data/select-fragments.js";
-import {
-  cachedGeocodeLinkedInLocation,
-  getTimezoneForCoordinates,
-  validateStreetAddress,
-} from "../../../lib/integrations/mapy.js";
+import { getGeocoder } from "../../../lib/integrations/mapy.js";
 
 type PreparedAddress = VCardPreparedContact["addresses"][0];
 
 const GEOCODE_BATCH_SIZE = 5;
+
+/**
+ * Geocodes and validates a single address entry.
+ *
+ * - If the address has both a street and a city, street validation via the geocoder
+ *   is REQUIRED. A successful match marks the address `"valid"` and uses the
+ *   geocoder's standardised data (street name, postal code, region, etc.) rather
+ *   than the vCard's raw values — which may have bad postal codes or non-standard
+ *   street numbers.
+ * - If street validation fails (geocoder cannot find the address) the address is
+ *   marked `"invalid"` and filtered out during the commit step. This avoids saving
+ *   addresses whose location cannot be confirmed.
+ * - If the address has no street but has a city/region, a city-level geocode fills
+ *   coordinates and the address is stored as `"unverifiable"` with lower granularity.
+ * - If geocoding fails entirely, the address is returned as-is with `"unverifiable"`.
+ */
+async function enrichAddress(addr: PreparedAddress): Promise<PreparedAddress> {
+  const geocoder = getGeocoder();
+  const {
+    addressLine1: street,
+    addressCity: city,
+    addressState: state,
+    addressCountry: country,
+  } = addr;
+
+  // ── Phase 1: Street validation (required when street is present) ─────────────
+  if (street && city) {
+    const streetQuery = [street, city, state, country].filter(Boolean).join(", ");
+    const streetResult = await geocoder.validateStreet(streetQuery, city);
+
+    if (streetResult) {
+      // Geocoder found the address — use its normalised fields instead of the
+      // vCard's values (which may have bad postal codes or non-standard numbering).
+      const timezone = await geocoder.timezoneForCoordinates(streetResult.lat, streetResult.lon);
+
+      const addressFormatted = formatAddressLabel({
+        addressLine1: streetResult.name,
+        addressLine2: addr.addressLine2 ?? undefined,
+        city: streetResult.city ?? undefined,
+        countryCode: streetResult.countryCode ?? undefined,
+        postalCode: streetResult.postalCode ?? undefined,
+        state: streetResult.state ?? undefined,
+      });
+
+      return {
+        ...addr,
+        addressCity: streetResult.city ?? city,
+        addressCountry: streetResult.country ?? country,
+        addressCountryCode: streetResult.countryCode,
+        addressFormatted,
+        addressLine1: streetResult.name || street,
+        addressPostalCode: streetResult.postalCode ?? addr.addressPostalCode,
+        addressState: streetResult.state ?? state,
+        addressStateCode: streetResult.stateCode,
+        geocodeSource: "mapy.com",
+        latitude: streetResult.lat,
+        longitude: streetResult.lon,
+        timezone,
+        validity: "valid",
+      };
+    }
+
+    // Street geocoding failed — the address cannot be confirmed; discard it.
+    return { ...addr, validity: "invalid" };
+  }
+
+  // ── Phase 2: City-level geocode for addresses without a street ───────────────
+  // Only fills coordinates and codes; address is stored as unverifiable.
+  if (city || state || country) {
+    const candidates = [
+      [city, country].filter(Boolean).join(", "),
+      [state, country].filter(Boolean).join(", "),
+    ].filter((s): s is string => !!s && s.length > 0);
+
+    const seen = new Set<string>();
+    for (const candidate of candidates) {
+      const key = candidate.trim().toLowerCase();
+      if (seen.has(key)) {
+        continue;
+      }
+      seen.add(key);
+
+      const result = await geocoder.cachedGeocodeLocation(candidate);
+      if (!result) {
+        continue;
+      }
+
+      return {
+        ...addr,
+        addressCity: city ?? result.geo.city,
+        addressCountry: country ?? result.geo.country,
+        addressCountryCode: result.geo.countryCode,
+        addressFormatted: result.geo.formattedLabel,
+        addressState: state ?? result.geo.state,
+        addressStateCode: result.geo.stateCode,
+        geocodeSource: "mapy.com",
+        latitude: addr.latitude ?? result.geo.lat,
+        longitude: addr.longitude ?? result.geo.lon,
+        timezone: result.timezone,
+        validity: "unverifiable",
+      };
+    }
+  }
+
+  // Geocode produced no result — return as-is.
+  return { ...addr, validity: "unverifiable" };
+}
+
+function normalizeString(value: string | null | undefined): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
 
 /**
  * Parses uploaded .vcf files, validates addresses via geocoding, and returns
@@ -45,8 +157,8 @@ export async function parseVCardUpload(
 
     try {
       parsed = parseVCards(content);
-    } catch {
-      throw new Error(`Failed to parse ${file.fileName}: invalid vCard format`);
+    } catch (error) {
+      throw new Error(`Failed to parse ${file.fileName}: invalid vCard format`, { cause: error });
     }
 
     for (const entry of parsed) {
@@ -103,126 +215,15 @@ export async function parseVCardUpload(
     const batch = jobs.slice(i, i + GEOCODE_BATCH_SIZE);
     await Promise.allSettled(
       batch.map(async ({ contactIndex, addressIndex }) => {
-        const addr = contacts[contactIndex].addresses[addressIndex];
-        contacts[contactIndex].addresses[addressIndex] = await enrichAddress(addr);
+        const contact = contacts[contactIndex];
+        const addr = contact?.addresses[addressIndex];
+        if (!contact || !addr) {
+          return;
+        }
+        contact.addresses[addressIndex] = await enrichAddress(addr);
       }),
     );
   }
 
   return contacts;
-}
-
-/**
- * Geocodes and validates a single address entry.
- *
- * - If the address has both a street and a city, street validation via the geocoder
- *   is REQUIRED. A successful match marks the address `"valid"` and uses the
- *   geocoder's standardised data (street name, postal code, region, etc.) rather
- *   than the vCard's raw values — which may have bad postal codes or non-standard
- *   street numbers.
- * - If street validation fails (geocoder cannot find the address) the address is
- *   marked `"invalid"` and filtered out during the commit step. This avoids saving
- *   addresses whose location cannot be confirmed.
- * - If the address has no street but has a city/region, a city-level geocode fills
- *   coordinates and the address is stored as `"unverifiable"` with lower granularity.
- * - If geocoding fails entirely, the address is returned as-is with `"unverifiable"`.
- */
-async function enrichAddress(addr: PreparedAddress): Promise<PreparedAddress> {
-  const {
-    addressLine1: street,
-    addressCity: city,
-    addressState: state,
-    addressCountry: country,
-  } = addr;
-
-  // ── Phase 1: Street validation (required when street is present) ─────────────
-  if (street && city) {
-    const streetQuery = [street, city, state, country].filter(Boolean).join(", ");
-    const streetResult = await validateStreetAddress(streetQuery, city);
-
-    if (streetResult) {
-      // Geocoder found the address — use its normalised fields instead of the
-      // vCard's values (which may have bad postal codes or non-standard numbering).
-      const timezone = await getTimezoneForCoordinates(streetResult.lat, streetResult.lon);
-
-      const addressFormatted = formatAddressLabel({
-        addressLine1: streetResult.name,
-        addressLine2: addr.addressLine2 ?? undefined,
-        city: streetResult.city ?? undefined,
-        countryCode: streetResult.countryCode ?? undefined,
-        postalCode: streetResult.postalCode ?? undefined,
-        state: streetResult.state ?? undefined,
-      });
-
-      return {
-        ...addr,
-        addressCity: streetResult.city ?? city,
-        addressCountry: streetResult.country ?? country,
-        addressCountryCode: streetResult.countryCode,
-        addressFormatted,
-        addressLine1: streetResult.name || street,
-        addressPostalCode: streetResult.postalCode ?? addr.addressPostalCode,
-        addressState: streetResult.state ?? state,
-        addressStateCode: streetResult.stateCode,
-        geocodeSource: "mapy.com",
-        latitude: streetResult.lat,
-        longitude: streetResult.lon,
-        timezone,
-        validity: "valid",
-      };
-    }
-
-    // Street geocoding failed — the address cannot be confirmed; discard it.
-    return { ...addr, validity: "invalid" };
-  }
-
-  // ── Phase 2: City-level geocode for addresses without a street ───────────────
-  // Only fills coordinates and codes; address is stored as unverifiable.
-  if (city || state || country) {
-    const candidates = [
-      [city, country].filter(Boolean).join(", "),
-      [state, country].filter(Boolean).join(", "),
-    ].filter((s): s is string => !!s && s.length > 0);
-
-    const seen = new Set<string>();
-    for (const candidate of candidates) {
-      const key = candidate.trim().toLowerCase();
-      if (seen.has(key)) {
-        continue;
-      }
-      seen.add(key);
-
-      const result = await cachedGeocodeLinkedInLocation(candidate);
-      if (!result) {
-        continue;
-      }
-
-      return {
-        ...addr,
-        addressCity: city ?? result.geo.city,
-        addressCountry: country ?? result.geo.country,
-        addressCountryCode: result.geo.countryCode,
-        addressFormatted: result.geo.formattedLabel,
-        addressState: state ?? result.geo.state,
-        addressStateCode: result.geo.stateCode,
-        geocodeSource: "mapy.com",
-        latitude: addr.latitude ?? result.geo.lat,
-        longitude: addr.longitude ?? result.geo.lon,
-        timezone: result.timezone,
-        validity: "unverifiable",
-      };
-    }
-  }
-
-  // Geocode produced no result — return as-is.
-  return { ...addr, validity: "unverifiable" };
-}
-
-function normalizeString(value: string | null | undefined): string | null {
-  if (typeof value !== "string") {
-    return null;
-  }
-
-  const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : null;
 }

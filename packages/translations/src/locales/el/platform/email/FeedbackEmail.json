@@ -1,0 +1,21 @@
+{
+  "agentActualHeading": "Τι επέστρεψε το εργαλείο:",
+  "agentExpectedHeading": "Τι περίμενε ο agent:",
+  "agentKindLabel": "Είδος αναφοράς:",
+  "agentRequestIdLabel": "ID αιτήματος:",
+  "agentSourceHeading": "Αναφορά από AI agent",
+  "agentToolLabel": "Εργαλείο:",
+  "description": "NPS {{npsScore}} / 10 · {{timestamp}}",
+  "generalFeedbackHeading": "Γενικά σχόλια:",
+  "heading": "Σχόλια από {{userEmail}}",
+  "notProvided": "(Δεν δόθηκε)",
+  "npsReasonHeading": "Γιατί επέλεξαν αυτή τη βαθμολογία;",
+  "npsScoreLabel": "Βαθμολογία NPS:",
+  "npsScoreValue": "{{npsScore}} / 10",
+  "preview": "Νέα σχόλια από {{userEmail}} - NPS: {{npsScore}}",
+  "replyCta": "Απάντηση σε {{userEmail}}",
+  "subject": "Νέα σχόλια για το Bondery",
+  "submittedAt": "Υποβλήθηκε: {{timestamp}}",
+  "userEmailLabel": "Email χρήστη:",
+  "userIdLabel": "ID χρήστη:"
+}

@@ -7,7 +7,7 @@ import { Paper } from "./ui/Paper";
 import { Sheet } from "./ui/Sheet";
 import { ThemeIcon } from "./ui/ThemeIcon";
 
-export type ActionListSheetRow = {
+type ActionListSheetRow = {
   disabled?: boolean;
   icon: ReactNode;
   id: string;
@@ -26,7 +26,7 @@ interface ActionListSheetProps {
 /**
  * Bottom sheet with a settings-style action list (icon + label rows).
  */
-export function ActionListSheet({ open, title, rows, onOpenChange }: ActionListSheetProps) {
+function ActionListSheet({ open, title, rows, onOpenChange }: ActionListSheetProps) {
   const colors = useMobileThemeColors();
 
   const handleRowPress = (row: ActionListSheetRow) => {
@@ -67,3 +67,6 @@ export function ActionListSheet({ open, title, rows, onOpenChange }: ActionListS
     </Sheet>
   );
 }
+
+export type { ActionListSheetRow };
+export { ActionListSheet };

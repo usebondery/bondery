@@ -6,7 +6,7 @@ export function readWebAuthnCredentialId(clientData: unknown): string | undefine
     return undefined;
   }
 
-  const id = (clientData as { id?: unknown }).id;
+  const { id } = clientData as { id?: unknown };
   if (typeof id !== "string") {
     return undefined;
   }
@@ -30,7 +30,7 @@ export async function touchPasskeyLastUsed(clientData: unknown): Promise<void> {
       data: { lastUsedAt: new Date() },
       where: { credentialID },
     });
-  } catch (err) {
-    logger.warn({ err }, "[passkey] failed to touch lastUsedAt");
+  } catch (error) {
+    logger.warn({ err: error }, "[passkey] failed to touch lastUsedAt");
   }
 }

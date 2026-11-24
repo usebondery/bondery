@@ -1,0 +1,4 @@
+# Orca runs `scripts.setup` in every new worktree.
+# Other tools call the same script: .cursor/worktrees.json, .claude/settings.json, .vscode/tasks.json.
+scripts:
+  setup: node scripts/dev/setup-worktree.mjs

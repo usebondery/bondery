@@ -1,4 +1,4 @@
-export type NavigationGateSnapshot = {
+type NavigationGateSnapshot = {
   isTransitioning: boolean;
   lastAt: number;
   lastKey: string | null;
@@ -21,11 +21,11 @@ function emit(): void {
   }
 }
 
-export function getNavigationGateSnapshot(): NavigationGateSnapshot {
+function getNavigationGateSnapshot(): NavigationGateSnapshot {
   return snapshot;
 }
 
-export function subscribeNavigationGate(listener: () => void): () => void {
+function subscribeNavigationGate(listener: () => void): () => void {
   listeners.add(listener);
   return () => {
     listeners.delete(listener);
@@ -39,7 +39,7 @@ function clearSafetyTimeout(): void {
   }
 }
 
-export function setNavigationTransitioning(isTransitioning: boolean): void {
+function setNavigationTransitioning(isTransitioning: boolean): void {
   if (snapshot.isTransitioning === isTransitioning) {
     return;
   }
@@ -53,7 +53,7 @@ export function setNavigationTransitioning(isTransitioning: boolean): void {
   emit();
 }
 
-export function recordNavigationKey(key: string, now: number): void {
+function recordNavigationKey(key: string, now: number): void {
   snapshot = {
     ...snapshot,
     lastAt: now,
@@ -65,7 +65,7 @@ export function recordNavigationKey(key: string, now: number): void {
 /**
  * After a gated navigation, hold the lock until transitionEnd or a safety timeout.
  */
-export function armTransitionSafetyFallback(): void {
+function armTransitionSafetyFallback(): void {
   clearSafetyTimeout();
   snapshot = { ...snapshot, isTransitioning: true };
   emit();
@@ -75,3 +75,12 @@ export function armTransitionSafetyFallback(): void {
     setNavigationTransitioning(false);
   }, TRANSITION_SAFETY_MS);
 }
+
+export type { NavigationGateSnapshot };
+export {
+  armTransitionSafetyFallback,
+  getNavigationGateSnapshot,
+  recordNavigationKey,
+  setNavigationTransitioning,
+  subscribeNavigationGate,
+};

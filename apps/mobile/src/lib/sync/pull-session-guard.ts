@@ -1,7 +1,7 @@
 export type PullSessionGeneration = number;
 
 export class PullSessionGuard {
-  private active = false;
+  private active = false as boolean;
   private generation = 0;
   private readonly operations = new Set<Promise<unknown>>();
 

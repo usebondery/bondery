@@ -13,7 +13,7 @@ import {
   sendRenderedEmail,
 } from "../../lib/notifications/transporter.js";
 
-export type SendWelcomeEmailInput = {
+type SendWelcomeEmailInput = {
   email: string;
   language: SupportedLocale;
   userId: string;
@@ -23,6 +23,8 @@ export type SendWelcomeEmailInput = {
 function resolveAppUrl(): string {
   return resolveAppOrigin();
 }
+
+export type { SendWelcomeEmailInput };
 
 export async function sendWelcomeEmail(
   input: SendWelcomeEmailInput,

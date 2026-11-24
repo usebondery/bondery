@@ -1,0 +1,18 @@
+{
+  "ContactNameFallback": "Kapcsolat",
+  "FieldUpdated": "{label} frissítve",
+  "FirstNamePlaceholder": "Keresztnév",
+  "FirstNameSuccessLabel": "Keresztnév",
+  "HeadlinePlaceholder": "Bevezető",
+  "HeadlineSuccessLabel": "Bevezető",
+  "LastNamePlaceholder": "Vezetéknév",
+  "LastNameSuccessLabel": "Vezetéknév",
+  "LocationPlaceholder": "Hely",
+  "LocationSuccessLabel": "Hely",
+  "LocationUpdated": "Hely frissítve",
+  "MiddleNamePlaceholder": "Második keresztnév",
+  "MiddleNameSuccessLabel": "Második keresztnév",
+  "NameFieldUpdated": "{label} neve frissítve",
+  "SavedTitle": "Mentve",
+  "UpdateFieldFailed": "Nem sikerült frissíteni: {field}"
+}

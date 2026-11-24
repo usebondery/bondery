@@ -11,8 +11,19 @@ import {
   usePeoplePickerPagedList,
 } from "@bondery/mantine-next";
 import { Group, Loader, Paper, Text, UnstyledButton } from "@mantine/core";
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { type Ref, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { useNotesEditorTranslations } from "@/lib/i18n/generated/hooks";
+
+interface MentionListProps {
+  command: (item: MentionSuggestionItem) => void;
+  contactsHasMore?: boolean;
+  currentPerson?: PeoplePickerOptionPerson | null;
+  onSearch: PeoplePickerOnSearch<PeoplePickerOptionPerson>;
+  query: string;
+  ref?: Ref<MentionListHandle>;
+  searchDebounceMs: number;
+  seed: PeoplePickerOptionPerson[];
+}
 
 export interface MentionSuggestionItem {
   avatar?: string | null;
@@ -37,32 +48,20 @@ export function contactToMentionItem(contact: PeoplePickerOptionPerson): Mention
   };
 }
 
-interface MentionListProps {
-  command: (item: MentionSuggestionItem) => void;
-  contactsHasMore?: boolean;
-  currentPerson?: PeoplePickerOptionPerson | null;
-  onSearch: PeoplePickerOnSearch<PeoplePickerOptionPerson>;
-  query: string;
-  searchDebounceMs: number;
-  seed: PeoplePickerOptionPerson[];
-}
-
 export interface MentionListHandle {
   onKeyDown: (props: { event: KeyboardEvent }) => boolean;
 }
 
-export const MentionList = forwardRef<MentionListHandle, MentionListProps>(function MentionList(
-  {
-    command,
-    contactsHasMore = false,
-    currentPerson = null,
-    onSearch,
-    query,
-    searchDebounceMs,
-    seed,
-  },
+export function MentionList({
+  command,
+  contactsHasMore = false,
+  currentPerson = null,
+  onSearch,
+  query,
   ref,
-) {
+  searchDebounceMs,
+  seed,
+}: MentionListProps) {
   const t = useNotesEditorTranslations();
   const selectedOptionRef = useRef<HTMLButtonElement | null>(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -90,6 +89,7 @@ export const MentionList = forwardRef<MentionListHandle, MentionListProps>(funct
     if (listQuery === query) {
       return;
     }
+    // biome-ignore lint/nursery/useReactCompiler: forwards the editor's suggestion query to the paged list, which starts a debounced search; this is not state that can be derived while rendering
     setQuery(query);
   }, [listQuery, query, setQuery]);
 
@@ -103,19 +103,17 @@ export const MentionList = forwardRef<MentionListHandle, MentionListProps>(funct
     return [currentPerson, ...visibleItems];
   })();
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: token is the replace trigger
-  useEffect(() => {
+  // The highlighted row restarts at the top when the list asks for it, and stays inside the
+  // list when it shrinks. Adjusting during render avoids a frame with a stale highlight.
+  const [seenFirstOptionToken, setSeenFirstOptionToken] = useState(selectFirstOptionToken);
+  if (seenFirstOptionToken !== selectFirstOptionToken) {
+    setSeenFirstOptionToken(selectFirstOptionToken);
     setSelectedIndex(0);
-  }, [selectFirstOptionToken]);
-
-  useEffect(() => {
-    setSelectedIndex((current) => {
-      if (items.length === 0) {
-        return 0;
-      }
-      return Math.min(current, items.length - 1);
-    });
-  }, [items]);
+  }
+  const clampedIndex = items.length === 0 ? 0 : Math.min(selectedIndex, items.length - 1);
+  if (clampedIndex !== selectedIndex) {
+    setSelectedIndex(clampedIndex);
+  }
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: scroll the highlighted row into view
   useEffect(() => {
@@ -243,4 +241,4 @@ export const MentionList = forwardRef<MentionListHandle, MentionListProps>(funct
       />
     </Paper>
   );
-});
+}

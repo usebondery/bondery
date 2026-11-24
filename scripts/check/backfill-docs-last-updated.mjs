@@ -17,146 +17,153 @@ import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const repoRoot = join(__dirname, "../..");
-const docsRoot = join(repoRoot, "docs");
+const PATTERN_5C723F5C6E_RE = /\r?\n/;
+const LAST_UPDATED_RE_2 = /^last_updated\s*:/;
+const LAST_UPDATED_RE = /^last_updated\s*:/m;
+const PATTERN_5E2D2D2D24_RE = /^---$/m;
 
-/** Generated API pages have no Git history; they are not authored. */
-const EXCLUDED_DIRECTORIES = new Set(["_generated"]);
+function main() {
+  const __dirname = dirname(fileURLToPath(import.meta.url));
+  const repoRoot = join(__dirname, "../..");
+  const docsRoot = join(repoRoot, "docs");
 
-const dryRun = process.argv.includes("--dry-run");
+  /** Generated API pages have no Git history; they are not authored. */
+  const EXCLUDED_DIRECTORIES = new Set(["_generated"]);
 
-function walkMdxFiles(dir, acc = []) {
-  for (const entry of readdirSync(dir)) {
-    const full = join(dir, entry);
-    if (statSync(full).isDirectory()) {
-      if (!EXCLUDED_DIRECTORIES.has(entry)) {
-        walkMdxFiles(full, acc);
+  const dryRun = process.argv.includes("--dry-run");
+
+  function walkMdxFiles(dir, acc = []) {
+    for (const entry of readdirSync(dir)) {
+      const full = join(dir, entry);
+      if (statSync(full).isDirectory()) {
+        if (!EXCLUDED_DIRECTORIES.has(entry)) {
+          walkMdxFiles(full, acc);
+        }
+      } else if (entry.endsWith(".mdx")) {
+        acc.push(full);
       }
-    } else if (entry.endsWith(".mdx")) {
-      acc.push(full);
     }
-  }
-  return acc;
-}
-
-/** Committer date (UTC `YYYY-MM-DD`) of the last commit that touched the file. */
-function gitDateFor(repoPath) {
-  try {
-    const iso = execFileSync("git", ["log", "-1", "--format=%cI", "--", repoPath], {
-      cwd: repoRoot,
-      encoding: "utf-8",
-    }).trim();
-
-    if (!iso) {
-      return undefined;
-    }
-
-    return new Date(iso).toISOString().slice(0, 10);
-  } catch {
-    return undefined;
-  }
-}
-
-/**
- * Insert `last_updated` as the final frontmatter key, keeping the block valid.
- *
- * The file's own line ending is preserved. Writing `\n` into a CRLF file would
- * rewrite every line and bury the one-line change in a whole-file diff.
- */
-function withLastUpdated(content, date) {
-  const eol = content.includes("\r\n") ? "\r\n" : "\n";
-  const lines = content.split(/\r?\n/);
-  if (lines[0]?.trim() !== "---") {
-    return undefined;
+    return acc;
   }
 
-  const endIndex = lines.findIndex((line, index) => index > 0 && line.trim() === "---");
-  if (endIndex === -1) {
-    return undefined;
-  }
-
-  if (lines.slice(1, endIndex).some((line) => /^last_updated\s*:/.test(line))) {
-    return undefined;
-  }
-
-  lines.splice(endIndex, 0, `last_updated: ${date}`);
-  return lines.join(eol);
-}
-
-/**
- * Write with a short retry loop.
- *
- * A dev server, a type watcher, or an editor holding the file can reject the
- * write on Windows with a transient lock. Retrying avoids aborting a 201-file
- * backfill on the first collision.
- */
-function writeWithRetry(filePath, contents, attempts = 5) {
-  for (let attempt = 1; ; attempt += 1) {
+  /** Committer date (UTC `YYYY-MM-DD`) of the last commit that touched the file. */
+  function gitDateFor(repoPath) {
     try {
-      writeFileSync(filePath, contents, "utf-8");
-      return true;
-    } catch (error) {
-      if (attempt >= attempts) {
-        console.error(`  ! could not write ${filePath}: ${error.code ?? error.message}`);
-        return false;
+      const iso = execFileSync("git", ["log", "-1", "--format=%cI", "--", repoPath], {
+        cwd: repoRoot,
+        encoding: "utf-8",
+      }).trim();
+
+      if (!iso) {
+        return;
       }
-      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 200 * attempt);
+
+      return new Date(iso).toISOString().slice(0, 10);
+    } catch {
+      // git log may fail for untracked or uncommitted files.
     }
   }
-}
 
-let written = 0;
-let skipped = 0;
-const missing = [];
-const failed = [];
+  /**
+   * Insert `last_updated` as the final frontmatter key, keeping the block valid.
+   *
+   * The file's own line ending is preserved. Writing `\n` into a CRLF file would
+   * rewrite every line and bury the one-line change in a whole-file diff.
+   */
+  function withLastUpdated(content, date) {
+    const eol = content.includes("\r\n") ? "\r\n" : "\n";
+    const lines = content.split(PATTERN_5C723F5C6E_RE);
+    if (lines[0]?.trim() !== "---") {
+      return;
+    }
 
-for (const filePath of walkMdxFiles(docsRoot).sort()) {
-  const repoPath = relative(repoRoot, filePath).split(sep).join("/");
-  const content = readFileSync(filePath, "utf8");
+    const endIndex = lines.findIndex((line, index) => index > 0 && line.trim() === "---");
+    if (endIndex === -1) {
+      return;
+    }
 
-  if (/^last_updated\s*:/m.test(content.split(/^---$/m)[1] ?? "")) {
-    skipped += 1;
-    continue;
+    if (lines.slice(1, endIndex).some((line) => LAST_UPDATED_RE_2.test(line))) {
+      return;
+    }
+
+    lines.splice(endIndex, 0, `last_updated: ${date}`);
+    return lines.join(eol);
   }
 
-  const date = gitDateFor(repoPath);
-  if (!date) {
-    missing.push(repoPath);
-    continue;
+  /**
+   * Write with a short retry loop.
+   *
+   * A dev server, a type watcher, or an editor holding the file can reject the
+   * write on Windows with a transient lock. Retrying avoids aborting a 201-file
+   * backfill on the first collision.
+   */
+  function writeWithRetry(filePath, contents, attempts = 5) {
+    for (let attempt = 1; ; attempt += 1) {
+      try {
+        writeFileSync(filePath, contents, "utf-8");
+        return true;
+      } catch (error) {
+        if (attempt >= attempts) {
+          console.error(`  ! could not write ${filePath}: ${error.code ?? error.message}`);
+          return false;
+        }
+        Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 200 * attempt);
+      }
+    }
   }
 
-  const next = withLastUpdated(content, date);
-  if (next === undefined) {
-    missing.push(repoPath);
-    continue;
-  }
+  let written = 0;
+  let skipped = 0;
+  const missing = [];
+  const failed = [];
 
-  if (!dryRun) {
-    if (!writeWithRetry(filePath, next)) {
+  for (const filePath of walkMdxFiles(docsRoot).sort()) {
+    const repoPath = relative(repoRoot, filePath).split(sep).join("/");
+    const content = readFileSync(filePath, "utf8");
+
+    if (LAST_UPDATED_RE.test(content.split(PATTERN_5E2D2D2D24_RE)[1] ?? "")) {
+      skipped += 1;
+      continue;
+    }
+
+    const date = gitDateFor(repoPath);
+    if (!date) {
+      missing.push(repoPath);
+      continue;
+    }
+
+    const next = withLastUpdated(content, date);
+    if (next === undefined) {
+      missing.push(repoPath);
+      continue;
+    }
+
+    if (!dryRun && !writeWithRetry(filePath, next)) {
       failed.push(repoPath);
       continue;
     }
+    written += 1;
   }
-  written += 1;
+
+  console.log(`backfill-docs-last-updated: ${written} ${dryRun ? "would write" : "written"}`);
+  if (skipped > 0) {
+    console.log(`  ${skipped} already had a date`);
+  }
+  if (missing.length > 0) {
+    console.log(`  ${missing.length} without a date source:`);
+    for (const path of missing) {
+      console.log(`    - ${path}`);
+    }
+  }
+  if (failed.length > 0) {
+    console.log(`  ${failed.length} could not be written:`);
+    for (const path of failed) {
+      console.log(`    - ${path}`);
+    }
+  }
+  if (missing.length > 0 || failed.length > 0) {
+    process.exitCode = 1;
+  }
 }
 
-console.log(`backfill-docs-last-updated: ${written} ${dryRun ? "would write" : "written"}`);
-if (skipped > 0) {
-  console.log(`  ${skipped} already had a date`);
-}
-if (missing.length > 0) {
-  console.log(`  ${missing.length} without a date source:`);
-  for (const path of missing) {
-    console.log(`    - ${path}`);
-  }
-}
-if (failed.length > 0) {
-  console.log(`  ${failed.length} could not be written:`);
-  for (const path of failed) {
-    console.log(`    - ${path}`);
-  }
-}
-if (missing.length > 0 || failed.length > 0) {
-  process.exit(1);
-}
+main();

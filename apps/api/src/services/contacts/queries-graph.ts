@@ -25,14 +25,6 @@ import {
 import { listUnlinkedIds, loadOverlays } from "./graph-overlay-queries.js";
 import type { ServiceLog } from "./queries-shared.js";
 
-export { RELATIONSHIP_GRAPH_GROUP_HULL_CAP, RELATIONSHIP_GRAPH_HUB_CAP };
-
-/** Global graph stops at this many people. A larger book sets `truncated`. */
-export const RELATIONSHIP_GRAPH_NODE_CAP = 500;
-
-/** Global graph stops at this many relationship rows. A larger book sets `truncated`. */
-export const RELATIONSHIP_GRAPH_EDGE_CAP = 1000;
-
 const UNLINKED_PREVIEW_LIMIT = 50;
 
 type GraphContext = Pick<DomainContext, "db" | "user"> & { log?: ServiceLog };
@@ -250,7 +242,7 @@ function buildGraph(input: {
     nodes.unshift(toNode(input.userId, input.selfPerson, input.avatarOptions));
   }
 
-  let truncated = input.truncated;
+  let { truncated } = input;
   const hubs = input.hubs.flatMap((hub) => {
     const personIds = hub.personIds.filter((personId) => seen.has(personId));
     if (personIds.length < 2) {
@@ -303,21 +295,6 @@ async function loadPeople(
   return new Map(rows.map((row) => [row.id, row]));
 }
 
-export async function getRelationshipGraph(
-  ctx: GraphContext,
-  query: { focus?: string; groups?: "1"; hubs?: "1" },
-  avatarOptions?: AvatarTransformOptions,
-): Promise<RelationshipGraphResponse> {
-  const db = domainDb(ctx as DomainContext);
-  const userId = ctx.user.id;
-  const flags = graphFlags(query);
-
-  if (query.focus) {
-    return getFocusedGraph(db, userId, query.focus, avatarOptions, flags);
-  }
-  return getGlobalGraph(db, userId, avatarOptions, flags);
-}
-
 async function getGlobalGraph(
   db: GraphDb,
   userId: string,
@@ -338,7 +315,7 @@ async function getGlobalGraph(
   ]);
 
   const capped = capEdges(edgeRows);
-  let truncated = capped.truncated;
+  let { truncated } = capped;
   let relationshipIds = orderedPersonIds(capped.rows);
   if (relationshipIds.length > RELATIONSHIP_GRAPH_NODE_CAP) {
     truncated = true;
@@ -436,7 +413,7 @@ async function getFocusedGraph(
   ]);
 
   const capped = capEdges(edgeRows);
-  let truncated = capped.truncated;
+  let { truncated } = capped;
   let personIds = orderedPersonIds(capped.rows, focusId);
   if (personIds.length > RELATIONSHIP_GRAPH_NODE_CAP) {
     truncated = true;
@@ -496,4 +473,27 @@ async function getFocusedGraph(
     unlinkedCount,
     userId,
   });
+}
+
+export { RELATIONSHIP_GRAPH_GROUP_HULL_CAP, RELATIONSHIP_GRAPH_HUB_CAP };
+
+/** Global graph stops at this many people. A larger book sets `truncated`. */
+export const RELATIONSHIP_GRAPH_NODE_CAP = 500;
+
+/** Global graph stops at this many relationship rows. A larger book sets `truncated`. */
+export const RELATIONSHIP_GRAPH_EDGE_CAP = 1000;
+
+export async function getRelationshipGraph(
+  ctx: GraphContext,
+  query: { focus?: string; groups?: "1"; hubs?: "1" },
+  avatarOptions?: AvatarTransformOptions,
+): Promise<RelationshipGraphResponse> {
+  const db = domainDb(ctx as DomainContext);
+  const userId = ctx.user.id;
+  const flags = graphFlags(query);
+
+  if (query.focus) {
+    return getFocusedGraph(db, userId, query.focus, avatarOptions, flags);
+  }
+  return getGlobalGraph(db, userId, avatarOptions, flags);
 }

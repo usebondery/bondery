@@ -1,4 +1,5 @@
 import { buildAppleAppSiteAssociation } from "@bondery/helpers/auth/associated-domains";
+import { getIosAppTeamId } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
 
@@ -9,7 +10,7 @@ export const dynamic = "force-dynamic";
  */
 export function GET() {
   const document = buildAppleAppSiteAssociation({
-    teamId: process.env.BONDERY_PUBLIC_IOS_APP_TEAM_ID,
+    teamId: getIosAppTeamId(),
   });
 
   if (!document) {

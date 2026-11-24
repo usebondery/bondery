@@ -1,6 +1,8 @@
 import type { StorageAdapter } from "./adapter.js";
 import { S3Storage } from "./s3.js";
 
+const TRAILING_SLASHES_PATTERN = /\/+$/;
+
 let storageAdapter: StorageAdapter | null = null;
 
 function requireEnv(name: string): string {
@@ -15,7 +17,6 @@ function createStorageAdapter(): StorageAdapter {
   return new S3Storage({
     accessKeyId: requireEnv("BONDERY_PRIVATE_S3_ACCESS_KEY_ID"),
     endpoint: requireEnv("BONDERY_PRIVATE_S3_ENDPOINT"),
-    forcePathStyle: true,
     publicBaseUrl: requireEnv("BONDERY_PUBLIC_STORAGE_URL"),
     region: requireEnv("BONDERY_PRIVATE_S3_REGION"),
     secretAccessKey: requireEnv("BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY"),
@@ -41,7 +42,7 @@ export function resetStorageForTests(): void {
 }
 
 export function getPublicStorageBaseUrl(): string {
-  return requireEnv("BONDERY_PUBLIC_STORAGE_URL").replace(/\/+$/, "");
+  return requireEnv("BONDERY_PUBLIC_STORAGE_URL").replace(TRAILING_SLASHES_PATTERN, "");
 }
 
 export const AVATARS_BUCKET = "avatars";

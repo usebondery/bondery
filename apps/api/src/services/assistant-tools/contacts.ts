@@ -12,7 +12,17 @@ import {
   getContactTags,
 } from "../contacts/queries-detail.js";
 import { listContacts } from "../contacts/queries-list.js";
-import { ASSISTANT_COLLECTION_CAP, assistantPageSize } from "./collection-cap.js";
+import {
+  ASSISTANT_COLLECTION_CAP,
+  ASSISTANT_TAG_FILTER_MAX_IDS,
+  assistantPageSize,
+} from "./collection-cap.js";
+
+function definedPatch(value: Record<string, unknown>): UpdateContactInput {
+  return Object.fromEntries(
+    Object.entries(value).filter(([, field]) => field !== undefined),
+  ) as UpdateContactInput;
+}
 
 export const searchContactsInputSchema = z.object({
   limit: z.number().int().min(1).max(ASSISTANT_COLLECTION_CAP).optional(),
@@ -32,7 +42,7 @@ export const searchContactsInputSchema = z.object({
     .optional(),
   tagIds: z
     .array(z.string().uuid())
-    .max(20)
+    .max(ASSISTANT_TAG_FILTER_MAX_IDS)
     .optional()
     .describe("Only contacts with any of these tag IDs (OR)"),
 });
@@ -59,12 +69,6 @@ export const updateContactInputSchema = contactWritableFieldsSchema.extend({
 export const deleteContactInputSchema = z.object({
   personId: z.string().uuid(),
 });
-
-function definedPatch(value: Record<string, unknown>): UpdateContactInput {
-  return Object.fromEntries(
-    Object.entries(value).filter(([, field]) => field !== undefined),
-  ) as UpdateContactInput;
-}
 
 export async function executeSearchContacts(
   ctx: DomainContext,

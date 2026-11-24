@@ -1,0 +1,34 @@
+{
+  "Import": {
+    "ChoosePlatform": "Dışa aktarmayı hangi platformdan istedin?",
+    "Description": "Mevcut ağını LinkedIn, Instagram üzerinden Bondery’ye getir veya elle ekle.",
+    "Finish": "Başla",
+    "Instagram": "Instagram’dan içe aktar",
+    "InstagramDescription": "Instagram takipçi/takip verilerini yükle.",
+    "LinkedIn": "LinkedIn’den içe aktar",
+    "LinkedInDescription": "LinkedIn kişi dışa aktarma dosyasını yükle.",
+    "ManualAdd": "Elle oluştur",
+    "SkipImport": "İçe aktarmayı atla",
+    "SuccessDescription": "İçe aktarılan: {imported}, güncellenen: {updated}, atlanan: {skipped}.",
+    "SuccessTitle": "İçe aktarma tamam!",
+    "Title": "Kişileri içe aktar",
+    "WaitingForExport": "Dışa aktarma bekleniyor"
+  },
+  "Intent": {
+    "both": "İkisi de",
+    "Description": "Bunu Bondery’yi sana göre uyarlamak için kullanırız.",
+    "personal": "Arkadaşlar ve aile",
+    "professional": "Profesyonel",
+    "Title": "Bondery’yi nasıl kullanıyorsun?"
+  },
+  "Loading": {
+    "Message": "Senin için hazırlıyoruz…"
+  },
+  "MetadataTitle": "Başlarken",
+  "Welcome": {
+    "LetsGo": "Hadi",
+    "Subtitle": "Burada olduğuna sevindik. Kişisel PRM’ini kuralım.",
+    "TitleGeneric": "Bondery’ye hoş geldin! 😊",
+    "TitleWithName": "Hoş geldin, {name}! 😊"
+  }
+}

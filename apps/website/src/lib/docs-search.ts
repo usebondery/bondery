@@ -1,4 +1,8 @@
-export type DocsSearchResult = {
+import docs from "@bondery/translations/locales/en/platform/website/WebsiteDocs.json" with {
+  type: "json",
+};
+
+type DocsSearchResult = {
   breadcrumbs?: string[];
   content: string;
   id: string;
@@ -6,29 +10,31 @@ export type DocsSearchResult = {
   url: string;
 };
 
-export type DocsSearchTab = "Develop" | "How to use Bondery" | "Integrate" | "Self-host";
+type DocsSearchTab = "develop" | "integrate" | "product" | "selfhost";
 
-export type DocsSearchAction = {
+const TAB_TITLES: Record<DocsSearchTab, string> = {
+  develop: docs.Tabs.Develop,
+  integrate: docs.Tabs.Integrate,
+  product: docs.Tabs.Product,
+  selfhost: docs.Tabs.SelfHost,
+};
+
+type DocsSearchAction = {
   description?: string;
   id: string;
   label: string;
   url: string;
 };
 
-export type DocsSearchGroup = {
+type DocsSearchGroup = {
   actions: DocsSearchAction[];
   group: string;
 };
 
-const TAB_ORDER: readonly DocsSearchTab[] = [
-  "How to use Bondery",
-  "Self-host",
-  "Integrate",
-  "Develop",
-];
+const TAB_ORDER: readonly DocsSearchTab[] = ["product", "selfhost", "integrate", "develop"];
 
 /** Removes the `<mark>` wrappers the docs search API puts around hits. */
-export function stripTags(value: string): string {
+function stripTags(value: string): string {
   return value.replace(/<\/?mark>/g, "");
 }
 
@@ -44,20 +50,20 @@ function docsPathname(url: string): string {
   }
 }
 
-export function tabForDocsUrl(url: string): DocsSearchTab {
+function tabForDocsUrl(url: string): DocsSearchTab {
   const path = docsPathname(url);
 
   if (path.startsWith("/docs/deploy")) {
-    return "Self-host";
+    return "selfhost";
   }
   if (path.startsWith("/docs/api")) {
-    return "Integrate";
+    return "integrate";
   }
   if (path.startsWith("/docs/contributing")) {
-    return "Develop";
+    return "develop";
   }
 
-  return "How to use Bondery";
+  return "product";
 }
 
 function actionForResult(result: DocsSearchResult): DocsSearchAction {
@@ -82,7 +88,7 @@ function actionForResult(result: DocsSearchResult): DocsSearchAction {
   };
 }
 
-export function toSearchGroups(results: DocsSearchResult[]): DocsSearchGroup[] {
+function toSearchGroups(results: DocsSearchResult[]): DocsSearchGroup[] {
   const grouped = new Map<DocsSearchTab, DocsSearchAction[]>();
 
   for (const result of results) {
@@ -103,6 +109,9 @@ export function toSearchGroups(results: DocsSearchResult[]): DocsSearchGroup[] {
       return [];
     }
 
-    return [{ actions, group: tab }];
+    return [{ actions, group: TAB_TITLES[tab] }];
   });
 }
+
+export type { DocsSearchAction, DocsSearchGroup, DocsSearchResult, DocsSearchTab };
+export { stripTags, tabForDocsUrl, toSearchGroups };

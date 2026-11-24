@@ -4,12 +4,13 @@ import type { ReactNode } from "react";
 import { folderUrl } from "@/lib/docs-folders";
 import { source } from "@/lib/source";
 
+const DOCS_PREFIX_RE = /^\/docs\/?/;
 function nodeTitle(name: ReactNode): string {
   return typeof name === "string" ? name : "Page";
 }
 
 function pageDescription(url: string): string | undefined {
-  const slug = url.replace(/^\/docs\/?/, "");
+  const slug = url.replace(DOCS_PREFIX_RE, "");
   if (slug.length === 0) {
     return undefined;
   }

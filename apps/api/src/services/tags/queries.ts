@@ -17,7 +17,7 @@ import { extractAvatarOptions } from "../../lib/data/select-fragments.js";
 import { internal, notFound } from "../../lib/platform/errors/http-errors.js";
 import { resolveContactAvatarUrl } from "../../lib/storage/avatar-urls.js";
 
-export type PreviewListQuery = AvatarTransformQuery & {
+type PreviewListQuery = AvatarTransformQuery & {
   previewLimit?: number | string;
 };
 
@@ -47,11 +47,15 @@ function peopleListOrderBy(sort: PeopleListQuery["sort"]): Prisma.PeopleOrderByW
   }
 }
 
+const DEFAULT_TAG_PREVIEW_LIMIT = 3;
+
+export type { PreviewListQuery };
+
 export async function listTags(ctx: TagListContext, query?: PreviewListQuery) {
   const { user } = ctx;
   const db = domainDb(ctx as DomainContext);
   const previewLimitRaw = query?.previewLimit;
-  const previewLimit = previewLimitRaw ? Number(previewLimitRaw) : 3;
+  const previewLimit = previewLimitRaw ? Number(previewLimitRaw) : DEFAULT_TAG_PREVIEW_LIMIT;
   const includePreview = previewLimit > 0;
   const avatarOptions = extractAvatarOptions(query ?? {});
 
@@ -129,19 +133,20 @@ export async function listTags(ctx: TagListContext, query?: PreviewListQuery) {
     }
   }
 
-  const tagsWithCounts: TagWithCount[] = tagRows.map((row) => {
+  const tagsWithCounts: TagWithCount[] = [];
+  for (const row of tagRows) {
     const baseTag = toTagDto(row);
     const pIds = includePreview ? (previewMap.get(row.id) ?? []) : [];
     const previewContacts = includePreview
       ? (pIds.map((id) => previewContactsById.get(id)).filter(Boolean) as ContactPreview[])
       : undefined;
 
-    return {
+    tagsWithCounts.push({
       ...baseTag,
       contactCount: countMap.get(row.id) ?? 0,
       previewContacts,
-    };
-  });
+    });
+  }
 
   return {
     tags: tagsWithCounts,
@@ -194,7 +199,7 @@ export async function listTagMembers(ctx: TagListContext, tagId: string, query: 
     hasAvatar: boolean;
     avatarUpdatedAt: Date | string | null;
   }> = [];
-  let totalCount = 0;
+  let totalCount: number;
 
   if (search) {
     const [searchResult, countResult] = await Promise.all([
@@ -270,18 +275,21 @@ export async function listTagMembers(ctx: TagListContext, tagId: string, query: 
     totalCount = count;
   }
 
-  const enrichedContacts = contacts.map((c) => ({
-    ...c,
-    avatar: resolveContactAvatarUrl(
-      user.id,
-      {
-        avatarUpdatedAt: c.avatarUpdatedAt,
-        hasAvatar: c.hasAvatar,
-        id: c.id,
-      },
-      avatarOptions,
-    ),
-  }));
+  const enrichedContacts: Array<(typeof contacts)[number] & { avatar: string | null }> = [];
+  for (const c of contacts) {
+    enrichedContacts.push({
+      ...c,
+      avatar: resolveContactAvatarUrl(
+        user.id,
+        {
+          avatarUpdatedAt: c.avatarUpdatedAt,
+          hasAvatar: c.hasAvatar,
+          id: c.id,
+        },
+        avatarOptions,
+      ),
+    });
+  }
 
   const pagination = buildPaginationMeta({
     itemCount: enrichedContacts.length,

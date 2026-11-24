@@ -15,6 +15,47 @@
  * @param html - Raw HTML string from editor.getHTML()
  * @returns Markdown string
  */
+const DATA_CHECKED_RE = /data-checked="([^"]*)"/;
+const TRUE_RE = /^(true|1)$/i;
+const DATA_ID_RE = /data-id="([^"]*)"/;
+const DATA_LABEL_RE = /data-label="([^"]*)"/;
+const PATTERN_5E40_RE = /^@/;
+
+const HTML_ENTITIES: Record<string, string> = {
+  "&#39;": "'",
+  "&amp;": "&",
+  "&gt;": ">",
+  "&lt;": "<",
+  "&nbsp;": " ",
+  "&quot;": '"',
+};
+
+/** One pass, so `&amp;lt;` becomes `&lt;` and not `<`. */
+function decodeEntities(text: string): string {
+  return text.replace(
+    /&(?:#39|amp|gt|lt|nbsp|quot);/g,
+    (entity) => HTML_ENTITIES[entity] ?? entity,
+  );
+}
+
+function stripTags(html: string): string {
+  return html.replace(/<[^>]+>/g, "");
+}
+
+function mentionSpanToMarkdown(span: string): string {
+  const id = span.match(DATA_ID_RE)?.[1];
+  if (!id) {
+    return "";
+  }
+  const labelAttr = span.match(DATA_LABEL_RE)?.[1]?.trim();
+  const inner = stripTags(span).replace(PATTERN_5E40_RE, "").trim();
+  const label = labelAttr || inner;
+  if (!label) {
+    return `[[bp:person:${id}]]`;
+  }
+  return `[@${label.replace(/]/g, "")}](bp://person/${id})`;
+}
+
 export function htmlToMarkdown(html: string): string {
   if (!html || html === "<p></p>") {
     return "";
@@ -64,8 +105,8 @@ export function htmlToMarkdown(html: string): string {
   md = md.replace(/<ul[^>]*data-type="taskList"[^>]*>(.*?)<\/ul>/gs, (_, body) => {
     const items = body.match(/<li[^>]*data-checked="([^"]*)"[^>]*>(.*?)<\/li>/gs) ?? [];
     const rows = items.map((item: string) => {
-      const checkedMatch = item.match(/data-checked="([^"]*)"/);
-      const checked = checkedMatch ? /^(true|1)$/i.test(checkedMatch[1]) : false;
+      const checkedMatch = item.match(DATA_CHECKED_RE);
+      const checked = checkedMatch ? TRUE_RE.test(checkedMatch[1] ?? "") : false;
       const content = stripTags(item.replace(/<li[^>]*>|<\/li>/g, "")).trim();
       return `- [${checked ? "x" : " "}] ${content}`;
     });
@@ -116,24 +157,8 @@ export function htmlToMarkdown(html: string): string {
   // Strip any remaining tags
   md = stripTags(md);
 
-  // Normalise excess blank lines
-  return md.replace(/\n{3,}/g, "\n\n").trim();
-}
-
-function stripTags(html: string): string {
-  return html.replace(/<[^>]+>/g, "");
-}
-
-function mentionSpanToMarkdown(span: string): string {
-  const id = span.match(/data-id="([^"]*)"/)?.[1];
-  if (!id) {
-    return "";
-  }
-  const labelAttr = span.match(/data-label="([^"]*)"/)?.[1]?.trim();
-  const inner = stripTags(span).replace(/^@/, "").trim();
-  const label = labelAttr || inner;
-  if (!label) {
-    return `[[bp:person:${id}]]`;
-  }
-  return `[@${label.replace(/]/g, "")}](bp://person/${id})`;
+  // Normalise excess blank lines, then turn entities back into the characters they stand for.
+  // Last, after every tag is gone: `markdownToHtml` escapes `& < > " '` on the way back in, so
+  // leaving `&lt;` here would come back as the literal text `&lt;`.
+  return decodeEntities(md.replace(/\n{3,}/g, "\n\n").trim());
 }

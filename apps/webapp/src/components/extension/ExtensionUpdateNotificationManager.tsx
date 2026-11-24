@@ -1,6 +1,7 @@
 "use client";
 
 import { CHROME_EXTENSION_URL, isVersionBelow } from "@bondery/helpers";
+import { detachPromise } from "@bondery/helpers/async";
 import { Button, Stack, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconPuzzle } from "@tabler/icons-react";
@@ -79,11 +80,13 @@ export function ExtensionUpdateNotificationManager() {
               window.location.origin,
             );
 
-            promise.then((handled) => {
-              if (!handled) {
-                window.open(CHROME_EXTENSION_URL, "_blank", "noopener,noreferrer");
-              }
-            });
+            detachPromise(
+              promise.then((handled) => {
+                if (!handled) {
+                  window.open(CHROME_EXTENSION_URL, "_blank", "noopener,noreferrer");
+                }
+              }),
+            );
           }
 
           notifications.show(
@@ -92,7 +95,7 @@ export function ExtensionUpdateNotificationManager() {
               color: "red",
               id: EXTENSION_UPDATE_ID,
               message: (
-                <Stack gap={"xs"} mt={4}>
+                <Stack gap="xs" mt={4}>
                   <Text c="dimmed" size="xs">
                     {t("WebappNotificationDescription")}
                   </Text>
@@ -118,7 +121,7 @@ export function ExtensionUpdateNotificationManager() {
       }
     }
 
-    check();
+    detachPromise(check());
 
     return () => {
       cancelled = true;

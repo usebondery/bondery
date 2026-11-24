@@ -1,0 +1,23 @@
+{
+  "AllEnrichedDescription": "Усі контакти з профілім LinkedIn уже обогащени.",
+  "AllEnrichedTitle": "Усі контакти обогащени",
+  "Badge": "LinkedIn",
+  "CurrentlyEnriching": "Сейчас обогащается:",
+  "EligibleLabel_few": "{count} особ і можна обогатить",
+  "EligibleLabel_many": "{count} осіб можна обогатить",
+  "EligibleLabel_one": "{count} особ і можна обогатить",
+  "EligibleLabel_other": "{count} особ і можна обогатить",
+  "Enrich": "Обогатить",
+  "EnrichAll": "Обогатить усіх",
+  "HelpTooltip": "Підтягніть актуальні дані профілю LinkedIn до цього контакту. Натисніть, щоб дізнатися, як працює збагачення.",
+  "Pause": "Пауза",
+  "PausingTooltip": "Завершаем текущий контакт, потім пауза…",
+  "PersonEligibleLabel": "Цей контакт можна обогатить з LinkedIn",
+  "ProcessingPerson": "Збагачення {name}…",
+  "ProgressLabel": "Збагачення: {completed} из {totalEligible} завершено",
+  "ProgressLabelWithFailed": "Збагачення: {completed} из {totalEligible} завершеале (ошибок: {failed})",
+  "Resume": "Продовжити",
+  "ResumeLabel": "Збагачення перервано: готово {completed}, залишилося {pending}",
+  "SkipRemaining": "Пропустить оставшиеся",
+  "Tooltip": "У цих контактів є профіль LinkedIn, але вони ще не збагачені. Збагатьте їх, щоб підтягнути актуальну кар’єру, освіту й опис."
+}

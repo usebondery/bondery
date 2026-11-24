@@ -18,6 +18,8 @@ import { createCliLogger } from "@bondery/helpers/cli";
 import { getSyncableEnvVars, parseEnvContent } from "../../packages/helpers/src/env/index.ts";
 import { upsertEnvAssignments } from "./env-upsert.js";
 
+const PATTERN_5C723F5C6E_RE = /\r?\n/;
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, "../..");
 const log = createCliLogger("env:pull");
@@ -71,7 +73,7 @@ function resolveInfisicalExecutable(): { command: string; shell: boolean } {
   }
 
   const where = spawnSync("cmd", ["/c", "where", "infisical.cmd"], { encoding: "utf-8" });
-  const cmdPath = where.stdout?.trim().split(/\r?\n/)[0]?.trim();
+  const cmdPath = where.stdout?.trim().split(PATTERN_5C723F5C6E_RE)[0]?.trim();
   if (cmdPath) {
     const exe = join(dirname(cmdPath), "node_modules", "@infisical", "cli", "bin", "infisical.exe");
     if (existsSync(exe)) {
@@ -86,20 +88,23 @@ function readInfisicalConfig(): InfisicalPullTarget {
   if (!existsSync(INFISICAL_CONFIG)) {
     log.error(`Missing ${INFISICAL_CONFIG}`);
     log.info("Restore .infisical.json from git, or copy .infisical.json.example and set projectId");
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   const raw = JSON.parse(readFileSync(INFISICAL_CONFIG, "utf-8")) as InfisicalConfig;
   const projectId = raw.projectId ?? raw.workspaceId;
   if (!projectId) {
     log.error(".infisical.json must include projectId (or workspaceId)");
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   const environment = raw.defaultEnvironment;
   if (!environment) {
     log.error(".infisical.json must include defaultEnvironment (Infisical slug, e.g. development)");
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   if (environment.includes(" ")) {
@@ -152,7 +157,8 @@ function exportInfisicalSecrets(config: InfisicalPullTarget): Record<string, str
     if (process.platform === "win32") {
       log.info("Reinstall: pnpm install -g @infisical/cli");
     }
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   if (result.status !== 0) {
@@ -165,7 +171,8 @@ function exportInfisicalSecrets(config: InfisicalPullTarget): Record<string, str
     } else {
       log.info(`Command: ${command} ${args.join(" ")}`);
     }
-    process.exit(result.status ?? 1);
+    process.exitCode = result.status ?? 1;
+    return;
   }
 
   return parseEnvContent(result.stdout ?? "");
@@ -177,7 +184,8 @@ function ensureRootEnvFile() {
   }
   if (!existsSync(ROOT_ENV_EXAMPLE)) {
     log.error("Missing .env.local — run pnpm run setup:dev first");
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
   copyFileSync(ROOT_ENV_EXAMPLE, ROOT_ENV);
   log.warn("Created .env.local from example");
@@ -187,13 +195,15 @@ function main() {
   const syncable = getSyncableEnvVars();
   if (syncable.length === 0) {
     log.error("No manifest entries have syncable: true — nothing to pull");
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   if (!commandExists("infisical")) {
     log.error("Infisical CLI not found on PATH");
     log.info("Install: https://infisical.com/docs/cli/overview");
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   if (!existsSync(INFISICAL_CONFIG_EXAMPLE)) {
@@ -223,12 +233,13 @@ function main() {
     if (missing.length > 0) {
       log.info(`Expected: ${missing.join(", ")}`);
     }
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   upsertEnvAssignments(ROOT_ENV, updates);
   log.success(`Updated ${Object.keys(updates).length} key(s) in .env.local`);
-  for (const key of Object.keys(updates).sort()) {
+  for (const key of Object.keys(updates).sort((left, right) => left.localeCompare(right))) {
     log.info(`  ${key}`);
   }
 

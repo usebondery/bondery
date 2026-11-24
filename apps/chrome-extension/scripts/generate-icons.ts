@@ -13,7 +13,7 @@ const icons = [
 
 const svgPath = join(__dirname, "../../../packages/branding/src/assets/icon.svg");
 
-generateIcons({
+await generateIcons({
   baseDir: __dirname,
   icons,
   svgPath,

@@ -11,7 +11,7 @@ import { domainDb } from "../_shared/domain-db.js";
 import { isUniqueViolation, toSyncRow } from "../_shared/prisma-helpers.js";
 import { captureCurrentSyncTxid } from "../_shared/with-txid.js";
 
-export interface ReplaceImportantDateInput {
+interface ReplaceImportantDateInput {
   date: string;
   id?: string;
   note?: string | null;
@@ -33,18 +33,20 @@ function toImportantDateFromRow(row: {
 }) {
   const sync = toSyncRow(row as unknown as Record<string, unknown>);
   return toImportantDate({
-    created_at: String(sync.created_at),
-    date: String(sync.date).slice(0, 10),
-    id: String(sync.id),
-    note: (sync.note as string | null) ?? null,
-    notify_days_before: (sync.notify_days_before as number | null) ?? null,
-    notify_on: sync.notify_on ? String(sync.notify_on).slice(0, 10) : null,
-    person_id: String(sync.person_id),
-    type: String(sync.type),
-    updated_at: String(sync.updated_at),
-    user_id: String(sync.user_id),
+    created_at: String(sync["created_at"]),
+    date: String(sync["date"]).slice(0, 10),
+    id: String(sync["id"]),
+    note: (sync["note"] as string | null) ?? null,
+    notify_days_before: (sync["notify_days_before"] as number | null) ?? null,
+    notify_on: sync["notify_on"] ? String(sync["notify_on"]).slice(0, 10) : null,
+    person_id: String(sync["person_id"]),
+    type: String(sync["type"]),
+    updated_at: String(sync["updated_at"]),
+    user_id: String(sync["user_id"]),
   });
 }
+
+export type { ReplaceImportantDateInput };
 
 export async function replaceImportantDates(
   ctx: DomainContext,

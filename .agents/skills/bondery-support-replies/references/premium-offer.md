@@ -31,7 +31,7 @@ Address source of truth: `SUPPORT_EMAIL` in `packages/helpers` (`team@usebondery
 
 ## Example paragraph
 
-```
+```text
 This was on us, so I'd like to give you 6 months of Premium. Email [team@usebondery.com](mailto:team@usebondery.com) from the address on your Bondery account so we can credit it.
 ```
 

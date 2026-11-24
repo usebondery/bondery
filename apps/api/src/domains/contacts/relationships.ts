@@ -15,13 +15,13 @@ function toRelationshipRow(row: {
 }) {
   const sync = toSyncRow(row as unknown as Record<string, unknown>);
   return {
-    createdAt: String(sync.created_at),
-    id: String(sync.id),
+    createdAt: String(sync["created_at"]),
+    id: String(sync["id"]),
     relationshipType: row.relationshipType as RelationshipType,
-    sourcePersonId: String(sync.source_person_id),
-    targetPersonId: String(sync.target_person_id),
-    updatedAt: String(sync.updated_at),
-    userId: String(sync.user_id),
+    sourcePersonId: String(sync["source_person_id"]),
+    targetPersonId: String(sync["target_person_id"]),
+    updatedAt: String(sync["updated_at"]),
+    userId: String(sync["user_id"]),
   };
 }
 

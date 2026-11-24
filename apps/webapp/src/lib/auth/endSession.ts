@@ -9,14 +9,11 @@ import { buildLoginUrl, getClientReturnPathForLogin } from "@/lib/auth/returnInt
 import { resetState } from "@/lib/extension/enrichBatchStore";
 import { statusNotificationsStore } from "@/lib/extension/statusNotificationsStore";
 
-export type EndSessionReason = "user_initiated" | "session_expired" | "account_deleted";
-
-export type EndSessionOptions = {
-  reason: EndSessionReason;
-  redirectTo?: string;
-};
-
 let isEndingSession = false;
+
+function clearEndingSession(): void {
+  isEndingSession = false;
+}
 
 function resolveRedirectTo(reason: EndSessionReason, redirectTo?: string): string {
   if (redirectTo !== undefined) {
@@ -29,6 +26,13 @@ function resolveRedirectTo(reason: EndSessionReason, redirectTo?: string): strin
 
   return WEBSITE_ROUTES.LOGIN;
 }
+
+export type EndSessionReason = "user_initiated" | "session_expired" | "account_deleted";
+
+export type EndSessionOptions = {
+  reason: EndSessionReason;
+  redirectTo?: string;
+};
 
 /**
  * Ends the authenticated client session: cancels and clears caches, resets
@@ -107,6 +111,6 @@ export async function endSession({ reason, redirectTo }: EndSessionOptions): Pro
 
     window.location.replace(destination);
   } finally {
-    isEndingSession = false;
+    clearEndingSession();
   }
 }

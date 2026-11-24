@@ -4,25 +4,15 @@ import type {
   EmailEntry,
   ImportantDate,
   PhoneEntry,
+  SocialPlatform,
 } from "@bondery/schemas";
 import { resolveLocalContactAvatarUrl } from "../sync/avatar";
 import { parseGisPointLatLon } from "../sync/materializer/read-row";
 import { listContactNotesFields } from "./contacts-list-sql";
 
-export type {
-  ContactsListParams,
-  ContactsListQuery,
-  ContactsListSql,
-} from "./contacts-list-sql";
-export {
-  buildContactIdsSelectSql,
-  buildContactNamesByIdsSelectSql,
-  buildContactsListQuery,
-  buildContactsListSelectSql,
-  listContactNotesFields,
-} from "./contacts-list-sql";
+type ContactSocials = Record<SocialPlatform, string | null>;
 
-export type PeopleRow = {
+type PeopleRow = {
   id: string;
   user_id: string;
   first_name: string;
@@ -45,8 +35,8 @@ export type PeopleRow = {
   updated_at: string;
 };
 
-export type ContactChildRows = {
-  socials: Record<string, string | null>;
+type ContactChildRows = {
+  socials: ContactSocials;
   phones: Array<{ prefix: string; value: string; type: string; preferred: number }>;
   emails: Array<{ value: string; type: string; preferred: number }>;
   addresses: Array<{
@@ -83,7 +73,7 @@ export type ContactChildRows = {
   }>;
 };
 
-const EMPTY_SOCIALS: Record<string, string | null> = {
+const EMPTY_SOCIALS: ContactSocials = {
   facebook: null,
   instagram: null,
   linkedin: null,
@@ -92,7 +82,7 @@ const EMPTY_SOCIALS: Record<string, string | null> = {
   whatsapp: null,
 };
 
-export function mapPeopleRowToContact(
+function mapPeopleRowToContact(
   row: PeopleRow,
   includeChildren: boolean,
   children?: ContactChildRows,
@@ -209,14 +199,31 @@ export function mapPeopleRowToContact(
   };
 }
 
-export function mapSocialRowsToRecord(
-  rows: Array<{ platform: string; handle: string }>,
-): Record<string, string | null> {
-  const map: Record<string, string | null> = { ...EMPTY_SOCIALS };
+function mapSocialRowsToRecord(rows: Array<{ platform: string; handle: string }>): ContactSocials {
+  const map: ContactSocials = { ...EMPTY_SOCIALS };
   for (const row of rows) {
-    if (row.platform in map) {
+    if (isContactSocialPlatform(row.platform)) {
       map[row.platform] = row.handle;
     }
   }
   return map;
 }
+
+function isContactSocialPlatform(value: string): value is keyof ContactSocials {
+  return value in EMPTY_SOCIALS;
+}
+
+export type {
+  ContactsListParams,
+  ContactsListQuery,
+  ContactsListSql,
+} from "./contacts-list-sql";
+export {
+  buildContactIdsSelectSql,
+  buildContactNamesByIdsSelectSql,
+  buildContactsListQuery,
+  buildContactsListSelectSql,
+  listContactNotesFields,
+} from "./contacts-list-sql";
+export type { ContactChildRows, PeopleRow };
+export { mapPeopleRowToContact, mapSocialRowsToRecord };

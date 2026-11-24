@@ -9,7 +9,7 @@ import { resolveAnthropicModelId } from "./models.js";
 const MIN_ANTHROPIC_API_KEY_LENGTH = 40;
 
 export function resolveAnthropicApiKey(configValue: string | undefined): string | undefined {
-  const key = (configValue ?? process.env.BONDERY_PRIVATE_ANTHROPIC_API_KEY ?? "").trim();
+  const key = (configValue ?? process.env["BONDERY_PRIVATE_ANTHROPIC_API_KEY"] ?? "").trim();
   if (key.length < MIN_ANTHROPIC_API_KEY_LENGTH) {
     return undefined;
   }
@@ -26,7 +26,7 @@ export function resolveAnthropicApiKey(configValue: string | undefined): string 
  * @returns An AI SDK-compatible language model.
  */
 export function getChatModel(
-  apiKey = process.env.BONDERY_PRIVATE_ANTHROPIC_API_KEY,
+  apiKey = process.env["BONDERY_PRIVATE_ANTHROPIC_API_KEY"],
   modelId?: ChatModelId,
 ) {
   const anthropic = createAnthropic({

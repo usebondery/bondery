@@ -6,12 +6,20 @@ interface PageWrapperProps {
   fill?: boolean;
 }
 
+/**
+ * Page body inside `AppShellMainScrollArea`.
+ *
+ * The scroller owns the base `md` inset, which matches the phone header gutter.
+ * This wrapper adds the wider desktop gutter from `sm` up only. A phone keeps
+ * one 16px inset, and a desktop keeps its 48px column.
+ */
 export function PageWrapper({ children, fill = false }: PageWrapperProps) {
   return (
     <Box
       h={fill ? "100%" : undefined}
       mih={fill ? 0 : undefined}
-      p="xl"
+      px={{ base: 0, sm: "xl" }}
+      py="xl"
       style={
         fill ? { boxSizing: "border-box", display: "flex", flexDirection: "column" } : undefined
       }

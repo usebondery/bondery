@@ -4,18 +4,21 @@ import {
   runEnrichQueueCleanup,
   runIdempotencyKeyCleanup,
   runReviewerAccessSweep,
+  runTlsCertificateCheck,
 } from "./workers.js";
 
 const ENRICH_CLEANUP_QUEUE = "enrich-queue-cleanup";
 const HOURLY_REMINDER_QUEUE = "reminder-digest-hourly";
 const IDEMPOTENCY_CLEANUP_QUEUE = "idempotency-key-cleanup";
 const REVIEWER_ACCESS_SWEEP_QUEUE = "reviewer-access-sweep";
+const TLS_CERTIFICATE_QUEUE = "tls-certificate-check";
 
 const JOB_QUEUES = [
   HOURLY_REMINDER_QUEUE,
   ENRICH_CLEANUP_QUEUE,
   IDEMPOTENCY_CLEANUP_QUEUE,
   REVIEWER_ACCESS_SWEEP_QUEUE,
+  TLS_CERTIFICATE_QUEUE,
 ] as const;
 
 /** pg-boss requires queues to exist before workers or schedules attach. */
@@ -43,6 +46,10 @@ export async function registerJobWorkers(log: FastifyBaseLogger): Promise<void> 
     log.info("Running reviewer access sweep job");
     await runReviewerAccessSweep(log);
   });
+
+  await boss.work(TLS_CERTIFICATE_QUEUE, async () => {
+    await runTlsCertificateCheck(log);
+  });
 }
 
 export async function registerJobSchedules(log: FastifyBaseLogger): Promise<void> {
@@ -59,6 +66,9 @@ export async function registerJobSchedules(log: FastifyBaseLogger): Promise<void
 
   // Nightly reviewer-access sweep at 03:15 UTC — bans ended grants
   await boss.schedule(REVIEWER_ACCESS_SWEEP_QUEUE, "15 3 * * *", {}, { tz: "UTC" });
+
+  // Daily Postgres and object storage certificate expiry check at 03:30 UTC
+  await boss.schedule(TLS_CERTIFICATE_QUEUE, "30 3 * * *", {}, { tz: "UTC" });
 
   log.info({ queues: [...JOB_QUEUES] }, "pg-boss schedules registered");
 }

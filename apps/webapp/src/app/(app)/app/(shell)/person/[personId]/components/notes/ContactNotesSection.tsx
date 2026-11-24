@@ -114,16 +114,14 @@ export function ContactNotesSection({
       return;
     }
     applyAndSync(editableText, mode as "source" | "markdown");
-  }; // Subscribe to editor state so toolbar active-states stay in sync with keyboard shortcuts
-  const _editorState = useEditorState({
-    editor,
-    selector: ({ editor: ed }) => ed?.state ?? null,
-  });
-  const _taskListActive =
+  };
+
+  const taskListActive = Boolean(
     useEditorState({
       editor,
       selector: ({ editor: ed }) => ed?.isActive("taskList") ?? false,
-    }) ?? false;
+    }),
+  );
 
   const handleToggleTaskList = () => {
     if (!editor) {
@@ -147,7 +145,7 @@ export function ContactNotesSection({
           </Text>
         )}
       </Group>
-      <RichTextEditor editor={editor}>
+      <RichTextEditor dir="auto" editor={editor}>
         <RichTextEditor.Toolbar
           data-notes-editor-toolbar="true"
           sticky
@@ -232,7 +230,7 @@ export function ContactNotesSection({
                     </T>
                     <T hint={tNotes("TodoListHint")} label={tNotes("TodoList")}>
                       <RichTextEditor.Control
-                        active={editor?.isActive("taskList")}
+                        active={taskListActive}
                         aria-label={tNotes("ToggleTodoList")}
                         onClick={handleToggleTaskList}
                       >

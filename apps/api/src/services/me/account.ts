@@ -149,8 +149,8 @@ export async function uploadProfilePhoto(
 
   try {
     await uploadContactAvatarAndSetFlag(db, user.id, user.id, buffer, mimeType);
-  } catch {
-    throw internal("account_failed_to_upload_profile_photo");
+  } catch (error) {
+    throw internal("account_failed_to_upload_profile_photo", error);
   }
 
   const myself = await db.people.findFirst({

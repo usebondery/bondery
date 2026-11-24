@@ -1,3 +1,4 @@
+import { cn } from "cn";
 import type { ReactNode } from "react";
 import { View, type ViewProps } from "react-native";
 import {
@@ -8,7 +9,6 @@ import {
   gapClassName,
   type SpacingSize,
 } from "./flexLayout";
-import { joinClassNames } from "./joinClassNames";
 import { wrapGrowChildren } from "./wrapGrowChildren";
 
 export type StackProps = Omit<ViewProps, "children"> & {
@@ -31,7 +31,7 @@ export function Stack({
 }: StackProps) {
   return (
     <View
-      className={joinClassNames(
+      className={cn(
         "flex-col",
         align === undefined ? undefined : FLEX_ALIGN_CLASS[align],
         justify === undefined ? undefined : FLEX_JUSTIFY_CLASS[justify],
@@ -40,7 +40,7 @@ export function Stack({
       )}
       {...rest}
     >
-      {grow ? wrapGrowChildren(children, "column") : children}
+      {grow ? <>{wrapGrowChildren(children, "column")}</> : <>{children}</>}
     </View>
   );
 }

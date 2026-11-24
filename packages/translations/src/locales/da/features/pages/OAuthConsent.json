@@ -1,0 +1,30 @@
+{
+  "Approve": "Godkend",
+  "ChromeExtensionClientName": "Bondery Chrome-udvidelse",
+  "Deny": "Neka",
+  "Description": "{clientName} vil komma åt ditt Bondery-konto.",
+  "ErrorTitle": "Auktoriseringsfel",
+  "InvalidRequest": "Ogiltig auktoriseringsbegeran.",
+  "LoopbackWarning": "Appen kører på den her datorn (localhost). Fortsæt bara om du startade den selv.",
+  "MissingAuthorizationId": "Auktoriseringsbegeran saknas. FörSøg igen via appen.",
+  "PermissionFullDescription": "Får også opret, opdater og slette kontakter og deras data.",
+  "PermissionFullLabel": "Full åtkomst",
+  "PermissionLabel": "Adgang",
+  "PermissionReadDescription": "Söka og læse dina kontakter og deras data.",
+  "PermissionReadLabel": "Kun læsning",
+  "RequestedPermissions": "Anmodede tilladelser",
+  "Scopes": {
+    "api:access": "Bruge Bondery-API:et å dina veje",
+    "email": "Visa din e-postadresse",
+    "mcp:read": "Visa dina kontakter og deras data",
+    "mcp:write": "Opret, opdater og slette kontakter og deras data",
+    "offline_access": "Holda dig inloggad tills du återkallar åtkomsten",
+    "openid": "Bekräfta din identitet",
+    "phone": "Visa ditt telefonnummer",
+    "profile": "Visa din profilinformation"
+  },
+  "Title": "Auktorisera app",
+  "UnexpectedError": "Ett uventet fel indtraf. FörSøg igen.",
+  "UnknownClientName": "Ukendt app",
+  "WebappClientName": "Bondery"
+}

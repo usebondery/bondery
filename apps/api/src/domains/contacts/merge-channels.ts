@@ -11,6 +11,7 @@ import {
   normalizePhoneSet,
   resolveConflictChoice,
 } from "../../lib/contacts/merge-helpers.js";
+import { orIfBlank } from "../../lib/platform/blank-text.js";
 import { internal } from "../../lib/platform/errors/http-errors.js";
 
 type ConflictResolutions = Partial<Record<MergeConflictField, MergeConflictChoice>>;
@@ -26,9 +27,9 @@ function normalizePhones(
   return phones
     .map((phone) => ({
       preferred: Boolean(phone.preferred),
-      prefix: phone.prefix || "+1",
-      type: phone.type || "home",
-      value: String(phone.value || "").trim(),
+      prefix: orIfBlank(phone.prefix, "+1"),
+      type: orIfBlank(phone.type, "home"),
+      value: (phone.value ?? "").trim(),
     }))
     .filter((phone) => phone.value.length > 0);
 }
@@ -43,8 +44,8 @@ function normalizeEmails(
   return emails
     .map((email) => ({
       preferred: Boolean(email.preferred),
-      type: email.type || "home",
-      value: String(email.value || "").trim(),
+      type: orIfBlank(email.type, "home"),
+      value: (email.value ?? "").trim(),
     }))
     .filter((email) => email.value.length > 0);
 }
@@ -58,11 +59,11 @@ function resolveMergedCollection<T>(
 ): T[] {
   const itemsEqual = JSON.stringify(normalize(leftItems)) === JSON.stringify(normalize(rightItems));
 
-  if (!leftItems.length && rightItems.length) {
+  if (leftItems.length === 0 && rightItems.length > 0) {
     return rightItems;
   }
 
-  if (leftItems.length && rightItems.length && !itemsEqual) {
+  if (leftItems.length > 0 && rightItems.length > 0 && !itemsEqual) {
     const choice = resolveConflictChoice(conflictResolutions, field);
     return choice === "right" ? rightItems : leftItems;
   }

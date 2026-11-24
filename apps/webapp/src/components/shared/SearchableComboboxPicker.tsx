@@ -11,6 +11,11 @@ import {
 } from "@/components/shared/SearchableComboboxItem";
 import classes from "./SearchableComboboxPicker.module.css";
 
+const styles = {
+  dropdown: classes["dropdown"] ?? "",
+  optionsScroll: classes["optionsScroll"] ?? "",
+};
+
 const OPTIONS_MAX_HEIGHT = 240;
 
 export { selectedComboboxOptionStyle } from "@/components/shared/SearchableComboboxItem";
@@ -83,7 +88,7 @@ export function SearchableComboboxPicker({
     }
   };
 
-  const isTargetDisabled = disabled || loading;
+  const isTargetDisabled = disabled === true || loading === true;
 
   const targetBody = targetItem ? (
     <SearchableComboboxTargetItem {...targetItem} />
@@ -142,7 +147,7 @@ export function SearchableComboboxPicker({
         </Combobox.Target>
 
         <Combobox.Dropdown
-          classNames={{ dropdown: classes.dropdown }}
+          classNames={{ dropdown: styles.dropdown }}
           styles={{
             dropdown: {
               "--combobox-option-active-bg": "var(--mantine-color-branding-primary-filled-hover)",
@@ -158,14 +163,18 @@ export function SearchableComboboxPicker({
           />
           <Combobox.Options>
             <ScrollArea.Autosize
-              className={classes.optionsScroll}
+              className={styles.optionsScroll}
               mah={OPTIONS_MAX_HEIGHT}
               offsetScrollbars={false}
               scrollbars="y"
               type="scroll"
               w="100%"
             >
-              {renderOptions({ query: searchQuery, selectedValue: value })}
+              {/* Build options only while open. A JSX child expression runs on every render
+                  even though the closed dropdown is not mounted. */}
+              {combobox.dropdownOpened
+                ? renderOptions({ query: searchQuery, selectedValue: value })
+                : null}
             </ScrollArea.Autosize>
           </Combobox.Options>
         </Combobox.Dropdown>

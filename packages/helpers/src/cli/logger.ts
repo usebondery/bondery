@@ -16,18 +16,21 @@ const LEVEL_BG = {
 
 type Level = keyof typeof LEVEL_BG;
 
-function useColor(): boolean {
-  if (process.env.NO_COLOR !== undefined) {
+function isColorEnabled(): boolean {
+  if (process.env["NO_COLOR"] !== undefined) {
     return false;
   }
-  if (process.env.FORCE_COLOR === "0") {
+  if (process.env["FORCE_COLOR"] === "0") {
     return false;
   }
   return Boolean(process.stdout.isTTY);
 }
 
+/** Width of the widest level label ("SUCCESS"), so the columns after it line up. */
+const LEVEL_LABEL_WIDTH = 7;
+
 function padLevel(level: Level): string {
-  return level.toUpperCase().padEnd(7);
+  return level.toUpperCase().padEnd(LEVEL_LABEL_WIDTH);
 }
 
 function formatLine(level: Level, message: string, colored: boolean): string {
@@ -44,12 +47,12 @@ export type CliLogger = {
   info: (message: string) => void;
   step: (current: number, total: number, message: string) => void;
   success: (message: string) => void;
-  table: (rows: Array<Record<string, string | number>>) => void;
+  table: (rows: Record<string, string | number>[]) => void;
   warn: (message: string) => void;
 };
 
 export function createCliLogger(_scope?: string): CliLogger {
-  const colored = useColor();
+  const colored = isColorEnabled();
 
   const write = (level: Level, message: string, stream: NodeJS.WriteStream = process.stdout) => {
     stream.write(`${formatLine(level, message, colored)}\n`);
@@ -69,11 +72,11 @@ export function createCliLogger(_scope?: string): CliLogger {
     success(message: string) {
       write("success", message);
     },
-    table(rows: Array<Record<string, string | number>>) {
+    table(rows: Record<string, string | number>[]) {
       if (rows.length === 0) {
         return;
       }
-      const first = rows[0];
+      const [first] = rows;
       if (!first) {
         return;
       }

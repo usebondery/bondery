@@ -9,12 +9,24 @@
  * so this writes SeaweedFS + has_avatar directly, then copies JPEGs into the ZIP.
  */
 
+import { readFileSync } from "node:fs";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import { Agent } from "node:https";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const API_URL = (process.env.BONDERY_API_URL ?? "http://127.0.0.1:26631").replace(/\/+$/, "");
+import { resolveDevApiUrl } from "./dev-api.mjs";
+
+/**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+function asUnknown(value) {
+  return value;
+}
+
+const API_URL = resolveDevApiUrl();
 const API_KEY = process.env.BONDERY_API_KEY;
 const WIKI_UA = "BonderySampleData/1.0 (https://usebondery.com; team@usebondery.com)";
 const AVATAR_MAX_EDGE = 512;
@@ -71,7 +83,9 @@ const TITLE_OVERRIDES = {
 };
 
 function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }
 
 function fullName(contact) {
@@ -85,7 +99,7 @@ function titleCandidates(contact) {
 }
 
 async function mapPool(items, concurrency, worker) {
-  const results = new Array(items.length);
+  const results = Array.from({ length: items.length });
   let next = 0;
   async function run() {
     while (next < items.length) {
@@ -107,7 +121,7 @@ async function api(method, pathname) {
     method,
   });
   const text = await response.text();
-  const json = text ? JSON.parse(text) : null;
+  const json = asUnknown(text ? JSON.parse(text) : null);
   if (!response.ok) {
     throw new Error(`${method} ${pathname} → ${response.status} ${text.slice(0, 300)}`);
   }
@@ -131,20 +145,22 @@ async function listAllContacts() {
 }
 
 async function wikiJson(url) {
-  const response = await fetch(url, {
-    headers: {
-      Accept: "application/json",
-      "User-Agent": WIKI_UA,
-    },
-  });
-  if (response.status === 429) {
-    await sleep(2000);
-    return wikiJson(url);
+  for (;;) {
+    const response = await fetch(url, {
+      headers: {
+        Accept: "application/json",
+        "User-Agent": WIKI_UA,
+      },
+    });
+    if (response.status === 429) {
+      await sleep(2000);
+      continue;
+    }
+    if (!response.ok) {
+      return null;
+    }
+    return response.json();
   }
-  if (!response.ok) {
-    return null;
-  }
-  return response.json();
 }
 
 async function wikiThumbnailUrl(title) {
@@ -162,19 +178,20 @@ async function wikiThumbnailUrl(title) {
   if (!page || page.missing || page.invalid) {
     return null;
   }
-  if (page.pageprops?.disambiguation != null) {
+  if (page.pageprops?.disambiguation !== null && page.pageprops?.disambiguation !== undefined) {
     return null;
   }
   return page.thumbnail?.source ?? null;
 }
 
+/** @type {Map<string, string | null>} */
 const thumbnailCache = new Map();
 
 async function thumbnailForContact(contact) {
   for (const title of titleCandidates(contact)) {
     if (thumbnailCache.has(title)) {
-      const cached = thumbnailCache.get(title);
-      if (cached) {
+      const cached = asUnknown(thumbnailCache.get(title));
+      if (typeof cached === "string") {
         return cached;
       }
       continue;
@@ -220,11 +237,18 @@ function createS3() {
   if (!accessKeyId || !secretAccessKey || !endpoint || !region) {
     return null;
   }
+  // Local SeaweedFS uses TLS with a private CA (pnpm run start:seaweedfs). Paths in .env.local
+  // are relative to apps/api, like every app that reads it.
+  const caFile = process.env.BONDERY_PRIVATE_S3_TLS_CA_FILE?.trim();
+  const ca = caFile ? readFileSync(path.resolve(ROOT, "apps/api", caFile), "utf8") : undefined;
+  // An Agent, not agent options: the SDK drops options for uploads sent with Expect: 100-continue.
+  const httpsAgent = ca ? new Agent({ ca, keepAlive: true, maxSockets: 50 }) : undefined;
   return new S3Client({
     credentials: { accessKeyId, secretAccessKey },
     endpoint,
     forcePathStyle: true,
     region,
+    ...(httpsAgent ? { requestHandler: { httpsAgent } } : {}),
   });
 }
 
@@ -333,7 +357,7 @@ async function main() {
   console.log(`Attached photos: ${attached.length}`);
   if (skipped.length > 0) {
     console.log(`Skipped: ${skipped.length}`);
-    for (const line of skipped.toSorted()) {
+    for (const line of skipped.toSorted((a, b) => (a < b ? -1 : a > b ? 1 : 0))) {
       console.log(`  - ${line}`);
     }
   }

@@ -51,7 +51,9 @@ export function usePersonNotesEditor({
   onSaveNotes,
 }: UsePersonNotesEditorOptions) {
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const noteSaveRef = useRef<() => void>(() => {});
+  const noteSaveRef = useRef<() => void>(() => {
+    // no-op: replaced after the editor instance is created
+  });
   const onSaveNotesRef = useRef(onSaveNotes);
 
   useEffect(() => {
@@ -59,7 +61,7 @@ export function usePersonNotesEditor({
   }, [onSaveNotes]);
 
   const editor = useEditor({
-    content: contact?.notes || "",
+    content: contact?.notes ?? "",
     extensions: [
       MarkdownPasteExtension,
       StarterKit.configure({ link: false }),
@@ -123,7 +125,7 @@ export function usePersonNotesEditor({
     if (!editor || contact?.notes === undefined) {
       return;
     }
-    const incoming = contact.notes || "";
+    const incoming = contact.notes ?? "";
     if (editor.getHTML() === incoming) {
       return;
     }

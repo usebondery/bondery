@@ -4,11 +4,11 @@ Source of truth: `apps/chrome-extension/wxt.config.ts`. Product values are **inl
 
 ## Required `BONDERY_PUBLIC_*`
 
-| Variable | Used for |
-|----------|----------|
-| `BONDERY_PUBLIC_API_URL` | Fastify origin (`config.apiUrl`) |
-| `BONDERY_PUBLIC_WEBAPP_URL` | App links (`config.appUrl`), `host_permissions` origin |
-| `BONDERY_PUBLIC_OAUTH_CLIENT_ID` | PKCE public client |
+| Variable                         | Used for                                               |
+| -------------------------------- | ------------------------------------------------------ |
+| `BONDERY_PUBLIC_API_URL`         | Fastify origin (`config.apiUrl`)                       |
+| `BONDERY_PUBLIC_WEBAPP_URL`      | App links (`config.appUrl`), `host_permissions` origin |
+| `BONDERY_PUBLIC_OAUTH_CLIENT_ID` | PKCE public client                                     |
 
 Vite `envPrefix`: `BONDERY_PUBLIC_`, `BONDERY_EXTENSION_` (`BONDERY_EXTENSION_FLAVOR=production|staging`), `WXT_` (framework, e.g. `WXT_DEBUG`). Do not introduce `VITE_` or unprefixed keys.
 
@@ -37,8 +37,8 @@ Today: `storage`, `identity`, `alarms`. Adding a permission is a **Chrome Web St
 Instagram MAIN-world interceptor:
 
 ```ts
-resources: ["instagram-interceptor.js"]
-matches: ["https://www.instagram.com/*", "https://instagram.com/*"]
+resources: ["instagram-interceptor.js"];
+matches: ["https://www.instagram.com/*", "https://instagram.com/*"];
 ```
 
 Do not add other hosts to this list without a security review.

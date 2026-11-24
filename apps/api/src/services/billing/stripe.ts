@@ -13,7 +13,7 @@ let _stripe: Stripe | null = null;
  */
 export function getStripeClient(): Stripe {
   if (!_stripe) {
-    const secretKey = process.env.BONDERY_PRIVATE_STRIPE_SECRET_KEY;
+    const secretKey = process.env["BONDERY_PRIVATE_STRIPE_SECRET_KEY"];
     if (!secretKey) {
       throw new Error("BONDERY_PRIVATE_STRIPE_SECRET_KEY is not configured");
     }

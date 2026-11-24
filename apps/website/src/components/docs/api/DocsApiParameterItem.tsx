@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { DocsApiField } from "./DocsApiField";
 
 /** Minimal JSON Schema shape used by parameters and nested properties. */
-export type ParamSchema = {
+type ParamSchema = {
   default?: unknown;
   deprecated?: boolean;
   description?: string;
@@ -19,7 +19,7 @@ export type ParamSchema = {
   type?: string | string[];
 };
 
-export function asParamSchema(value: unknown): ParamSchema | null {
+function asParamSchema(value: unknown): ParamSchema | null {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     return null;
   }
@@ -27,7 +27,7 @@ export function asParamSchema(value: unknown): ParamSchema | null {
 }
 
 /** Human type label, handling unions such as `["array", "null"]`. */
-export function paramTypeName(schema: ParamSchema | null): string | null {
+function paramTypeName(schema: ParamSchema | null): string | null {
   if (!schema) {
     return null;
   }
@@ -70,7 +70,7 @@ type DocsApiParameterItemProps = {
  * One parameter or schema property. Object properties and array items are
  * unwrapped into readable child rows behind "Show child parameters".
  */
-export function DocsApiParameterItem({
+function DocsApiParameterItem({
   description,
   name,
   required = false,
@@ -107,7 +107,10 @@ export function DocsApiParameterItem({
               </Box>
             );
           })
-        : undefined}
+        : null}
     </DocsApiField>
   );
 }
+
+export type { ParamSchema };
+export { asParamSchema, DocsApiParameterItem, paramTypeName };

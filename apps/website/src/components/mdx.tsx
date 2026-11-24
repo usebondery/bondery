@@ -15,17 +15,33 @@ import { DocsStep, DocsSteps } from "@/components/docs/DocsSteps";
 import { RepoStructureFiles } from "@/components/docs/repo-structure-files";
 import { MdxTable } from "@/components/mdx-table";
 
-function heading(order: 2 | 3 | 4) {
-  return function DocsMdxHeading({ children, id }: { children?: ReactNode; id?: string }) {
-    return (
-      <DocsHeading id={id} order={order}>
-        {children}
-      </DocsHeading>
-    );
-  };
+type MdxHeadingProps = { children?: ReactNode; id?: string };
+
+function DocsMdxH2({ children, id }: MdxHeadingProps) {
+  return (
+    <DocsHeading id={id} order={2}>
+      {children}
+    </DocsHeading>
+  );
 }
 
-export function getMDXComponents(components?: MDXComponents): MDXComponents {
+function DocsMdxH3({ children, id }: MdxHeadingProps) {
+  return (
+    <DocsHeading id={id} order={3}>
+      {children}
+    </DocsHeading>
+  );
+}
+
+function DocsMdxH4({ children, id }: MdxHeadingProps) {
+  return (
+    <DocsHeading id={id} order={4}>
+      {children}
+    </DocsHeading>
+  );
+}
+
+function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
     Accordion: DocsAccordion,
     Accordions: DocsAccordions,
@@ -38,9 +54,9 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     File: DocsFile,
     Files: DocsFiles,
     Folder: DocsFolder,
-    h2: heading(2),
-    h3: heading(3),
-    h4: heading(4),
+    h2: DocsMdxH2,
+    h3: DocsMdxH3,
+    h4: DocsMdxH4,
     OpenAPIPage,
     PlatformCode: DocsPlatformCode,
     pre: DocsMdxPre,
@@ -52,8 +68,10 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
   };
 }
 
-export const useMDXComponents = getMDXComponents;
+const useMDXComponents = getMDXComponents;
 
 declare global {
   type MDXProvidedComponents = ReturnType<typeof getMDXComponents>;
 }
+
+export { getMDXComponents, useMDXComponents };

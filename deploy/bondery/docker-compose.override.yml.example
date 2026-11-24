@@ -1,28 +1,43 @@
-# Optional: publish host ports when you are NOT using Traefik/Dokploy.
-# Copy to docker-compose.override.yml in this directory:
+# Optional: run the stack WITHOUT Traefik/Dokploy, behind your own HTTPS reverse proxy on this
+# host (Caddy, nginx). Copy to docker-compose.override.yml in this directory:
 #
 #   cp docker-compose.override.yml.example docker-compose.override.yml
 #
-# Then: docker compose up -d
-# Reach API at http://localhost:26631, webapp at http://localhost:26632,
-# SeaweedFS S3 gateway at http://localhost:8333, Postgres at localhost:54322.
+# Then: docker compose up -d, and point your proxy at the loopback ports below. Ready-made
+# proxy configs: deploy/bondery/proxy/ (see docs/deploy/reverse-proxy.mdx).
+#
+# Every port binds to 127.0.0.1 only: nothing in the stack speaks to the internet directly, so
+# visitors always reach it through your proxy's HTTPS. The API port is HTTPS with a private CA;
+# export it for your proxy with scripts/api-ca.sh. The storage gateway is HTTPS with a private CA
+# and requires a client certificate, so use `scripts/storage-ca.sh --client-dir <folder>`.
 #
 # You still need: docker network create dokploy-network
 # (services declare that network for Traefik-compatible labels; labels are inert without Traefik.)
 
 services:
+  # HTTPS (TLS 1.3), verified with the API CA as the host name "<prefix>-api".
   api:
     ports:
-      - "26631:26631"
+      - "127.0.0.1:26631:26631"
 
+  # Plain HTTP on loopback: your proxy terminates TLS for the webapp on this host.
   webapp:
     ports:
-      - "26632:26632"
+      - "127.0.0.1:26632:26632"
 
+  # HTTPS (TLS 1.3), verified with the storage CA as the host name "<prefix>-storage".
   seaweedfs-s3:
     ports:
-      - "8333:8333"
+      - "127.0.0.1:8443:8443"
 
+  # No Traefik on this host, so there is no Traefik folder to publish serversTransports to.
+  # The job runs and does nothing.
+  traefik-transport:
+    command: [ "true" ]
+    volumes: !reset []
+
+  # Loopback only: Postgres must never be reachable on a public interface. Connections need TLS
+  # (sslmode=verify-full with the stack CA; see docs/deploy/configuration.mdx#postgres-tls).
   db:
     ports:
-      - "54322:5432"
+      - "127.0.0.1:54322:5432"

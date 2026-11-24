@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { geocodeSuggestionDisplayLabel } from "@bondery/helpers/geocode";
 import { resolveToCanonicalTimezone } from "@bondery/helpers/locale";
 import {
@@ -185,7 +186,7 @@ export function ContactAddressEntryCard({
                     disabled={!entry.value}
                     leftSection={<IconCopy size={14} />}
                     onClick={() => {
-                      void navigator.clipboard.writeText(entry.value || "");
+                      detachPromise(navigator.clipboard.writeText(entry.value || ""));
                       notifications.show(
                         successNotificationTemplate({
                           description: t("AddressCopiedMessage"),
@@ -292,7 +293,9 @@ export function ContactAddressEntryCard({
                       <Menu.Item
                         leftSection={
                           detectingTimezoneId === entry.id ? (
-                            <IconLoader2 className="animate-spin" size={14} />
+                            <span className="animate-spin">
+                              <IconLoader2 size={14} />
+                            </span>
                           ) : (
                             <IconClock size={14} />
                           )

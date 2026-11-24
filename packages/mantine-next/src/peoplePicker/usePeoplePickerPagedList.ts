@@ -1,6 +1,7 @@
 // biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { useEffect, useRef, useState } from "react";
 import { PEOPLE_PICKER_PAGE_SIZE } from "#peoplePicker/constants.js";
@@ -32,6 +33,21 @@ type UsePeoplePickerPagedListOptions<T extends PeoplePickerItem> = {
   seed: T[];
 };
 
+export type PeoplePickerPagedListResult<T extends PeoplePickerItem> = {
+  canLoadMore: boolean;
+  isFirstPageSearching: boolean;
+  isLoadingMore: boolean;
+  loadMore: () => void;
+  loadMoreError: boolean;
+  query: string;
+  resetList: () => void;
+  retryLoadMore: () => void;
+  scrollResetKey: number;
+  selectFirstOptionToken: number;
+  setQuery: (query: string) => void;
+  visibleItems: T[];
+};
+
 export function usePeoplePickerPagedList<T extends PeoplePickerItem>({
   seed,
   contactsHasMore = false,
@@ -39,7 +55,7 @@ export function usePeoplePickerPagedList<T extends PeoplePickerItem>({
   searchDebounceMs = 0,
   filter,
   matchQuery,
-}: UsePeoplePickerPagedListOptions<T>) {
+}: UsePeoplePickerPagedListOptions<T>): PeoplePickerPagedListResult<T> {
   const [state, setState] = useState<PeoplePickerPagedState<T>>(createPeoplePickerPagedState);
   const [scrollResetKey, setScrollResetKey] = useState(0);
   const [selectFirstOptionToken, setSelectFirstOptionToken] = useState(0);
@@ -53,21 +69,26 @@ export function usePeoplePickerPagedList<T extends PeoplePickerItem>({
   seedRef.current = seed;
   const contactsHasMoreRef = useRef(contactsHasMore);
   contactsHasMoreRef.current = contactsHasMore;
-  const fetchLockRef = useRef(false);
+  const fetchLockRef = useRef<boolean>(false);
 
   const bumpScroll = () => {
     setScrollResetKey((current) => current + 1);
   };
 
   const fetchPage = async (offset: number, mode: "typed" | "browse", generation: number) => {
-    const search = onSearchRef.current;
+    const search: PeoplePickerOnSearch<T> | undefined = onSearchRef.current;
     if (!search) {
       return;
     }
 
     const query = mode === "typed" ? stateRef.current.query.trim() : "";
     try {
-      const page = await search(query, { limit: PEOPLE_PICKER_PAGE_SIZE, offset });
+      const page = await Promise.resolve(
+        search(query, {
+          limit: PEOPLE_PICKER_PAGE_SIZE,
+          offset,
+        }),
+      );
       if (generation !== generationRef.current) {
         return;
       }
@@ -94,7 +115,7 @@ export function usePeoplePickerPagedList<T extends PeoplePickerItem>({
   };
 
   const triggerTypedSearch = useDebouncedCallback((_query: string, generation: number) => {
-    void fetchPage(0, "typed", generation);
+    detachPromise(fetchPage(0, "typed", generation));
   }, searchDebounceMs);
 
   const setQuery = (query: string) => {
@@ -121,7 +142,7 @@ export function usePeoplePickerPagedList<T extends PeoplePickerItem>({
     if (fetchLockRef.current) {
       return;
     }
-    const current = stateRef.current;
+    const { current } = stateRef;
     const hasOnSearch = Boolean(onSearchRef.current);
     const pool = getFilteredPool(seedRef.current, current, {
       filter,
@@ -149,7 +170,7 @@ export function usePeoplePickerPagedList<T extends PeoplePickerItem>({
     const generation = generationRef.current;
     fetchLockRef.current = true;
     setState((prev) => applyLoadMoreStart(prev));
-    void fetchPage(offset, typed ? "typed" : "browse", generation);
+    detachPromise(fetchPage(offset, typed ? "typed" : "browse", generation));
   };
 
   const retryLoadMore = () => {

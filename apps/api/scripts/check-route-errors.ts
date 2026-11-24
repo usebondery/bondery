@@ -11,6 +11,13 @@ import { API_ERROR_CODES, isApiErrorCode } from "@bondery/schemas/errors";
 
 import { createCheck } from "../../../scripts/check/check-report.mjs";
 
+const REPLY_STATUS_D_D_PATTERN = /reply\.status\(5\d\d\)/;
+const STATUSCODE_S_PATTERN = /statusCode\s*=/;
+const AS_ERROR_PATTERN = /as Error/;
+const NEW_DOMAINERROR_PATTERN = /new DomainError\(([^)]*)\)/;
+const NEW_DOMAINERROR_MESSAGE_S_PATTERN = /new DomainError\([^,]+\.message,\s*500/;
+const HANDLEDOMAINERROR_PATTERN = /handleDomainError/;
+
 const check = createCheck("check-route-errors");
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -22,6 +29,9 @@ const authFiles = [
   join(apiSrc, "lib", "platform", "auth", "native-session.ts"),
 ];
 const schemasRoot = join(__dirname, "..", "..", "..", "packages", "schemas", "src");
+
+/** A DomainError takes three arguments: message, status and code. */
+const DOMAIN_ERROR_REQUIRED_ARG_COUNT = 3;
 
 const violations: string[] = [];
 const catalogCodes = new Set<string>(API_ERROR_CODES);
@@ -92,32 +102,36 @@ function checkFile(
     const line = lines[i];
     const loc = `${rel}:${i + 1}`;
 
-    if (rules.banHandleDomainError && /handleDomainError/.test(line)) {
+    if (rules.banHandleDomainError && HANDLEDOMAINERROR_PATTERN.test(line)) {
       violations.push(`${loc}: handleDomainError is banned — use throw + global mapper`);
     }
 
-    if (rules.banReply5xx && /reply\.status\(5\d\d\)/.test(line)) {
+    if (rules.banReply5xx && REPLY_STATUS_D_D_PATTERN.test(line)) {
       violations.push(
         `${loc}: reply.status(5xx) is banned — throw internal() or serviceUnavailable()`,
       );
     }
 
-    if (rules.banErrorStatusCode && /statusCode\s*=/.test(line) && /as Error/.test(line)) {
+    if (
+      rules.banErrorStatusCode &&
+      STATUSCODE_S_PATTERN.test(line) &&
+      AS_ERROR_PATTERN.test(line)
+    ) {
       violations.push(`${loc}: Error + statusCode pattern is banned in auth files`);
     }
 
     if (rules.banDomainErrorMissingCode) {
-      const match = line.match(/new DomainError\(([^)]*)\)/);
+      const match = line.match(NEW_DOMAINERROR_PATTERN);
       if (match) {
-        const args = match[1];
+        const [, args] = match;
         const argCount = args.split(",").length;
-        if (argCount < 3) {
+        if (argCount < DOMAIN_ERROR_REQUIRED_ARG_COUNT) {
           violations.push(`${loc}: DomainError missing required code argument`);
         }
       }
     }
 
-    if (rules.banDomainError500Leak && /new DomainError\([^,]+\.message,\s*500/.test(line)) {
+    if (rules.banDomainError500Leak && NEW_DOMAINERROR_MESSAGE_S_PATTERN.test(line)) {
       violations.push(
         `${loc}: DomainError with .message on 500 leaks internals — use internal(code, cause)`,
       );

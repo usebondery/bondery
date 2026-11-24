@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { InMemorySyncWakeBus } from "./in-memory-bus.js";
 
-describe("InMemorySyncWakeBus", () => {
+describe("inMemorySyncWakeBus", () => {
   it("delivers published events to the started handler", async () => {
     const bus = new InMemorySyncWakeBus();
     const received: Array<{ userId: string; serverSequence: number }> = [];

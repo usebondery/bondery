@@ -1,0 +1,32 @@
+{
+  "LoggedIn": {
+    "OpenBondery": "Aprire Bondery",
+    "UnsupportedSiteMessage": "Visita il profilo di qualcuno su Instagram o LinkedIn per vedere altre azioni e funzionalità dell'estensione."
+  },
+  "LoggedOut": {
+    "Description": "Collega il tuo account per salvare contatti dai social.",
+    "SignIn": "Accedere",
+    "Title": "Accesso a Bondery"
+  },
+  "PersonActions": {
+    "AddInteraction": "Aggiungere un'interazione con questa persona"
+  },
+  "Settings": {
+    "ApiServer": "Server API",
+    "SignOut": "Disconnettersi"
+  },
+  "UpdateRequired": {
+    "Description": "La tua estensione Bondery è obsoleta e potrebbe non funzionare correttamente. Aggiornala per continuare.",
+    "OpenExtensionsPage": "Aprire la pagina delle estensioni",
+    "Title": "Aggiornamento richiesto"
+  },
+  "Welcome": {
+    "ConnectButton": "Collegare l'account Bondery",
+    "Description": "Collega il tuo account Bondery per salvare i contatti direttamente dai profili dei social.",
+    "SignInHint": "Ti verrà chiesto di accedere al tuo account Bondery e di autorizzare l'estensione.",
+    "SuccessClose": "Ora puoi chiudere questa scheda.",
+    "SuccessDescription": "Il tuo account Bondery è ora collegato. Visita un profilo Instagram o LinkedIn qualsiasi per iniziare a salvare i contatti.",
+    "SuccessTitle": "È tutto pronto!",
+    "Title": "Ti diamo il benvenuto su Bondery"
+  }
+}

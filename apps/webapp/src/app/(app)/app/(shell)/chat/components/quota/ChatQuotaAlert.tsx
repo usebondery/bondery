@@ -9,8 +9,11 @@ import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 /**
  * Inline alert shown when the user has exhausted their message quota.
  *
- * - variant="free"    : free limit reached — shows upgrade CTA.
- * - variant="premium" : monthly premium limit reached — shows reset date, no upgrade CTA.
+ * Both plans have a monthly allowance with a reset date, so both name it.
+ * Only the free plan offers the upgrade call to action.
+ *
+ * - variant="free"    : free limit reached — shows the reset date and the upgrade CTA.
+ * - variant="premium" : premium limit reached — shows the reset date, no upgrade CTA.
  */
 export function ChatQuotaAlert({
   onSuccess,
@@ -23,9 +26,9 @@ export function ChatQuotaAlert({
 }) {
   const t = useChatPageTranslations();
   const format = useFormatter();
+  const resetDate = resetAt ? format.formatDate(new Date(resetAt), "medium") : null;
 
   if (variant === "premium") {
-    const resetDate = resetAt ? format.dateTime(new Date(resetAt), { dateStyle: "medium" }) : null;
     return (
       <Alert
         color="blue"
@@ -47,7 +50,9 @@ export function ChatQuotaAlert({
       title={t("quotaAlertTitle")}
       variant="light"
     >
-      {t("quotaAlertDescription")}
+      {resetDate
+        ? t("freeLimitAlertDescriptionDate", { date: resetDate })
+        : t("quotaAlertDescription")}
       <UpgradeButton display="block" mt="sm" onSuccess={onSuccess} size="xs" w="fit-content" />
     </Alert>
   );

@@ -1,5 +1,6 @@
 import type * as PageTree from "fumadocs-core/page-tree";
 
+const DOCS_SECTION_RE = /^\/docs\/([^/]+)/;
 type TabKey = "product" | "selfhost" | "integrate" | "develop";
 
 const TAB_SLUGS: Record<TabKey, Set<string>> = {
@@ -18,7 +19,7 @@ const TAB_SLUGS: Record<TabKey, Set<string>> = {
   selfhost: new Set(["deploy"]),
 };
 
-export function getActiveTabKey(pathname: string): TabKey {
+function getActiveTabKey(pathname: string): TabKey {
   if (pathname.startsWith("/docs/deploy")) {
     return "selfhost";
   }
@@ -66,7 +67,7 @@ function nodeSlug(node: PageTree.Node): string | null {
     return "index";
   }
 
-  const match = url.match(/^\/docs\/([^/]+)/);
+  const match = url.match(DOCS_SECTION_RE);
   return match?.[1] ?? null;
 }
 
@@ -104,7 +105,7 @@ function filterChildren(children: PageTree.Node[], allowed: Set<string>): PageTr
   return kept;
 }
 
-export function filterPageTreeForTab(tree: PageTree.Root, tabKey: TabKey): PageTree.Root {
+function filterPageTreeForTab(tree: PageTree.Root, tabKey: TabKey): PageTree.Root {
   return {
     ...tree,
     $id: `${tree.$id ?? "root"}-${tabKey}`,
@@ -112,6 +113,8 @@ export function filterPageTreeForTab(tree: PageTree.Root, tabKey: TabKey): PageT
   };
 }
 
-export function filterPageTreeForPathname(tree: PageTree.Root, pathname: string): PageTree.Root {
+function filterPageTreeForPathname(tree: PageTree.Root, pathname: string): PageTree.Root {
   return filterPageTreeForTab(tree, getActiveTabKey(pathname));
 }
+
+export { filterPageTreeForPathname, filterPageTreeForTab, getActiveTabKey };

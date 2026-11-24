@@ -27,7 +27,7 @@ function structuredErrorCode(result: unknown): string | undefined {
   if (!content || typeof content !== "object" || !("error" in content)) {
     return undefined;
   }
-  const error = (content as { error?: { code?: unknown } }).error;
+  const { error } = content as { error?: { code?: unknown } };
   return typeof error?.code === "string" ? error.code : undefined;
 }
 
@@ -145,14 +145,14 @@ describe("signMcpDeleteRequestState / verifyMcpDeleteRequestState", () => {
 });
 
 describe("confirmMcpDelete", () => {
-  const previousSecret = process.env.BONDERY_PRIVATE_SERVICE_SECRET;
+  const previousSecret = process.env["BONDERY_PRIVATE_SERVICE_SECRET"];
 
   afterEach(() => {
-    process.env.BONDERY_PRIVATE_SERVICE_SECRET = previousSecret;
+    process.env["BONDERY_PRIVATE_SERVICE_SECRET"] = previousSecret;
   });
 
   it("returns input_required on the first call and does not run onConfirm", async () => {
-    process.env.BONDERY_PRIVATE_SERVICE_SECRET = SECRET;
+    process.env["BONDERY_PRIVATE_SERVICE_SECRET"] = SECRET;
     let confirmed = false;
     const result = await confirmMcpDelete({
       args: ARGS,
@@ -167,14 +167,15 @@ describe("confirmMcpDelete", () => {
     });
     assert.equal(isInputRequiredResult(result), true);
     assert.equal(confirmed, false);
-    if (isInputRequiredResult(result)) {
-      assert.ok(result.requestState);
-      assert.ok(result.inputRequests?.[MCP_DELETE_CONFIRM_KEY]);
+    if (!isInputRequiredResult(result)) {
+      throw new Error("expected input_required result with requestState");
     }
+    assert.ok(result.requestState);
+    assert.ok(result.inputRequests?.[MCP_DELETE_CONFIRM_KEY]);
   });
 
   it("cancels on decline and deletes only after accept plus a valid requestState", async () => {
-    process.env.BONDERY_PRIVATE_SERVICE_SECRET = SECRET;
+    process.env["BONDERY_PRIVATE_SERVICE_SECRET"] = SECRET;
     const first = await confirmMcpDelete({
       args: ARGS,
       extra: { mcpReq: { requestState: () => undefined } },
@@ -237,7 +238,7 @@ describe("confirmMcpDelete", () => {
   });
 
   it("does not delete when requestState is tampered", async () => {
-    process.env.BONDERY_PRIVATE_SERVICE_SECRET = SECRET;
+    process.env["BONDERY_PRIVATE_SERVICE_SECRET"] = SECRET;
     const first = await confirmMcpDelete({
       args: ARGS,
       extra: { mcpReq: { requestState: () => undefined } },
@@ -277,7 +278,7 @@ describe("confirmMcpDelete", () => {
   });
 
   it("returns service_unavailable when the HMAC secret is missing", async () => {
-    delete process.env.BONDERY_PRIVATE_SERVICE_SECRET;
+    delete process.env["BONDERY_PRIVATE_SERVICE_SECRET"];
     const result = await runMcpTool(mockMcpCtx(), () =>
       confirmMcpDelete({
         args: ARGS,

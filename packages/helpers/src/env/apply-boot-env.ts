@@ -24,7 +24,7 @@ export function getBootEnvVarNames(targetId: TargetId, environment: EnvEnvironme
     }
     names.add(target.runtimeName ?? entry.canonical);
   }
-  return [...names].sort();
+  return [...names].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 }
 
 /** Names included only via `boot.include` (not manifest-required for the environment). */
@@ -46,7 +46,7 @@ export function getBootIncludeExtraVarNames(
     }
     names.push(target.runtimeName ?? entry.canonical);
   }
-  return names.sort();
+  return names.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 }
 
 /** Apply manifest boot profile so a target can start without a `.env` file. */

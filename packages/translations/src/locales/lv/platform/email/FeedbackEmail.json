@@ -1,0 +1,21 @@
+{
+  "agentActualHeading": "Ko rīks atgrieza:",
+  "agentExpectedHeading": "Ko aģents gaidīja:",
+  "agentKindLabel": "Pārskata veids:",
+  "agentRequestIdLabel": "Pieprasījuma ID:",
+  "agentSourceHeading": "Ziņoja AI aģents",
+  "agentToolLabel": "Rīks:",
+  "description": "NPS {{npsScore}} / 10 · {{timestamp}}",
+  "generalFeedbackHeading": "Vispārīgas atsauksmes:",
+  "heading": "Atsauksmes no {{userEmail}}",
+  "notProvided": "(nav nodrošināts)",
+  "npsReasonHeading": "Kāpēc viņi izvēlējās šo punktu skaitu?",
+  "npsScoreLabel": "NPS rezultāts:",
+  "npsScoreValue": "{{npsScore}} / 10",
+  "preview": "Jaunas atsauksmes no {{userEmail}} — NPS rezultāts: {{npsScore}}",
+  "replyCta": "Atbildēt uz {{userEmail}}",
+  "subject": "Jaunas atsauksmes par Bondery",
+  "submittedAt": "Iesniegts: {{timestamp}}",
+  "userEmailLabel": "Lietotāja e-pasts:",
+  "userIdLabel": "Lietotāja ID:"
+}

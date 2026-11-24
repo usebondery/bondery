@@ -11,7 +11,7 @@ function newId(): string {
   return generateUuid();
 }
 
-export function applyOptimisticMutation(mutation: SyncMutation): void {
+function applyOptimisticMutation(mutation: SyncMutation): void {
   const db = getSyncDatabase();
   let deletedPersonId: string | null = null;
 
@@ -151,7 +151,7 @@ function applyOptimisticContactReplaceImportantDates(
   const personId = mutation.entityId;
 
   db.runSync("DELETE FROM people_important_dates WHERE person_id = ?", personId);
-  mutation.payload.dates.forEach((entry) => {
+  for (const entry of mutation.payload.dates) {
     db.runSync(
       `INSERT INTO people_important_dates (
         id, person_id, user_id, type, date, note, notify_days_before, created_at, updated_at
@@ -165,7 +165,7 @@ function applyOptimisticContactReplaceImportantDates(
       ts,
       ts,
     );
-  });
+  }
 }
 
 function applyOptimisticContactChannels(
@@ -260,7 +260,7 @@ function applyOptimisticContactChannels(
     });
   }
 
-  const socialFields: Array<[string, string | null | undefined]> = [
+  const socialFields: [string, string | null | undefined][] = [
     ["linkedin", patch.linkedin],
     ["instagram", patch.instagram],
     ["whatsapp", patch.whatsapp],
@@ -418,3 +418,5 @@ function applyOptimisticTagUpdate(
     tagId,
   );
 }
+
+export { applyOptimisticMutation };

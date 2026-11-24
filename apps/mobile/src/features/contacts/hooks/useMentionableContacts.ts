@@ -8,8 +8,6 @@ import {
 import { formatContactName } from "../contactUtils";
 import { filterMentionContacts, MAX_MENTION_RESULTS } from "./filterMentionContacts";
 
-export { filterMentionContacts, MAX_MENTION_RESULTS };
-
 function mergeContacts(primary: Contact | null, others: Contact[]): Contact[] {
   const byId = new Map<string, Contact>();
 
@@ -33,7 +31,7 @@ interface UseMentionableContactsOptions {
   subjectContact?: Contact | null;
 }
 
-export function useMentionableContacts({
+function useMentionableContacts({
   contactId,
   isMyselfMode = false,
   subjectContact = null,
@@ -79,3 +77,5 @@ export function useMentionableContacts({
     myselfContactId,
   };
 }
+
+export { filterMentionContacts, MAX_MENTION_RESULTS, useMentionableContacts };

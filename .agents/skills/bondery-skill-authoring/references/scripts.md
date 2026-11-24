@@ -22,7 +22,7 @@ Do **not** add scripts for one-off tasks, exploratory commands, or anything the 
 
 ## Layout
 
-```
+```text
 .agents/skills/bondery-example/
 ├── SKILL.md
 ├── scripts/

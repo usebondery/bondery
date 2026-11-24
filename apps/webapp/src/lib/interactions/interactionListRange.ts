@@ -55,7 +55,7 @@ export function formatLocalCalendarDate(value: Date): string {
 
 /** Map a date-picker value to a URL calendar day. Empty clears the param. */
 export function calendarParamFromPicker(value: Date | string | null): string | undefined {
-  if (value == null || value === "") {
+  if (value === null || value === "") {
     return undefined;
   }
   if (value instanceof Date) {

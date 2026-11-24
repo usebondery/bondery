@@ -1,0 +1,9 @@
+{
+  "body": "Sen jälkeen tilauksesi uusiutuu automaattisesti, ellei sitä peruuteta.",
+  "cta": "Hallitse tilausta",
+  "endDateFallback": "pian",
+  "heading": "Premium-kokeilusi päättyy {{endDate}}",
+  "preview": "Tilauksesi uusiutuu, ellei sitä peruuteta",
+  "subject": "Bondery Premium -kokeilusi päättyy pian",
+  "whyReceiving": "Saat tämän sähköpostin, koska sinulla on Bondery Premium -kokeilu."
+}

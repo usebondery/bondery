@@ -1,7 +1,7 @@
 import { Badge } from "@mantine/core";
 
 /** Color per HTTP status class. */
-function statusColor(status: number): string {
+function statusColor(status: number): "green" | "yellow" | "red" {
   if (status < 400) {
     return "green";
   }

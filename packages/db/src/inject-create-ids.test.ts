@@ -33,7 +33,7 @@ describe("injectCreateIds", () => {
     };
 
     assert.equal(isUuidV7(result.id), true);
-    assert.equal(isUuidV7(result.phones.create[0]?.id), true);
+    assert.equal(isUuidV7(result.phones.create[0]?.id ?? ""), true);
   });
 
   it("does not inject id for composite-key rows", () => {
@@ -43,5 +43,13 @@ describe("injectCreateIds", () => {
     }) as Record<string, unknown>;
 
     assert.equal("id" in result, false);
+  });
+
+  it("does not inject id for a Stripe webhook event, which is keyed by eventId", () => {
+    // Regression: an injected `id` made every Stripe webhook answer 500.
+    const row = { eventId: "evt_123", eventType: "invoice.paid" };
+
+    assert.deepEqual(injectCreateIds(row), row);
+    assert.deepEqual(injectCreateIds([row]), [row]);
   });
 });

@@ -3,7 +3,7 @@
 import type { MantineSpacing } from "@mantine/core";
 import { Button, Flex, Group, Stack, Switch, VisuallyHidden } from "@mantine/core";
 import { IconCheck, IconTrash } from "@tabler/icons-react";
-import { type ReactNode, useId } from "react";
+import { type ReactElement, type ReactNode, useId } from "react";
 
 /** Equal-width actions below `sm`. Hug content from `sm` up. */
 const MOBILE_EQUAL_BUTTON_FLEX = { base: 1, sm: "none" } as const;
@@ -64,7 +64,7 @@ export function ModalFooter({
   actionRightSection,
   actionLoading = false,
   actionDisabled,
-}: ModalFooterProps) {
+}: ModalFooterProps): ReactElement {
   const createMoreDescriptionId = useId();
   const showDanger = Boolean(dangerLabel && onDanger);
   const showBack = Boolean(backLabel && onBack);

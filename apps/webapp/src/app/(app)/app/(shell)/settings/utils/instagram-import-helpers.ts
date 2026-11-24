@@ -1,4 +1,15 @@
-import type { Contact, InstagramPreparedContact } from "@bondery/schemas";
+import type { InstagramPreparedContact } from "@bondery/schemas";
+
+type ZipValidationError = "no-file" | "file-too-large" | "invalid-extension" | "invalid-mime";
+
+const ACCEPTED_ZIP_MIME_TYPES = new Set([
+  "application/zip",
+  "application/x-zip-compressed",
+  "application/x-zip",
+  "multipart/x-zip",
+  "application/octet-stream",
+  "",
+]);
 
 export const INSTAGRAM_MAX_FILE_SIZE_BYTES = 100 * 1024 * 1024;
 
@@ -8,9 +19,11 @@ export type InstagramImportStep =
   | "upload"
   | "strategy"
   | "processing"
-  | "preview";
+  | "preview"
+  | "finished";
 
 export const INSTAGRAM_STEP_PROGRESS: Record<InstagramImportStep, number> = {
+  finished: 100,
   instructions: 24,
   intro: 10,
   preview: 84,
@@ -23,17 +36,6 @@ export function readNumberField(data: object | null, key: string): number {
   const value = data && key in data ? (data as Record<string, unknown>)[key] : undefined;
   return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }
-
-type ZipValidationError = "no-file" | "file-too-large" | "invalid-extension" | "invalid-mime";
-
-const ACCEPTED_ZIP_MIME_TYPES = new Set([
-  "application/zip",
-  "application/x-zip-compressed",
-  "application/x-zip",
-  "multipart/x-zip",
-  "application/octet-stream",
-  "",
-]);
 
 export function validateInstagramZipFile(
   file: File | null,
@@ -61,40 +63,6 @@ export function validateInstagramZipFile(
 }
 
 export type ZipValidationErrorCode = ZipValidationError;
-
-export function toInstagramPreviewContact(contact: InstagramPreparedContact): Contact {
-  return {
-    avatar: null,
-    createdAt: new Date().toISOString(),
-    emails: [],
-    facebook: null,
-    firstName: contact.firstName,
-    gisPoint: null,
-    headline: null,
-    id: contact.tempId,
-    importantDates: null,
-    instagram: contact.instagramUrl,
-    keepFrequencyDays: null,
-    language: null,
-    lastInteraction: null,
-    lastInteractionActivityId: null,
-    lastName: contact.lastName,
-    latitude: null,
-    linkedin: null,
-    location: null,
-    longitude: null,
-    middleName: contact.middleName,
-    myself: false,
-    notes: null,
-    phones: [],
-    signal: null,
-    timezone: null,
-    updatedAt: new Date().toISOString(),
-    userId: "",
-    website: null,
-    whatsapp: null,
-  };
-}
 
 export function sortInstagramContactsForPreview(
   contacts: InstagramPreparedContact[],

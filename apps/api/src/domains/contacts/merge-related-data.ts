@@ -44,11 +44,11 @@ function resolveMergedImportantDates(
   const importantDatesEqual =
     JSON.stringify(toComparable(leftDates)) === JSON.stringify(toComparable(rightDates));
 
-  if (!leftDates.length && rightDates.length) {
+  if (leftDates.length === 0 && rightDates.length > 0) {
     return rightDates;
   }
 
-  if (leftDates.length && rightDates.length && !importantDatesEqual) {
+  if (leftDates.length > 0 && rightDates.length > 0 && !importantDatesEqual) {
     const choice = resolveConflictChoice(conflictResolutions, "importantDates");
     return choice === "right" ? rightDates : leftDates;
   }
@@ -89,7 +89,7 @@ export async function mergeContactSocials(
     handle: string;
     connectedAt: Date | null;
   }> = [];
-  const socialUpdatePromises: Array<Promise<unknown>> = [];
+  const socialUpdatePromises: Promise<unknown>[] = [];
 
   for (const [field, platform] of Object.entries(MERGEABLE_SOCIAL_FIELDS)) {
     const leftSocial = leftSocialByPlatform.get(platform);

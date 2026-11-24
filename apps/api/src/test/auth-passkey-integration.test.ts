@@ -19,7 +19,7 @@ loadTestEnv();
 
 const { createTestApp } = await import("./create-test-app.js");
 
-const WEBAPP_URL = (process.env.BONDERY_PUBLIC_WEBAPP_URL ?? "").replace(/\/+$/, "");
+const WEBAPP_URL = (process.env["BONDERY_PUBLIC_WEBAPP_URL"] ?? "").replace(/\/+$/, "");
 const GENERATE_REGISTER_OPTIONS_PATH = "/auth/passkey/generate-register-options";
 
 async function createTestUser(): Promise<{ id: string; email: string }> {
@@ -54,7 +54,7 @@ function extractWebAuthnUser(body: unknown): { displayName?: string; name?: stri
     record.publicKey && typeof record.publicKey === "object"
       ? (record.publicKey as Record<string, unknown>)
       : record;
-  const user = nested.user;
+  const { user } = nested;
   if (!user || typeof user !== "object") {
     return null;
   }
@@ -72,7 +72,7 @@ function extractWebAuthnRp(body: unknown): { id?: string; name?: string } | null
     record.publicKey && typeof record.publicKey === "object"
       ? (record.publicKey as Record<string, unknown>)
       : record;
-  const rp = nested.rp;
+  const { rp } = nested;
   if (!rp || typeof rp !== "object") {
     return null;
   }
@@ -90,7 +90,7 @@ function extractErrorCode(body: unknown): string | undefined {
     return record.code;
   }
 
-  const error = record.error;
+  const { error } = record;
   if (
     error &&
     typeof error === "object" &&
@@ -142,7 +142,7 @@ describe("passkey generate-register-options", () => {
 
   it("returns configured rpID and rpName when a session is present", async () => {
     const resolved = resolveWebAuthnRp({
-      rpIdOverride: process.env.BONDERY_PUBLIC_WEBAUTHN_RP_ID,
+      rpIdOverride: process.env["BONDERY_PUBLIC_WEBAUTHN_RP_ID"],
       webappUrl: WEBAPP_URL,
     });
     const expectedRpID = resolved.ok ? resolved.rpID : "localhost";

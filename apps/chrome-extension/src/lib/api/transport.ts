@@ -1,22 +1,10 @@
+import { browser } from "wxt/browser";
 import { clearTokens, getAccessToken } from "../auth";
+import { AuthRequiredError } from "./auth-required-error";
+import { ExtensionOutdatedError } from "./extension-outdated-error";
 
-export class AuthRequiredError extends Error {
-  readonly requiresAuth = true;
-
-  constructor(message: string) {
-    super(message);
-    this.name = "AuthRequiredError";
-  }
-}
-
-export class ExtensionOutdatedError extends Error {
-  readonly extensionOutdated = true;
-
-  constructor(message: string) {
-    super(message);
-    this.name = "ExtensionOutdatedError";
-  }
-}
+export { AuthRequiredError } from "./auth-required-error";
+export { ExtensionOutdatedError } from "./extension-outdated-error";
 
 export async function authenticatedFetch(
   url: string,
@@ -28,7 +16,7 @@ export async function authenticatedFetch(
     throw new AuthRequiredError("Not authenticated");
   }
 
-  const extensionVersion = chrome.runtime.getManifest().version;
+  const extensionVersion = browser.runtime.getManifest().version;
 
   const headers: Record<string, string> = {
     ...(options.headers as Record<string, string>),
@@ -44,7 +32,7 @@ export async function authenticatedFetch(
   }
 
   if (response.status === 426) {
-    await chrome.storage.local.set({ updateRequired: true });
+    await browser.storage.local.set({ updateRequired: true });
     throw new ExtensionOutdatedError("Extension update required");
   }
 

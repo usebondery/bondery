@@ -5,9 +5,11 @@ import type { SubscriptionStatus } from "@bondery/schemas";
 import { Badge, Button, CardSection, Group, Progress, Stack, Text } from "@mantine/core";
 import { IconCreditCard, IconExternalLink } from "@tabler/icons-react";
 import { UpgradeButton } from "@/components/shared/UpgradeButton";
+import { canShowUsageReset } from "@/lib/api/resources/subscription";
 import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 import { useSubscriptionQuery } from "@/lib/query/hooks/useSubscription";
+import { SETTINGS_SUBSCRIPTION_SECTION_ID } from "../../settingsSectionIds";
 import { SettingsSection } from "./SettingsSection";
 
 function SubscriptionCardContent({
@@ -24,16 +26,16 @@ function SubscriptionCardContent({
     if (!value) {
       return null;
     }
-    return format.dateTime(new Date(value), { dateStyle: "medium" });
+    return format.formatDate(new Date(value), "medium");
   };
 
   const formatAmount = (amountMinor: number | null, currency: string | null): string | null => {
-    if (amountMinor == null || !currency) {
+    if (amountMinor === null || amountMinor === undefined || !currency) {
       return null;
     }
     const upperCurrency = currency.toUpperCase();
 
-    let fractionDigits = 2;
+    let fractionDigits: number;
     try {
       fractionDigits =
         new Intl.NumberFormat(undefined, {
@@ -60,9 +62,10 @@ function SubscriptionCardContent({
   const periodEndsAt = formatDate(subscriptionStatus.currentPeriodEnd);
   const renewalAmount = formatAmount(subscriptionStatus.amount, subscriptionStatus.currency);
   const monthlyResetAt = formatDate(subscriptionStatus.aiMonthlyResetAt);
+  const showUsageReset = canShowUsageReset(subscriptionStatus);
 
   const getSubscriptionDescription = (): { text: string; color: string } => {
-    const billingStatus = subscriptionStatus.billingStatus;
+    const { billingStatus } = subscriptionStatus;
 
     if (!isPremium) {
       if (
@@ -179,7 +182,11 @@ function SubscriptionCardContent({
     : t("FreePlan");
 
   return (
-    <SettingsSection icon={<IconCreditCard size={20} />} id="subscription" title={t("Title")}>
+    <SettingsSection
+      icon={<IconCreditCard size={20} />}
+      id={SETTINGS_SUBSCRIPTION_SECTION_ID}
+      title={t("Title")}
+    >
       <CardSection inheritPadding py="md">
         <Stack gap="md">
           <Group align="flex-start" justify="space-between">
@@ -207,7 +214,7 @@ function SubscriptionCardContent({
               <UpgradeButton />
             )}
           </Group>
-          {isPremium && subscriptionStatus.aiMessageLimit > 0 && (
+          {subscriptionStatus.aiMessageLimit > 0 && (
             <div>
               <Group justify="space-between" mb={6}>
                 <Text c="dimmed" size="xs">
@@ -216,11 +223,11 @@ function SubscriptionCardContent({
                     used: subscriptionStatus.aiMessagesUsed,
                   })}
                 </Text>
-                {monthlyResetAt && (
+                {showUsageReset && monthlyResetAt ? (
                   <Text c="dimmed" size="xs">
                     {t("MonthlyUsageReset", { date: monthlyResetAt })}
                   </Text>
-                )}
+                ) : null}
               </Group>
               <Progress
                 color={

@@ -1,6 +1,7 @@
 "use client";
 
 import { ApiError, getUserFacingError } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import { CountChip, ModalFooter, ModalTitle } from "@bondery/mantine-next";
 import { Alert, Group, Stack, Text } from "@mantine/core";
 import type { FileRejection } from "@mantine/dropzone";
@@ -71,7 +72,7 @@ export function BonderyImportModal({ modalId }: BonderyImportModalProps) {
   const t = useSettingsPageTranslations("DataManagement.BonderyImport");
   const tCommon = useCommonTranslations();
   const openRef = useRef<(() => void) | null>(null);
-  const cancelledRef = useRef(false);
+  const cancelledRef = useRef<boolean>(false);
   const abortRef = useRef<AbortController | null>(null);
   const abortReasonRef = useRef<"cancel" | "timeout" | null>(null);
   const fileRef = useRef<File | null>(null);
@@ -117,12 +118,13 @@ export function BonderyImportModal({ modalId }: BonderyImportModalProps) {
     });
   }, [modalId, t]);
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       cancelledRef.current = true;
       abortRef.current?.abort();
-    };
-  }, []);
+    },
+    [],
+  );
 
   const showUploadError = phase === "upload" && errorMessage !== null;
   const showReviewError = phase === "review" && errorMessage !== null;
@@ -192,12 +194,12 @@ export function BonderyImportModal({ modalId }: BonderyImportModalProps) {
       }
       setFileCounts(counts);
       setPhase("review");
-    } catch (caught) {
+    } catch (error) {
       if (cancelledRef.current) {
         return;
       }
       const kind =
-        caught instanceof BonderyImportPeekError ? caught.kind : ("invalid" as ImportErrorKind);
+        error instanceof BonderyImportPeekError ? error.kind : ("invalid" as ImportErrorKind);
       setError(kind, peekErrorBody(kind));
       captureEvent("account_settings:import_fail", { error_code: kind });
       setPhase("upload");
@@ -205,11 +207,11 @@ export function BonderyImportModal({ modalId }: BonderyImportModalProps) {
   };
 
   const handleDrop = (files: File[]) => {
-    const file = files[0];
+    const [file] = files;
     if (!file) {
       return;
     }
-    void checkFile(file);
+    detachPromise(checkFile(file));
   };
 
   const handleReject = (rejections: FileRejection[]) => {
@@ -252,11 +254,12 @@ export function BonderyImportModal({ modalId }: BonderyImportModalProps) {
       const settingsData = settingsQuery.data?.data as
         | { importCompletedAt?: string | null }
         | undefined;
-      const isFirstImport = settingsData?.importCompletedAt == null;
+      const isFirstImport =
+        settingsData?.importCompletedAt === null || settingsData?.importCompletedAt === undefined;
       captureImportComplete("bondery_export", result.people.inserted, isFirstImport);
       setPhase("finished");
-    } catch (caught) {
-      if (caught instanceof Error && caught.name === "AbortError") {
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
         if (abortReasonRef.current === "timeout") {
           setError("timeout", t("TimeoutBody"));
           captureEvent("account_settings:import_fail", { error_code: "timeout" });
@@ -265,8 +268,8 @@ export function BonderyImportModal({ modalId }: BonderyImportModalProps) {
         return;
       }
 
-      const errorCode = caught instanceof ApiError ? caught.code : "import_bondery_failed";
-      setError("api", getUserFacingError(caught, tCommon));
+      const errorCode = error instanceof ApiError ? error.code : "import_bondery_failed";
+      setError("api", getUserFacingError(error, tCommon));
       captureEvent("account_settings:import_fail", { error_code: errorCode });
       setPhase("review");
     } finally {
@@ -410,7 +413,7 @@ export function BonderyImportModal({ modalId }: BonderyImportModalProps) {
           backLabel={tCommon("actions.back")}
           cancelLabel={tCommon("actions.cancel")}
           onAction={() => {
-            void handleImport();
+            detachPromise(handleImport());
           }}
           onBack={() => {
             clearError();

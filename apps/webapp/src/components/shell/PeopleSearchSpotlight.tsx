@@ -1,6 +1,5 @@
 "use client";
 
-import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { PERSON_SEARCH_OPTION_HIT_CLASS, PersonSearchOptionRow } from "@bondery/mantine-next";
 import type { ContactSelectable } from "@bondery/schemas";
 import { Group, Loader, Text } from "@mantine/core";
@@ -19,9 +18,9 @@ import { DEBOUNCE_MS, HOTKEYS } from "@/lib/platform/config";
 
 const [peopleStore, peopleSearchActions] = createSpotlight();
 
-export { peopleSearchActions };
-
 const descriptionColor = "var(--action-description-color, var(--mantine-color-dimmed))";
+
+export { peopleSearchActions };
 
 export function PeopleSearchSpotlight() {
   const t = usePeopleSearchSpotlightTranslations();
@@ -90,31 +89,33 @@ export function PeopleSearchSpotlight() {
       />
 
       <Spotlight.ActionsList>
-        {hasQuery && isLoading && (
+        {hasQuery && isLoading ? (
           <Spotlight.Empty>
             <Group justify="center" py="md">
               <Loader size="sm" />
             </Group>
           </Spotlight.Empty>
-        )}
+        ) : null}
 
-        {hasQuery && !isLoading && results.length === 0 && (
+        {hasQuery && !isLoading && results.length === 0 ? (
           <Spotlight.Empty>{t("NoPeopleFound")}</Spotlight.Empty>
-        )}
+        ) : null}
 
-        {hasQuery &&
-          !isLoading &&
-          results.map((contact) => (
-            <Spotlight.Action
-              className={PERSON_SEARCH_OPTION_HIT_CLASS}
-              key={contact.id}
-              onClick={() => handlePersonClick(contact)}
-            >
-              <PersonSearchOptionRow person={contact} />
-            </Spotlight.Action>
-          ))}
+        {hasQuery && !isLoading ? (
+          <>
+            {results.map((contact) => (
+              <Spotlight.Action
+                className={PERSON_SEARCH_OPTION_HIT_CLASS}
+                key={contact.id}
+                onClick={() => handlePersonClick(contact)}
+              >
+                <PersonSearchOptionRow person={contact} />
+              </Spotlight.Action>
+            ))}
+          </>
+        ) : null}
 
-        {hasQuery && !isLoading && results.length > 0 && (
+        {hasQuery && !isLoading && results.length > 0 ? (
           <Spotlight.Action onClick={handleSeeAll}>
             <Group gap="xs" justify="center" style={{ color: descriptionColor }}>
               <IconUsers size={16} stroke={1.5} />
@@ -123,7 +124,7 @@ export function PeopleSearchSpotlight() {
               </Text>
             </Group>
           </Spotlight.Action>
-        )}
+        ) : null}
       </Spotlight.ActionsList>
     </Spotlight.Root>
   );

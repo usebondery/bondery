@@ -8,7 +8,7 @@ export function metroHostFromHostUri(hostUri: string | undefined): string | null
 
   try {
     const withProtocol = hostUri.includes("://") ? hostUri : `http://${hostUri}`;
-    const hostname = new URL(withProtocol).hostname;
+    const { hostname } = new URL(withProtocol);
     return hostname.length > 0 ? hostname : null;
   } catch {
     return null;

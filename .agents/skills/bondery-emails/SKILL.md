@@ -34,32 +34,32 @@
 
 ## Decision tree
 
-| Task | Read |
-|------|------|
-| System overview | [references/architecture.md](references/architecture.md) |
-| All live emails | [references/catalog.md](references/catalog.md) |
-| Add a new email | [references/adding-a-new-email.md](references/adding-a-new-email.md) |
-| Templates, chrome, folders, branding | [references/templates-and-branding.md](references/templates-and-branding.md) |
-| Env vars, transporter, from/replyTo | [references/sending-and-env.md](references/sending-and-env.md) |
-| Preview and testing | [references/dx-preview-and-test.md](references/dx-preview-and-test.md) |
-| Triggers, jobs, idempotency | [references/triggers-and-idempotency.md](references/triggers-and-idempotency.md) |
-| Subject, preview text, mobile UX | [references/ux-email-design.md](references/ux-email-design.md) |
-| Accessibility | [references/accessibility.md](references/accessibility.md) |
+| Task                                                    | Read                                                                                                                     |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| System overview                                         | [references/architecture.md](references/architecture.md)                                                                 |
+| All live emails                                         | [references/catalog.md](references/catalog.md)                                                                           |
+| Add a new email                                         | [references/adding-a-new-email.md](references/adding-a-new-email.md)                                                     |
+| Templates, chrome, folders, branding                    | [references/templates-and-branding.md](references/templates-and-branding.md)                                             |
+| Env vars, transporter, from/replyTo                     | [references/sending-and-env.md](references/sending-and-env.md)                                                           |
+| Preview and testing                                     | [references/dx-preview-and-test.md](references/dx-preview-and-test.md)                                                   |
+| Triggers, jobs, idempotency                             | [references/triggers-and-idempotency.md](references/triggers-and-idempotency.md)                                         |
+| Subject, preview text, mobile UX                        | [references/ux-email-design.md](references/ux-email-design.md)                                                           |
+| Accessibility                                           | [references/accessibility.md](references/accessibility.md)                                                               |
 | Transactional vs marketing, unsubscribe, postal address | [references/email-types.md](references/email-types.md) and [bondery-legal emails](../bondery-legal/references/emails.md) |
-| DNS, Plunk, inbox placement | [references/deliverability.md](references/deliverability.md) |
-| Trial-ending **billing trigger** | [bondery-payments trial-ending-email](../bondery-payments/references/trial-ending-email.md) |
-| Generic React Email / Resend patterns | `email-best-practices` (`.agents/skills/email-best-practices/SKILL.md`) |
+| DNS, Plunk, inbox placement                             | [references/deliverability.md](references/deliverability.md)                                                             |
+| Trial-ending **billing trigger**                        | [bondery-payments trial-ending-email](../bondery-payments/references/trial-ending-email.md)                              |
+| Generic React Email / Resend patterns                   | `email-best-practices` (`.agents/skills/email-best-practices/SKILL.md`)                                                  |
 
 ## Cross-skill owners
 
-| Domain | Owner |
-|--------|-------|
-| Stripe trial webhook + `trial_ending_email_sent_at` | [bondery-payments](../bondery-payments/SKILL.md) |
-| Voice, sentence case | [bondery-ux](../bondery-ux/SKILL.md) |
-| Sentence craft for body copy | [bondery-writing](../bondery-writing/SKILL.md) Orwell-Hemingway |
-| PII, rate limits, trigger auth | [bondery-security](../bondery-security/SKILL.md) |
+| Domain                                               | Owner                                                                                           |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Stripe trial webhook + `trial_ending_email_sent_at`  | [bondery-payments](../bondery-payments/SKILL.md)                                                |
+| Voice, sentence case                                 | [bondery-ux](../bondery-ux/SKILL.md)                                                            |
+| Sentence craft for body copy                         | [bondery-writing](../bondery-writing/SKILL.md) Orwell-Hemingway                                 |
+| PII, rate limits, trigger auth                       | [bondery-security](../bondery-security/SKILL.md)                                                |
 | Plunk subprocessor, marketing vs transactional email | [bondery-legal](../bondery-legal/SKILL.md) → [emails.md](../bondery-legal/references/emails.md) |
-| User-visible release notes | [bondery-changelog](../bondery-changelog/SKILL.md) |
+| User-visible release notes                           | [bondery-changelog](../bondery-changelog/SKILL.md)                                              |
 
 ## Pre-ship checklist
 

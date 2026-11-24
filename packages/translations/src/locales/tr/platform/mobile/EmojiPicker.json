@@ -1,0 +1,22 @@
+{
+  "Category": {
+    "Activities": "Etkinlikler",
+    "Animals": "Hayvanlar",
+    "Buildings": "Binalar",
+    "Celebrations": "Kutlamalar",
+    "Food": "Yiyecek",
+    "Hearts": "Kalpler",
+    "Humans": "İnsanlar",
+    "Miscellaneous": "Çeşitli",
+    "Nature": "Doğa",
+    "Objects": "Nesneler",
+    "Sports": "Spor",
+    "Travel": "Seyahat",
+    "Work": "İş"
+  },
+  "EmptySearch": "Emoji bulunamadı",
+  "RandomAccessibilityLabel": "Rastgele emoji seç",
+  "SearchPlaceholder": "Emoji ara…",
+  "SheetTitle": "Emoji",
+  "TriggerAccessibilityHint": "Emoji seçiciyi aç"
+}

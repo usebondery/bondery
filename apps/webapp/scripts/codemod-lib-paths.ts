@@ -7,6 +7,8 @@ import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
+const TS_TSX_MD = /\.(ts|tsx|md)$/;
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const webappRoot = join(__dirname, "..");
 
@@ -55,7 +57,7 @@ function walk(dir: string): string[] {
         continue;
       }
       files.push(...walk(full));
-    } else if (/\.(ts|tsx|md)$/.test(entry)) {
+    } else if (TS_TSX_MD.test(entry)) {
       files.push(full);
     }
   }

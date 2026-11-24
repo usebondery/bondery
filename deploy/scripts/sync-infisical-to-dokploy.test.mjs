@@ -13,6 +13,9 @@ import {
   readDokployConfig,
 } from "./sync-infisical-to-dokploy.mjs";
 
+const INFRA_VERSION_LINE_RE = /BONDERY_INFRA_VERSION=1\.8\.2/;
+const WEBAPP_DOMAIN_LINE_RE = /BONDERY_INFRA_WEBAPP_DOMAIN=app\.usebondery\.com/;
+
 describe("sync-infisical-to-dokploy", () => {
   const websiteEnv = {
     BONDERY_INFRA_API_DOMAIN: "api.usebondery.com",
@@ -270,8 +273,7 @@ describe("sync-infisical-to-dokploy", () => {
     "BONDERY_INFRA_PLAUSIBLE_DOMAIN",
   ]) {
     it(`website sync fails when required key ${missingKey} is missing`, () => {
-      const env = { ...websiteEnv };
-      delete env[missingKey];
+      const { [missingKey]: _missing, ...env } = websiteEnv;
 
       let exited = false;
       const originalExit = process.exit;
@@ -356,8 +358,8 @@ describe("sync-infisical-to-dokploy", () => {
 
     const merged = mergeComposeEnv(existing, rows, quoteEnvValue);
 
-    assert.match(merged, /BONDERY_INFRA_VERSION=1\.8\.2/);
-    assert.match(merged, /BONDERY_INFRA_WEBAPP_DOMAIN=app\.usebondery\.com/);
+    assert.match(merged, INFRA_VERSION_LINE_RE);
+    assert.match(merged, WEBAPP_DOMAIN_LINE_RE);
   });
 
   it("mergeOpsEnv remains an alias for mergeComposeEnv", () => {

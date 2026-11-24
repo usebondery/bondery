@@ -24,10 +24,12 @@
     },
     "26630": {
       "label": "website",
+      "onAutoForward": "notify",
       "requireLocalPort": true
     },
     "26631": {
       "label": "api",
+      "protocol": "https",
       "requireLocalPort": true
     },
     "26632": {

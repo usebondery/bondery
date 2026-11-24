@@ -52,14 +52,14 @@ export function ContactChannelBadges({
           ]}
         >
           <IconStarFilled fill={colors.primary} size={12} stroke={colors.primary} />
-          <Text c="brand" className="text-[11px]" fw={600} size={null}>
+          <Text c="brand" className="text-2xs" fw={600} size={null}>
             {tContactInfo("Preferred")}
           </Text>
         </View>
       ) : null}
       <View style={[contactDetailStyles.badge, { backgroundColor: colors.border }]}>
         <Text style={contactDetailStyles.typeEmoji}>{typeEmoji}</Text>
-        <Text c="secondary" className="text-[11px]" fw={600} size={null}>
+        <Text c="secondary" className="text-2xs" fw={600} size={null}>
           {typeLabel}
         </Text>
       </View>

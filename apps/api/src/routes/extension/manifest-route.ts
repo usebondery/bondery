@@ -25,17 +25,15 @@ export function registerManifestRoute(fastify: AppFastifyInstance): void {
         tags: ["Extension"],
       } satisfies FastifyZodOpenApiSchema,
     },
-    async () => {
-      return {
-        extension: {
-          latestVersion: latestProductionCalver(
-            readRuntimeProductVersion(packageVersion),
-            MIN_EXTENSION_VERSION,
-          ),
-          minVersion: MIN_EXTENSION_VERSION,
-          storeUrl: CHROME_EXTENSION_URL,
-        },
-      };
-    },
+    async () => ({
+      extension: {
+        latestVersion: latestProductionCalver(
+          readRuntimeProductVersion(packageVersion),
+          MIN_EXTENSION_VERSION,
+        ),
+        minVersion: MIN_EXTENSION_VERSION,
+        storeUrl: CHROME_EXTENSION_URL,
+      },
+    }),
   );
 }

@@ -1,0 +1,16 @@
+{
+  "CheckingAgain": "Νέος έλεγχος σε {seconds} δ.…",
+  "Description": "Ο λογαριασμός σου είναι ασφαλής και παραμένεις σε σύνδεση. Συνεχίζουμε τους ελέγχους, συνήθως διαρκεί λίγο.",
+  "MetadataTitle": "Η υπηρεσία δεν είναι διαθέσιμη",
+  "Retry": "Δοκίμασε ξανά",
+  "StatusChecking": "Έλεγχος σύνδεσης…",
+  "StatusDegraded": "Ορισμένες λειτουργίες μπορεί να είναι αργές αυτή τη στιγμή",
+  "StatusOffline": "Το Bondery είναι προσωρινά μη διαθέσιμο",
+  "StatusOnline": "Η σύνδεση επανήλθε. Σε πηγαίνουμε πίσω…",
+  "StatusPageLink": "Δες τη σελίδα κατάστασης",
+  "TechnicalBackendStatus": "Backend: {status}",
+  "TechnicalDetails": "Τεχνικές λεπτομέρειες",
+  "TechnicalHttpStatus": "Κατάσταση HTTP: {status}",
+  "TechnicalUnreachable": "μη προσβάσιμο",
+  "Title": "Δυσκολευόμαστε να συνδεθούμε"
+}

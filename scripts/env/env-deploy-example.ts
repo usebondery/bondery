@@ -1,7 +1,7 @@
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { createCliLogger } from "@bondery/helpers/cli";
-import { DEPLOY_GENERATED_HEADER, formatEnvFile } from "./env-file-format.js";
+import { DEPLOY_GENERATED_HEADER, type EnvFileVar, formatEnvFile } from "./env-file-format.js";
 import {
   DEPLOY_GROUP_GUIDES,
   ENV_MANIFEST,
@@ -10,7 +10,7 @@ import {
 } from "./env-manifest.ts";
 
 export function collectDeployExampleRows(infraPinVersion: string) {
-  const rows = [];
+  const rows: EnvFileVar[] = [];
   for (const entry of ENV_MANIFEST) {
     const deploy = entry.deployExample;
     if (!deploy?.include) {

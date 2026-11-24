@@ -1,9 +1,3 @@
-export interface MapUrlCamera {
-  latitude: number;
-  longitude: number;
-  zoom: number;
-}
-
 const LAT_DECIMALS = 5;
 const LNG_DECIMALS = 5;
 const ZOOM_DECIMALS = 1;
@@ -30,6 +24,16 @@ function clamp(value: number, min: number, max: number): number {
 function roundTo(value: number, decimals: number): number {
   const factor = 10 ** decimals;
   return Math.round(value * factor) / factor;
+}
+
+/** Minimal shape shared by `URLSearchParams` and Next `ReadonlyURLSearchParams`. */
+interface ReadonlyURLSearchParamsLike {
+  get: (name: string) => string | null;
+}
+export interface MapUrlCamera {
+  latitude: number;
+  longitude: number;
+  zoom: number;
 }
 
 /**
@@ -98,9 +102,4 @@ export function isSameMapCameraInSearchParams(
     existing.longitude === next.longitude &&
     existing.zoom === next.zoom
   );
-}
-
-/** Minimal shape shared by `URLSearchParams` and Next `ReadonlyURLSearchParams`. */
-interface ReadonlyURLSearchParamsLike {
-  get(name: string): string | null;
 }

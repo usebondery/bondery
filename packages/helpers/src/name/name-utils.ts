@@ -2,6 +2,9 @@
  * Name parsing and cleaning utilities shared across import flows and the redirect API.
  */
 
+const PATTERN_2C24_RE = /,$/;
+const PATTERN_5C732B_RE = /\s+/;
+
 const NAME_TITLE_TOKENS = new Set([
   "doc",
   "doc.",
@@ -57,6 +60,10 @@ const NAME_TITLE_TOKENS = new Set([
  * @param value Name string potentially containing parenthetical parts.
  * @returns Name string with parentheses removed but their content preserved.
  */
+function normalizeNameToken(token: string): string {
+  return token.trim().replace(PATTERN_2C24_RE, "").toLowerCase();
+}
+
 export function stripNameParentheticals(value: string): string {
   return value
     .replace(/\(([^)]*)\)/g, "$1")
@@ -78,10 +85,6 @@ export function stripEmojis(value: string): string {
     .trim();
 }
 
-function normalizeNameToken(token: string): string {
-  return token.trim().replace(/,$/, "").toLowerCase();
-}
-
 /**
  * Strips common academic/professional title prefixes and suffixes from a name string.
  *
@@ -89,7 +92,7 @@ function normalizeNameToken(token: string): string {
  * @returns Name string with leading/trailing title tokens removed.
  */
 export function stripNameTitles(rawName: string): string {
-  const words = rawName.split(/\s+/).filter(Boolean);
+  const words = rawName.split(PATTERN_5C732B_RE).filter(Boolean);
   if (words.length === 0) {
     return "";
   }
@@ -97,17 +100,17 @@ export function stripNameTitles(rawName: string): string {
   let start = 0;
   let end = words.length - 1;
 
-  while (start <= end && NAME_TITLE_TOKENS.has(normalizeNameToken(words[start]))) {
+  while (start <= end && NAME_TITLE_TOKENS.has(normalizeNameToken(words[start] ?? ""))) {
     start += 1;
   }
 
-  while (end >= start && NAME_TITLE_TOKENS.has(normalizeNameToken(words[end]))) {
+  while (end >= start && NAME_TITLE_TOKENS.has(normalizeNameToken(words[end] ?? ""))) {
     end -= 1;
   }
 
   return words
     .slice(start, end + 1)
-    .map((w) => w.replace(/,$/, "")) // strip trailing commas left by "Name, TITLE" patterns
+    .map((w) => w.replace(PATTERN_2C24_RE, "")) // strip trailing commas left by "Name, TITLE" patterns
     .join(" ")
     .trim();
 }
@@ -124,20 +127,18 @@ export function extractNameParts(lastNameInput: string): {
   middleName: string | null;
   lastName: string;
 } {
-  const words = lastNameInput.trim().split(/\s+/).filter(Boolean);
+  const words = lastNameInput.trim().split(PATTERN_5C732B_RE).filter(Boolean);
 
-  if (words.length === 0) {
+  const lastName = words.at(-1);
+  if (lastName === undefined) {
     return { lastName: "", middleName: null };
   }
 
   if (words.length === 1) {
-    return { lastName: words[0], middleName: null };
+    return { lastName, middleName: null };
   }
 
-  return {
-    lastName: words[words.length - 1],
-    middleName: words[words.length - 2],
-  };
+  return { lastName, middleName: words.at(-2) ?? null };
 }
 
 /**
@@ -153,7 +154,7 @@ export function extractNameParts(lastNameInput: string): {
  */
 export function normalizeNameCase(name: string): string {
   return name
-    .split(/\s+/)
+    .split(PATTERN_5C732B_RE)
     .map((token) => {
       if (token.length > 1 && token === token.toUpperCase()) {
         return token.charAt(0).toUpperCase() + token.slice(1).toLowerCase();
@@ -191,23 +192,21 @@ export function parseFullName(fullName: string): {
   lastName: string | null;
 } {
   const cleaned = cleanPersonName(fullName);
-  const tokens = cleaned.split(/\s+/).filter(Boolean);
+  const tokens = cleaned.split(PATTERN_5C732B_RE).filter(Boolean);
 
-  if (tokens.length === 0) {
+  const firstName = tokens.at(0);
+  const lastName = tokens.at(-1);
+  if (firstName === undefined || lastName === undefined) {
     return { firstName: "", lastName: null, middleName: null };
   }
 
   if (tokens.length === 1) {
-    return { firstName: tokens[0], lastName: null, middleName: null };
+    return { firstName, lastName: null, middleName: null };
   }
 
   if (tokens.length === 2) {
-    return { firstName: tokens[0], lastName: tokens[1], middleName: null };
+    return { firstName, lastName, middleName: null };
   }
 
-  return {
-    firstName: tokens[0],
-    lastName: tokens[tokens.length - 1],
-    middleName: tokens.slice(1, -1).join(" "),
-  };
+  return { firstName, lastName, middleName: tokens.slice(1, -1).join(" ") };
 }

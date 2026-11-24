@@ -18,12 +18,14 @@ import { useLoginPageTranslations } from "@/lib/i18n/generated/hooks";
 import { INTEGRATION_PROVIDERS } from "@/lib/platform/config";
 import classes from "./LoginProviderButtons.module.css";
 
+const styles = {
+  brandButton: classes["brandButton"] ?? "",
+};
+
 const PROVIDER_ICONS: Record<string, ComponentType<{ size?: number }>> = {
   github: IconBrandGithubFilled,
   linkedin: IconBrandLinkedin,
 };
-
-export type LoginBusyAction = OAuthProviderId | "email" | "passkey" | null;
 
 type LoginProviderButtonsProps = {
   allowedOAuthProviders?: OAuthProviderId[];
@@ -37,6 +39,8 @@ type LoginProviderButtonsProps = {
   showOAuth: boolean;
   showPasskey: boolean;
 };
+
+export type LoginBusyAction = OAuthProviderId | "email" | "passkey" | null;
 
 export function LoginProviderButtons({
   allowedOAuthProviders,
@@ -91,7 +95,7 @@ export function LoginProviderButtons({
             const button = (
               <CornerLabeledButton
                 autoContrast
-                className={classes.brandButton}
+                className={styles.brandButton}
                 color={provider.backgroundColor}
                 cornerLabel={isLastUsed ? t("LastUsed") : undefined}
                 cornerLabelTestId="login-last-used-badge"
@@ -133,7 +137,7 @@ export function LoginProviderButtons({
       {showPasskey ? (
         <CornerLabeledButton
           autoContrast
-          className={classes.brandButton}
+          className={styles.brandButton}
           color="gray"
           cornerLabel={passkeyIsLastUsed ? t("LastUsed") : undefined}
           cornerLabelTestId="login-last-used-badge"

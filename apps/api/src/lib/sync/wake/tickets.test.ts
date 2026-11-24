@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { InMemorySyncWsTicketStore } from "./tickets.js";
 
-describe("InMemorySyncWsTicketStore", () => {
+describe("inMemorySyncWsTicketStore", () => {
   it("issues and consumes a ticket once", async () => {
     const store = new InMemorySyncWsTicketStore();
     const { ticket } = await store.issue("user-1");

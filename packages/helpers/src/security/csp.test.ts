@@ -3,6 +3,8 @@ import { describe, it } from "node:test";
 import { buildCsp, CSP_REPORT_GROUP } from "./csp.js";
 
 /** Parses a policy string into directive name → sources. */
+const PATTERN_5C732B_RE = /\s+/;
+
 function parsePolicy(policy: string): Map<string, string[]> {
   const map = new Map<string, string[]>();
   for (const entry of policy.split(";")) {
@@ -10,7 +12,7 @@ function parsePolicy(policy: string): Map<string, string[]> {
     if (trimmed.length === 0) {
       continue;
     }
-    const [name, ...sources] = trimmed.split(/\s+/);
+    const [name, ...sources] = trimmed.split(PATTERN_5C732B_RE);
     if (name) {
       map.set(name, sources);
     }

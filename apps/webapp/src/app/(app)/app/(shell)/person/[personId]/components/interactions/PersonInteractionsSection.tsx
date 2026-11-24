@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { NEXT_ACTION_PARAM, NEXT_ACTIONS } from "@bondery/helpers/globals/webapp-query";
 import {
   errorNotificationTemplate,
@@ -42,7 +43,7 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
   const tCommon = useCommonTranslations();
   const deleteInteractionMutation = useDeleteInteractionMutation(personId);
   const createInteractionMutation = useCreateInteractionMutation(personId);
-  const addInteractionTriggeredRef = useRef(false);
+  const addInteractionTriggeredRef = useRef<boolean>(false);
   const {
     data: interactionsData,
     fetchNextPage,
@@ -60,9 +61,7 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
     (candidate) => candidate.id !== personId,
   );
 
-  const contactsById = (() => {
-    return new Map([[contact.id, contact]]);
-  })();
+  const contactsById = (() => new Map([[contact.id, contact]]))();
 
   const sortedActivities = [...activities].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
@@ -107,8 +106,8 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
     });
   };
 
-  const resolveParticipants = (activity: Activity): PersonPreview[] => {
-    return (activity.participants || []).flatMap((participant) => {
+  const resolveParticipants = (activity: Activity): PersonPreview[] =>
+    (activity.participants ?? []).flatMap((participant) => {
       const participantId = typeof participant === "string" ? participant : participant.id;
       const knownContact = contactsById.get(participantId);
       if (knownContact) {
@@ -129,7 +128,6 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
         },
       ];
     });
-  };
 
   const handleDelete = (activity: Activity) => {
     openStandardConfirmModal({
@@ -167,7 +165,7 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
   };
 
   const handleDuplicate = async (activity: Activity) => {
-    const participantIds = (activity.participants || [])
+    const participantIds = (activity.participants ?? [])
       .map((participant) => (typeof participant === "string" ? participant : participant.id))
       .filter((id): id is string => Boolean(id));
 
@@ -181,9 +179,9 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
     try {
       await createInteractionMutation.mutateAsync({
         date: activity.date,
-        description: activity.description || "",
+        description: activity.description ?? "",
         participantIds,
-        title: activity.title || "",
+        title: activity.title ?? "",
         type: activity.type,
       });
 
@@ -234,7 +232,7 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
         isFetchingNextPage={isFetchingNextPage}
         isFetchNextPageError={isFetchNextPageError}
         onLoadMore={() => {
-          void fetchNextPage();
+          detachPromise(fetchNextPage());
         }}
         retryLabel={t("LoadMoreRetry")}
       />

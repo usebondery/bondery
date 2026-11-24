@@ -4,6 +4,14 @@ import { useQuery } from "@tanstack/react-query";
 import { createWebappAuthClient } from "@/lib/auth/client";
 import { settingsKeys } from "@/lib/query/keys";
 
+async function fetchPasskeys(): Promise<PasskeyRecord[]> {
+  const { data, error } = await createWebappAuthClient().passkey.listUserPasskeys();
+  if (error) {
+    throw error;
+  }
+  return Array.isArray(data) ? data : [];
+}
+
 export type PasskeyRecord = {
   aaguid?: string | null;
   createdAt?: Date | string;
@@ -14,21 +22,13 @@ export type PasskeyRecord = {
 
 export function passkeyLastUsedAtIso(passkey: PasskeyRecord): string | null {
   const value = passkey.lastUsedAt;
-  if (value == null) {
+  if (value === null || value === undefined) {
     return null;
   }
   if (value instanceof Date) {
     return Number.isNaN(value.getTime()) ? null : value.toISOString();
   }
   return value.length > 0 ? value : null;
-}
-
-async function fetchPasskeys(): Promise<PasskeyRecord[]> {
-  const { data, error } = await createWebappAuthClient().passkey.listUserPasskeys();
-  if (error) {
-    throw error;
-  }
-  return Array.isArray(data) ? data : [];
 }
 
 export function usePasskeysQuery() {

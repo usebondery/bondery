@@ -25,7 +25,9 @@ describe("refreshSqliteViews", () => {
 
     await client.prefetchQuery({ meta, queryFn: sqliteRead, queryKey });
     const observer = new QueryObserver(client, { meta, queryFn: sqliteRead, queryKey });
-    const unsubscribe = observer.subscribe(() => {});
+    const unsubscribe = observer.subscribe(() => {
+      // Keep the query observed. The test reads the cache, not observer events.
+    });
 
     sqliteValue = "after";
     refreshSqliteViews(["people"], client);
@@ -81,7 +83,9 @@ describe("refreshSqliteViews", () => {
       queryKey,
     };
     const observer = new QueryObserver(client, options);
-    const unsubscribe = observer.subscribe(() => {});
+    const unsubscribe = observer.subscribe(() => {
+      // Keep the query observed. The test reads the cache, not observer events.
+    });
 
     sqliteValue = "after";
     refreshSqliteViews(["people"], client);
@@ -94,7 +98,7 @@ describe("refreshSqliteViews", () => {
   it("reports active SQLite read failures without retaining stale data", async () => {
     const client = makeClient();
     const queryKey = ["sqlite", "contacts", "detail", "person-1"] as const;
-    let shouldFail = false;
+    let shouldFail = false as boolean;
     const sqliteRead = () => {
       if (shouldFail) {
         throw new Error("SQLite read failed");
@@ -105,7 +109,9 @@ describe("refreshSqliteViews", () => {
 
     await client.prefetchQuery({ meta, queryFn: sqliteRead, queryKey });
     const observer = new QueryObserver(client, { meta, queryFn: sqliteRead, queryKey });
-    const unsubscribe = observer.subscribe(() => {});
+    const unsubscribe = observer.subscribe(() => {
+      // Keep the query observed. The test reads the cache, not observer events.
+    });
 
     shouldFail = true;
     refreshSqliteViews(["people"], client);
@@ -149,7 +155,9 @@ describe("refreshSqliteViews", () => {
       queryFn: contactsRead,
       queryKey: contactsKey,
     });
-    const unsubscribe = observer.subscribe(() => {});
+    const unsubscribe = observer.subscribe(() => {
+      // Keep the query observed. The test reads the cache, not observer events.
+    });
 
     refreshSqliteViews(["people_groups"], client);
 

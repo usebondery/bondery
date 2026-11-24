@@ -1,10 +1,11 @@
 "use client";
 
-import { Group, Stack, Text } from "@mantine/core";
+import { Stack, Text } from "@mantine/core";
 import { TimePicker } from "@mantine/dates";
 import { IconBell } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
+import { useDateFormatter } from "@/lib/i18n/useDateFormatter";
 import { parseReminderPickerInput } from "./reminderTimeValue";
 
 interface ReminderTimePickerProps {
@@ -25,6 +26,7 @@ export function ReminderTimePicker({
   description,
 }: ReminderTimePickerProps) {
   const t = useSettingsPageTranslations("Preferences");
+  const formatter = useDateFormatter();
 
   const presetGroups = [
     {
@@ -51,32 +53,30 @@ export function ReminderTimePicker({
           {description}
         </Text>
       ) : null}
-      <Group align="flex-end" grow wrap="wrap">
-        <div style={{ flex: 1, minWidth: 220 }}>
-          <TimePicker
-            format={timeFormat}
-            key={timeFormat}
-            leftSection={<IconBell size={16} />}
-            minutesStep={60}
-            onBlur={onBlur}
-            onChange={(nextValue) => {
-              if (!nextValue) {
-                return;
-              }
+      <TimePicker
+        amPmLabels={formatter.amPmLabels()}
+        format={timeFormat}
+        key={timeFormat}
+        leftSection={<IconBell size={16} />}
+        minutesStep={60}
+        onBlur={onBlur}
+        onChange={(nextValue) => {
+          if (!nextValue) {
+            return;
+          }
 
-              const parsedValue = parseReminderPickerInput(nextValue);
-              if (!parsedValue) {
-                return;
-              }
+          const parsedValue = parseReminderPickerInput(nextValue);
+          if (!parsedValue) {
+            return;
+          }
 
-              onChange(parsedValue);
-            }}
-            presets={presetGroups}
-            value={value}
-            withDropdown
-          />
-        </div>
-      </Group>
+          onChange(parsedValue);
+        }}
+        presets={presetGroups}
+        value={value}
+        w="100%"
+        withDropdown
+      />
     </Stack>
   );
 }

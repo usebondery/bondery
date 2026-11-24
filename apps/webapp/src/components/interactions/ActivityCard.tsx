@@ -19,6 +19,7 @@ import type { MouseEvent } from "react";
 import { getActivityTypeConfig } from "@/lib/contacts/activityTypes";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 import { useInteractionTypeLabel } from "@/lib/i18n/useInteractionTypeLabel";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 
 interface ActivityCardProps {
   actionsLabel: string;
@@ -86,14 +87,10 @@ export function ActivityCard({
           <Group align="flex-start" gap="xs" justify="space-between" wrap="nowrap">
             <Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
               <Text fw={700} size="md">
-                {activity.title || typeLabel}
+                {nonEmpty(activity.title) ?? typeLabel}
               </Text>
               <Text c="dimmed" size="xs">
-                {formatter.dateTime(date, {
-                  day: "numeric",
-                  month: "short",
-                  year: "numeric",
-                })}
+                {formatter.formatDate(date, "medium")}
               </Text>
               {activity.description ? (
                 <Text c="dimmed" size="xs">

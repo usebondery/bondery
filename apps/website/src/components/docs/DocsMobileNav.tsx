@@ -1,5 +1,8 @@
 "use client";
 
+import docs from "@bondery/translations/locales/en/platform/website/WebsiteDocs.json" with {
+  type: "json",
+};
 import { Burger, Drawer } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import type * as PageTree from "fumadocs-core/page-tree";
@@ -26,7 +29,7 @@ export function DocsMobileNav({ pathname, tabs, tree }: DocsMobileNavProps) {
   return (
     <>
       <Burger
-        aria-label={opened ? "Close documentation menu" : "Open documentation menu"}
+        aria-label={opened ? docs.Navigation.CloseMenu : docs.Navigation.OpenMenu}
         onClick={toggle}
         opened={opened}
       />
@@ -34,7 +37,7 @@ export function DocsMobileNav({ pathname, tabs, tree }: DocsMobileNavProps) {
         <Drawer.Overlay />
         <Drawer.Content>
           <Drawer.Header>
-            <Drawer.Title>Documentation</Drawer.Title>
+            <Drawer.Title>{docs.Navigation.DrawerTitle}</Drawer.Title>
             <Drawer.CloseButton />
           </Drawer.Header>
           <Drawer.Body>

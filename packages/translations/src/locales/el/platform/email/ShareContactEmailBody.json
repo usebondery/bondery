@@ -1,0 +1,22 @@
+{
+  "description": "Ο/Η {{senderName}} μοιράστηκε αυτή την επαφή μαζί σου",
+  "footerNotes": "Στάλθηκε με Bondery. Απάντησε σε αυτό το email για να επικοινωνήσεις με {{senderName}}.",
+  "importantDateLine": "{{label}}: {{date}} ({{type}})",
+  "labels": {
+    "address": "Διεύθυνση",
+    "email": "Email",
+    "facebook": "Facebook",
+    "importantDates": "Σημαντικές ημερομηνίες",
+    "instagram": "Instagram",
+    "linkedin": "LinkedIn",
+    "location": "Τοποθεσία",
+    "notes": "Σημειώσεις",
+    "phone": "Τηλέφωνο",
+    "signal": "Signal",
+    "website": "Ιστότοπος",
+    "whatsapp": "WhatsApp"
+  },
+  "previewFallback": "Τηλέφωνο, email και άλλα στοιχεία μέσα",
+  "replyCta": "Απάντηση σε {{senderName}}",
+  "subject": "Ο/Η {{senderName}} μοιράστηκε επαφή • {{contactName}}"
+}

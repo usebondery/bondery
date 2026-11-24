@@ -48,10 +48,11 @@ export async function commitVCardImport(
   const importedCount = insertedPeople.length;
   const personIds = insertedPeople.map((person) => person.id);
 
-  const contactPersonPairs = contacts.map((contact, index) => ({
-    contact,
-    personId: personIds[index],
-  }));
+  // `createManyAndReturn` returns one row per input row, in input order.
+  const contactPersonPairs = contacts.flatMap((contact, index) => {
+    const personId = personIds[index];
+    return personId === undefined ? [] : [{ contact, personId }];
+  });
 
   const phoneRows = contactPersonPairs.flatMap(({ contact, personId }) =>
     contact.phones.map((phone, sortOrder) => ({
@@ -142,7 +143,7 @@ export async function commitVCardImport(
           validAddresses.find((address) => address.type === "home") ??
           validAddresses[0];
 
-        if (!picked || picked.latitude == null || picked.longitude == null) {
+        if (!picked || picked.latitude === null || picked.longitude === null) {
           return;
         }
 
@@ -175,9 +176,9 @@ export async function commitVCardImport(
             WHERE id = ${personId}::uuid AND user_id = ${user.id}::uuid
           `;
         }
-      } catch (err) {
+      } catch (error) {
         log?.error(
-          { err, personId },
+          { err: error, personId },
           "Failed to sync preferred address to person during vCard import",
         );
       }
@@ -256,7 +257,7 @@ export async function commitVCardImport(
   const avatarUploads = contactPersonPairs
     .filter(({ contact }) => contact.avatarUri)
     .map(async ({ contact, personId }) => {
-      const avatarUri = contact.avatarUri;
+      const { avatarUri } = contact;
       if (!avatarUri) {
         return;
       }
@@ -270,8 +271,7 @@ export async function commitVCardImport(
           if (!decoded) {
             return;
           }
-          buffer = decoded.buffer;
-          contentType = decoded.contentType;
+          ({ buffer, contentType } = decoded);
         } else if (avatarUri.startsWith("http")) {
           const response = await fetch(avatarUri);
           if (!response.ok) {

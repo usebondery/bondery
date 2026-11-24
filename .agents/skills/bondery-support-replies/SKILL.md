@@ -47,12 +47,12 @@ This is **not** marketing copy ([bondery-brand](../bondery-brand/SKILL.md)), UI 
 
 ## Decision tree
 
-| Task | Read |
-|------|------|
-| Voice, anti-slop, YC founder bar | [references/voice.md](references/voice.md) |
+| Task                                    | Read                                                           |
+| --------------------------------------- | -------------------------------------------------------------- |
+| Voice, anti-slop, YC founder bar        | [references/voice.md](references/voice.md)                     |
 | Greeting, body, sign-off, channel shape | [references/reply-structure.md](references/reply-structure.md) |
-| Whether and how to offer Premium | [references/premium-offer.md](references/premium-offer.md) |
-| Good vs bad examples | [references/examples.md](references/examples.md) |
+| Whether and how to offer Premium        | [references/premium-offer.md](references/premium-offer.md)     |
+| Good vs bad examples                    | [references/examples.md](references/examples.md)               |
 
 Full index: [references/README.md](references/README.md).
 

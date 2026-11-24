@@ -2,7 +2,7 @@
 title: "Environment configuration"
 description: One naming scheme for every env var, and one root file for local development. See the prefixes, who may read each value, and how to add one.
 icon: Settings
-last_updated: 2026-10-23
+last_updated: 2026-11-22
 ---
 
 Bondery uses one naming scheme everywhere and one root file for local development.
@@ -124,7 +124,7 @@ Templates: [`.env.local.example`](../../.env.local.example) (local dev) · [`dep
 ## Platform adapters (why not `NEXT_PUBLIC_` / `EXPO_PUBLIC_`)
 
 - **Webapp** — runtime config via dynamic `process.env[name]` + `/runtime-config.json` (same Docker image, many environments). Never use `NEXT_PUBLIC_*` for product config.
-- **Website** — Server Components / route handlers read `BONDERY_PUBLIC_*` from `process.env`. Client leaves receive values as RSC props (no `next.config` `env`, no `NEXT_PUBLIC_*`).
+- **Website** — `apps/website/src/lib/env.ts` is the only module that reads `BONDERY_PUBLIC_*` from `process.env`. Biome rejects a `process.env` read elsewhere in `apps/website`. `lib/config.ts` adds `server-only` and freezes the required origins for page metadata. Client leaves receive values as RSC props (no `next.config` `env`, no `NEXT_PUBLIC_*`).
 - **Mobile** — Expo only auto-inlines `EXPO_PUBLIC_*`. We load `BONDERY_PUBLIC_*` in `app.config.ts` into `extra`, and [`apps/mobile/src/lib/config.ts`](../../apps/mobile/src/lib/config.ts) reads `Constants.expoConfig.extra`.
 - **Chrome extension** — Vite `envPrefix: ["BONDERY_PUBLIC_", "WXT_"]`.
 

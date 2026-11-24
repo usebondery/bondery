@@ -1,0 +1,21 @@
+{
+  "AllEnrichedDescription": "Alla kontakter med LinkedIn-profil er redan berikade.",
+  "AllEnrichedTitle": "Alla kontakter berikade",
+  "Badge": "LinkedIn",
+  "CurrentlyEnriching": "Berikar just nu:",
+  "EligibleLabel_one": "{count} person kan berikas",
+  "EligibleLabel_other": "{count} personer kan berikas",
+  "Enrich": "Berika",
+  "EnrichAll": "Berika alla",
+  "HelpTooltip": "Hent sidste LinkedIn-profilen till kontakten. Klicka for at læse hur berikning fungerar.",
+  "Pause": "Pausa",
+  "PausingTooltip": "Aktuell kontakt slutförs, sedan paus…",
+  "PersonEligibleLabel": "Den her kontakten kan berikas från LinkedIn",
+  "ProcessingPerson": "Berikar {name}…",
+  "ProgressLabel": "Berikning: {completed} av {totalEligible} færdiga",
+  "ProgressLabelWithFailed": "Berikning: {completed} av {totalEligible} færdiga ({failed} misslyckades)",
+  "Resume": "Fortsæt",
+  "ResumeLabel": "Berikning avbruten: {completed} færdiga, {pending} venter",
+  "SkipRemaining": "Hoppa över resten",
+  "Tooltip": "Dessa kontakter har LinkedIn-profil men er ikke berikade end. Berika for at hent sidste karriere, utbildning og bio."
+}

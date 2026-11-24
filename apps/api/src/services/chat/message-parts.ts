@@ -65,7 +65,7 @@ export function stripToolPartsForModel(
 
 /** True when the last assistant message carries a tool part awaiting a decision. */
 export function hasPendingToolApproval(messages: UIMessage[]): boolean {
-  const lastMessage = messages[messages.length - 1];
+  const lastMessage = messages.at(-1);
   if (lastMessage?.role !== "assistant") {
     return false;
   }
@@ -86,10 +86,12 @@ export function hasToolApprovalDecision(messages: UIMessage[]): boolean {
   return messages.some(
     (message) =>
       message.role === "assistant" &&
-      message.parts.some(
-        (part) =>
-          isToolPart(part) &&
-          (part as { approval?: { approved?: unknown } }).approval?.approved != null,
-      ),
+      message.parts.some((part) => {
+        if (!isToolPart(part)) {
+          return false;
+        }
+        const approved = (part as { approval?: { approved?: unknown } }).approval?.approved;
+        return approved !== null && approved !== undefined;
+      }),
   );
 }

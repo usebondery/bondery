@@ -21,7 +21,7 @@ type ChannelsAndSocialExtras = {
   signal: string | null;
 };
 
-export type FullContactExtras = ChannelsAndSocialExtras & {
+type FullContactExtras = ChannelsAndSocialExtras & {
   addresses: ContactExtrasPayload["addresses"];
 };
 
@@ -102,6 +102,8 @@ function mergeExtrasIntoContact<T extends ContactWithId>(
   };
 }
 
+export type { FullContactExtras };
+
 /**
  * Enriches a list of contacts with channels (phones + emails), optional addresses,
  * and socials via a single RPC batch load.
@@ -126,7 +128,7 @@ export async function attachContactExtras<T extends ContactWithId>(
   contacts: T[],
   options?: { addresses?: boolean; avatarOptions?: AvatarTransformOptions },
 ): Promise<Array<T & ChannelsAndSocialExtras>> {
-  if (!contacts.length) {
+  if (contacts.length === 0) {
     return [];
   }
 

@@ -1,0 +1,11 @@
+{
+  "ActionsButton": "Acciones",
+  "CannotDeleteMyself": "No puedes eliminar tu propia ficha de contacto",
+  "CannotMergeMyself": "No puedes fusionar tu propia ficha de contacto con otras",
+  "DeleteContact": "Eliminar contacto",
+  "DownloadVCard": "Descargar vCard",
+  "ExportError": "Error",
+  "ExportErrorDescription": "No se ha podido exportar el contacto. Inténtalo de nuevo.",
+  "ExportSuccess": "Hecho",
+  "ExportSuccessDescription": "Contacto exportado como vCard"
+}

@@ -11,8 +11,6 @@ const SOCIAL_PLATFORMS: SocialPlatform[] = [
   "signal",
 ];
 
-export type { SocialPlatform };
-
 type SocialsShape = {
   linkedin: string | null;
   instagram: string | null;
@@ -41,13 +39,15 @@ function asSocialPlatform(value: string): SocialPlatform | null {
   return null;
 }
 
+export type { SocialPlatform };
+
 /** Loads normalized socials rows and merges them into contact-shaped objects. */
 export async function attachContactSocials<T extends ContactWithId>(
   db: PrismaClient,
   userId: string,
   contacts: T[],
 ): Promise<Array<T & SocialsShape>> {
-  if (!contacts.length) {
+  if (contacts.length === 0) {
     return [];
   }
 
@@ -79,7 +79,7 @@ export async function attachContactSocials<T extends ContactWithId>(
 
   return contacts.map((contact) => ({
     ...contact,
-    ...(map.get(contact.id) || emptySocialShape()),
+    ...(map.get(contact.id) ?? emptySocialShape()),
   }));
 }
 

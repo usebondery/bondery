@@ -6,6 +6,7 @@ import { Card, Group, Menu, MenuDropdown, MenuItem, MenuTarget, Stack, Text } fr
 import { IconCopy, IconEdit, IconFolderCog, IconTrash, IconUserPlus } from "@tabler/icons-react";
 import { type MouseEvent, type ReactNode, useState } from "react";
 import { useCommonTranslations, useGroupsPageTranslations } from "@/lib/i18n/generated/hooks";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 
 // ── Color maps ──────────────────────────────────────────
 
@@ -60,12 +61,6 @@ interface GroupActionCardProps extends GroupCardCommonProps {
 
 type GroupCardProps = GroupEntityCardProps | GroupActionCardProps;
 
-export const GROUP_CARD_MAX_WIDTH_BY_VARIANT: Record<"default" | "small" | "action", string> = {
-  action: "14rem",
-  default: "18rem",
-  small: "14rem",
-};
-
 // ── Shared card shell ───────────────────────────────────
 
 /**
@@ -115,7 +110,7 @@ function GroupCardShell({
       p={compact ? "sm" : "md"}
       shadow={shadow}
       style={{
-        cursor: cursorType || (interactive ? "pointer" : "default"),
+        cursor: nonEmpty(cursorType) ?? (interactive ? "pointer" : "default"),
       }}
       w="100%"
     >
@@ -223,6 +218,12 @@ function GroupCardMenu({
   );
 }
 
+export const GROUP_CARD_MAX_WIDTH_BY_VARIANT: Record<"default" | "small" | "action", string> = {
+  action: "14rem",
+  default: "18rem",
+  small: "14rem",
+};
+
 // ── Main component ──────────────────────────────────────
 
 export function GroupCard(props: GroupCardProps) {
@@ -238,10 +239,10 @@ export function GroupCard(props: GroupCardProps) {
     shadow = "none",
   } = props;
 
-  const variant = props.variant || "default";
+  const variant = nonEmpty(props.variant) ?? "default";
   const compact = variant !== "default";
   const maxWidth = fullWidth ? "100%" : GROUP_CARD_MAX_WIDTH_BY_VARIANT[variant];
-  const resolvedHighlightColor = highlightColor || (selected ? "primary" : undefined);
+  const resolvedHighlightColor = nonEmpty(highlightColor) ?? (selected ? "primary" : undefined);
   const className = "card-press-effect w-full";
 
   // ── Action card ─────────────────────────────────────
@@ -270,8 +271,8 @@ export function GroupCard(props: GroupCardProps) {
 
   // ── Entity card ─────────────────────────────────────
 
-  const group = props.group;
-  const previewContacts = group.previewContacts || [];
+  const { group } = props;
+  const previewContacts = group.previewContacts ?? [];
   const peopleLabel = t("ContactCount", { count: group.contactCount });
 
   const handleCardClick = (e: MouseEvent) => {

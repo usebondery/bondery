@@ -1,9 +1,10 @@
 import { isApiError } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { SyncMutation, SyncPushResponse, SyncTableKey } from "@bondery/schemas/sync";
 import { mobileFetch } from "../../api/transport";
-import { getAccessToken } from "../../auth/client";
-import { endLocalSession, logLocalSessionMissing } from "../../auth/session";
+import { endLocalSession, readLocalAccessToken } from "../../auth/local-session";
+import { logLocalSessionMissing } from "../../auth/session";
 import { API_URL } from "../../config";
 import { syncRequestHeaders } from "../constants";
 import { getSyncMutationTables } from "../mutation-tables";
@@ -25,10 +26,19 @@ import { errorFromSyncPushHttp, errorFromSyncPushRejected } from "./sync-display
 let drainScheduledGeneration: PullSessionGeneration | null = null;
 let draining = false;
 
+function tryBeginDrain(): boolean {
+  if (draining) {
+    return false;
+  }
+
+  draining = true;
+  return true;
+}
+
 type SyncErrorListener = (error: unknown) => void;
 const errorListeners = new Set<SyncErrorListener>();
 
-export function subscribeSyncErrors(listener: SyncErrorListener): () => void {
+function subscribeSyncErrors(listener: SyncErrorListener): () => void {
   errorListeners.add(listener);
   return () => errorListeners.delete(listener);
 }
@@ -49,7 +59,7 @@ function logDisplayedSyncError(error: unknown, extra: Record<string, unknown>): 
 }
 
 async function getBearerToken(): Promise<string | null> {
-  return getAccessToken();
+  return readLocalAccessToken();
 }
 
 async function isCurrentDrainSession(
@@ -64,10 +74,9 @@ async function isCurrentDrainSession(
 }
 
 async function runDrainPendingMutations(generation: PullSessionGeneration): Promise<void> {
-  if (draining) {
+  if (!tryBeginDrain()) {
     return;
   }
-  draining = true;
 
   try {
     const token = await getBearerToken();
@@ -204,13 +213,13 @@ async function runDrainPendingMutations(generation: PullSessionGeneration): Prom
   }
 }
 
-export function drainPendingMutations(
+function drainPendingMutations(
   generation: PullSessionGeneration | null = syncSessionGuard.capture(),
 ): Promise<void> {
   return syncSessionGuard.runIfCurrent(generation, runDrainPendingMutations) ?? Promise.resolve();
 }
 
-export function scheduleSyncDrain(): void {
+function scheduleSyncDrain(): void {
   const generation = syncSessionGuard.capture();
   if (generation === null || drainScheduledGeneration === generation) {
     return;
@@ -221,10 +230,12 @@ export function scheduleSyncDrain(): void {
     if (drainScheduledGeneration === generation) {
       drainScheduledGeneration = null;
     }
-    void drainPendingMutations(generation);
+    detachPromise(drainPendingMutations(generation));
   });
 }
 
-export async function pushSync(): Promise<void> {
+async function pushSync(): Promise<void> {
   await drainPendingMutations();
 }
+
+export { drainPendingMutations, pushSync, scheduleSyncDrain, subscribeSyncErrors };

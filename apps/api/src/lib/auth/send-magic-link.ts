@@ -13,7 +13,7 @@ import {
 import { resolveAuthLocale } from "./resolve-auth-locale.js";
 import { skipSmtpForReviewerSignIn } from "./reviewer-magic-link.js";
 
-export type MagicLinkSendPayload = {
+type MagicLinkSendPayload = {
   email: string;
   token: string;
   url: string;
@@ -22,15 +22,6 @@ export type MagicLinkSendPayload = {
 type SendMagicLinkFn = (data: MagicLinkSendPayload, ctx?: GenericEndpointContext) => Promise<void>;
 
 let sendCaptureForTests: ((payload: MagicLinkSendPayload) => void) | null = null;
-
-export function setMagicLinkSendCaptureForTests(
-  capture: ((payload: MagicLinkSendPayload) => void) | null,
-): void {
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("setMagicLinkSendCaptureForTests is not available in production");
-  }
-  sendCaptureForTests = capture;
-}
 
 async function deleteStoredVerification(
   ctx: GenericEndpointContext | undefined,
@@ -50,6 +41,17 @@ function throwUnconfigured(): never {
     code: "email_service_not_configured",
     message: "Email service not configured.",
   });
+}
+
+export type { MagicLinkSendPayload };
+
+export function setMagicLinkSendCaptureForTests(
+  capture: ((payload: MagicLinkSendPayload) => void) | null,
+): void {
+  if (process.env["NODE_ENV"] === "production") {
+    throw new Error("setMagicLinkSendCaptureForTests is not available in production");
+  }
+  sendCaptureForTests = capture;
 }
 
 /**

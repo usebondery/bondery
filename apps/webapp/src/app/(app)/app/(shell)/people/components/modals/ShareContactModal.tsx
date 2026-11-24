@@ -24,7 +24,7 @@ import { z } from "zod";
 import { SelectableCard } from "@/components/shell/SelectableCard";
 import { useShareContactModalTranslations } from "@/lib/i18n/generated/hooks";
 import { createModalId, useModalDismiss } from "@/lib/modals";
-import { useShareContactMutation } from "@/lib/query/hooks/useContacts";
+import { useShareContactMutation } from "@/lib/query/hooks/useContactMutations";
 
 const REQUIRED_FIELDS: ShareableField[] = ["avatar", "headline"];
 const shareContactFormSchema = z.object({
@@ -72,18 +72,6 @@ function ShareContactModalTitle() {
   return <ModalTitle icon={<IconShare size={22} />} text={tShare("ModalTitle")} />;
 }
 
-export function openShareContactModal({ contact }: OpenShareContactModalParams) {
-  const modalId = createModalId("share-contact");
-
-  modals.open({
-    children: <ShareContactModalContent contact={contact} modalId={modalId} />,
-    modalId,
-    size: "lg",
-    title: <ShareContactModalTitle />,
-    trapFocus: true,
-  });
-}
-
 function contactShareFieldPreviews(contact: Contact) {
   return buildShareableFieldPreviews({
     addresses: contact.addresses,
@@ -103,35 +91,6 @@ function contactShareFieldPreviews(contact: Contact) {
     website: contact.website,
     whatsapp: contact.whatsapp,
   });
-}
-
-export interface ShareContactTexts {
-  avatarDescription: (name: string) => string;
-  avatarRequiredTooltip: string;
-  cancelButton: string;
-  errorDescription: string;
-  errorTitle: string;
-  fieldLabels: Record<ShareableField, string>;
-  invalidEmailError: string;
-  invalidEmailsError: string;
-  maxRecipientsError: string;
-  messageLabel: string;
-  messagePlaceholder: string;
-  modalTitle: string;
-  noFieldsSelectedError: string;
-  noRecipientsError: string;
-  recipientEmailLabel: string;
-  recipientEmailPlaceholder: string;
-  recipientsLabel: string;
-  recipientsPlaceholder: string;
-  requiredFieldTooltip: string;
-  selectFieldsLabel: string;
-  sendCopyCheckbox: string;
-  sendCopyTooltip: string;
-  sendingButton: string;
-  submitButton: (count: number) => string;
-  successDescription: string;
-  successTitle: string;
 }
 
 function ShareContactModalContent({ contact, modalId }: { contact: Contact; modalId: string }) {
@@ -289,7 +248,14 @@ function ShareContactModalContent({ contact, modalId }: { contact: Contact; moda
         />
 
         <Tooltip label={tShare("SendCopyTooltip")}>
-          <Checkbox checked disabled label={tShare("SendCopyCheckbox")} onChange={() => {}} />
+          <Checkbox
+            checked
+            disabled
+            label={tShare("SendCopyCheckbox")}
+            onChange={() => {
+              // no-op: send-copy is always on and the control is disabled
+            }}
+          />
         </Tooltip>
 
         <Text fw={500} size="sm">
@@ -330,4 +296,45 @@ function ShareContactModalContent({ contact, modalId }: { contact: Contact; moda
       </Stack>
     </ModalScrollLayout>
   );
+}
+
+export function openShareContactModal({ contact }: OpenShareContactModalParams) {
+  const modalId = createModalId("share-contact");
+
+  modals.open({
+    children: <ShareContactModalContent contact={contact} modalId={modalId} />,
+    modalId,
+    size: "lg",
+    title: <ShareContactModalTitle />,
+    trapFocus: true,
+  });
+}
+
+export interface ShareContactTexts {
+  avatarDescription: (name: string) => string;
+  avatarRequiredTooltip: string;
+  cancelButton: string;
+  errorDescription: string;
+  errorTitle: string;
+  fieldLabels: Record<ShareableField, string>;
+  invalidEmailError: string;
+  invalidEmailsError: string;
+  maxRecipientsError: string;
+  messageLabel: string;
+  messagePlaceholder: string;
+  modalTitle: string;
+  noFieldsSelectedError: string;
+  noRecipientsError: string;
+  recipientEmailLabel: string;
+  recipientEmailPlaceholder: string;
+  recipientsLabel: string;
+  recipientsPlaceholder: string;
+  requiredFieldTooltip: string;
+  selectFieldsLabel: string;
+  sendCopyCheckbox: string;
+  sendCopyTooltip: string;
+  sendingButton: string;
+  submitButton: (count: number) => string;
+  successDescription: string;
+  successTitle: string;
 }

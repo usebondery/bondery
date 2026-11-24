@@ -8,7 +8,7 @@ import { prisma } from "@bondery/db";
 import { PLATFORM_ADMIN_ROLE } from "@bondery/helpers/auth/platform-admin";
 
 function resolvePlatformAdminEmails(): string[] {
-  const raw = process.env.BONDERY_PRIVATE_PLATFORM_ADMIN_EMAILS?.trim();
+  const raw = process.env["BONDERY_PRIVATE_PLATFORM_ADMIN_EMAILS"]?.trim();
   if (!raw) {
     return [];
   }

@@ -23,6 +23,6 @@ export function parseKeepInTouchContacts(raw: KeepInTouchApiResponse): KeepInTou
   return { contacts: (raw.contacts ?? []) as Contact[] };
 }
 
-export function parseKeepInTouchCount(raw: KeepInTouchCountResponse): number {
+export function parseKeepInTouchCount(raw: Partial<KeepInTouchCountResponse>): number {
   return raw.overdueCount ?? 0;
 }

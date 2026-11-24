@@ -1,5 +1,6 @@
+import { detachPromise } from "@bondery/helpers/async";
+import { cn } from "cn";
 import { type GestureResponderEvent, Linking } from "react-native";
-import { joinClassNames } from "./joinClassNames";
 import { Text, type TextProps } from "./Text";
 
 export type AnchorProps = Omit<TextProps, "accessibilityRole"> & {
@@ -9,7 +10,7 @@ export type AnchorProps = Omit<TextProps, "accessibilityRole"> & {
 export function Anchor({ className, href, onPress, size = "xs", ...rest }: AnchorProps) {
   const handlePress = (event: GestureResponderEvent) => {
     onPress?.(event);
-    void Linking.openURL(href);
+    detachPromise(Linking.openURL(href));
   };
 
   return (
@@ -17,7 +18,7 @@ export function Anchor({ className, href, onPress, size = "xs", ...rest }: Ancho
       {...rest}
       accessibilityRole="link"
       c="brand"
-      className={joinClassNames("underline", className)}
+      className={cn("underline", className)}
       onPress={handlePress}
       size={size}
     />

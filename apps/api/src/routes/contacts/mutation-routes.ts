@@ -28,7 +28,7 @@ export function registerContactMutationRoutes(fastify: AppFastifyInstance): void
     },
     async (request, reply) => {
       const ctx = domainContextFromRequest(request);
-      const body = request.body;
+      const { body } = request;
 
       const { data, txid } = await createContact(ctx, body);
 

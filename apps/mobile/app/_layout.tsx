@@ -1,6 +1,8 @@
 import "react-native-get-random-values";
 import "react-native-gesture-handler";
 import "../global.css";
+import "../src/lib/i18n/bootstrap-document-direction";
+import { detachPromise } from "@bondery/helpers/async";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { Stack, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
@@ -11,11 +13,8 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AppNavigationBar, AppStatusBar } from "../src/components/chrome";
 import { RootErrorBoundary } from "../src/components/RootErrorBoundary";
 import { AuthProvider } from "../src/lib/auth/AuthProvider";
-import {
-  readLocalAccessToken,
-  resolveBootAuthGate,
-  subscribeLocalSessionEnded,
-} from "../src/lib/auth/session";
+import { readLocalAccessToken } from "../src/lib/auth/local-session";
+import { resolveBootAuthGate, subscribeLocalSessionEnded } from "../src/lib/auth/session";
 import { useAuth } from "../src/lib/auth/useAuth";
 import { KeyboardRoot } from "../src/lib/boot/KeyboardRoot";
 import { hideNativeSplash, keepNativeSplashVisible } from "../src/lib/boot/nativeSplash";
@@ -27,21 +26,22 @@ import { useMobileThemeColors } from "../src/theme/useMobileThemeColors";
 keepNativeSplashVisible();
 
 /** Hung SecureStore only. Never treat this as logout while a cookie exists. */
-const LOCAL_CREDENTIAL_WAIT_MS = 2_000;
+const LOCAL_CREDENTIAL_WAIT_MS = 2000;
 
 function loadLocalCookieToken(onToken: (token: string | null) => void): () => void {
   let cancelled = false;
-  void readLocalAccessToken()
-    .then((token) => {
+  detachPromise(
+    readLocalAccessToken().then((token) => {
       if (!cancelled) {
         onToken(token);
       }
-    })
-    .catch(() => {
+    }),
+    () => {
       if (!cancelled) {
         onToken(null);
       }
-    });
+    },
+  );
 
   return () => {
     cancelled = true;
@@ -79,11 +79,13 @@ function RootNavigator() {
     return loadLocalCookieToken(setCookieToken);
   }, [isAuthenticated]);
 
-  useEffect(() => {
-    return subscribeLocalSessionEnded(() => {
-      setCookieToken(null);
-    });
-  }, []);
+  useEffect(
+    () =>
+      subscribeLocalSessionEnded(() => {
+        setCookieToken(null);
+      }),
+    [],
+  );
 
   useEffect(() => {
     if (isReady) {
@@ -152,7 +154,7 @@ function ConsumeRootHardwareBack() {
 function LocaleSync() {
   const locale = useMobilePreferences((s) => s.locale);
   useEffect(() => {
-    void i18n.changeLanguage(locale);
+    detachPromise(i18n.changeLanguage(locale));
   }, [locale]);
   return null;
 }

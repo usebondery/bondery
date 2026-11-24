@@ -1,6 +1,6 @@
 # Stripe product model
 
-```
+```text
 Product: Bondery Premium
 ├── Price: premium_monthly (month, trial_period_days=15)
 └── Price: premium_annual  (year, trial_period_days=15)

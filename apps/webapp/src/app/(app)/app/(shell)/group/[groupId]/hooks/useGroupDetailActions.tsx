@@ -29,6 +29,7 @@ import {
   useDuplicateGroupMutation,
   useRemoveContactsFromGroupMutation,
 } from "@/lib/query/hooks/useGroups";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 import { openEditGroupModal } from "../../../groups/components/EditGroupModal";
 import { openAddPeopleToGroupSelectionModal } from "../../../people/components/modals/AddPeopleToGroupSelectionModal";
 import { openMergeWithModal } from "../../../people/components/modals/MergeWithModal";
@@ -218,8 +219,8 @@ export function useGroupDetailActions({
   const handleEditGroup = (group: GroupWithCount) => {
     openEditGroupModal({
       groupId: group.id,
-      initialColor: group.color || "",
-      initialEmoji: group.emoji || "",
+      initialColor: group.color ?? "",
+      initialEmoji: group.emoji ?? "",
       initialLabel: group.label,
     });
   };
@@ -285,8 +286,8 @@ export function useGroupDetailActions({
     try {
       await duplicateGroupMutation.mutateAsync({
         input: {
-          color: group.color || "#1971C2",
-          emoji: group.emoji || "",
+          color: nonEmpty(group.color) ?? "#1971C2",
+          emoji: group.emoji ?? "",
           label: t("DuplicateGroup.DuplicatedName", { name: group.label }),
         },
         sourceGroupId: group.id,

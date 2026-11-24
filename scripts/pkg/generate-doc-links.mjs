@@ -1,8 +1,11 @@
 // Scans docs markdown frontmatter and generates the in-app doc link registry.
-import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
+
+const PATTERN_5E2D2D2D5C72_RE = /^---\r?\n([\s\S]*?)\r?\n---/;
+const MDX_RE = /\.mdx$/;
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(__dirname, "../..");
@@ -22,7 +25,7 @@ function walkMarkdownFiles(dir, acc = []) {
 }
 
 function parseFrontmatter(content) {
-  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  const match = content.match(PATTERN_5E2D2D2D5C72_RE);
   if (!match) {
     return null;
   }
@@ -38,7 +41,7 @@ function defaultDocPath(filePath) {
   if (rel === "index.mdx") {
     return "";
   }
-  const withoutExt = rel.replace(/\.mdx$/, "");
+  const withoutExt = rel.replace(MDX_RE, "");
   if (withoutExt.endsWith("/index")) {
     return withoutExt.slice(0, -"/index".length);
   }
@@ -84,10 +87,11 @@ function main() {
 
   if (duplicates.length > 0) {
     console.error("Duplicate docId values:", [...new Set(duplicates)].join(", "));
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
-  const sortedIds = [...entries.keys()].sort();
+  const sortedIds = [...entries.keys()].sort((left, right) => left.localeCompare(right));
   const lines = sortedIds.map((id) => {
     const entry = entries.get(id);
     const pathPart = `path: ${JSON.stringify(entry.path)}`;
@@ -103,8 +107,14 @@ ${lines.join("\n")}
 export type DocId = keyof typeof DOC_LINKS;
 `;
 
-  writeFileSync(OUTPUT_FILE, output, "utf8");
-  console.log(`Wrote ${sortedIds.length} doc link(s) to ${relative(REPO_ROOT, OUTPUT_FILE)}`);
+  // Write only on a real change. This file is helpers source: touching it unchanged made every
+  // docs check rebuild helpers, every package that depends on it, and restart the dev API.
+  if (existsSync(OUTPUT_FILE) && readFileSync(OUTPUT_FILE, "utf8") === output) {
+    console.log(`Doc links unchanged (${sortedIds.length}) in ${relative(REPO_ROOT, OUTPUT_FILE)}`);
+  } else {
+    writeFileSync(OUTPUT_FILE, output, "utf8");
+    console.log(`Wrote ${sortedIds.length} doc link(s) to ${relative(REPO_ROOT, OUTPUT_FILE)}`);
+  }
 }
 
 main();

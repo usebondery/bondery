@@ -52,23 +52,23 @@ export function ContactImportantDatesSection({
   }, [dates]);
 
   const typeOptions = IMPORTANT_DATE_TYPE_OPTIONS.map((option) => ({
-    label: `${option.emoji} ${t(`Types.${option.value}`)}`,
+    label: [option.emoji, t(`Types.${option.value}`)].join(" "),
     value: option.value,
   }));
 
-  const getTypeOptionsFor = (currentType: ImportantDateType | null) =>
-    typeOptions.map((option) => {
+  const getTypeOptionsFor = (currentType: ImportantDateType | null) => {
+    const options: Array<(typeof typeOptions)[number] & { disabled: boolean }> = [];
+    for (const option of typeOptions) {
       const hasTypeAlready = localDates.some((dateItem) => dateItem.type === option.value);
       const disableUniqueType =
         (option.value === "birthday" || option.value === "nameday") &&
         hasTypeAlready &&
         currentType !== option.value;
 
-      return {
-        ...option,
-        disabled: disableUniqueType,
-      };
-    });
+      options.push({ ...option, disabled: disableUniqueType });
+    }
+    return options;
+  };
 
   const notifyOptions = IMPORTANT_DATE_NOTIFY_OPTIONS.map((option) => ({
     label:
@@ -184,13 +184,11 @@ export function ContactImportantDatesSection({
       return;
     }
 
-    const nextDates = [...localDates];
-    nextDates[index] = {
-      ...nextDates[index],
-      date: formattedDate,
-    };
-
-    persistDates(nextDates);
+    persistDates(
+      localDates.map((dateItem, rowIndex) =>
+        rowIndex === index ? { ...dateItem, date: formattedDate } : dateItem,
+      ),
+    );
   };
 
   const handleTypeChange = (index: number, dateType: ImportantDateType) => {
@@ -213,13 +211,11 @@ export function ContactImportantDatesSection({
       return;
     }
 
-    const nextDates = [...localDates];
-    nextDates[index] = {
-      ...nextDates[index],
-      type: dateType,
-    };
-
-    persistDates(nextDates);
+    persistDates(
+      localDates.map((dateItem, rowIndex) =>
+        rowIndex === index ? { ...dateItem, type: dateType } : dateItem,
+      ),
+    );
   };
 
   const handleNotifyChange = (index: number, notifyValue: string | null) => {
@@ -228,13 +224,11 @@ export function ContactImportantDatesSection({
       return;
     }
 
-    const nextDates = [...localDates];
-    nextDates[index] = {
-      ...nextDates[index],
-      notifyDaysBefore: parsedNotifyValue,
-    };
-
-    persistDates(nextDates);
+    persistDates(
+      localDates.map((dateItem, rowIndex) =>
+        rowIndex === index ? { ...dateItem, notifyDaysBefore: parsedNotifyValue } : dateItem,
+      ),
+    );
   };
 
   const handleNoteChange = (index: number, note: string) => {
@@ -242,13 +236,11 @@ export function ContactImportantDatesSection({
       return;
     }
 
-    const nextDates = [...localDates];
-    nextDates[index] = {
-      ...nextDates[index],
-      note,
-    };
-
-    setLocalDates(nextDates);
+    setLocalDates(
+      localDates.map((dateItem, rowIndex) =>
+        rowIndex === index ? { ...dateItem, note } : dateItem,
+      ),
+    );
   };
 
   const handleSaveCurrentDates = (index: number) => {
@@ -308,7 +300,7 @@ export function ContactImportantDatesSection({
                 disabled={savingField === "importantDates"}
                 key={dateItem.id || index}
                 loading={savingField === "importantDates"}
-                note={dateItem.note || ""}
+                note={dateItem.note ?? ""}
                 notifyDaysBefore={dateItem.notifyDaysBefore}
                 onDateChange={(value) => handleDateChange(index, value)}
                 onDelete={() => handleRemoveDate(index)}

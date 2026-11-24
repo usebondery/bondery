@@ -36,15 +36,15 @@ A tool failure returns the REST nested envelope with `isError: true`:
 }
 ```
 
-| Field | Answers | Rule |
-|-------|---------|------|
-| `code` | WHAT class of failure | Catalog code, snake_case, stable. Never a new literal. |
-| `param` | WHAT input is wrong | Present when one argument caused the failure. |
-| `details` | WHY, with data | Machine-actionable facts. Allowed values, conflicts, bounds, ids. |
-| `message` | WHY, for a developer | One sentence. Name the cause, not the symptom. No recovery step. |
-| `agent_message` | HOW, for an agent | **Always present.** The `message` plus one imperative recovery step. |
-| `doc_url` | HOW, in full | Always present. `/docs/api/errors/{code}`. |
-| `request_id` | Support trail | Echo the request id. The agent quotes it in a feedback report. |
+| Field           | Answers               | Rule                                                                 |
+| --------------- | --------------------- | -------------------------------------------------------------------- |
+| `code`          | WHAT class of failure | Catalog code, snake_case, stable. Never a new literal.               |
+| `param`         | WHAT input is wrong   | Present when one argument caused the failure.                        |
+| `details`       | WHY, with data        | Machine-actionable facts. Allowed values, conflicts, bounds, ids.    |
+| `message`       | WHY, for a developer  | One sentence. Name the cause, not the symptom. No recovery step.     |
+| `agent_message` | HOW, for an agent     | **Always present.** The `message` plus one imperative recovery step. |
+| `doc_url`       | HOW, in full          | Always present. `/docs/api/errors/{code}`.                           |
+| `request_id`    | Support trail         | Echo the request id. The agent quotes it in a feedback report.       |
 
 `agent_message` is a required field on `apiErrorBodySchema`, so no builder can omit it. It is produced by `buildAgentMessage(code, message)` in `@bondery/schemas/errors`, which uses a per-code hint table and falls back to the docs link. `doc_url` comes from `getErrorDocUrl(code, websiteBaseUrl())`. Do not build either by hand.
 
@@ -56,18 +56,18 @@ On agent tool surfaces, `toAgentToolErrorResponse` also sets `message` equal to 
 
 `message` carries WHAT failed and WHY. `agent_message` adds HOW. Write the two as separate sentences, never as one run-on string.
 
-| Part | Question the agent asks | Example fragment |
-|------|-------------------------|------------------|
-| WHAT | Which call or resource failed? | `Cannot create interaction` |
-| WHY | What rule or cause blocked it? | `participant 018f… is not a contact you own` |
-| HOW | What exact change fixes the call? | `Use search_contacts to find a personId you own, then retry` |
+| Part | Question the agent asks           | Example fragment                                             |
+| ---- | --------------------------------- | ------------------------------------------------------------ |
+| WHAT | Which call or resource failed?    | `Cannot create interaction`                                  |
+| WHY  | What rule or cause blocked it?    | `participant 018f… is not a contact you own`                 |
+| HOW  | What exact change fixes the call? | `Use search_contacts to find a personId you own, then retry` |
 
-| Bad | Good (`agent_message`) |
-|-----|------|
-| `Contact not found` | `personId 018f… does not belong to a contact you own. Call search_contacts with the person's name, then retry with a returned personId.` |
-| `Forbidden` | `delete_contact needs mcp:write. Ask the user to reconnect with Full access, or use a read tool.` |
-| `Invalid body` | `phones[0].value must be E.164, for example +420601123456. Fix the value and retry.` |
-| `Something went wrong` | `The confirmation expired after 5 minutes. Call delete_contact again to get a new prompt.` |
+| Bad                    | Good (`agent_message`)                                                                                                                   |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `Contact not found`    | `personId 018f… does not belong to a contact you own. Call search_contacts with the person's name, then retry with a returned personId.` |
+| `Forbidden`            | `delete_contact needs mcp:write. Ask the user to reconnect with Full access, or use a read tool.`                                        |
+| `Invalid body`         | `phones[0].value must be E.164, for example +420601123456. Fix the value and retry.`                                                     |
+| `Something went wrong` | `The confirmation expired after 5 minutes. Call delete_contact again to get a new prompt.`                                               |
 
 Rules:
 
@@ -85,14 +85,14 @@ Validation failures on the Fastify route keep `code: "validation_error"` and put
 
 Put the facts that let the agent repair the call without a second lookup.
 
-| Failure | Put in `details` |
-|---------|------------------|
-| Unknown id | The rejected id, and the resource type |
-| Duplicate | The conflicting record id and label |
-| Out of range | The bound and the received value |
-| Wrong enum | The allowed values |
-| Scope missing | The required scope, for example `mcp:write` |
-| Expired confirm | The TTL in seconds |
+| Failure         | Put in `details`                            |
+| --------------- | ------------------------------------------- |
+| Unknown id      | The rejected id, and the resource type      |
+| Duplicate       | The conflicting record id and label         |
+| Out of range    | The bound and the received value            |
+| Wrong enum      | The allowed values                          |
+| Scope missing   | The required scope, for example `mcp:write` |
+| Expired confirm | The TTL in seconds                          |
 
 Never put a secret, token, or another tenant's row in `details`.
 
@@ -118,16 +118,16 @@ An agent finds a defect that no error explains. A wrong description, a missing t
 
 Requirements for the channel:
 
-| Requirement | Rule |
-|-------------|------|
-| Discoverable | A tool in `tools/list`, or an instruction in `MCP_SERVER_INSTRUCTIONS`. The agent learns about it without a human. |
-| Named by the tool rules | `{create\|get\|update\|delete\|search}_{resource}`. A write is `create_agent_feedback`. |
-| Structured | Separate fields for kind, tool, summary, expected, actual, and `request_id`. No single free-text blob. |
-| Redacted | The agent must not send contact data, tokens, or emails. Ask for a description, not for a payload. |
-| Scoped | Writes need `mcp:write`. Reads stay open. |
-| Rate limited | One tool, one tier. Do not let a loop flood the inbox. |
-| Reviewable | It lands where we read it. An email, a ticket, or a table we triage. |
-| Answered | The tool returns an id the agent can quote. The reply must not promise a fix deadline. |
+| Requirement             | Rule                                                                                                               |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Discoverable            | A tool in `tools/list`, or an instruction in `MCP_SERVER_INSTRUCTIONS`. The agent learns about it without a human. |
+| Named by the tool rules | `{create\|get\|update\|delete\|search}_{resource}`. A write is `create_agent_feedback`.                            |
+| Structured              | Separate fields for kind, tool, summary, expected, actual, and `request_id`. No single free-text blob.             |
+| Redacted                | The agent must not send contact data, tokens, or emails. Ask for a description, not for a payload.                 |
+| Scoped                  | Writes need `mcp:write`. Reads stay open.                                                                          |
+| Rate limited            | One tool, one tier. Do not let a loop flood the inbox.                                                             |
+| Reviewable              | It lands where we read it. An email, a ticket, or a table we triage.                                               |
+| Answered                | The tool returns an id the agent can quote. The reply must not promise a fix deadline.                             |
 
 Minimum input shape:
 

@@ -1,0 +1,22 @@
+{
+  "ActionsGroup": "Műveletek",
+  "AddPerson": "Személy hozzáadása",
+  "AddPersonDescription": "Új kapcsolat a hálózatodban",
+  "ContactUs": "Kapcsolatfelvétel",
+  "ContactUsDescription": "Írj a Bondery csapatnak",
+  "Documentation": "Dokumentáció",
+  "DocumentationDescription": "Bondery dokumentáció",
+  "ExportData": "Adatok exportálása",
+  "ExportDataDescription": "Bondery-adatok másolatának mentése",
+  "FindPerson": "Személy keresése",
+  "FindPersonDescription": "Keresés név szerint a hálózatban",
+  "GoToDescription": "Ugrás ide: {label}",
+  "HelpGroup": "Súgó",
+  "ImportData": "Adatok importálása",
+  "ImportDataDescription": "Bondery JSON ZIP importálása",
+  "LogInteraction": "Interakció rögzítése",
+  "LogInteractionDescription": "Új találkozó, hívás vagy üzenet rögzítése",
+  "NavigateGroup": "Navigáció",
+  "NothingFound": "Nincs találat",
+  "SearchPlaceholder": "Műveletek vagy navigáció keresése…"
+}

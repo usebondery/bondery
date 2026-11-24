@@ -14,6 +14,8 @@ import { cp, lstat, readdir, readFile, realpath, stat, writeFile } from "node:fs
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
+const DIST_RE = /^(.*[/\\]dist)(?:[/\\]|$)/;
+
 const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const DEFAULT_PACKAGES = [
   "schemas",
@@ -30,7 +32,7 @@ const HASH_IMPORT_RE =
 
 function toRelativePath(fromFile, hashSpecifier) {
   const fromDir = dirname(fromFile);
-  const distRoot = fromFile.match(/^(.*[/\\]dist)(?:[/\\]|$)/)?.[1] ?? join(fromDir, "..");
+  const distRoot = fromFile.match(DIST_RE)?.[1] ?? join(fromDir, "..");
   const target = join(distRoot, hashSpecifier);
   let rel = relative(fromDir, target).replace(/\\/g, "/");
   if (!rel.startsWith(".")) {
@@ -169,7 +171,7 @@ async function syncInjectedDist(pkgName) {
   }
 }
 
-const targets = process.argv.slice(2).length ? process.argv.slice(2) : DEFAULT_PACKAGES;
+const targets = process.argv.slice(2).length > 0 ? process.argv.slice(2) : DEFAULT_PACKAGES;
 
 for (const pkg of targets) {
   await rewritePackage(pkg);

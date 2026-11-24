@@ -1,5 +1,26 @@
 import { resolveCookieDomain } from "./resolve-cookie-domain.js";
 
+const PATTERN_5C2F2B24_RE = /\/+$/;
+const Z0_Z0_Z0_Z0_Z0_Z0_RE =
+  /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*$/;
+const PATTERN_5E5C647B312C_RE = /^\d{1,3}(\.\d{1,3}){3}$/;
+
+function isValidRpIdOverride(value: string): boolean {
+  if (!value || isIpHostname(value) || value.includes("/") || value.includes(":")) {
+    return false;
+  }
+
+  return Z0_Z0_Z0_Z0_Z0_Z0_RE.test(value);
+}
+
+function isIpHostname(hostname: string): boolean {
+  if (hostname.includes(":")) {
+    return true;
+  }
+
+  return PATTERN_5E5C647B312C_RE.test(hostname);
+}
+
 export type WebAuthnRpConfig = {
   origin: string;
   rpID: string;
@@ -53,7 +74,7 @@ export function resolveWebAuthnRp(input: ResolveWebAuthnRpInput): ResolveWebAuth
     return { ok: false, reason: "ip_hostname" };
   }
 
-  const origin = `${parsed.protocol}//${parsed.host}`.replace(/\/+$/, "");
+  const origin = `${parsed.protocol}//${parsed.host}`.replace(PATTERN_5C2F2B24_RE, "");
   const override = input.rpIdOverride?.trim().toLowerCase();
 
   if (override) {
@@ -70,20 +91,4 @@ export function resolveWebAuthnRp(input: ResolveWebAuthnRpInput): ResolveWebAuth
 
   const rpID = resolveCookieDomain(origin) ?? hostname;
   return { ok: true, origin, rpID };
-}
-
-function isValidRpIdOverride(value: string): boolean {
-  if (!value || isIpHostname(value) || value.includes("/") || value.includes(":")) {
-    return false;
-  }
-
-  return /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*$/.test(value);
-}
-
-function isIpHostname(hostname: string): boolean {
-  if (hostname.includes(":")) {
-    return true;
-  }
-
-  return /^\d{1,3}(\.\d{1,3}){3}$/.test(hostname);
 }

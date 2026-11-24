@@ -24,10 +24,10 @@ For **writing style, structure, SEO, and content guidelines**, see [WRITING-GUID
 
 Each post requires two files in `apps/website/content/blog/<category>/`:
 
-| File | Purpose |
-|------|---------|
+| File             | Purpose                                                                       |
+| ---------------- | ----------------------------------------------------------------------------- |
 | `<slug>.meta.ts` | Post metadata as plain TypeScript (title, date, description, announce config) |
-| `<slug>.mdx` | Content in MDX format; re-exports `postMeta` from the sidecar |
+| `<slug>.mdx`     | Content in MDX format; re-exports `postMeta` from the sidecar                 |
 
 Use the quick-start template in [WRITING-GUIDE.md](WRITING-GUIDE.md#7-quick-start-template).
 
@@ -122,14 +122,14 @@ pnpm run announce -w website -- <slug> skip-check
 
 The announce script reads from `.env.local` at the repo root:
 
-| Variable | Required for |
-|----------|-------------|
-| `NEXT_PUBLIC_WEBSITE_URL` | Both |
-| `BONDERY_OPS_DISCORD_WEBHOOK_URL` | Discord |
-| `BONDERY_OPS_REDDIT_CLIENT_ID` | Reddit |
-| `BONDERY_OPS_REDDIT_CLIENT_SECRET` | Reddit |
-| `BONDERY_OPS_REDDIT_USERNAME` | Reddit |
-| `BONDERY_OPS_REDDIT_PASSWORD` | Reddit |
+| Variable                           | Required for |
+| ---------------------------------- | ------------ |
+| `NEXT_PUBLIC_WEBSITE_URL`          | Both         |
+| `BONDERY_OPS_DISCORD_WEBHOOK_URL`  | Discord      |
+| `BONDERY_OPS_REDDIT_CLIENT_ID`     | Reddit       |
+| `BONDERY_OPS_REDDIT_CLIENT_SECRET` | Reddit       |
+| `BONDERY_OPS_REDDIT_USERNAME`      | Reddit       |
+| `BONDERY_OPS_REDDIT_PASSWORD`      | Reddit       |
 
 ### What the script does
 
@@ -151,7 +151,7 @@ Plan: show a one-time popup or banner inside the webapp when users log in after 
 When writing the blog post for a monthly release:
 
 1. Pull the new features and fixes from [`docs/changelog/X.Y.Z.mdx`](../../docs/changelog/) for the version
-2. Write the post following [WRITING-GUIDE.md](WRITING-GUIDE.md) — focus on *what's new for users*, not internal changes
+2. Write the post following [WRITING-GUIDE.md](WRITING-GUIDE.md) — focus on _what's new for users_, not internal changes
 3. Set `announce.enabled: true` in metadata
 4. Deploy: merge to `main`, then `git push origin main:release` (website CD — see [Deploy](#3-deploy))
 5. Run `pnpm run announce -w website -- <slug> simulate` to verify

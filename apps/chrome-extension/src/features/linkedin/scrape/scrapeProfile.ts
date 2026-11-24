@@ -24,7 +24,8 @@ import {
 } from "./sduiProfile";
 import type { WorkEntry } from "./workExperience";
 
-export interface CachedProfile {
+const JSESSIONID_COOKIE_PRESENT_RE = /(?:^|;\s*)JSESSIONID=/;
+interface CachedProfile {
   educationHistory: EducationEntry[];
   firstName?: string;
   headline?: string;
@@ -36,11 +37,11 @@ export interface CachedProfile {
   workHistory: WorkEntry[];
 }
 
-export const profileCache = new Map<string, CachedProfile>();
+const profileCache = new Map<string, CachedProfile>();
 const inflightScrapes = new Map<string, Promise<CachedProfile>>();
 
 /** Only cache profiles that include history so a later scrape can recover empty Voyager. */
-export function shouldCacheProfile(profile: CachedProfile): boolean {
+function shouldCacheProfile(profile: CachedProfile): boolean {
   return profile.workHistory.length > 0 || profile.educationHistory.length > 0;
 }
 
@@ -126,7 +127,7 @@ function keptCount(voyagerCount: number, domCount: number): "voyager" | "dom" | 
   return "none";
 }
 
-function setFlag(value: string | undefined): string {
+function setFlag(value: string | undefined): "set" | "" {
   return value ? "set" : "";
 }
 
@@ -145,7 +146,7 @@ function coverageRows(input: {
 }): VoyagerCoverageRow[] {
   const dom = input.domIdentity;
   const voyager = input.voyagerIdentity;
-  const nameKept = (field: "firstName" | "lastName"): string => {
+  const nameKept = (field: "firstName" | "lastName"): "dom" | "voyager" | "handle" | "none" => {
     const side = keptPreferDom(dom?.[field], voyager?.[field]);
     if (side !== "none") {
       return side;
@@ -224,7 +225,7 @@ function applySchoolDomLogos(entries: EducationEntry[], sdui: EducationEntry[]):
   });
 }
 
-export async function scrapeLinkedInProfile(
+async function scrapeLinkedInProfile(
   handle: string,
   options?: { skipNetworkLogos?: boolean },
 ): Promise<CachedProfile> {
@@ -235,7 +236,7 @@ export async function scrapeLinkedInProfile(
     }
   }
   const inflight = inflightScrapes.get(handle);
-  if (inflight) {
+  if (inflight !== undefined) {
     return inflight;
   }
 
@@ -304,7 +305,7 @@ export async function scrapeLinkedInProfile(
       if (!linkedinBio) {
         await pollUntil(
           () => Boolean(extractSduiBio()),
-          5_000,
+          5000,
           () => {
             window.scrollTo(0, 480);
           },
@@ -325,18 +326,20 @@ export async function scrapeLinkedInProfile(
         workHistory,
       };
 
+      const locationLog = voyagerMeta.location ? `"${voyagerMeta.location}"` : "none";
+      const bioLog = linkedinBio ? `${linkedinBio.length}c` : "none";
       extLog.debug(
         `[linkedin][scrape] ${handle}: ${workHistory.length} work (${fetchedWork.length > 0 ? "voyager" : "dom"}),` +
           ` ${educationHistory.length} edu (${fetchedEdu.length > 0 ? "voyager" : "dom"}),` +
-          ` location=${voyagerMeta.location ? `"${voyagerMeta.location}"` : "none"}` +
-          ` bio=${linkedinBio ? `${linkedinBio.length}c` : "none"}`,
+          ` location=${locationLog}` +
+          ` bio=${bioLog}`,
       );
 
       if (workHistory.length === 0 && educationHistory.length === 0) {
         extLog.warn("[linkedin][scrape] empty work and education", {
           handle,
           hasIdentity: Boolean(identity),
-          hasJsessionId: /(?:^|;\s*)JSESSIONID=/.test(document.cookie),
+          hasJsessionId: JSESSIONID_COOKIE_PRESENT_RE.test(document.cookie),
           hasTopcard: Boolean(getTopcard()),
           voyagerEduEmpty: fetchedEdu.length === 0,
           voyagerWorkEmpty: fetchedWork.length === 0,
@@ -374,3 +377,6 @@ export async function scrapeLinkedInProfile(
     inflightScrapes.delete(handle);
   }
 }
+
+export type { CachedProfile };
+export { profileCache, scrapeLinkedInProfile, shouldCacheProfile };

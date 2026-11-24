@@ -2,6 +2,10 @@ import { mergeAttributes, Node } from "@tiptap/core";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import { InlineDateDisplay } from "../components/notes/InlineDateDisplay";
 
+type InlineDateAttrs = {
+  timestamp?: string;
+};
+
 /**
  * Tiptap inline atom node that stores a timestamp and renders it as a formatted date badge.
  * Serialises to/from <span data-type="inline-date" data-timestamp="..."> in HTML.
@@ -13,7 +17,7 @@ export const InlineDateExtension = Node.create({
         default: new Date().toISOString(),
         parseHTML: (element) => element.getAttribute("data-timestamp"),
         renderHTML: (attributes) => ({
-          "data-timestamp": attributes.timestamp as string,
+          "data-timestamp": (attributes as InlineDateAttrs).timestamp ?? "",
         }),
       },
     };

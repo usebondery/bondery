@@ -7,9 +7,11 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import localeCatalog from "@bondery/schemas/locale/supported-locales.json" with { type: "json" };
-
 import { createCheck } from "../../../scripts/check/check-report.mjs";
+import { ALL_LOCALES as LOCALES, localesForNamespace } from "./lib/namespace-locales.mjs";
+
+const TSX_JSX_RE = /\.(tsx?|jsx?)$/;
+const FEW_MANY_ZERO_TWO_RE = /_(few|many|zero|two)$/;
 
 const check = createCheck("check-i18n-usage");
 
@@ -17,7 +19,6 @@ const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "
 const repoRoot = path.resolve(packageRoot, "../..");
 const localesRoot = path.join(packageRoot, "src/locales");
 const manifestPath = path.join(packageRoot, "manifest.json");
-const LOCALES = localeCatalog.supported.map((entry) => entry.code);
 
 const SCAN_ROOTS = [
   path.join(repoRoot, "apps/webapp/src"),
@@ -65,7 +66,7 @@ function walk(dir, acc = []) {
         continue;
       }
       walk(full, acc);
-    } else if (/\.(tsx?|jsx?)$/.test(entry.name)) {
+    } else if (TSX_JSX_RE.test(entry.name)) {
       acc.push(full);
     }
   }
@@ -107,16 +108,24 @@ function keyExists(resource, key) {
   );
 }
 
+/**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+function asUnknown(value) {
+  return value;
+}
+
 function loadNamespaceJson(locale, relativePath) {
   const filePath = path.join(localesRoot, locale, relativePath);
-  return JSON.parse(fs.readFileSync(filePath, "utf8"));
+  return asUnknown(JSON.parse(fs.readFileSync(filePath, "utf8")));
 }
 
 const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
 const namespaceResources = {};
 for (const [name, entry] of Object.entries(manifest.namespaces)) {
   namespaceResources[name] = {};
-  for (const locale of LOCALES) {
+  for (const locale of localesForNamespace(entry)) {
     namespaceResources[name][locale] = loadNamespaceJson(locale, entry.path);
   }
 }
@@ -207,6 +216,9 @@ for (const locale of LOCALES) {
     const dot = full.indexOf(".");
     const ns = dot === -1 ? full : full.slice(0, dot);
     const key = dot === -1 ? "" : full.slice(dot + 1);
+    if (manifest.namespaces[ns] && !localesForNamespace(manifest.namespaces[ns]).includes(locale)) {
+      continue;
+    }
     const resource = namespaceResources[ns]?.[locale];
     if (!resource) {
       missing.push(`${full} (unknown namespace)`);
@@ -216,7 +228,7 @@ for (const locale of LOCALES) {
       missing.push(full);
     }
   }
-  missing.sort();
+  missing.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
   console.log(`\nUsed keys missing for ${locale}: ${missing.length}`);
   for (const key of missing.slice(0, 30)) {
     console.log(`  ${key}`);
@@ -230,12 +242,12 @@ for (const locale of LOCALES) {
 }
 
 function isAllowedExtraKey(key) {
-  return /_(few|many|zero)$/.test(key);
+  return FEW_MANY_ZERO_TWO_RE.test(key);
 }
 
-for (const [name] of Object.entries(manifest.namespaces)) {
+for (const [name, entry] of Object.entries(manifest.namespaces)) {
   const referenceKeys = new Set(collectKeys(namespaceResources[name].en));
-  for (const locale of LOCALES) {
+  for (const locale of localesForNamespace(entry)) {
     if (locale === "en") {
       continue;
     }

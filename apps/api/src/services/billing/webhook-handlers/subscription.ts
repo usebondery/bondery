@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import type { FastifyBaseLogger } from "fastify";
 import type Stripe from "stripe";
 import {
@@ -10,8 +11,11 @@ import {
   findUserIdByEmail,
   type SubscriptionMirrorFields,
   storePendingSubscription,
+  syncAiQuotaPeriod,
   upsertSubscription,
 } from "../subscription.js";
+
+const UUID_PATTERN = /^[0-9a-f-]{36}$/i;
 
 function customerId(customer: string | Stripe.Customer | Stripe.DeletedCustomer): string {
   return typeof customer === "string" ? customer : customer.id;
@@ -32,7 +36,7 @@ function customerEmail(
 export function extractMirrorFromStripeSubscription(
   subscription: Stripe.Subscription,
 ): SubscriptionMirrorFields {
-  const item = subscription.items.data[0];
+  const [item] = subscription.items.data;
   const price = item?.price;
   const product = price?.product;
   const productName =
@@ -57,13 +61,14 @@ export async function upsertSubscriptionFromStripe(
   options?: { eventType?: string },
 ): Promise<void> {
   const email =
-    subscription.metadata.email ??
+    subscription.metadata["email"] ??
     customerEmail(
       typeof subscription.customer === "string" ? null : (subscription.customer as Stripe.Customer),
     );
 
-  const externalId = subscription.metadata.bondery_user_id;
-  const isValidUuid = externalId != null && /^[0-9a-f-]{36}$/i.test(externalId);
+  const externalId = subscription.metadata["bondery_user_id"];
+  const isValidUuid =
+    externalId !== null && externalId !== undefined && UUID_PATTERN.test(externalId);
 
   let userId: string | null = isValidUuid ? externalId : null;
 
@@ -101,7 +106,7 @@ export async function upsertSubscriptionFromStripe(
     return;
   }
 
-  await upsertSubscription(
+  const result = await upsertSubscription(
     userId,
     stripeCustomerId,
     subscription.id,
@@ -112,12 +117,28 @@ export async function upsertSubscriptionFromStripe(
     mirror,
   );
 
+  if (result === "user_missing") {
+    // The account was deleted. Stripe would retry a failure for days and it could never
+    // succeed, so the event is acknowledged. The warning is the record of it.
+    log?.warn(
+      { stripeSubscriptionId: subscription.id, userId },
+      "stripe-webhook: user no longer exists — skipping subscription upsert",
+    );
+    return;
+  }
+
+  // The chat allowance follows the paid period, so its window ends when this one does.
+  // A new period end starts a new window; Stripe redelivery passes the same end twice.
+  if (currentPeriodEnd) {
+    await syncAiQuotaPeriod(userId, currentPeriodEnd, log);
+  }
+
   if (options?.eventType === "customer.subscription.created") {
-    void captureSubscriptionCreate(userId, subscription, mirror);
+    detachPromise(captureSubscriptionCreate(userId, subscription, mirror));
   }
 
   if (options?.eventType === "customer.subscription.deleted") {
-    void captureSubscriptionCancel(userId, subscription, mirror);
+    detachPromise(captureSubscriptionCancel(userId, subscription, mirror));
   }
 
   log?.info(

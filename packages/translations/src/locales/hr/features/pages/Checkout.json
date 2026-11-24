@@ -1,0 +1,18 @@
+{
+  "alreadySubscribedMessage": "Već imaš aktivnu Premium pretplatu.",
+  "alreadySubscribedTitle": "Već si pretplaćen/a",
+  "errorMessage": "Nešto je pošlo po zlu. Pokušaj ponovno.",
+  "errorTitle": "Greška pri plaćanju",
+  "errorUnauthorized": "Prijavi se i pokušaj ponovno.",
+  "intervalAnnual": "Godišnje",
+  "intervalMonthly": "Mjesečno",
+  "paymentBlockedAction": "Ažurirati naplatu",
+  "paymentBlockedMessage": "Nismo uspjeli obraditi plaćanje nakon više pokušaja. Ažuriraj podatke za naplatu da povratiš Premium pristup.",
+  "paymentBlockedTitle": "Potrebno je plaćanje",
+  "successMessage": "Uživaj u 300 AI poruka mjesečno i svim Premium značajkama.",
+  "successTitle": "Sada si Premium!",
+  "upgradePendingMessage": "Račun će uskoro postati Premium.",
+  "upgradePendingTitle": "Plaćanje primljeno",
+  "upgradesDisabledTooltip": "Nadogradnja na Premium još nije dostupna. Vrati se uskoro.",
+  "upgradeToPremium": "Nadograditi na Premium"
+}

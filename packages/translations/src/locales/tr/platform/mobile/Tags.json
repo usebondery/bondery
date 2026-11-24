@@ -1,0 +1,10 @@
+{
+  "CreateFailed": "Etiket oluşturulamadı. Yeniden dene.",
+  "CreateTag": "Etiket oluştur",
+  "DeleteFailed": "Etiket silinemedi. Yeniden dene.",
+  "EditFailed": "Etiket kaydedilemedi. Yeniden dene.",
+  "EditTagsSearchPlaceholder": "Etiket ara...",
+  "LoadFailed": "Etiketler yüklenemedi",
+  "NoTagsYet": "Henüz etiket yok",
+  "NoTagsYetHint": "Etiketlerle kişilerini düzenleyebilir ve bulabilirsin."
+}

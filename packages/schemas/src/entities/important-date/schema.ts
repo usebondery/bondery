@@ -3,6 +3,9 @@ import {
   CONTACT_FIELD_MAX_LENGTHS,
   CONTACT_LIMITS,
   IMPORTANT_DATE_TYPES,
+  NOTIFY_DAY_BEFORE,
+  NOTIFY_FEW_DAYS_BEFORE,
+  NOTIFY_WEEK_BEFORE,
 } from "#constants/index.js";
 import {
   entityAuditSchema,
@@ -24,14 +27,12 @@ const isoDateSchema = z
   .trim()
   .regex(/^\d{4}-\d{2}-\d{2}$/, { error: "Date must be YYYY-MM-DD" });
 
-export const importantDateTypeSchema = z.enum(
-  IMPORTANT_DATE_TYPES,
-) satisfies z.ZodType<ImportantDateType>;
+const importantDateTypeSchema = z.enum(IMPORTANT_DATE_TYPES) satisfies z.ZodType<ImportantDateType>;
 
-export const importantDateNotifyDaysSchema: z.ZodType<ImportantDateNotifyDaysBefore> = z.union([
-  z.literal(1),
-  z.literal(3),
-  z.literal(7),
+const importantDateNotifyDaysSchema: z.ZodType<ImportantDateNotifyDaysBefore> = z.union([
+  z.literal(NOTIFY_DAY_BEFORE),
+  z.literal(NOTIFY_FEW_DAYS_BEFORE),
+  z.literal(NOTIFY_WEEK_BEFORE),
   z.null(),
 ]);
 
@@ -54,14 +55,6 @@ const importantDateBaseFieldsSchema = importantDateCoreSchema.extend({
   ),
 });
 
-export const importantDateSchema: z.ZodType<ImportantDate> = entityIdentitySchema
-  .extend({
-    personId: z.string().describe("Contact this date belongs to"),
-    ...importantDateBaseFieldsSchema.shape,
-    notifyOn: z.string().nullable().describe("Computed date on which the reminder fires"),
-  })
-  .extend(entityAuditSchema.shape);
-
 const importantDateNotifyDaysInputSchema = z.preprocess((value) => {
   if (value === "none" || value === "") {
     return null;
@@ -74,6 +67,16 @@ const importantDateNotifyDaysInputSchema = z.preprocess((value) => {
 
   return value;
 }, importantDateNotifyDaysSchema);
+
+export { importantDateNotifyDaysSchema, importantDateTypeSchema };
+
+export const importantDateSchema: z.ZodType<ImportantDate> = entityIdentitySchema
+  .extend({
+    personId: z.string().describe("Contact this date belongs to"),
+    ...importantDateBaseFieldsSchema.shape,
+    notifyOn: z.string().nullable().describe("Computed date on which the reminder fires"),
+  })
+  .extend(entityAuditSchema.shape);
 
 /** One row in PUT /api/contacts/:id/important-dates body. */
 export const importantDateInputSchema: z.ZodType<ImportantDateInputValidated> = z.object({

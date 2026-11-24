@@ -94,7 +94,9 @@
     "UpdateFailed": "Failed to update group"
   },
   "EmojiEmptySearch": "No emojis found",
+  "EmojiLabel": "Emoji",
   "EmojiSearchPlaceholder": "Search emojis…",
+  "EmojiSelectPlaceholder": "Select emoji",
   "Empty": "No groups yet. Create one to start organizing your contacts.",
   "FallbackTitle": "Group",
   "HeaderDescription": "Groups can be used to organize people into custom groups for faster filtering and actions.",

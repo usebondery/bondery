@@ -1,3 +1,6 @@
+const LINKEDIN_COM_COMPANY_SCHOOL_ORGANIZATION_RE =
+  /linkedin\.com\/(?:company|school|organization|showcase)\/([^/?#]+)/i;
+
 /**
  * LinkedIn URL utilities.
  *
@@ -34,8 +37,6 @@ export function extractLinkedinId(urlOrId: string | null | undefined): string | 
   if (!urlOrId) {
     return null;
   }
-  const match = urlOrId.match(
-    /linkedin\.com\/(?:company|school|organization|showcase)\/([^/?#]+)/i,
-  );
-  return match ? match[1].toLowerCase() : urlOrId;
+  const match = urlOrId.match(LINKEDIN_COM_COMPANY_SCHOOL_ORGANIZATION_RE);
+  return match ? (match[1] ?? "").toLowerCase() : urlOrId;
 }

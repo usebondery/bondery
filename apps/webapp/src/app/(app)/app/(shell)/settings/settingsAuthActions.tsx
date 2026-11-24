@@ -26,15 +26,50 @@ type UserIdentity = {
   user_id: string;
 };
 
-export function providerKeyFor(provider: "github" | "linkedin"): string {
-  return INTEGRATION_PROVIDERS.find((item) => item.provider === provider)?.providerKey ?? provider;
-}
-
 function identityMatchesProvider(identity: UserIdentity, provider: "github" | "linkedin"): boolean {
   if (identity.provider === provider || identity.provider === providerKeyFor(provider)) {
     return true;
   }
   return provider === "linkedin" && identity.provider === "linkedin_oidc";
+}
+
+async function confirmUnlinkProvider(options: {
+  identities: UserIdentity[];
+  onUnlinked: (provider: "github" | "linkedin") => void;
+  provider: "github" | "linkedin";
+  tCommon: TranslateFn<"common">;
+}): Promise<void> {
+  const { provider, tCommon } = options;
+  try {
+    const targetIdentity = options.identities.find((identity) =>
+      identityMatchesProvider(identity, provider),
+    );
+
+    if (!targetIdentity) {
+      throw new Error(`${provider} identity not found`);
+    }
+
+    const authClient = createWebappAuthClient();
+    const { error } = await authClient.unlinkAccount({
+      accountId: betterAuthUnlinkAccountId(targetIdentity),
+    });
+    if (error) {
+      throw error;
+    }
+
+    options.onUnlinked(provider);
+  } catch (error) {
+    notifications.show(
+      errorNotificationTemplate({
+        description: getAuthUserFacingError(error, tCommon),
+        title: tCommon("feedback.errorTitle"),
+      }),
+    );
+  }
+}
+
+export function providerKeyFor(provider: "github" | "linkedin"): string {
+  return INTEGRATION_PROVIDERS.find((item) => item.provider === provider)?.providerKey ?? provider;
 }
 
 export async function runLinkSocialProvider(provider: "github" | "linkedin"): Promise<void> {
@@ -77,41 +112,6 @@ export function openUnlinkProviderConfirm(options: {
       <ModalTitle icon={<IconUnlink size={20} stroke={1.5} />} text={t("UnlinkAccountTitle")} />
     ),
   });
-}
-
-async function confirmUnlinkProvider(options: {
-  identities: UserIdentity[];
-  onUnlinked: (provider: "github" | "linkedin") => void;
-  provider: "github" | "linkedin";
-  tCommon: TranslateFn<"common">;
-}): Promise<void> {
-  const { provider, tCommon } = options;
-  try {
-    const targetIdentity = options.identities.find((identity) =>
-      identityMatchesProvider(identity, provider),
-    );
-
-    if (!targetIdentity) {
-      throw new Error(`${provider} identity not found`);
-    }
-
-    const authClient = createWebappAuthClient();
-    const { error } = await authClient.unlinkAccount({
-      accountId: betterAuthUnlinkAccountId(targetIdentity),
-    });
-    if (error) {
-      throw error;
-    }
-
-    options.onUnlinked(provider);
-  } catch (error) {
-    notifications.show(
-      errorNotificationTemplate({
-        description: getAuthUserFacingError(error, tCommon),
-        title: tCommon("feedback.errorTitle"),
-      }),
-    );
-  }
 }
 
 export function openDeleteAccountConfirm(options: {

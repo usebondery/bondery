@@ -19,8 +19,8 @@ export function PhotoUploadModal({ variant, onPhotoSelect }: PhotoUploadModalPro
   const t = usePhotoUploadTranslations(variant);
 
   const handleDrop = (files: File[]) => {
-    if (files.length > 0) {
-      const file = files[0];
+    const [file] = files;
+    if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
         const preview = e.target?.result as string;

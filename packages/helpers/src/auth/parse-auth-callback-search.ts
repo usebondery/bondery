@@ -1,3 +1,18 @@
+/**
+ * Expo injects `?cookie=` with URLSearchParams encoding. Decode once when
+ * percent-escapes are present so `getSetCookie` sees a Set-Cookie header.
+ */
+function decodeCallbackParam(value: string | null): string | null {
+  if (!value?.includes("%")) {
+    return value;
+  }
+
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
 export type AuthCallbackSearchParams = {
   cookie?: string | string[] | undefined;
   error?: string | string[] | undefined;
@@ -43,20 +58,4 @@ export function parseAuthCallbackSearch(
     error: firstSearchParam(params.error),
     token: firstSearchParam(params.token),
   };
-}
-
-/**
- * Expo injects `?cookie=` with URLSearchParams encoding. Decode once when
- * percent-escapes are present so `getSetCookie` sees a Set-Cookie header.
- */
-function decodeCallbackParam(value: string | null): string | null {
-  if (!value?.includes("%")) {
-    return value;
-  }
-
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    return value;
-  }
 }

@@ -1,0 +1,35 @@
+{
+  "email": {
+    "invalid": "Voer een geldig e-mailadres in",
+    "invalidTitle": "Ongeldig e-mailadres"
+  },
+  "fields": {
+    "firstName": {
+      "maxLength": "Voornaam mag maximaal {max} tekens bevatten",
+      "required": "Voornaam is verplicht"
+    },
+    "generic": {
+      "maxLength": "Waarde mag maximaal {max} tekens bevatten"
+    },
+    "headline": {
+      "maxLength": "Kop mag maximaal {max} tekens bevatten"
+    },
+    "label": {
+      "maxLength": "{field} mag maximaal {max} tekens bevatten",
+      "required": "{field} is verplicht"
+    },
+    "lastName": {
+      "maxLength": "Achternaam mag maximaal {max} tekens bevatten"
+    },
+    "location": {
+      "maxLength": "Locatie mag maximaal {max} tekens bevatten"
+    },
+    "middleName": {
+      "maxLength": "Tweede voornaam mag maximaal {max} tekens bevatten"
+    }
+  },
+  "interaction": {
+    "titleRequired": "Titel is verplicht"
+  },
+  "title": "Validatiefout"
+}

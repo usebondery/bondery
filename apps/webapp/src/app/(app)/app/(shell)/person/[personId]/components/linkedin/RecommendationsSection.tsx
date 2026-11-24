@@ -28,18 +28,18 @@ export function RecommendationsSection({
 
   return (
     <Stack gap="sm">
-      {mergeRecommendation && (
+      {mergeRecommendation ? (
         <MergeRecommendationCard
           contacts={[mergeRecommendation.leftPerson, mergeRecommendation.rightPerson]}
           recommendation={mergeRecommendation}
           redirectAfterMerge
           survivorPersonId={personId}
         />
-      )}
+      ) : null}
 
-      {showEnrichCard && (
+      {showEnrichCard ? (
         <EnrichRecommendationCard linkedinHandle={linkedinHandle} personId={personId} />
-      )}
+      ) : null}
     </Stack>
   );
 }

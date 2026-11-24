@@ -14,22 +14,22 @@ Other packages (for example `@bondery/helpers`, `@bondery/db`) may depend on sch
 
 ## Validation vs normalization
 
-| Concern | Package | Example |
-|---------|---------|---------|
-| **Validation** — is this input allowed? | `@bondery/schemas` | Required fields, max length, enums, email format |
-| **Normalization** — how do we store it consistently? | `@bondery/helpers` | `parseFullName`, `processContactSocialFieldValue` |
-| **Form pipelines** — validate then normalize on submit | `@bondery/helpers/forms` | `createContactFromFullNameSchema` |
+| Concern                                                | Package                  | Example                                           |
+| ------------------------------------------------------ | ------------------------ | ------------------------------------------------- |
+| **Validation** — is this input allowed?                | `@bondery/schemas`       | Required fields, max length, enums, email format  |
+| **Normalization** — how do we store it consistently?   | `@bondery/helpers`       | `parseFullName`, `processContactSocialFieldValue` |
+| **Form pipelines** — validate then normalize on submit | `@bondery/helpers/forms` | `createContactFromFullNameSchema`                 |
 
 Schemas may include lightweight structural transforms (trim-to-null, lowercase email, default flags) when they are part of the contract itself.
 
 ## Subpath exports
 
-| Import | Contents |
-|--------|----------|
-| `@bondery/schemas` | Entity schemas, types, shared utilities |
-| `@bondery/schemas/http` | Route transport primitives (params, coerced query, pagination), shared response helpers (`okResponse`, `standardErrorResponses`), `contactIdSchema` |
-| `@bondery/schemas/constants` | Field limits, product constants |
-| `@bondery/schemas/sync` | Mobile sync protocol and mutation payloads |
+| Import                       | Contents                                                                                                                                            |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@bondery/schemas`           | Entity schemas, types, shared utilities                                                                                                             |
+| `@bondery/schemas/http`      | Route transport primitives (params, coerced query, pagination), shared response helpers (`okResponse`, `standardErrorResponses`), `contactIdSchema` |
+| `@bondery/schemas/constants` | Field limits, product constants                                                                                                                     |
+| `@bondery/schemas/sync`      | Mobile sync protocol and mutation payloads                                                                                                          |
 
 ## Usage
 
@@ -60,12 +60,12 @@ import { prisma, type People } from "@bondery/db";
 
 ## Wire vs form vs read models
 
-| Kind | Location | Used by |
-|------|----------|---------|
-| **Wire** — HTTP request/response shapes | `@bondery/schemas` (`*ApiInputSchema`, `update*InputSchema`) | API routes, sync mutations |
-| **Form** — UI input with transforms (`fullName` → parts) | `@bondery/schemas` (`createContactInputSchema`, etc.) | Mobile/webapp forms only — never route `body` |
+| Kind                                                            | Location                                                                        | Used by                                                         |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| **Wire** — HTTP request/response shapes                         | `@bondery/schemas` (`*ApiInputSchema`, `update*InputSchema`)                    | API routes, sync mutations                                      |
+| **Form** — UI input with transforms (`fullName` → parts)        | `@bondery/schemas` (`createContactInputSchema`, etc.)                           | Mobile/webapp forms only — never route `body`                   |
 | **Transport** — params, coerced query, pagination, response kit | `@bondery/schemas/http` (`uuidParamSchema`, `okResponse`, `contactIdSchema`, …) | Fastify route `params` / `querystring` / `response` composition |
-| **Read** — list/detail response items | `@bondery/schemas` (`contactSchema`, `groupSchema`, …) | Route `response` schemas, clients |
+| **Read** — list/detail response items                           | `@bondery/schemas` (`contactSchema`, `groupSchema`, …)                          | Route `response` schemas, clients                               |
 
 OpenAPI documents wire **input** shapes. Zod transforms/refines still run at runtime but may not appear fully in generated docs — behavioral contracts live in `src/contracts.assertions.ts`.
 
@@ -73,12 +73,12 @@ OpenAPI documents wire **input** shapes. Zod transforms/refines still run at run
 
 Public types and Zod validators live in separate files inside a **module subfolder** so consumers doing `import type { Contact }` never load Zod generic trees:
 
-| File | Role |
-|------|------|
-| `types.ts` | Plain `interface` / `type` aliases — **no `zod` import** |
-| `schema.ts` | Zod schemas with `satisfies z.ZodType<T>` |
-| `contract.ts` | Compile-time `Assert<IsEqual<…>>` locks (not exported) |
-| `index.ts` | Thin barrel re-exporting types and schemas |
+| File          | Role                                                     |
+| ------------- | -------------------------------------------------------- |
+| `types.ts`    | Plain `interface` / `type` aliases — **no `zod` import** |
+| `schema.ts`   | Zod schemas with `satisfies z.ZodType<T>`                |
+| `contract.ts` | Compile-time `Assert<IsEqual<…>>` locks (not exported)   |
+| `index.ts`    | Thin barrel re-exporting types and schemas               |
 
 Example layout: `src/entities/contact/{types,schema,contract,index}.ts`, `src/sync/pull/…`, `src/geocode/…`.
 

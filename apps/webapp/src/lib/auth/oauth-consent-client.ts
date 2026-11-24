@@ -74,7 +74,7 @@ export function readOAuthPublicClientName(data: unknown): string | null {
   }
 
   const record = data as Record<string, unknown>;
-  const nested = record.client;
+  const nested = record["client"];
   if (nested && typeof nested === "object") {
     const client = nested as { client_name?: unknown; name?: unknown };
     const nestedName = client.client_name ?? client.name;
@@ -83,6 +83,6 @@ export function readOAuthPublicClientName(data: unknown): string | null {
     }
   }
 
-  const name = record.client_name ?? record.name;
+  const name = record["client_name"] ?? record["name"];
   return typeof name === "string" && name.trim() ? name.trim() : null;
 }

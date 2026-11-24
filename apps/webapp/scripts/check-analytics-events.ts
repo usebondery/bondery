@@ -8,6 +8,8 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "../../../scripts/check/check-report.mjs";
 
+const JS_TS_EXTENSION = /\.(tsx?|jsx?)$/;
+
 const check = createCheck("check-analytics-events");
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -24,7 +26,7 @@ function walk(dir: string, acc: string[] = []): string[] {
         continue;
       }
       walk(full, acc);
-    } else if (/\.(tsx?|jsx?)$/.test(entry)) {
+    } else if (JS_TS_EXTENSION.test(entry)) {
       acc.push(full);
     }
   }
@@ -36,7 +38,10 @@ function extractEventNames(content: string, callee: string): string[] {
   const names: string[] = [];
   let match = pattern.exec(content);
   while (match) {
-    names.push(match[1]);
+    const [, name] = match;
+    if (name !== undefined) {
+      names.push(name);
+    }
     match = pattern.exec(content);
   }
   return names;
@@ -72,10 +77,8 @@ function checkFile(absPath: string): Violation[] {
 
 const violations = walk(WEBAPP_SRC).flatMap(checkFile);
 
-if (violations.length > 0) {
-  for (const violation of violations) {
-    check.add(`${violation.file}: ${violation.detail}`);
-  }
+for (const violation of violations) {
+  check.add(`${violation.file}: ${violation.detail}`);
 }
 
 check.ok(`${walk(WEBAPP_SRC).length} files checked`);

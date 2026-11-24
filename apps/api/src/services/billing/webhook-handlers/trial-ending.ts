@@ -8,6 +8,8 @@ import {
   markTrialEndingEmailSent,
 } from "../subscription.js";
 
+const UUID_PATTERN = /^[0-9a-f-]{36}$/i;
+
 async function resolveUserEmail(userId: string): Promise<string | null> {
   const user = await prisma.user.findUnique({
     select: { email: true },
@@ -29,8 +31,9 @@ export async function handleTrialWillEnd(
     return;
   }
 
-  const metadataUserId = subscription.metadata.bondery_user_id;
-  const isValidUuid = metadataUserId != null && /^[0-9a-f-]{36}$/i.test(metadataUserId);
+  const metadataUserId = subscription.metadata["bondery_user_id"];
+  const isValidUuid =
+    metadataUserId !== null && metadataUserId !== undefined && UUID_PATTERN.test(metadataUserId);
 
   let userId = isValidUuid ? metadataUserId : (existing?.userId ?? null);
   let email: string | null = null;
@@ -73,7 +76,15 @@ export async function handleTrialWillEnd(
     log,
   );
 
-  await markTrialEndingEmailSent(subscription.id);
+  const marked = await markTrialEndingEmailSent(subscription.id);
+  if (marked === 0) {
+    // No subscription row to mark, so a redelivery of this event would send the email again.
+    log?.warn(
+      { stripeSubscriptionId: subscription.id },
+      "stripe-webhook: trial-ending email sent but no subscription row to mark",
+    );
+    return;
+  }
   log?.info(
     { email, stripeSubscriptionId: subscription.id },
     "stripe-webhook: trial-ending email sent",

@@ -20,11 +20,7 @@ export function LastInteractionSection({ contact }: LastInteractionSectionProps)
       </Text>
       <Text c="dimmed" size="sm">
         {contact.lastInteraction
-          ? formatter.dateTime(new Date(contact.lastInteraction), {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            })
+          ? formatter.formatDate(new Date(contact.lastInteraction), "long")
           : t("NoInteractionRecorded")}
       </Text>
     </div>

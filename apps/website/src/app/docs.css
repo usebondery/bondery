@@ -13,15 +13,15 @@
 .docsPageDescription,
 .docsPageFoot,
 .docsPageHead {
-  max-width: var(--docs-measure);
-  min-width: 0;
+  min-inline-size: 0;
+  max-inline-size: var(--docs-measure);
 }
 
 /* The prose box takes the whole column. Each direct child limits itself to
    `--docs-measure` for a readable line length, except a code block, which is full
    width by default. Give one a `max-width` through its `className` to narrow it. */
 .docsProse {
-  min-width: 0;
+  min-inline-size: 0;
 }
 
 .docsProse a.pressableCard,
@@ -42,7 +42,7 @@
 /* Narrow a code block that holds one short command, so it does not stretch to the
    full column. Pass it as `className` on `<PlatformCode>`. */
 .docsCodeNarrow {
-  max-width: 34rem;
+  max-inline-size: 34rem;
 }
 
 /* Docs cards grid. Columns live here, not in a responsive `cols` prop, because
@@ -50,8 +50,8 @@
    style tag breaks the adjacent-sibling rhythm rules below. */
 .docsGrid {
   display: grid;
-  gap: var(--mantine-spacing-md);
   grid-template-columns: minmax(0, 1fr);
+  gap: var(--mantine-spacing-md);
 }
 
 @media (min-width: 48em) {
@@ -65,10 +65,10 @@
    the text baseline to the optical centre of the cap height. Declared before the
    rhythm block: the rhythm rules below carry higher specificity. */
 .docsHeadingAnchor {
-  color: var(--mantine-color-dimmed);
   margin-inline-start: var(--mantine-spacing-xs);
-  opacity: 0;
   vertical-align: 0.12em;
+  color: var(--mantine-color-dimmed);
+  opacity: 0;
 }
 
 .docsHeading:hover .docsHeadingAnchor,
@@ -106,7 +106,7 @@
    attribute selector. */
 
 .docsRhythm.docsRhythm
-:where(p, h1, h2, h3, h4, h5, h6, ul, ol, pre, hr, blockquote, table, img, details) {
+  :where(p, h1, h2, h3, h4, h5, h6, ul, ol, pre, hr, blockquote, table, img, details) {
   margin-block: 0;
 }
 
@@ -115,7 +115,7 @@
    default, so long commands stay readable. Give one a `max-width` through its
    `className` when it should stay narrow. */
 .docsRhythm.docsRhythm > *:not([data-code-block]) {
-  max-width: var(--docs-measure);
+  max-inline-size: var(--docs-measure);
 }
 
 /* Default gap between body blocks. */
@@ -148,39 +148,39 @@
   --docs-step-marker: 44px;
 
   display: grid;
-  gap: var(--docs-step-gap);
   /* An explicit `minmax(0, 1fr)` column stops the implicit track from sizing to
      max-content. Without it the row keeps a code block's intrinsic width and the
      page scrolls sideways below ~660px. */
   grid-template-columns: minmax(0, 1fr);
-  list-style: none;
+  gap: var(--docs-step-gap);
   padding: 0;
+  list-style: none;
 }
 
 .docsSteps .docsStep {
-  /* A grid item defaults to `min-width: auto`, so it refuses to shrink below its
-     content and the `minmax(0, 1fr)` above has no effect without this. */
-  min-width: 0;
   position: relative;
+  /* A grid item defaults to an automatic minimum size, so it refuses to shrink
+     below its content and the `minmax(0, 1fr)` above has no effect without this. */
+  min-inline-size: 0;
 }
 
 /* The body takes the rest of the row, so a full-width code block fills the step.
    Without this the flex item shrinks to its content and leaves the column empty. */
 .docsSteps .docsStepBody {
   flex: 1 1 auto;
-  min-width: 0;
+  min-inline-size: 0;
 }
 
 .docsSteps .docsStep:not(:last-child)::after {
+  position: absolute;
+  inset-block-start: var(--docs-step-marker);
+  inset-block-end: calc(-1 * var(--docs-step-gap));
+  inset-inline-start: calc(var(--docs-step-marker) / 2);
+  inline-size: 2px;
+  margin-inline-start: -1px;
+  content: "";
   background: var(--mantine-color-default-border);
   border-radius: 999px;
-  bottom: calc(-1 * var(--docs-step-gap));
-  content: "";
-  left: calc(var(--docs-step-marker) / 2);
-  position: absolute;
-  top: var(--docs-step-marker);
-  transform: translateX(-50%);
-  width: 2px;
 }
 
 /* Sidebar column keeps the header and footer side gap. `75em` is the Mantine `lg`
@@ -205,12 +205,12 @@
 @media (min-width: 62em) {
   .docsPageWithRail {
     display: grid;
-    gap: var(--mantine-spacing-lg);
     grid-template-columns: minmax(0, 1fr) 15rem;
+    gap: var(--mantine-spacing-lg);
   }
 
   .docsPageWithRail > * {
-    min-width: 0;
+    min-inline-size: 0;
   }
 
   .docsPageRail {

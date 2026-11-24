@@ -1,5 +1,5 @@
+import { cn } from "cn";
 import { type HeadingOrder, headingClassName } from "./headingClassName";
-import { joinClassNames } from "./joinClassNames";
 import { Text, type TextProps } from "./Text";
 
 export type { HeadingOrder };
@@ -14,7 +14,7 @@ export function Heading({ className, order, c = "default", ...rest }: HeadingPro
       {...rest}
       accessibilityRole="header"
       c={c}
-      className={joinClassNames(headingClassName(order), className)}
+      className={cn(headingClassName(order), className)}
       size={null}
     />
   );

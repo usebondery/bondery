@@ -10,13 +10,13 @@ Stripe-style API docs order endpoints by **integrator journey**: list and retrie
 
 Register routes in this tier order within each tag (e.g. Contacts, Groups):
 
-| Tier | Name | Path pattern | Examples |
-|------|------|--------------|---------|
-| 1 | Collection | `/{resource}` | `GET/POST/DELETE /api/contacts` |
-| 2 | Static siblings | `/{resource}/{literal}` (non-auxiliary) | `/map-pins`, `/by-social`, `/important-dates/upcoming` |
-| 3 | Single resource | `/{resource}/{id}` | `GET/PATCH/DELETE /api/contacts/{id}` |
-| 4 | Sub-resources | `/{resource}/{id}/{sub}` | `/api/contacts/{id}/groups`, `/api/groups/{id}/contacts` |
-| 5 | Auxiliary | workflow / batch tooling | merge, enrich-queue, `POST /merge` |
+| Tier | Name            | Path pattern                            | Examples                                                 |
+| ---- | --------------- | --------------------------------------- | -------------------------------------------------------- |
+| 1    | Collection      | `/{resource}`                           | `GET/POST/DELETE /api/contacts`                          |
+| 2    | Static siblings | `/{resource}/{literal}` (non-auxiliary) | `/map-pins`, `/by-social`, `/important-dates/upcoming`   |
+| 3    | Single resource | `/{resource}/{id}`                      | `GET/PATCH/DELETE /api/contacts/{id}`                    |
+| 4    | Sub-resources   | `/{resource}/{id}/{sub}`                | `/api/contacts/{id}/groups`, `/api/groups/{id}/contacts` |
+| 5    | Auxiliary       | workflow / batch tooling                | merge, enrich-queue, `POST /merge`                       |
 
 Among paths at the **same tier**, prefer alphabetical order by path segment.
 
@@ -30,7 +30,7 @@ Current auxiliary segments: `merge`, `merge-recommendations`, `enrich-queue`, `k
 
 When multiple methods share one path, register in this order:
 
-```
+```text
 GET → POST → PUT → PATCH → DELETE
 ```
 
@@ -38,7 +38,7 @@ GET → POST → PUT → PATCH → DELETE
 
 Section order in GitBook follows `OPENAPI_TAG_ORDER` in `packages/schemas/src/openapi/route-order.ts` (applied via `apps/api/src/openapi/swagger-config.ts`). Order by **integrator dependency**, not alphabet:
 
-```
+```text
 Health → Contacts → Groups → Tags → Interactions → Import → Share → Geocode
 → Me → Sync → Extension → Mobile → Chat → Subscriptions → Webhooks → Internal
 ```

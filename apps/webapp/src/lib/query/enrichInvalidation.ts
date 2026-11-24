@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { useEffect } from "react";
 
 import { getState, subscribe } from "@/lib/extension/enrichBatchStore";
@@ -20,10 +21,10 @@ export function useEnrichBatchInvalidation() {
     return subscribe(() => {
       const state = getState();
 
-      const isRunning = state.isRunning;
+      const { isRunning } = state;
 
       if (wasRunning && !isRunning && state.completed > 0) {
-        void invalidateAfterEnrichBatch(getQueryClient());
+        detachPromise(invalidateAfterEnrichBatch(getQueryClient()));
       }
 
       wasRunning = isRunning;

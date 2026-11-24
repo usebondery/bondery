@@ -16,6 +16,8 @@ import {
   retryAfterHeader,
 } from "@bondery/schemas/http/responses";
 
+const THREE_DIGIT_STATUS_PATTERN = /^\d{3}$/;
+
 const RATE_LIMIT_REF = "#/components/headers/RateLimit";
 const RATE_LIMIT_POLICY_REF = "#/components/headers/RateLimitPolicy";
 const RETRY_AFTER_REF = "#/components/headers/RetryAfter";
@@ -47,7 +49,7 @@ type OpenApiSpec = {
 };
 
 function statusCode(status: string): number | undefined {
-  if (!/^\d{3}$/.test(status)) {
+  if (!THREE_DIGIT_STATUS_PATTERN.test(status)) {
     return undefined;
   }
   return Number(status);
@@ -59,16 +61,19 @@ function isLimitedSuccessStatus(status: string): boolean {
 }
 
 function rateLimitHeaderRefs(includeRetryAfter: boolean): Record<string, { $ref: string }> {
-  return {
+  const headers: Record<string, { $ref: string }> = {
     RateLimit: { $ref: RATE_LIMIT_REF },
     "RateLimit-Policy": { $ref: RATE_LIMIT_POLICY_REF },
-    ...(includeRetryAfter ? { "Retry-After": { $ref: RETRY_AFTER_REF } } : {}),
   };
+  if (includeRetryAfter) {
+    headers["Retry-After"] = { $ref: RETRY_AFTER_REF };
+  }
+  return headers;
 }
 
 function applyRateLimitHeaderRefs(response: SpecResponse, includeRetryAfter: boolean): void {
   response.headers = {
-    ...(response.headers ?? {}),
+    ...response.headers,
     ...rateLimitHeaderRefs(includeRetryAfter),
   };
 }
@@ -76,7 +81,7 @@ function applyRateLimitHeaderRefs(response: SpecResponse, includeRetryAfter: boo
 export function patchOpenApiRateLimitHeaders(spec: OpenApiSpec): void {
   spec.components ??= {};
   spec.components.headers = {
-    ...(spec.components.headers ?? {}),
+    ...spec.components.headers,
     RateLimit: structuredClone(rateLimitHeader),
     RateLimitPolicy: structuredClone(rateLimitPolicyHeader),
     RetryAfter: structuredClone(retryAfterHeader),

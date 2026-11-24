@@ -14,7 +14,7 @@ import type { ReactElement } from "react";
 import type { DataColumnConfig, RowAction } from "#DataTable/types.js";
 import { DotsMenuButton } from "#DotsMenuButton/index.js";
 
-export interface DataTableRowInternalProps<TRow> {
+interface DataTableRowInternalProps<TRow> {
   actionsLabel: string;
   isMenuOpen: boolean;
   isNonSelectable: boolean;
@@ -129,5 +129,7 @@ function DataTableRowComponent<TRow>({
     </TableTr>
   );
 }
+
+export type { DataTableRowInternalProps };
 
 export const DataTableRow = DataTableRowComponent as typeof DataTableRowComponent;

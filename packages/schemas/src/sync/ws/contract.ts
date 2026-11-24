@@ -19,14 +19,22 @@ import type {
   SyncWsTicketResponse,
 } from "./types.js";
 
-type _SyncEmitMeta = Assert<IsEqual<SyncEmitMeta, z.infer<typeof syncEmitMetaSchema>>>;
-type _SyncWsHelloMessage = Assert<IsEqual<SyncWsHelloMessage, z.infer<typeof syncWsHelloSchema>>>;
-type _SyncWsBatchMessage = Assert<IsEqual<SyncWsBatchMessage, z.infer<typeof syncWsBatchSchema>>>;
-type _SyncWsPingMessage = Assert<IsEqual<SyncWsPingMessage, z.infer<typeof syncWsPingSchema>>>;
-type _SyncWsServerMessage = Assert<
+export type _SyncEmitMeta = Assert<IsEqual<SyncEmitMeta, z.infer<typeof syncEmitMetaSchema>>>;
+export type _SyncWsHelloMessage = Assert<
+  IsEqual<SyncWsHelloMessage, z.infer<typeof syncWsHelloSchema>>
+>;
+export type _SyncWsBatchMessage = Assert<
+  IsEqual<SyncWsBatchMessage, z.infer<typeof syncWsBatchSchema>>
+>;
+export type _SyncWsPingMessage = Assert<
+  IsEqual<SyncWsPingMessage, z.infer<typeof syncWsPingSchema>>
+>;
+export type _SyncWsServerMessage = Assert<
   IsEqual<SyncWsServerMessage, z.infer<typeof syncWsServerMessageSchema>>
 >;
-type _SyncWsClientMessage = Assert<IsEqual<SyncWsClientMessage, z.infer<typeof syncWsPongSchema>>>;
-type _SyncWsTicketResponse = Assert<
+export type _SyncWsClientMessage = Assert<
+  IsEqual<SyncWsClientMessage, z.infer<typeof syncWsPongSchema>>
+>;
+export type _SyncWsTicketResponse = Assert<
   IsEqual<SyncWsTicketResponse, z.infer<typeof syncWsTicketResponseSchema>>
 >;

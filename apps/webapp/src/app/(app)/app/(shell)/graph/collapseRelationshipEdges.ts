@@ -1,5 +1,19 @@
 import type { RelationshipType } from "@bondery/schemas";
 
+function directedEnds(
+  type: RelationshipType,
+  sourcePersonId: string,
+  targetPersonId: string,
+): { sourcePersonId: string; targetPersonId: string } | null {
+  if (type === "parent" || type === "guardian") {
+    return { sourcePersonId, targetPersonId };
+  }
+  if (type === "child" || type === "dependent") {
+    return { sourcePersonId: targetPersonId, targetPersonId: sourcePersonId };
+  }
+  return null;
+}
+
 export const RELATIONSHIP_FAMILIES = ["family", "partners", "friends", "work", "other"] as const;
 
 export type RelationshipFamily = (typeof RELATIONSHIP_FAMILIES)[number];
@@ -45,20 +59,6 @@ export function relationshipPairKey(leftId: string, rightId: string): string {
   return leftId < rightId ? `${leftId}\0${rightId}` : `${rightId}\0${leftId}`;
 }
 
-function directedEnds(
-  type: RelationshipType,
-  sourcePersonId: string,
-  targetPersonId: string,
-): { sourcePersonId: string; targetPersonId: string } | null {
-  if (type === "parent" || type === "guardian") {
-    return { sourcePersonId, targetPersonId };
-  }
-  if (type === "child" || type === "dependent") {
-    return { sourcePersonId: targetPersonId, targetPersonId: sourcePersonId };
-  }
-  return null;
-}
-
 /**
  * One line per person pair. Parent/child and guardian/dependent point from the
  * parent or guardian toward the child or dependent. The type list keeps both words.
@@ -91,13 +91,11 @@ export function collapseRelationshipEdges(
     if (!group.relationshipTypes.includes(edge.relationshipType)) {
       group.relationshipTypes.push(edge.relationshipType);
     }
-    if (!group.directed) {
-      group.directed = directedEnds(
-        edge.relationshipType,
-        edge.sourcePersonId,
-        edge.targetPersonId,
-      );
-    }
+    group.directed ??= directedEnds(
+      edge.relationshipType,
+      edge.sourcePersonId,
+      edge.targetPersonId,
+    );
   }
 
   return [...groups.entries()].map(([key, group]) => ({

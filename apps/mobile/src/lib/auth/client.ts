@@ -1,5 +1,6 @@
 import { expoClient } from "@better-auth/expo/client";
 import { lastLoginMethodClient } from "@better-auth/expo/plugins";
+import { detachPromise } from "@bondery/helpers/async";
 import { BETTER_AUTH_BASE_PATH } from "@bondery/helpers/globals/paths";
 import { expoPasskeyClient } from "@lobehub/expo-better-auth-passkey";
 import { magicLinkClient } from "better-auth/client/plugins";
@@ -10,8 +11,6 @@ import { Platform } from "react-native";
 import { API_URL, HAS_MOBILE_CONFIG } from "../config";
 import { resolveExpoLastLoginMethod } from "./last-login-method";
 import { AUTH_SCHEME, nativeAuthDeepLink } from "./native-auth-deep-link";
-
-export { AUTH_SCHEME, nativeAuthDeepLink };
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -29,10 +28,10 @@ const webStorage = {
   },
 };
 
-export const AUTH_STORAGE_PREFIX = "bondery";
-export const AUTH_COOKIE_STORAGE_KEY = `${AUTH_STORAGE_PREFIX}_cookie`;
-export const AUTH_NATIVE_STORAGE = Platform.OS === "web" ? webStorage : SecureStore;
-export const LAST_LOGIN_METHOD_STORAGE_KEY = `${AUTH_STORAGE_PREFIX}_last_login_method`;
+const AUTH_STORAGE_PREFIX = "bondery";
+const AUTH_COOKIE_STORAGE_KEY = `${AUTH_STORAGE_PREFIX}_cookie`;
+const AUTH_NATIVE_STORAGE = Platform.OS === "web" ? webStorage : SecureStore;
+const LAST_LOGIN_METHOD_STORAGE_KEY = `${AUTH_STORAGE_PREFIX}_last_login_method`;
 
 const lastLoginMemory = new Map<string, string>();
 
@@ -40,7 +39,7 @@ const lastLoginMemory = new Map<string, string>();
  * Sync `getItem` over SecureStore / web storage. Expo `lastLoginMethodClient`
  * reads last-used synchronously and writes asynchronously.
  */
-export const lastLoginStorage = {
+const lastLoginStorage = {
   deleteItemAsync: async (key: string) => {
     lastLoginMemory.delete(key);
     await AUTH_NATIVE_STORAGE.deleteItemAsync(key);
@@ -52,20 +51,20 @@ export const lastLoginStorage = {
   },
 };
 
-export async function hydrateLastLoginMethod(): Promise<void> {
+async function hydrateLastLoginMethod(): Promise<void> {
   const value = await AUTH_NATIVE_STORAGE.getItemAsync(LAST_LOGIN_METHOD_STORAGE_KEY);
   if (value) {
     lastLoginMemory.set(LAST_LOGIN_METHOD_STORAGE_KEY, value);
   }
 }
 
-export async function rememberLastLoginMethod(method: string): Promise<void> {
+async function rememberLastLoginMethod(method: string): Promise<void> {
   await lastLoginStorage.setItem(LAST_LOGIN_METHOD_STORAGE_KEY, method);
 }
 
-void hydrateLastLoginMethod();
+detachPromise(hydrateLastLoginMethod());
 
-export const authClient = HAS_MOBILE_CONFIG
+const authClient = HAS_MOBILE_CONFIG
   ? createAuthClient({
       basePath: BETTER_AUTH_BASE_PATH,
       baseURL: API_URL,
@@ -86,7 +85,15 @@ export const authClient = HAS_MOBILE_CONFIG
     })
   : null;
 
-export async function getAccessToken(): Promise<string | null> {
-  const { readLocalAccessToken } = await import("./session");
-  return readLocalAccessToken();
-}
+export {
+  AUTH_COOKIE_STORAGE_KEY,
+  AUTH_NATIVE_STORAGE,
+  AUTH_SCHEME,
+  AUTH_STORAGE_PREFIX,
+  authClient,
+  hydrateLastLoginMethod,
+  LAST_LOGIN_METHOD_STORAGE_KEY,
+  lastLoginStorage,
+  nativeAuthDeepLink,
+  rememberLastLoginMethod,
+};

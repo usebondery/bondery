@@ -3,15 +3,15 @@ import { getKeepInTouchTranslations } from "@/lib/i18n/generated/hooks.server";
 import { staticPageTitle } from "@/lib/metadata/pageTitles";
 import { KeepInTouchLoader } from "./KeepInTouchLoader";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getKeepInTouchTranslations();
-  return staticPageTitle(t("Title"));
-}
-
 function defaultEndDate(): string {
   const d = new Date();
   d.setDate(d.getDate() + 30);
-  return d.toISOString().split("T")[0];
+  return d.toISOString().slice(0, 10);
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getKeepInTouchTranslations();
+  return staticPageTitle(t("Title"));
 }
 
 export default async function KeepInTouchPage({

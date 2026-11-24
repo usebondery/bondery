@@ -7,14 +7,12 @@
  * connection, and the user cannot act on it. These checks catch the two causes
  * the page can see, before the recognizer starts.
  */
-import type { DictationErrorCode } from "@/lib/speech/dictation/dictationEngine";
-
 /** Returns a failure code, or `null` when the session may start. */
 export function checkDictationPreflight(input: {
   online: boolean;
   secure: boolean;
   supported: boolean;
-}): DictationErrorCode | null {
+}): "insecure" | "offline" | "unsupported" | null {
   if (!input.supported) {
     return "unsupported";
   }
@@ -34,8 +32,8 @@ export function readDictationPreflightState(): {
   supported: boolean;
 } {
   return {
-    online: globalThis.navigator?.onLine !== false,
-    secure: globalThis.window?.isSecureContext !== false,
+    online: typeof globalThis.navigator === "undefined" || globalThis.navigator.onLine,
+    secure: typeof globalThis.window === "undefined" || globalThis.window.isSecureContext,
     supported: typeof globalThis.window !== "undefined",
   };
 }

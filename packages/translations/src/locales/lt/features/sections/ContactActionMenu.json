@@ -1,0 +1,11 @@
+{
+  "ActionsButton": "Veiksmai",
+  "CannotDeleteMyself": "Negali ištrinti savo kontakto kortelės",
+  "CannotMergeMyself": "Negali sujungti savo kontakto kortelės su kitomis",
+  "DeleteContact": "Ištrinti kontaktą",
+  "DownloadVCard": "Atsisiųsti vCard",
+  "ExportError": "Klaida",
+  "ExportErrorDescription": "Nepavyko eksportuoti kontakto. Bandyk dar kartą.",
+  "ExportSuccess": "Pavyko",
+  "ExportSuccessDescription": "Kontaktas eksportuotas kaip vCard"
+}

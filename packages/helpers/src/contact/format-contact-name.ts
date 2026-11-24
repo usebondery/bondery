@@ -1,5 +1,5 @@
 export type ContactNameFields = {
-  firstName: string;
+  firstName: string | null | undefined;
   middleName?: string | null;
   lastName?: string | null;
 };

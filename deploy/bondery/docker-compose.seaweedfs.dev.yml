@@ -1,15 +1,45 @@
 # Local laptop overlay — use with root .env.local:
 #   pnpm run start:seaweedfs
 #
-# Publishes S3 on 127.0.0.1:8333 and avoids requiring external dokploy-network / Traefik.
+# TLS like the deployed stack. `pnpm run storage:secrets` (run by start:seaweedfs) writes the
+# CA and cluster certificate to .temp/storage-secrets instead of the stack-secrets job.
+# Publishes S3 HTTPS on 127.0.0.1:8443 for the API and HTTP on 8333 for public reads, and
+# avoids requiring external dokploy-network / Traefik.
 
 services:
+  seaweedfs-master:
+    depends_on: !reset {}
+    volumes:
+      - ../../.temp/storage-secrets/cluster:/bondery-storage/cluster:ro
+
+  seaweedfs-volume:
+    depends_on: !override
+      seaweedfs-master:
+        condition: service_healthy
+    volumes:
+      - ../../.temp/storage-secrets/cluster:/bondery-storage/cluster:ro
+
+  seaweedfs-filer:
+    depends_on: !override
+      seaweedfs-master:
+        condition: service_healthy
+      seaweedfs-volume:
+        condition: service_healthy
+    volumes:
+      - ../../.temp/storage-secrets/cluster:/bondery-storage/cluster:ro
+
   seaweedfs-s3:
+    depends_on: !override
+      seaweedfs-filer:
+        condition: service_healthy
     labels: !reset []
     ports:
       - "8333:8333"
+      - "127.0.0.1:8443:8443"
     networks:
       - internal
+    volumes:
+      - ../../.temp/storage-secrets/cluster:/bondery-storage/cluster:ro
 
 networks:
   dokploy-network:

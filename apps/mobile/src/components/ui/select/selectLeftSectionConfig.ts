@@ -5,6 +5,6 @@ export function isSelectLeftSectionConfig(value: unknown): value is SelectLeftSe
     return false;
   }
 
-  const type = (value as { type?: unknown }).type;
+  const { type } = value as { type?: unknown };
   return type === "icon" || type === "emoji" || type === "emojiBadge";
 }

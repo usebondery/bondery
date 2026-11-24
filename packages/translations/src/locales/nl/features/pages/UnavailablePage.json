@@ -1,0 +1,16 @@
+{
+  "CheckingAgain": "Opnieuw controleren over {seconds}s…",
+  "Description": "Je account is veilig en je bent nog ingelogd. We blijven controleren; dit duurt meestal kort.",
+  "MetadataTitle": "Service niet beschikbaar",
+  "Retry": "Opnieuw proberen",
+  "StatusChecking": "Verbinding controleren…",
+  "StatusDegraded": "Sommige functies kunnen nu traag zijn",
+  "StatusOffline": "Bondery is tijdelijk niet beschikbaar",
+  "StatusOnline": "Weer online. Je wordt teruggeleid…",
+  "StatusPageLink": "Statuspagina bekijken",
+  "TechnicalBackendStatus": "Backend: {status}",
+  "TechnicalDetails": "Technische details",
+  "TechnicalHttpStatus": "HTTP-status: {status}",
+  "TechnicalUnreachable": "onbereikbaar",
+  "Title": "We hebben problemen met verbinden"
+}

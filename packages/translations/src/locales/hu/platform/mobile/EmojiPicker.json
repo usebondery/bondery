@@ -1,0 +1,22 @@
+{
+  "Category": {
+    "Activities": "Tevékenységek",
+    "Animals": "Állatok",
+    "Buildings": "Épületek",
+    "Celebrations": "Ünnepek",
+    "Food": "Étel",
+    "Hearts": "Szívek",
+    "Humans": "Emberek",
+    "Miscellaneous": "Egyéb",
+    "Nature": "Természet",
+    "Objects": "Tárgyak",
+    "Sports": "Sport",
+    "Travel": "Utazás",
+    "Work": "Munka"
+  },
+  "EmptySearch": "Nem található emoji",
+  "RandomAccessibilityLabel": "Véletlen emoji választása",
+  "SearchPlaceholder": "Emojik keresése…",
+  "SheetTitle": "Emoji",
+  "TriggerAccessibilityHint": "Emojiválasztó megnyitása"
+}

@@ -3,6 +3,35 @@ import type { ChatSession, ChatToolActivity } from "@bondery/schemas";
 import type { UIMessage } from "ai";
 import { normalizePaginatedList } from "@/lib/api/resources/pagination";
 
+function parseActivities(value: unknown): ChatToolActivity[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  const activities: ChatToolActivity[] = [];
+
+  for (const entry of value) {
+    if (!entry || typeof entry !== "object") {
+      continue;
+    }
+
+    const { displayName, kind, tool } = entry as Record<string, unknown>;
+    if (typeof tool !== "string" || (kind !== "read" && kind !== "write")) {
+      continue;
+    }
+
+    activities.push({
+      ...(typeof displayName === "string" && displayName
+        ? { displayName: displayName.slice(0, 80) }
+        : {}),
+      kind,
+      tool,
+    });
+  }
+
+  return activities.slice(0, 20);
+}
+
 export const CHAT_SESSIONS_LIST_PATH = `${API_ROUTES.CHAT_SESSIONS}?limit=50&offset=0`;
 
 export function buildChatSessionMessagesPath(sessionId: string): string {
@@ -10,7 +39,12 @@ export function buildChatSessionMessagesPath(sessionId: string): string {
 }
 
 export interface ChatMessageRow {
-  content: { activities?: unknown; status?: unknown; text?: string; writeMayHaveLanded?: unknown };
+  content?: {
+    activities?: unknown;
+    status?: unknown;
+    text?: string;
+    writeMayHaveLanded?: unknown;
+  } | null;
   createdAt: string;
   id: string;
   role: "user" | "assistant";
@@ -54,35 +88,6 @@ export function messageSentAt(message: UIMessage): Date | undefined {
 
   const parsed = new Date(metadata.createdAt);
   return Number.isNaN(parsed.getTime()) ? undefined : parsed;
-}
-
-function parseActivities(value: unknown): ChatToolActivity[] {
-  if (!Array.isArray(value)) {
-    return [];
-  }
-
-  const activities: ChatToolActivity[] = [];
-
-  for (const entry of value) {
-    if (!entry || typeof entry !== "object") {
-      continue;
-    }
-
-    const { displayName, kind, tool } = entry as Record<string, unknown>;
-    if (typeof tool !== "string" || (kind !== "read" && kind !== "write")) {
-      continue;
-    }
-
-    activities.push({
-      ...(typeof displayName === "string" && displayName
-        ? { displayName: displayName.slice(0, 80) }
-        : {}),
-      kind,
-      tool,
-    });
-  }
-
-  return activities.slice(0, 20);
 }
 
 /**

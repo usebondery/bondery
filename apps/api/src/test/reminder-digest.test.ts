@@ -8,6 +8,10 @@ import {
 } from "../lib/notifications/transporter.js";
 import { loadTestEnv } from "./load-test-env.js";
 
+const ISO_DATE_2026_07_29_PATTERN = /2026-07-29/;
+const YEAR_2026_PATTERN = /2026/;
+const SMTP_DOWN_PATTERN = /smtp down/;
+
 loadTestEnv();
 
 const { prisma } = await import("@bondery/db");
@@ -35,18 +39,29 @@ const reminderUser = {
 };
 
 function setConfiguredEmailEnv(): void {
-  process.env.BONDERY_PRIVATE_EMAIL_HOST = "smtp.example.com";
-  process.env.BONDERY_PRIVATE_EMAIL_PORT = "587";
-  process.env.BONDERY_PRIVATE_EMAIL_USER = "user";
-  process.env.BONDERY_PRIVATE_EMAIL_PASS = "secret";
-  process.env.BONDERY_PRIVATE_EMAIL_ADDRESS = "robot@usebondery.com";
-  process.env.BONDERY_PRIVATE_EMAIL_REPLY_TO = "team@usebondery.com";
+  process.env["BONDERY_PRIVATE_EMAIL_HOST"] = "smtp.example.com";
+  process.env["BONDERY_PRIVATE_EMAIL_PORT"] = "587";
+  process.env["BONDERY_PRIVATE_EMAIL_USER"] = "user";
+  process.env["BONDERY_PRIVATE_EMAIL_PASS"] = "secret";
+  process.env["BONDERY_PRIVATE_EMAIL_ADDRESS"] = "robot@usebondery.com";
+  process.env["BONDERY_PRIVATE_EMAIL_REPLY_TO"] = "team@usebondery.com";
 }
 
-function buildCtx() {
+function buildCtx(overrides?: Partial<emailI18n.EmailFormatContext>) {
   return {
     defaultTargetDate: "2026-07-29",
-    localeByUserId: new Map([[userId, "en"]]),
+    formatByUserId: new Map([
+      [
+        userId,
+        {
+          dateFormat: "locale" as const,
+          locale: "en" as const,
+          timeFormat: "24h" as const,
+          timeZone: "UTC",
+          ...overrides,
+        },
+      ],
+    ]),
     namespaceCache: emailI18n.preloadEmailNamespaces("ReminderDigestEmail"),
   };
 }
@@ -80,6 +95,24 @@ describe("sendOneUserDigest", () => {
     assert.equal(advanced, true);
   });
 
+  it("uses a formatted date in the digest subject, not ISO", async () => {
+    let capturedSubject = "";
+    setSendRenderedEmailOverrideForTests(async (options) => {
+      capturedSubject = options.subject;
+    });
+    prisma.reminderDispatchLog.create = (async () => ({ id: "log-id" })) as typeof originalCreate;
+    prisma.$executeRaw = (async () => 1) as typeof originalExecuteRaw;
+
+    const result = await sendOneUserDigest(
+      reminderUser,
+      buildCtx({ dateFormat: "locale", locale: "de" }),
+    );
+
+    assert.equal(result.ok, true, result.ok ? undefined : result.error);
+    assert.doesNotMatch(capturedSubject, ISO_DATE_2026_07_29_PATTERN);
+    assert.match(capturedSubject, YEAR_2026_PATTERN);
+  });
+
   it("does not log or advance when SMTP fails", async () => {
     setSendRenderedEmailOverrideForTests(async () => {
       throw new Error("smtp down");
@@ -99,7 +132,7 @@ describe("sendOneUserDigest", () => {
     const result = await sendOneUserDigest(reminderUser, buildCtx());
 
     assert.equal(result.ok, false);
-    assert.match(result.ok ? "" : result.error, /smtp down/);
+    assert.match(result.ok ? "" : result.error, SMTP_DOWN_PATTERN);
     assert.equal(created, false);
     assert.equal(advanced, false);
   });

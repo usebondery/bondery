@@ -28,21 +28,21 @@ When a MAIN card implements a public initiative:
 
 ### Pending links (post-migration)
 
-| MAIN work item | ROADMAP |
-|----------------|---------|
-| `c9976c0e-8bee-414e-bfa8-79c4f7bd149a` | ROADMAP-8 (`e91c1233-5b00-4d4b-b37c-17fc37093c4a`) |
-| `9b8294ee-9040-4ce2-82ef-fba09aaca840` | ROADMAP-9 (`4c13a284-694c-4d39-aa58-1d7c159d64aa`) |
+| MAIN work item                         | ROADMAP                                             |
+| -------------------------------------- | --------------------------------------------------- |
+| `c9976c0e-8bee-414e-bfa8-79c4f7bd149a` | ROADMAP-8 (`e91c1233-5b00-4d4b-b37c-17fc37093c4a`)  |
+| `9b8294ee-9040-4ce2-82ef-fba09aaca840` | ROADMAP-9 (`4c13a284-694c-4d39-aa58-1d7c159d64aa`)  |
 | `78c70898-d8c5-433e-b28d-a4dbd75b81dc` | ROADMAP-10 (`ed39b226-c586-4523-a07e-1e2c682e0692`) |
 
 Do not mandate 1:1 mirroring — many public cards have no internal twin until Building starts.
 
 ## Distinction from other docs
 
-| Surface | Owns |
-|---------|------|
+| Surface               | Owns                                      |
+| --------------------- | ----------------------------------------- |
 | **MAIN** (this skill) | Internal execution, cycles, sanity checks |
-| **ROADMAP** | Future intent and public confidence |
-| **Changelog** | Shipped facts and versions |
+| **ROADMAP**           | Future intent and public confidence       |
+| **Changelog**         | Shipped facts and versions                |
 
 ## vs-roadmap checklist
 

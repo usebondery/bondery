@@ -1,3 +1,4 @@
+import { cn } from "cn";
 import type { ReactNode } from "react";
 import { View, type ViewProps } from "react-native";
 import {
@@ -8,7 +9,6 @@ import {
   gapClassName,
   type SpacingSize,
 } from "./flexLayout";
-import { joinClassNames } from "./joinClassNames";
 import { wrapGrowChildren } from "./wrapGrowChildren";
 
 export type GroupProps = Omit<ViewProps, "children"> & {
@@ -33,17 +33,17 @@ export function Group({
 }: GroupProps) {
   return (
     <View
-      className={joinClassNames(
+      className={cn(
         "flex-row",
         FLEX_ALIGN_CLASS[align],
-        justify === undefined ? undefined : FLEX_JUSTIFY_CLASS[justify],
-        wrap ? "flex-wrap" : undefined,
+        justify !== undefined && FLEX_JUSTIFY_CLASS[justify],
+        wrap && "flex-wrap",
         gapClassName(gap),
         className,
       )}
       {...rest}
     >
-      {grow ? wrapGrowChildren(children, "row") : children}
+      {grow ? <>{wrapGrowChildren(children, "row")}</> : <>{children}</>}
     </View>
   );
 }

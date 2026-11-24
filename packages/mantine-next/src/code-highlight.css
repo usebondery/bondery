@@ -2,11 +2,11 @@
    The colors ship with `@bondery/mantine-next`, so every app renders code the same way. */
 
 .hljs {
-  color: #24292e;
+  color: rgb(36, 41, 46);
 }
 
 [data-mantine-color-scheme="dark"] .hljs {
-  color: #c9d1d9;
+  color: rgb(201, 209, 217);
 }
 
 .hljs-doctag,
@@ -16,14 +16,14 @@
 .hljs-template-variable,
 .hljs-type,
 .hljs-variable.language_ {
-  color: #d73a49;
+  color: rgb(215, 58, 73);
 }
 
 .hljs-title,
 .hljs-title.class_,
 .hljs-title.class_.inherited__,
 .hljs-title.function_ {
-  color: #6f42c1;
+  color: rgb(111, 66, 193);
 }
 
 .hljs-attr,
@@ -36,40 +36,40 @@
 .hljs-selector-class,
 .hljs-selector-id,
 .hljs-variable {
-  color: #005cc5;
+  color: rgb(0, 92, 197);
 }
 
 .hljs-regexp,
 .hljs-string,
 .hljs-meta .hljs-string {
-  color: #032f62;
+  color: rgb(3, 47, 98);
 }
 
 .hljs-built_in,
 .hljs-symbol {
-  color: #e36209;
+  color: rgb(227, 98, 9);
 }
 
 .hljs-comment,
 .hljs-code,
 .hljs-formula {
-  color: #6a737d;
+  color: rgb(106, 115, 125);
 }
 
 .hljs-name,
 .hljs-quote,
 .hljs-selector-pseudo,
 .hljs-selector-tag {
-  color: #22863a;
+  color: rgb(34, 134, 58);
 }
 
 .hljs-section {
-  color: #005cc5;
   font-weight: 700;
+  color: rgb(0, 92, 197);
 }
 
 .hljs-bullet {
-  color: #735c0f;
+  color: rgb(115, 92, 15);
 }
 
 .hljs-emphasis {
@@ -81,13 +81,13 @@
 }
 
 .hljs-addition {
-  background-color: #f0fff4;
-  color: #22863a;
+  color: rgb(34, 134, 58);
+  background-color: rgb(240, 255, 244);
 }
 
 .hljs-deletion {
-  background-color: #ffeef0;
-  color: #b31d28;
+  color: rgb(179, 29, 40);
+  background-color: rgb(255, 238, 240);
 }
 
 [data-mantine-color-scheme="dark"] .hljs-doctag,
@@ -97,14 +97,14 @@
 [data-mantine-color-scheme="dark"] .hljs-template-variable,
 [data-mantine-color-scheme="dark"] .hljs-type,
 [data-mantine-color-scheme="dark"] .hljs-variable.language_ {
-  color: #ff7b72;
+  color: rgb(255, 123, 114);
 }
 
 [data-mantine-color-scheme="dark"] .hljs-title,
 [data-mantine-color-scheme="dark"] .hljs-title.class_,
 [data-mantine-color-scheme="dark"] .hljs-title.class_.inherited__,
 [data-mantine-color-scheme="dark"] .hljs-title.function_ {
-  color: #d2a8ff;
+  color: rgb(210, 168, 255);
 }
 
 [data-mantine-color-scheme="dark"] .hljs-attr,
@@ -117,47 +117,47 @@
 [data-mantine-color-scheme="dark"] .hljs-selector-class,
 [data-mantine-color-scheme="dark"] .hljs-selector-id,
 [data-mantine-color-scheme="dark"] .hljs-variable {
-  color: #79c0ff;
+  color: rgb(121, 192, 255);
 }
 
 [data-mantine-color-scheme="dark"] .hljs-regexp,
 [data-mantine-color-scheme="dark"] .hljs-string,
 [data-mantine-color-scheme="dark"] .hljs-meta .hljs-string {
-  color: #a5d6ff;
+  color: rgb(165, 214, 255);
 }
 
 [data-mantine-color-scheme="dark"] .hljs-built_in,
 [data-mantine-color-scheme="dark"] .hljs-symbol {
-  color: #ffa657;
+  color: rgb(255, 166, 87);
 }
 
 [data-mantine-color-scheme="dark"] .hljs-comment,
 [data-mantine-color-scheme="dark"] .hljs-code,
 [data-mantine-color-scheme="dark"] .hljs-formula {
-  color: #8b949e;
+  color: rgb(139, 148, 158);
 }
 
 [data-mantine-color-scheme="dark"] .hljs-name,
 [data-mantine-color-scheme="dark"] .hljs-quote,
 [data-mantine-color-scheme="dark"] .hljs-selector-pseudo,
 [data-mantine-color-scheme="dark"] .hljs-selector-tag {
-  color: #7ee787;
+  color: rgb(126, 231, 135);
 }
 
 [data-mantine-color-scheme="dark"] .hljs-section {
-  color: #1f6feb;
+  color: rgb(31, 111, 235);
 }
 
 [data-mantine-color-scheme="dark"] .hljs-bullet {
-  color: #f2cc60;
+  color: rgb(242, 204, 96);
 }
 
 [data-mantine-color-scheme="dark"] .hljs-addition {
-  background-color: #033a16;
-  color: #aff5b4;
+  color: rgb(175, 245, 180);
+  background-color: rgb(3, 58, 22);
 }
 
 [data-mantine-color-scheme="dark"] .hljs-deletion {
-  background-color: #67060c;
-  color: #ffdcd7;
+  color: rgb(255, 220, 215);
+  background-color: rgb(103, 6, 12);
 }

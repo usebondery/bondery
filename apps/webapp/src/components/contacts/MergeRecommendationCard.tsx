@@ -1,7 +1,7 @@
 "use client";
 
 import { getUserFacingError } from "@bondery/helpers/api";
-import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import { detachPromise } from "@bondery/helpers/async";
 import {
   errorNotificationTemplate,
   PersonChip,
@@ -30,8 +30,9 @@ import {
 } from "@/lib/i18n/generated/hooks";
 import { orientMergePair } from "@/lib/merge/orientMergePair";
 import { routePerson } from "@/lib/navigation/route/person";
-import { useMergeContactsMutation } from "@/lib/query/hooks/useContacts";
+import { useMergeContactsMutation } from "@/lib/query/hooks/useContactMutations";
 import { useDeclineMergeRecommendationMutation } from "@/lib/query/hooks/useMergeRecommendations";
+import classes from "./MergeRecommendationCard.module.css";
 
 interface MergeRecommendationCardProps {
   contacts: Contact[];
@@ -214,47 +215,54 @@ export function MergeRecommendationCard({
 
   return (
     <Paper
+      className={classes["card"]}
       p="md"
       radius="md"
       style={{ borderLeft: "2px solid var(--mantine-color-yellow-6)" }}
       withBorder
     >
-      <Group align="center" justify="space-between" wrap="nowrap">
-        <Group align="center" wrap="nowrap">
-          <Tooltip label={t("PossibleDuplicateTooltip")}>
-            <Group align="center" gap={4} style={{ cursor: "default" }} wrap="nowrap">
-              <IconUsers color="var(--mantine-color-yellow-6)" size={14} />
-              <Text c="yellow.6" fw={600} size="sm">
-                {t("PossibleDuplicateBadge")}
-              </Text>
-            </Group>
-          </Tooltip>
-          <PersonChip isClickable person={recommendation.leftPerson} prefetch={false} />
-          <Text c="dimmed" fw={500} size="sm">
-            {tMerge("MergeWithLabel")}
-          </Text>
-          <PersonChip isClickable person={recommendation.rightPerson} prefetch={false} />
-        </Group>
-        <Group>
-          <Button
-            disabled={isAccepting}
-            leftSection={<IconX size={16} />}
-            loading={isDeclining}
-            onClick={handleDecline}
-            variant="default"
-          >
-            {t("DeclineMerge")}
-          </Button>
-          <Button
-            disabled={isDeclining}
-            leftSection={<IconCheck size={16} />}
-            loading={isAccepting}
-            onClick={() => void handleAccept()}
-          >
-            {t("AcceptMerge")}
-          </Button>
-        </Group>
-      </Group>
+      <div className={classes["badge"]}>
+        <Tooltip label={t("PossibleDuplicateTooltip")}>
+          <Group align="center" gap={4} style={{ cursor: "default" }} wrap="nowrap">
+            <IconUsers color="var(--mantine-color-yellow-6)" size={14} />
+            <Text c="yellow.6" fw={600} size="sm">
+              {t("PossibleDuplicateBadge")}
+            </Text>
+          </Group>
+        </Tooltip>
+      </div>
+
+      <div className={classes["pair"]}>
+        <div className={classes["person"]}>
+          <PersonChip isClickable person={recommendation.leftPerson} prefetch={false} truncate />
+        </div>
+        <Text c="dimmed" className={classes["label"]} fw={500} size="sm">
+          {tMerge("MergeWithLabel")}
+        </Text>
+        <div className={classes["person"]}>
+          <PersonChip isClickable person={recommendation.rightPerson} prefetch={false} truncate />
+        </div>
+      </div>
+
+      <div className={classes["actions"]}>
+        <Button
+          disabled={isAccepting}
+          leftSection={<IconX size={16} />}
+          loading={isDeclining}
+          onClick={handleDecline}
+          variant="default"
+        >
+          {t("DeclineMerge")}
+        </Button>
+        <Button
+          disabled={isDeclining}
+          leftSection={<IconCheck size={16} />}
+          loading={isAccepting}
+          onClick={() => detachPromise(handleAccept())}
+        >
+          {t("AcceptMerge")}
+        </Button>
+      </div>
     </Paper>
   );
 }

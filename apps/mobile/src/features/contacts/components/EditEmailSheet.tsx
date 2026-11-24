@@ -33,7 +33,7 @@ interface EditEmailSheetProps {
   open: boolean;
 }
 
-export function EditEmailSheet({
+function EditEmailSheet({
   open,
   mode,
   initialEntry,
@@ -185,3 +185,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
+
+export { EditEmailSheet };

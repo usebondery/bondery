@@ -1,6 +1,6 @@
+import { cn } from "cn";
 import { View, type ViewProps } from "react-native";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
-import { joinClassNames } from "./joinClassNames";
 
 export type DividerProps = ViewProps & {
   className?: string;
@@ -12,7 +12,7 @@ export function Divider({ className, inset = false, style, ...rest }: DividerPro
 
   return (
     <View
-      className={joinClassNames("h-px", inset ? "ml-[52px]" : undefined, className)}
+      className={cn("h-px", inset && "ml-touch-lg", className)}
       style={[{ backgroundColor: colors.border }, style]}
       {...rest}
     />

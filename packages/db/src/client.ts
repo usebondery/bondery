@@ -1,6 +1,7 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 
+import { pgConnectionConfig } from "./connection/database-tls.js";
 import { PrismaClient as BasePrismaClient } from "./generated/prisma/client.js";
 import { injectCreateIds } from "./inject-create-ids.js";
 
@@ -9,15 +10,16 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 function resolveDatabaseUrl(): string {
-  const databaseUrl = process.env.DATABASE_URL;
+  const databaseUrl = process.env["DATABASE_URL"];
   if (!databaseUrl) {
     throw new Error("DATABASE_URL is not set");
   }
   return databaseUrl;
 }
 
-export function createPrismaPool(url: string): Pool {
-  return new Pool({ connectionString: url });
+/** Pool for the Prisma adapter. TLS comes from `DATABASE_SSL_*` (connection/database-tls.ts). */
+function createPrismaPool(url: string): Pool {
+  return new Pool({ ...pgConnectionConfig(url) });
 }
 
 function createPrismaClientFromPool(pool: Pool): BasePrismaClient {
@@ -46,7 +48,7 @@ function createPrismaClientFromPool(pool: Pool): BasePrismaClient {
   }) as unknown as BasePrismaClient;
 }
 
-export type PrismaClient = BasePrismaClient;
+type PrismaClient = BasePrismaClient;
 
 let prismaInstance: PrismaClient | null = null;
 
@@ -62,7 +64,7 @@ function ensurePrismaFromEnv(): PrismaClient {
 /**
  * Wire Prisma to an API-owned pool. Call once at boot before any queries.
  */
-export function initializePrisma(pool: Pool): PrismaClient {
+function initializePrisma(pool: Pool): PrismaClient {
   if (prismaInstance) {
     return prismaInstance;
   }
@@ -71,6 +73,9 @@ export function initializePrisma(pool: Pool): PrismaClient {
   prismaInstance = createPrismaClientFromPool(pool);
   return prismaInstance;
 }
+
+export type { PrismaClient };
+export { createPrismaPool, initializePrisma };
 
 export function getPrismaPool(): Pool | undefined {
   return globalForPrisma.pool;

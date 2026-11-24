@@ -2,7 +2,7 @@
 title: "Local development setup"
 description: Run the whole stack locally, from Postgres and Redis to the API and the apps. Follow the dependency order, then open a Portless HTTPS URL to test.
 icon: Terminal
-last_updated: 2026-11-04
+last_updated: 2026-11-17
 ---
 
 Follow the dependency chain: **Postgres → Redis → Mailpit → (optional) SeaweedFS → API → apps**. Each service reads from the one before it, so start them in that order.
@@ -16,7 +16,7 @@ Follow the dependency chain: **Postgres → Redis → Mailpit → (optional) Sea
 | api | [https://api.usebondery.test](https://api.usebondery.test) |
 | Mailpit UI | [https://mail.usebondery.test](https://mail.usebondery.test) |
 
-Apps still listen on fixed loopback ports behind the proxy (`26630` / `26631` / `26632`). Use those ports for Stripe CLI, SSR `BONDERY_INFRA_INTERNAL_API_URL`, Tailscale phone testing, and `dev:classic`. Do not open raw `http://localhost:2663x` for daily web work.
+Apps still listen on fixed loopback ports behind the proxy: website `26630`, webapp `26632`, and the API `26631`. The API serves **HTTPS only**, like the deployed stack: Portless forwards to it over HTTPS, the webapp's server side calls `https://127.0.0.1:26631` and trusts the dev API CA, and a phone reaches it through `tailscale serve` (see the mobile section). It has no plain HTTP port. `dev:classic` serves the webapp and website on their loopback ports. Do not open raw `http://localhost:2663x` for daily web work.
 
 Aliases use `PORTLESS_TLD=test` and are stored with `pid 0`, so they survive a dev server restart and the hosts file stays complete. Each app's `dev` script re-registers its own alias, then starts the server. Mailpit SMTP stays on `127.0.0.1:26640` (not Portless).
 
@@ -69,6 +69,8 @@ pnpm run setup:dev`}
 
 This installs dependencies for all apps and packages in the monorepo, then creates root `.env.local` from the example.
 
+**New worktrees (any tool):** `scripts/dev/setup-worktree.mjs` installs dependencies, copies `.env.local` from the primary checkout, pulls the shared secrets from Infisical (`infisical login` once per machine), generates the per-app env files, and builds the workspace packages. It runs automatically in Orca (`orca.yaml`), Cursor (`.cursor/worktrees.json`), Claude Code (a SessionStart hook in `.claude/settings.json`, which skips itself when everything exists), and VS Code (a folder-open task you approve once). Anywhere else, run `pnpm run setup:worktree`.
+
 ---
 
 </Step>
@@ -92,7 +94,22 @@ From the repo root (reads `BONDERY_PRIVATE_POSTGRES_PASSWORD` from `.env.local`)
 pnpm run start:postgres
 ```
 
-Postgres listens on **host port 54322**. `pnpm run env` writes `DATABASE_URL` to api/db using `BONDERY_PRIVATE_POSTGRES_PASSWORD` from root `.env.local`.
+Postgres listens on **host port 54322**, loopback only. `pnpm run env` writes `DATABASE_URL` to api/db using `BONDERY_PRIVATE_POSTGRES_PASSWORD` from root `.env.local`.
+
+Local Postgres is set up like the deployed one: TLS only, plaintext connections are refused. `start:postgres` first creates a private CA and a server certificate in `.temp/postgres-secrets` (git-ignored), then starts Postgres. It keeps existing certificates. The API, Prisma, and pg-boss trust the CA through these lines in root `.env.local` (`pnpm run setup:dev` adds them):
+
+```bash
+DATABASE_SSL_MODE="verify-full"
+DATABASE_SSL_ROOT_CERT_FILE="../../.temp/postgres-secrets/client/ca.crt"
+```
+
+Connect with psql the same way:
+
+```bash
+psql "host=localhost port=54322 dbname=bondery user=postgres sslmode=verify-full sslrootcert=.temp/postgres-secrets/client/ca.crt"
+```
+
+An older dev database ran without TLS. Run `pnpm run setup:dev` once, then `pnpm run env` and `pnpm run start:postgres`; your data stays.
 
 Stop with `pnpm run stop:postgres`.
 
@@ -124,29 +141,36 @@ Mobile offline sync uses **custom pull/bootstrap** endpoints on the API (`GET /s
 Contact **avatars** and cached **LinkedIn logos** use the S3-compatible SeaweedFS gateway. Credentials live **only** in root `.env.local` (`BONDERY_PRIVATE_S3_ACCESS_KEY_ID` / `SECRET`); the `seaweedfs-s3` container renders its config from those vars at startup.
 
 ```bash
-pnpm run start:seaweedfs          # S3 gateway on http://127.0.0.1:8333
+pnpm run start:seaweedfs          # S3 API on https://127.0.0.1:8443, public reads on http://127.0.0.1:8333
 pnpm run setup:seaweedfs      # optional — API dev boot also ensures buckets
 ```
 
-Optional liveness smoke. Use `curl.exe` on Windows, because PowerShell aliases `curl` to `Invoke-WebRequest`:
+Local SeaweedFS is set up like the deployed one: the nodes talk to each other over mutual TLS, and the API uses HTTPS. `start:seaweedfs` first creates a private storage CA and a cluster certificate in `.temp/storage-secrets` (git-ignored), then starts the cluster. It keeps existing certificates. Browsers load public objects over plain HTTP on `8333`, like Traefik does in production.
+
+Optional smoke. Use `curl.exe` on Windows, because PowerShell aliases `curl` to `Invoke-WebRequest`:
 
 <PlatformCode
-  posix={`curl -s http://127.0.0.1:8333/status
+  posix={`curl -sS -D- --cacert .temp/storage-secrets/client/ca.crt https://127.0.0.1:8443/
 curl -sS -D- http://127.0.0.1:8333/`}
-  windows={`curl.exe -s http://127.0.0.1:8333/status
+  windows={`curl.exe -sS -D- --cacert .temp/storage-secrets/client/ca.crt https://127.0.0.1:8443/
 curl.exe -sS -D- http://127.0.0.1:8333/`}
 />
 
-Expect HTTP 403 and S3 `Error` XML from the second command. Empty 200 on `/status` is not sufficient.
+Expect HTTP 403 and S3 `Error` XML from both commands. Empty 200 on `/status` is not sufficient.
 
 Stop with `pnpm run stop:seaweedfs`.
 
-Set in `.env.local` (see `.env.local.example`):
+Set in `.env.local` (see `.env.local.example`; `pnpm run setup:dev` migrates the first to the loopback gateway and adds the last three):
 
 ```text
 BONDERY_PUBLIC_STORAGE_URL=http://127.0.0.1:8333
-BONDERY_PRIVATE_S3_ENDPOINT=http://127.0.0.1:8333
+BONDERY_PRIVATE_S3_ENDPOINT=https://127.0.0.1:8443
+BONDERY_PRIVATE_S3_TLS_CA_FILE=../../.temp/storage-secrets/client/ca.crt
 ```
+
+The public URL is the gateway's plain HTTP port, because browsers do not send the client certificate the gateway requires on `8443`. A Tailscale name from phone testing is stale: only a phone on the tailnet can resolve it.
+
+An older setup used `http://127.0.0.1:8333` for the API. Run `pnpm run setup:dev` once, then `pnpm run env`, `pnpm run stop:seaweedfs`, and `pnpm run start:seaweedfs`; your files stay.
 
 <Callout type="warn">
 **Avatar previews need public bucket policy.** Setup applies anonymous `GetObject` on `avatars`. If uploads succeed but images 404/403 in the browser, run `pnpm run setup:seaweedfs` or restart the API (dev bootstrap).
@@ -181,21 +205,35 @@ Redis powers **rate limiting**, **Better Auth secondary storage** (`bondery:auth
 
 | Mode | `BONDERY_PRIVATE_REDIS_URL` | When to use |
 |------|---------------------|-------------|
-| **Local Docker (required)** | `redis://127.0.0.1:26636` | Normal local API work |
+| **Local Docker (required)** | `rediss://127.0.0.1:26636` | Normal local API work |
 
-From the repo root (Docker must be running):
+Local Redis is set up like the deployed one: TLS 1.3 only, with a password and a client certificate. From the repo root (Docker must be running):
 
 ```bash
 pnpm run start:redis
 ```
 
-Stop with `pnpm run stop:redis`. Verify: `docker exec bondery-redis redis-cli ping` → `PONG`.
+`start:redis` first creates a random password and a TLS certificate in `.temp/redis-secrets` (git-ignored), then starts Redis on `127.0.0.1:26636`. It keeps existing secrets. Run it again after you delete that folder.
 
-Wire the API in `apps/api/.env.development.local`:
+Stop with `pnpm run stop:redis`. Verify:
+
+```bash
+docker exec bondery-redis sh -c 'REDISCLI_AUTH="$(cat /bondery-redis/server/password)" redis-cli --tls --cert /bondery-redis/server/healthcheck.crt --key /bondery-redis/server/healthcheck.key --cacert /bondery-redis/server/ca.crt -h localhost ping'
+```
+
+The answer is `PONG`.
+
+Wire the API in `apps/api/.env.development.local`. `pnpm run setup:dev` writes these values into root `.env.local`, and `pnpm run env` copies them. The two paths are relative to `apps/api`:
 
 ```text
-BONDERY_PRIVATE_REDIS_URL="redis://127.0.0.1:26636"
+BONDERY_PRIVATE_REDIS_URL="rediss://127.0.0.1:26636"
+BONDERY_PRIVATE_REDIS_PASSWORD_FILE="../../.temp/redis-secrets/client/password"
+BONDERY_PRIVATE_REDIS_TLS_CA_FILE="../../.temp/redis-secrets/client/ca.crt"
+BONDERY_PRIVATE_REDIS_TLS_CERT_FILE="../../.temp/redis-secrets/client/tls.crt"
+BONDERY_PRIVATE_REDIS_TLS_KEY_FILE="../../.temp/redis-secrets/client/tls.key"
 ```
+
+An older `.env.local` still has `redis://127.0.0.1:26636`. Run `pnpm run setup:dev` once to update it, then `pnpm run env`.
 
 `BONDERY_PRIVATE_REDIS_URL` is **required** in development and production. See [Installation](../deploy/installation.mdx).
 
@@ -249,7 +287,7 @@ cd apps/api
 pnpm run dev
 ```
 
-`dev` registers the API alias, then starts the server on loopback `26631`. Open [https://api.usebondery.test](https://api.usebondery.test).
+`dev` registers the API alias, then starts the server on `https://127.0.0.1:26631`, with the certificate that `pnpm run api:secrets` creates. Open [https://api.usebondery.test](https://api.usebondery.test). The API binds loopback only in development; set `API_HOST=0.0.0.0` only when something outside this machine's loopback must reach it (for example Tailscale on the Windows host with the API in WSL2).
 
 ---
 
@@ -264,7 +302,7 @@ Filled by `pnpm run env` into `apps/webapp/.env.development.local` — see [Envi
 
 The webapp is itself a confidential OAuth client of the API's authorization server. See [Authentication](./auth.mdx) for env vars, bootstrap commands, and troubleshooting.
 
-For SSR, keep `BONDERY_INFRA_INTERNAL_API_URL=http://127.0.0.1:26631` so server fetches hit the API loopback. The browser still uses `BONDERY_PUBLIC_API_URL` (Portless).
+For SSR, server fetches call the API's HTTPS listener on loopback, like the deployed stack: `BONDERY_INFRA_INTERNAL_API_URL=https://127.0.0.1:26631` with `BONDERY_INFRA_INTERNAL_API_CA_FILE`. The browser still uses `BONDERY_PUBLIC_API_URL` (Portless). `pnpm run setup:dev` sets these lines and runs `pnpm run api:secrets`, which creates the API CA and certificate in `.temp/api-secrets` (git-ignored). If the API or webapp says it cannot read a file there, run `pnpm run api:secrets` and restart `pnpm run dev`.
 
 ### Start
 
@@ -333,26 +371,20 @@ Run the mobile app against your local API and Postgres stack. Requires Postgres 
 
 Filled by `pnpm run env` into `apps/mobile/.env.local` (`BONDERY_PUBLIC_*`). Expo loads those into `app.config.ts` `extra`.
 
-#### Physical device on the same Wi‑Fi
+#### Phone, simulator, or emulator over Tailscale
 
-In root `.env.local`, replace `127.0.0.1` / `localhost` with your machine's LAN IP (e.g. `192.168.1.42`) for `BONDERY_PUBLIC_API_URL`, then `pnpm run env`. The phone cannot reach your laptop's loopback interface.
+The API serves HTTPS only, with a certificate from the private dev CA. A phone or an emulator can neither resolve `api.usebondery.test` nor trust that CA, so the mobile app reaches the API through `tailscale serve`, which gives it a name with a public certificate on your tailnet.
 
-Ensure the API is reachable on the LAN and your firewall allows inbound connections on port `26631`.
-
-#### Physical device over Tailscale (recommended)
-
-Tailscale gives your dev machine a stable `100.x.x.x` address on your tailnet — works off Wi‑Fi and avoids public tunnel interstitials.
-
-1. Install Tailscale on your dev machine and phone; sign in to the same tailnet.
-2. On the dev machine, run `tailscale ip -4` and note the address (e.g. `100.64.0.5`).
-3. For phone testing only, temporarily set in root `.env.local`:
+1. Install Tailscale on your dev machine and on the phone, and sign in to the same tailnet. In the Tailscale admin console, on the DNS page, turn on **MagicDNS** and **HTTPS Certificates**.
+2. Publish the API and store its URL:
 
    ```bash
-   BONDERY_PUBLIC_API_URL=http://100.64.0.5:26631
+   pnpm run dev:mobile-api
    ```
 
-4. Run `pnpm run env` and restart the API.
-5. Revert `BONDERY_PUBLIC_API_URL` to `https://api.usebondery.test` when you return to laptop web dev.
+   It runs `tailscale serve` for `https://<machine>.<tailnet>.ts.net:26631`, which forwards to the API on loopback, and writes that URL to `BONDERY_DEV_MOBILE_API_URL` in `.env.local`.
+3. Run `pnpm run env`. The mobile app gets the Tailscale URL as its API URL; the webapp and the API keep `https://api.usebondery.test`, so web development keeps working at the same time.
+4. Start the app (below). Stop publishing with `pnpm run dev:mobile-api -- --off`, then `pnpm run env`.
 
 Start Metro with LAN binding so the phone can load the JS bundle over Tailscale:
 
@@ -361,13 +393,13 @@ cd apps/mobile
 pnpm exec expo start --host lan
 ```
 
-Register `http://<tailscale-ip>:26631/auth/callback/github` in your GitHub OAuth app when testing social login on a physical device.
+**Social sign-in on a phone.** OAuth providers redirect to the API's own URL. To test GitHub or LinkedIn sign-in on a phone, set `BONDERY_PUBLIC_API_URL` in `.env.local` to the Tailscale URL as well, register `https://<machine>.<tailnet>.ts.net:26631/auth/callback/github` in your OAuth app, run `pnpm run env`, and restart the API. Switch back to `https://api.usebondery.test` for web development.
 
-**WSL2:** Ensure the API listens on `0.0.0.0` (not only `127.0.0.1`). Tailscale on the Windows host routes to WSL forwarded ports when using WSL2 networking.
+**WSL2:** With Tailscale on the Windows host and the API in WSL2, set `API_HOST=0.0.0.0` in `.env.local`, so the Windows side can reach the API.
 
 #### Android emulator note
 
-On Android emulators, `127.0.0.1` and `localhost` in env vars are **automatically rewritten** to `10.0.2.2` (the host loopback from the emulator).
+On Android emulators, `127.0.0.1` and `localhost` in the other mobile URLs (public storage reads, webapp, website) are **automatically rewritten** to `10.0.2.2` (the host loopback from the emulator). The API URL is the Tailscale URL above; the emulator resolves it through the host when Tailscale runs there.
 
 ### Start
 
@@ -427,6 +459,66 @@ See also [Sync architecture (mobile)](sync-architecture.mdx) and [apps/mobile/RE
 
 ---
 
+## Remote desktop (Orca or SSH) on a laptop
+
+When you work from another machine, the editor is only a window. Two things decide whether `https://app.usebondery.test` loads:
+
+1. **Where the browser renders.** A remote Orca session pairs the laptop to `orca-serve` on this PC. The GUI and its browser pane run **on the laptop**. Portless binds `127.0.0.1:443` on this PC, so the laptop cannot reach it by loopback.
+2. **Where the CA is trusted.** `pnpm exec portless trust` writes the CA into this PC's trust store only. The laptop has its own store. A browser there reports `ERR_CERT_AUTHORITY_INVALID`, even though `curl` on this PC succeeds. That difference is the cause of the confusing "Connection isn't secure" message: the terminal is on the PC, the browser is not.
+
+The laptop needs two things: the `.test` hostnames pointing at this PC's Tailscale address, and the Portless CA in its own Windows root store.
+
+### Preferred: Tailscale name, no SSH server
+
+```bash
+# On the PC, from the repo root
+pnpm run dev:remote-laptop
+```
+
+It prints the resolved name and writes a ready-to-run script:
+
+```text
+Tailscale name : sveetya-desktop-wsl.tailb35e0c.ts.net  (from tailscale status)
+Address        : 100.125.211.35
+Wrote a ready-to-run script: .temp/connect-laptop.ps1
+```
+
+Copy `.temp/connect-laptop.ps1` to the laptop, then run it in an **elevated** PowerShell. If your policy blocks local scripts, add `-ExecutionPolicy Bypass`:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\connect-laptop.ps1
+```
+
+The script writes one hosts block between `BONDERY-REMOTE-PORTLESS` markers, checks the CA's SHA-256 against the build, and imports the CA into `CurrentUser\Root`. It installs nothing else. Re-running it replaces the block instead of appending, so it is safe to repeat after the Tailscale address changes.
+
+Then **fully quit and reopen Orca on the laptop**, so the browser pane re-reads the root store. Open `https://usebondery.test/`.
+
+The name comes from `BONDERY_DEV_MOBILE_API_URL` in `.env.local` when set (that is what `pnpm run dev:mobile-api` writes for phone testing), otherwise from `tailscale status --json`. Override either with `BONDERY_DEV_TAILSCALE_HOST`. Without a name the script stops and lists how to provide one.
+
+### Alternative: SSH tunnel
+
+Use this when you want the laptop's `127.0.0.1:443` forwarded rather than its hosts file pointed at Tailscale:
+
+```powershell
+# On the laptop, elevated PowerShell, repo checkout
+.\scripts\dev\connect-remote-portless.ps1
+```
+
+It needs an SSH server on this PC. Check first, because Ubuntu on WSL ships without one:
+
+```bash
+systemctl is-active ssh      # inactive and openssh-server absent => install it first
+sudo apt-get install -y openssh-server && sudo systemctl enable --now ssh
+```
+
+Keep the window open while you browse; Ctrl+C stops the tunnel.
+
+### What does not work
+
+- **Restarting WSL to pick up trust.** The trust lives on the laptop. Restarting this PC changes nothing and risks losing a machine you cannot physically reach.
+- **`browser.certificate.proceed` from the laptop.** Orca refuses it by design: "Only someone at the desktop can accept a certificate warning in its browser."
+- **Fixing only `~/.pki/nssdb` on this PC.** On a remote session the browser is not here. The NSS database on this PC does matter for a browser running *inside* WSL, so install `p11-kit-modules` if you want NSS to see `/etc/ssl/certs`.
+
 ## Running everything at once
 
 > **Before using these commands**, complete environment setup in the steps above.
@@ -451,7 +543,7 @@ pnpm run dev:extension
 pnpm run dev:mobile
 ```
 
-These scripts are defined in the root `package.json` and orchestrated by Turborepo (`turbo run`). Persistent app processes (`next dev`, `tsx watch`) stay up; package `tsc --watch` runs beside them. Do not wrap those servers in `turbo watch` — that kills Next on any tracked file write. Locale JSON is copied by `@bondery/translations#dev` (poll + `fs.watch`); refresh the tab to see new copy. The API restarts once per save burst when the locale watch stamp changes.
+These scripts are defined in the root `package.json` and orchestrated by Turborepo (`turbo run`). Persistent app processes (`next dev`, and the API under `node --watch`) stay up; package `tsc --watch` runs beside them. Do not wrap those servers in `turbo watch` — that kills Next on any tracked file write. Locale JSON is copied by `@bondery/translations#dev` (poll + `fs.watch`); refresh the tab to see new copy. The API restarts once per save burst when the locale watch stamp changes.
 
 ### Stripe billing (optional)
 
@@ -503,8 +595,8 @@ URL and port registry: [architecture.mdx](architecture.mdx#apps). Hostnames: `DE
 | Redis | [`deploy/bondery/docker-compose.dev-redis.yml`](../../deploy/bondery/docker-compose.dev-redis.yml) | port `26636` | `pnpm run start:redis` |
 | Mailpit SMTP | [`deploy/bondery/docker-compose.dev-mail.yml`](../../deploy/bondery/docker-compose.dev-mail.yml) | port `26640` | `pnpm run start:mailpit` |
 | Mailpit UI | [`deploy/bondery/docker-compose.dev-mail.yml`](../../deploy/bondery/docker-compose.dev-mail.yml) | [https://mail.usebondery.test](https://mail.usebondery.test) (loopback `26641`) | `pnpm run start:mailpit` |
-| SeaweedFS | [`deploy/bondery/docker-compose.seaweedfs.yml`](../../deploy/bondery/docker-compose.seaweedfs.yml) | [http://127.0.0.1:8333](http://127.0.0.1:8333) | `pnpm run start:seaweedfs` |
-| `api` | [`apps/api`](../../apps/api) | [https://api.usebondery.test](https://api.usebondery.test) (loopback `26631`) | `pnpm run dev:api` or `pnpm run dev:webapp-api` |
+| SeaweedFS | [`deploy/bondery/docker-compose.seaweedfs.yml`](../../deploy/bondery/docker-compose.seaweedfs.yml) | S3 API `https://127.0.0.1:8443`, public reads [http://127.0.0.1:8333](http://127.0.0.1:8333) | `pnpm run start:seaweedfs` |
+| `api` | [`apps/api`](../../apps/api) | [https://api.usebondery.test](https://api.usebondery.test) (loopback `26631`, HTTPS only) | `pnpm run dev:api` or `pnpm run dev:webapp-api` |
 | `webapp` | [`apps/webapp`](../../apps/webapp) | [https://app.usebondery.test](https://app.usebondery.test) (loopback `26632`) | `pnpm run dev:webapp` or `pnpm run dev:webapp-api` |
 | `website` | [`apps/website`](../../apps/website) | [https://usebondery.test](https://usebondery.test) (loopback `26630`) | `pnpm --filter website run dev` |
 | `mobile` | [`apps/mobile`](../../apps/mobile) | Metro `http://localhost:26634` | `pnpm run dev:mobile` |

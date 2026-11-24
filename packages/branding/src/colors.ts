@@ -18,9 +18,9 @@ export const BRAND_PRIMARY_SHADES = [
   "#6b218d",
 ] as const;
 
-export const BRAND_PRIMARY_COLOR = BRAND_PRIMARY_SHADES[5];
-export const BRAND_PRIMARY_HOVER = BRAND_PRIMARY_SHADES[6];
-export const BRAND_PRIMARY_PRESS = BRAND_PRIMARY_SHADES[7];
+export const BRAND_PRIMARY_COLOR: (typeof BRAND_PRIMARY_SHADES)[5] = BRAND_PRIMARY_SHADES[5];
+export const BRAND_PRIMARY_HOVER: (typeof BRAND_PRIMARY_SHADES)[6] = BRAND_PRIMARY_SHADES[6];
+export const BRAND_PRIMARY_PRESS: (typeof BRAND_PRIMARY_SHADES)[7] = BRAND_PRIMARY_SHADES[7];
 export const BRAND_PRIMARY_TEXT = "#ffffff";
 
 export interface BrandSurfaceColors {

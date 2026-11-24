@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
 import { View } from "react-native";
+import { nonEmpty } from "../../lib/text";
 import { Text } from "./Text";
 
-export type InputWrapperProps = {
+type InputWrapperProps = {
   children: ReactNode;
   description?: string;
   errorMessage?: string;
@@ -17,14 +18,14 @@ const COMPACT_TEXT_STYLE = { includeFontPadding: false } as const;
  * Header uses `gap-0` so the description sits on the label. Outer `gap-1`
  * is only between that header, the control, and the below message.
  */
-export function InputWrapper({
+function InputWrapper({
   children,
   description,
   errorMessage,
   label,
   statusMessage,
 }: InputWrapperProps) {
-  const belowMessage = errorMessage || statusMessage;
+  const belowMessage = nonEmpty(errorMessage) ?? statusMessage;
   if (!label && !description && !belowMessage) {
     return children;
   }
@@ -58,3 +59,6 @@ export function InputWrapper({
     </View>
   );
 }
+
+export type { InputWrapperProps };
+export { InputWrapper };

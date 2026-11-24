@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import type { Contact, CreateContactInput as CreateContactPayload } from "@bondery/schemas";
 import { loadEnrichedContact } from "../../lib/contacts/enrichment.js";
 import { internal } from "../../lib/platform/errors/http-errors.js";
@@ -9,11 +10,13 @@ import { domainDb } from "../_shared/domain-db.js";
 import { withPersonTxid } from "../_shared/with-txid.js";
 import { applyContactPatch } from "./apply-contact-patch.js";
 
-export interface CreateContactDomainInput extends CreateContactPayload {
+interface CreateContactDomainInput extends CreateContactPayload {
   id?: string;
 }
 
 const CREATE_INSERT_KEYS = new Set(["id", "firstName", "lastName", "middleName"]);
+
+export type { CreateContactDomainInput };
 
 export function contactCreateHasExtras(input: CreateContactDomainInput): boolean {
   return Object.entries(input).some(
@@ -69,7 +72,7 @@ export async function createContact(
   const changes = await buildContactSnapshotChanges(user.id, newContact.id, db);
   const serverSequence = await emitSyncBatch(user.id, changes, syncEmitMetaFromContext(ctx));
 
-  void maybeCaptureActivation(ctx, "first_contact");
+  detachPromise(maybeCaptureActivation(ctx, "first_contact"));
 
   return {
     data: { contact, personId: newContact.id },

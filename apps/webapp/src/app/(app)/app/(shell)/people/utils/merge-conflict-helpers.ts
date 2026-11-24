@@ -5,51 +5,6 @@ import type {
   MergeConflictField,
 } from "@bondery/schemas";
 
-export const MERGE_CONFLICT_FIELDS: MergeConflictField[] = [
-  "avatar",
-  "firstName",
-  "middleName",
-  "lastName",
-  "headline",
-  "location",
-  "notes",
-  "lastInteraction",
-  "phones",
-  "emails",
-  "importantDates",
-  "language",
-  "timezone",
-  "gisPoint",
-  "latitude",
-  "longitude",
-  "linkedin",
-  "instagram",
-  "whatsapp",
-  "facebook",
-  "website",
-  "signal",
-];
-
-export function hasMeaningfulValue(value: unknown): boolean {
-  if (value === null || value === undefined) {
-    return false;
-  }
-
-  if (typeof value === "string") {
-    return value.trim().length > 0;
-  }
-
-  if (Array.isArray(value)) {
-    return value.length > 0;
-  }
-
-  if (typeof value === "number") {
-    return Number.isFinite(value);
-  }
-
-  return true;
-}
-
 function normalizePhoneSet(value: unknown): string[] {
   if (!Array.isArray(value)) {
     return [];
@@ -138,6 +93,69 @@ function normalizeImportantDatesSet(value: unknown): string[] {
     .sort();
 }
 
+function parseTimestampValue(value: unknown): number | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? value : null;
+  }
+
+  const raw = typeof value === "string" ? value.trim() : String(value);
+  if (!raw) {
+    return null;
+  }
+
+  const time = new Date(raw).getTime();
+  return Number.isFinite(time) ? time : null;
+}
+
+export const MERGE_CONFLICT_FIELDS: MergeConflictField[] = [
+  "avatar",
+  "firstName",
+  "middleName",
+  "lastName",
+  "headline",
+  "location",
+  "notes",
+  "lastInteraction",
+  "phones",
+  "emails",
+  "importantDates",
+  "language",
+  "timezone",
+  "gisPoint",
+  "latitude",
+  "longitude",
+  "linkedin",
+  "instagram",
+  "whatsapp",
+  "facebook",
+  "website",
+  "signal",
+];
+
+export function hasMeaningfulValue(value: unknown): boolean {
+  if (value === null || value === undefined) {
+    return false;
+  }
+
+  if (typeof value === "string") {
+    return value.trim().length > 0;
+  }
+
+  if (Array.isArray(value)) {
+    return value.length > 0;
+  }
+
+  if (typeof value === "number") {
+    return Number.isFinite(value);
+  }
+
+  return true;
+}
+
 export type MergeFieldConflict = {
   field: MergeConflictField;
   leftValue: unknown;
@@ -200,24 +218,6 @@ export function normalizeDisplayText(value: unknown): string {
   }
 
   return "";
-}
-
-function parseTimestampValue(value: unknown): number | null {
-  if (value === null || value === undefined) {
-    return null;
-  }
-
-  if (typeof value === "number") {
-    return Number.isFinite(value) ? value : null;
-  }
-
-  const raw = typeof value === "string" ? value.trim() : String(value);
-  if (!raw) {
-    return null;
-  }
-
-  const time = new Date(raw).getTime();
-  return Number.isFinite(time) ? time : null;
 }
 
 export function getAutoLastInteractionChoice(

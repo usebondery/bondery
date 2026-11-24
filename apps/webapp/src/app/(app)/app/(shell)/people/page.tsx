@@ -13,11 +13,6 @@ import { PeopleHeaderClient } from "./components/chrome/PeopleHeaderClient";
 import { PeopleTableSkeleton } from "./components/chrome/PeopleSkeletons";
 import { PeopleTableLoader } from "./components/chrome/PeopleTableLoader";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getPeoplePageTranslations();
-  return staticPageTitle(t("Title"));
-}
-
 /** Matches DEFAULT_COLUMNS in PeopleClient - used to derive the skeleton shape. */
 const DEFAULT_VISIBLE_COLUMNS: ColumnKey[] = [
   "name",
@@ -26,6 +21,11 @@ const DEFAULT_VISIBLE_COLUMNS: ColumnKey[] = [
   "lastInteraction",
   "social",
 ];
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getPeoplePageTranslations();
+  return staticPageTitle(t("Title"));
+}
 
 export default async function PeoplePage({
   searchParams,

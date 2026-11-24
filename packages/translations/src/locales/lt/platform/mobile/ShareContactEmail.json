@@ -1,0 +1,22 @@
+{
+  "AddButton": "Pridėti",
+  "Description": "Jų duomenis išsiųsime žemiau nurodytiems žmonėms. Kopiją gausi ir tu.",
+  "DuplicateEmail": "Šis adresas jau pridėtas",
+  "ErrorDescription": "Patikrink ryšį ir bandyk dar kartą.",
+  "ErrorHeadline": "Nepavyko išsiųsti kontakto",
+  "InvalidEmail": "Įvesk galiojantį el. pašto adresą",
+  "MaxRecipients": "Galima pridėti iki 10 gavėjų",
+  "MaxRecipientsHint": "Daugiausia 10 gavėjų",
+  "MessagePlaceholder": "Pridėk pastabą (neprivaloma)",
+  "NoRecipients": "Pridėk bent vieną gavėją",
+  "RecipientsLabel": "Kam",
+  "RecipientsPlaceholder": "Gavėjo el. pašto adresas",
+  "RemoveRecipient": "Pašalinti {email}",
+  "SendButton": "Siųsti",
+  "SendButtonMany": "Siųsti {count} žmonėms",
+  "SendButtonOne": "Siųsti 1 žmogui",
+  "SuccessDescription": "Gavėjai netrukus ją gaus.",
+  "SuccessHeadline": "Kontaktas išsiųstas",
+  "Title": "El. paštu siųsti {name} kontaktą",
+  "WhatsIncluded": "Įtraukia kontaktinę informaciją, socialinius tinklus ir užrašus."
+}

@@ -130,24 +130,24 @@ function walkOperation(operation: OperationNode, path: string, missing: string[]
 }
 
 const spec = parse(readFileSync(specPath, "utf8")) as OpenApiSpec;
-const missing: string[] = [];
+const missingDescriptions: string[] = [];
 
 for (const [name, schema] of Object.entries(spec.components?.schemas ?? {})) {
-  walkSchema(schema, `components.schemas.${name}`, missing);
+  walkSchema(schema, `components.schemas.${name}`, missingDescriptions);
 }
 
 for (const [path, methods] of Object.entries(spec.paths ?? {})) {
-  walkParameters(methods.parameters as ParameterNode[] | undefined, path, missing);
+  walkParameters(methods.parameters as ParameterNode[] | undefined, path, missingDescriptions);
 
   for (const [method, operation] of Object.entries(methods)) {
     if (!HTTP_METHODS.has(method) || !operation || Array.isArray(operation)) {
       continue;
     }
-    walkOperation(operation, `${method.toUpperCase()} ${path}`, missing);
+    walkOperation(operation, `${method.toUpperCase()} ${path}`, missingDescriptions);
   }
 }
 
-const unique = [...new Set(missing)].sort();
+const unique = [...new Set(missingDescriptions)].sort((left, right) => left.localeCompare(right));
 
 for (const path of unique.slice(0, MAX_REPORTED)) {
   check.add(`${path}: missing description`);

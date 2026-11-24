@@ -24,17 +24,14 @@ import type { AppRoutePlugin } from "../../../lib/platform/fastify-types.js";
 import { withOkResponse } from "../../../lib/platform/openapi/responses.js";
 import { withDomainRoute } from "../../../lib/platform/with-domain-route.js";
 import { dismissGettingStarted } from "../../../services/me/onboarding.js";
-import {
-  ensureDefaultSettings,
-  type UserSettingsLanguage,
-  updateUserSettings,
-} from "../../../services/me/settings.js";
+import { ensureDefaultSettings, updateUserSettings } from "../../../services/me/settings.js";
 
 const settingsPatchResponseSchema = z
   .object({
     data: z
       .object({
         colorScheme: z.string().nullable().optional().describe("Color scheme preference"),
+        dateFormat: z.string().nullable().optional().describe("Calendar date order preference"),
         defaultPhoneCountry: z
           .string()
           .nullable()
@@ -80,31 +77,6 @@ const DEFAULT_LEFT_SWIPE_ACTION = "message" as const;
 const DEFAULT_RIGHT_SWIPE_ACTION = "call" as const;
 const DEFAULT_GROUP_SORT_ORDER = "count-desc" as const;
 const DEFAULT_TAG_SORT_ORDER = "count-desc" as const;
-const _NEW_SIGNUP_WINDOW_MS = 30_000;
-
-function _formatSettingsPatchData(result: {
-  timezone?: string | null;
-  reminder_send_hour?: string | null;
-  time_format?: string | null;
-  language?: UserSettingsLanguage | null;
-  color_scheme?: string | null;
-  left_swipe_action?: string | null;
-  right_swipe_action?: string | null;
-  group_sort_order?: string | null;
-  tag_sort_order?: string | null;
-}) {
-  return {
-    colorScheme: result.color_scheme,
-    groupSortOrder: result.group_sort_order,
-    language: result.language,
-    leftSwipeAction: result.left_swipe_action,
-    reminderSendHour: result.reminder_send_hour,
-    rightSwipeAction: result.right_swipe_action,
-    tagSortOrder: result.tag_sort_order,
-    timeFormat: result.time_format,
-    timezone: result.timezone,
-  };
-}
 
 type UserIdentityRow = {
   id: string;
@@ -112,15 +84,6 @@ type UserIdentityRow = {
   identity_id: string;
   provider: string;
 };
-
-function _normalizeReminderSendHour(value: string): string {
-  const [hourPart, minutePart, secondPart] = value.trim().split(":");
-  const normalizedHour = hourPart.padStart(2, "0");
-  const normalizedMinute = minutePart.padStart(2, "0");
-  const normalizedSecond = (secondPart || "00").padStart(2, "0");
-
-  return `${normalizedHour}:${normalizedMinute}:${normalizedSecond}`;
-}
 
 function parseImportFollowupStatus(value: string | null | undefined): ImportFollowupStatus | null {
   if (value === "awaiting_export" || value === "dismissed") {
@@ -179,6 +142,7 @@ export const meSettingsRoutes: AppRoutePlugin = async (fastify) => {
             aiMessagesUsed: resolvedSettings.aiMessagesUsed ?? 0,
             avatarUrl: resolvedAvatarUrl,
             colorScheme: resolvedSettings.colorScheme,
+            dateFormat: resolvedSettings.dateFormat ?? "locale",
             defaultPhoneCountry: resolvedSettings.defaultPhoneCountry ?? null,
             email: user.email,
             gettingStartedDismissedAt:

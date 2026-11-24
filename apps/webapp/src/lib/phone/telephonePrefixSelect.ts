@@ -1,23 +1,9 @@
 import { TELEPHONE_PREFIX_OPTIONS, type TelephonePrefixOption } from "@bondery/helpers/phone";
 import { type ComboboxItem, isOptionsGroup, type OptionsFilter } from "@mantine/core";
 
-/**
- * Mantine renders `label` in the closed input, so the label must be the dial
- * prefix. Country names stay searchable through `filterTelephonePrefixOptions`.
- */
-export const TELEPHONE_PREFIX_SELECT_DATA: ReadonlyArray<ComboboxItem> =
-  TELEPHONE_PREFIX_OPTIONS.map((option) => ({
-    label: option.displayPrefix,
-    value: option.value,
-  }));
-
 const OPTION_BY_VALUE = new Map<string, TelephonePrefixOption>(
   TELEPHONE_PREFIX_OPTIONS.map((option) => [option.value, option]),
 );
-
-export function findTelephonePrefixSelectOption(value: string): TelephonePrefixOption | undefined {
-  return OPTION_BY_VALUE.get(value);
-}
 
 function matchesPrefixQuery(option: TelephonePrefixOption, query: string): boolean {
   const normalized = query.trim().toLowerCase();
@@ -34,6 +20,21 @@ function matchesPrefixQuery(option: TelephonePrefixOption, query: string): boole
     option.label.toLowerCase().includes(normalized) ||
     option.countryCode.toLowerCase() === normalized
   );
+}
+
+/**
+ * Mantine renders `label` in the closed input, so the label must be the dial
+ * prefix. Country names stay searchable through `filterTelephonePrefixOptions`.
+ */
+export const TELEPHONE_PREFIX_SELECT_DATA: readonly ComboboxItem[] = TELEPHONE_PREFIX_OPTIONS.map(
+  (option) => ({
+    label: option.displayPrefix,
+    value: option.value,
+  }),
+);
+
+export function findTelephonePrefixSelectOption(value: string): TelephonePrefixOption | undefined {
+  return OPTION_BY_VALUE.get(value);
 }
 
 /**

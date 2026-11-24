@@ -74,7 +74,7 @@ export function runChatAgent(
   ctx: DomainContext,
   options: RunChatAgentOptions = {},
 ): ChatAgentResult {
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Date().toISOString().slice(0, 10);
   const tracker = options.tracker ?? createChatActivityTracker();
 
   return streamText({
@@ -88,7 +88,7 @@ export function runChatAgent(
       }
     },
     onToolExecutionEnd: (event) => {
-      const toolName = event.toolCall.toolName;
+      const { toolName } = event.toolCall;
       tracker.inFlight.delete(toolName);
 
       if (event.toolOutput.type !== "tool-result") {
@@ -102,7 +102,7 @@ export function runChatAgent(
       tracker.inputs.delete(toolName);
     },
     onToolExecutionStart: (event) => {
-      const toolName = event.toolCall.toolName;
+      const { toolName } = event.toolCall;
       tracker.inFlight.add(toolName);
       tracker.inputs.set(toolName, event.toolCall.input);
     },

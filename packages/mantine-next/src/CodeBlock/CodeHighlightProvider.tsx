@@ -10,7 +10,7 @@ import powershell from "highlight.js/lib/languages/powershell";
 import python from "highlight.js/lib/languages/python";
 import typescript from "highlight.js/lib/languages/typescript";
 import yaml from "highlight.js/lib/languages/yaml";
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 
 hljs.registerLanguage("bash", bash);
 hljs.registerLanguage("javascript", javascript);
@@ -28,7 +28,7 @@ type CodeHighlightProviderProps = {
 };
 
 /** Shared highlight.js adapter for `CodeBlock`. Webapp and docs use this provider. */
-export function CodeHighlightProvider({ children }: CodeHighlightProviderProps) {
+export function CodeHighlightProvider({ children }: CodeHighlightProviderProps): ReactElement {
   return (
     <CodeHighlightAdapterProvider adapter={highlightJsAdapter}>
       {children}

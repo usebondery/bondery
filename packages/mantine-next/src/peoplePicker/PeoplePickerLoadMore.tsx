@@ -1,6 +1,7 @@
 "use client";
 
 import { Group, Loader, Text, UnstyledButton } from "@mantine/core";
+import type { ReactElement } from "react";
 
 export type PeoplePickerLoadMoreProps = {
   isLoadingMore: boolean;
@@ -19,7 +20,7 @@ export function PeoplePickerLoadMore({
   loadMoreErrorLabel,
   loadMoreRetryLabel,
   onRetryLoadMore,
-}: PeoplePickerLoadMoreProps) {
+}: PeoplePickerLoadMoreProps): ReactElement | null {
   if (isLoadingMore) {
     return (
       <Group gap="xs" justify="center" py="xs" w="100%" wrap="nowrap">

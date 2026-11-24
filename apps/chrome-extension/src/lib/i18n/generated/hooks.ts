@@ -3,7 +3,7 @@
 "use client";
 
 import { createNamespaceHook } from "../createNamespaceHook";
-import type { CommonPrefix, ExtensionPopupPrefix, ExtensionSocialButtonsPrefix, ExtensionVersionCheckPrefix, GlossaryPrefix, ValidationPrefix } from "@bondery/translations/generated/i18n/catalog-prefixes";
+import type { CommonPrefix, ExtensionPopupPrefix, ExtensionSocialButtonsPrefix, GlossaryPrefix, ValidationPrefix } from "@bondery/translations/generated/i18n/catalog-prefixes";
 
 export function useExtensionPopupTranslations(): import("@bondery/translations").TranslateFn<"ExtensionPopup">;
 export function useExtensionPopupTranslations<P extends ExtensionPopupPrefix>(keyPrefix: P): import("@bondery/translations").TranslateFn<"ExtensionPopup", P>;

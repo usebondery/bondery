@@ -14,7 +14,7 @@ import { TagChip } from "./TagChip";
  * - `chipRow` — Horizontal scroller only; parent provides title/inset (contact detail, preview).
  * - `wrap` — Wrapping chip row; all tags visible without scrolling (settings edit list).
  */
-export type ContactsTagsHeaderLayout = "section" | "chipRow" | "wrap";
+type ContactsTagsHeaderLayout = "section" | "chipRow" | "wrap";
 
 interface ContactsTagsHeaderProps {
   headerText?: string;
@@ -74,7 +74,7 @@ function TagChipList({
   );
 }
 
-export function ContactsTagsHeader({
+function ContactsTagsHeader({
   tags,
   layout = "section",
   title,
@@ -166,3 +166,6 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
 });
+
+export type { ContactsTagsHeaderLayout };
+export { ContactsTagsHeader };

@@ -1,0 +1,10 @@
+{
+  "CreateFailed": "Štítok ni bilo mogoče vytvorit. Poskusi to znova.",
+  "CreateTag": "Ustvariti oznako",
+  "DeleteFailed": "Štítok ni bilo mogoče odstránit. Poskusi to znova.",
+  "EditFailed": "Štítok ni bilo mogoče uložit. Poskusi to znova.",
+  "EditTagsSearchPlaceholder": "Vyhladávat štítky...",
+  "LoadFailed": "Štítky ni bilo mogoče naložiti",
+  "NoTagsYet": "Zatial žiadne štítky",
+  "NoTagsYetHint": "Štítky vám pomáhajú usporiadat a nájst stiki."
+}

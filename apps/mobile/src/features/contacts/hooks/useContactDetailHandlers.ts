@@ -1,4 +1,5 @@
 import type { ContactSocialFieldKey } from "@bondery/helpers";
+import { detachPromise } from "@bondery/helpers/async";
 import type {
   Contact,
   ContactAddressEntry,
@@ -52,29 +53,31 @@ export function useContactDetailHandlers({
   const name = formatContactName(contact);
 
   function shareContact() {
-    void (async () => {
-      setIsSharing(true);
+    detachPromise(
+      (async () => {
+        setIsSharing(true);
 
-      try {
-        await shareContactVCard({
-          contact,
-          contactId: contact.id,
-          dialogTitle: name,
-        });
-      } catch (err) {
-        if (err instanceof ShareUnavailableError) {
-          notifications.show({
-            title: tMobileContactDetail("ShareUnavailable"),
-            type: "error",
+        try {
+          await shareContactVCard({
+            contact,
+            contactId: contact.id,
+            dialogTitle: name,
           });
-          return;
-        }
+        } catch (error) {
+          if (error instanceof ShareUnavailableError) {
+            notifications.show({
+              title: tMobileContactDetail("ShareUnavailable"),
+              type: "error",
+            });
+            return;
+          }
 
-        showErrorToast(err, tMobileContactDetail("ShareFailed"));
-      } finally {
-        setIsSharing(false);
-      }
-    })();
+          showErrorToast(error, tMobileContactDetail("ShareFailed"));
+        } finally {
+          setIsSharing(false);
+        }
+      })(),
+    );
   }
 
   function handleCloseDeleteConfirm() {
@@ -82,7 +85,7 @@ export function useContactDetailHandlers({
   }
 
   function performDeleteContact() {
-    deleteContact(contact.id, contact.updatedAt ?? undefined);
+    deleteContact(contact.id, contact.updatedAt);
   }
 
   function handleDeleteSuccess() {
@@ -106,7 +109,7 @@ export function useContactDetailHandlers({
       {
         [platform]: value,
       },
-      contact.updatedAt ?? undefined,
+      contact.updatedAt,
     );
     onContactUpdated();
   }
@@ -117,7 +120,7 @@ export function useContactDetailHandlers({
       {
         phones: normalizePhonesForSave(nextPhones),
       },
-      contact.updatedAt ?? undefined,
+      contact.updatedAt,
     );
     onContactUpdated();
   }
@@ -128,7 +131,7 @@ export function useContactDetailHandlers({
       {
         emails: normalizeEmailsForSave(nextEmails),
       },
-      contact.updatedAt ?? undefined,
+      contact.updatedAt,
     );
     onContactUpdated();
   }
@@ -139,7 +142,7 @@ export function useContactDetailHandlers({
       {
         addresses: nextAddresses,
       },
-      contact.updatedAt ?? undefined,
+      contact.updatedAt,
     );
     onContactUpdated();
   }

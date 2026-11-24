@@ -8,7 +8,9 @@
  * (type-stripped `.ts`); they must not copy these regexes.
  */
 
-export type CalverVersion = {
+const PATTERN_5E76285C642B_RE = /^v(\d+\.\d+\.\d+)$/;
+
+type CalverVersion = {
   major: number;
   minor: number;
   patch: number;
@@ -31,7 +33,7 @@ function asVersion(input: string | CalverVersion): CalverVersion {
  * Parse npm / git identity: `1.9.1`, `v1.9.1`, `1.9.1-rc.1`, `v1.9.1-rc.1`.
  * Rejects Chrome 4-part, `rc.0`, and `1.9.1.rc-1`.
  */
-export function parseCalver(input: string): CalverVersion {
+function parseCalver(input: string): CalverVersion {
   const trimmed = input.trim();
   const match = CALVER_RE.exec(trimmed);
   if (!match) {
@@ -46,6 +48,31 @@ export function parseCalver(input: string): CalverVersion {
     rc: match[4] === undefined ? null : toInt(match[4]),
   };
 }
+
+function compareParsed(a: CalverVersion, b: CalverVersion): -1 | 0 | 1 {
+  if (a.major !== b.major) {
+    return a.major < b.major ? -1 : 1;
+  }
+  if (a.minor !== b.minor) {
+    return a.minor < b.minor ? -1 : 1;
+  }
+  if (a.patch !== b.patch) {
+    return a.patch < b.patch ? -1 : 1;
+  }
+  if (a.rc === b.rc) {
+    return 0;
+  }
+  if (a.rc === null) {
+    return 1;
+  }
+  if (b.rc === null) {
+    return -1;
+  }
+  return a.rc < b.rc ? -1 : 1;
+}
+
+export type { CalverVersion };
+export { parseCalver };
 
 /** Production `X.Y.Z` or RC `X.Y.Z-rc.N` for package.json / health. */
 export function toNpm(input: string | CalverVersion): string {
@@ -109,28 +136,6 @@ export function parseComparableVersion(input: string): CalverVersion | null {
   };
 }
 
-function compareParsed(a: CalverVersion, b: CalverVersion): -1 | 0 | 1 {
-  if (a.major !== b.major) {
-    return a.major < b.major ? -1 : 1;
-  }
-  if (a.minor !== b.minor) {
-    return a.minor < b.minor ? -1 : 1;
-  }
-  if (a.patch !== b.patch) {
-    return a.patch < b.patch ? -1 : 1;
-  }
-  if (a.rc === b.rc) {
-    return 0;
-  }
-  if (a.rc === null) {
-    return 1;
-  }
-  if (b.rc === null) {
-    return -1;
-  }
-  return a.rc < b.rc ? -1 : 1;
-}
-
 /**
  * Compare CalVer, `X.Y.Z-rc.N`, and Chrome 4-part.
  * Unparseable `a` sorts below a valid `b` (426-safe); unparseable `b` does not
@@ -167,7 +172,7 @@ export function previousProductionCalver(
   const shippedCore = toCoreCalver(shippedNpmVersion);
   const candidates: string[] = [];
   for (const tag of gitTags) {
-    const match = /^v(\d+\.\d+\.\d+)$/.exec(tag.trim());
+    const match = PATTERN_5E76285C642B_RE.exec(tag.trim());
     if (!match) {
       continue;
     }
@@ -227,7 +232,7 @@ export function highestNamedRc(gitTags: readonly string[], coreCalver: string): 
     );
   }
   rcs.sort((left, right) => compareParsed(right, left));
-  const winner = rcs[0];
+  const [winner] = rcs;
   if (!winner) {
     throw new Error(`No named RC git tag found for ${core} (need v${core}-rc.N).`);
   }

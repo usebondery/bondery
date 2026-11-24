@@ -1,0 +1,22 @@
+{
+  "AddButton": "Προσθήκη",
+  "Description": "Θα στείλουμε τα στοιχεία τους στα άτομα παρακάτω. Θα λάβεις και αντίγραφο.",
+  "DuplicateEmail": "Αυτή η διεύθυνση έχει ήδη προστεθεί",
+  "ErrorDescription": "Έλεγξε τη σύνδεσή σου και δοκίμασε ξανά.",
+  "ErrorHeadline": "Αδύνατη αποστολή επαφής",
+  "InvalidEmail": "Εισήγαγε έγκυρη διεύθυνση email",
+  "MaxRecipients": "Μπορείς να προσθέσεις έως 10 παραλήπτες",
+  "MaxRecipientsHint": "Μέγιστο 10 παραλήπτες",
+  "MessagePlaceholder": "Προσθήκη σημείωσης (προαιρετικό)",
+  "NoRecipients": "Πρόσθεσε τουλάχιστον έναν παραλήπτη",
+  "RecipientsLabel": "Προς",
+  "RecipientsPlaceholder": "Διεύθυνση email παραλήπτη",
+  "RemoveRecipient": "Αφαίρεση {email}",
+  "SendButton": "Αποστολή",
+  "SendButtonMany": "Αποστολή σε {count} άτομα",
+  "SendButtonOne": "Αποστολή σε 1 άτομο",
+  "SuccessDescription": "Οι παραλήπτες θα τη λάβουν σύντομα.",
+  "SuccessHeadline": "Η επαφή στάλθηκε",
+  "Title": "Αποστολή επαφής του/της {name} με email",
+  "WhatsIncluded": "Περιλαμβάνει στοιχεία επαφής, social links και σημειώσεις."
+}

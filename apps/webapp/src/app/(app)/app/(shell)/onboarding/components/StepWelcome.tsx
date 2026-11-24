@@ -19,7 +19,10 @@ export function StepWelcome({ onNext }: StepProps) {
     return displayName.split(" ")[0] || null;
   })();
 
-  const greeting = firstName != null ? t("TitleWithName", { name: firstName }) : t("TitleGeneric");
+  const greeting =
+    firstName !== null && firstName !== undefined
+      ? t("TitleWithName", { name: firstName })
+      : t("TitleGeneric");
 
   return (
     <Center mih={260}>

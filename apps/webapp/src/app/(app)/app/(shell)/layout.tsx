@@ -6,6 +6,7 @@ import { PaymentFailureModal } from "@/components/billing/PaymentFailureModal";
 import { EnrichResumeDetector } from "@/components/extension/EnrichResumeDetector";
 import { EnrichStatusNotificationManager } from "@/components/extension/EnrichStatusNotificationManager";
 import { ExtensionUpdateNotificationManager } from "@/components/extension/ExtensionUpdateNotificationManager";
+import { AfterHydration } from "@/components/shell/AfterHydration";
 import { AppShellRefreshRegistrar } from "@/components/shell/AppShellRefreshRegistrar";
 import { AppShellWithQueryBadges } from "@/components/shell/AppShellWithQueryBadges";
 import { AppShellWrapper } from "@/components/shell/AppShellWrapper";
@@ -26,10 +27,6 @@ import { routeAssert } from "@/lib/navigation/route/assert";
 import { routeLogin } from "@/lib/navigation/route/login";
 import { parseStoredLastExpandedWidth, parseStoredSidebarWidth } from "@/lib/shell/sidebarWidth";
 
-export const metadata: Metadata = {
-  title: WEBAPP_NAME,
-};
-
 function resolveShellDisplayName(
   displayName: string | undefined,
   fallbackName: string,
@@ -43,6 +40,10 @@ function resolveShellDisplayName(
   }
   return fallbackEmail;
 }
+
+export const metadata: Metadata = {
+  title: WEBAPP_NAME,
+};
 
 /** Authenticated product chrome: sidebar, shell providers, onboarding gate. */
 export default async function AppShellLayout({ children }: { children: React.ReactNode }) {
@@ -87,15 +88,18 @@ export default async function AppShellLayout({ children }: { children: React.Rea
 
   return (
     <UserSessionProvider avatarUrl={avatarUrl} colorScheme={colorScheme} displayName={displayName}>
-      <AppShellRefreshRegistrar />
-      <ProductAnalyticsShellSync />
-      <SyncWakeRegistrar />
-      <ServiceWorkerRegistration />
-      <ColorSchemeSync />
-      <EnrichStatusNotificationManager />
-      <EnrichResumeDetector />
-      <ExtensionUpdateNotificationManager />
-      <PaymentFailureModal />
+      {/* Headless shell components render nothing on the server. See AfterHydration. */}
+      <AfterHydration>
+        <AppShellRefreshRegistrar />
+        <ProductAnalyticsShellSync />
+        <SyncWakeRegistrar />
+        <ServiceWorkerRegistration />
+        <ColorSchemeSync />
+        <EnrichStatusNotificationManager />
+        <EnrichResumeDetector />
+        <ExtensionUpdateNotificationManager />
+        <PaymentFailureModal />
+      </AfterHydration>
       <Suspense
         fallback={
           <AppShellWrapper

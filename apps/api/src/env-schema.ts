@@ -2,14 +2,58 @@
 
 import { getApiRequiredEnvVars } from "./lib/platform/required-env.js";
 
+declare module "fastify" {
+  interface FastifyInstance {
+    config: {
+      LOG_LEVEL: string;
+      BONDERY_PUBLIC_ANDROID_SHA256_CERT_FINGERPRINTS: string;
+      BONDERY_PUBLIC_WEBAPP_URL: string;
+      BONDERY_PUBLIC_WEBAUTHN_RP_ID: string;
+      BONDERY_PUBLIC_WEBSITE_URL: string;
+      BONDERY_PUBLIC_API_URL: string;
+      BONDERY_PUBLIC_EXTRA_ALLOWED_ORIGINS: string;
+      API_PORT: number;
+      API_HOST: string;
+      DATABASE_URL: string;
+      BONDERY_PRIVATE_EMAIL_HOST: string;
+      BONDERY_PRIVATE_EMAIL_USER: string;
+      BONDERY_PRIVATE_EMAIL_PASS: string;
+      BONDERY_PRIVATE_EMAIL_ADDRESS: string;
+      BONDERY_PRIVATE_EMAIL_REPLY_TO: string;
+      BONDERY_PRIVATE_EMAIL_PORT: number;
+      BONDERY_PUBLIC_POSTHOG_HOST: string;
+      BONDERY_PUBLIC_POSTHOG_KEY: string;
+      BONDERY_PRIVATE_ANTHROPIC_API_KEY: string;
+      BONDERY_PRIVATE_STRIPE_SECRET_KEY: string;
+      BONDERY_PRIVATE_STRIPE_WEBHOOK_SECRET: string;
+      BONDERY_PUBLIC_BILLING_UPGRADES_ENABLED: string;
+      BONDERY_PUBLIC_STRIPE_PRICE_ID_ANNUAL: string;
+      BONDERY_PUBLIC_STRIPE_PRICE_ID_MONTHLY: string;
+      BONDERY_PUBLIC_STRIPE_PUBLISHABLE_KEY: string;
+      BONDERY_PUBLIC_STORAGE_URL: string;
+      BONDERY_PUBLIC_MAPS_URL: string;
+      BONDERY_PRIVATE_MAPS_KEY: string;
+      BONDERY_PRIVATE_REDIS_URL: string;
+      BONDERY_PRIVATE_S3_ACCESS_KEY_ID: string;
+      BONDERY_PRIVATE_S3_ENDPOINT: string;
+      BONDERY_PRIVATE_S3_REGION: string;
+      BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY: string;
+      BONDERY_PRIVATE_SERVICE_SECRET: string;
+      SYNC_WAKE_ENABLED: string;
+    };
+  }
+}
+
 export const envSchema = {
   properties: {
+    // Empty: loopback in development, all interfaces otherwise (resolveListenAddress).
     API_HOST: {
-      default: "0.0.0.0",
+      default: "",
       type: "string",
     },
+    // The API's only listener, HTTPS (lib/platform/api-tls.ts).
     API_PORT: {
-      default: 26631,
+      default: 26_631,
       type: "number",
     },
     BONDERY_PRIVATE_ANTHROPIC_API_KEY: {
@@ -135,45 +179,3 @@ export const envSchema = {
   required: [...getApiRequiredEnvVars("development")],
   type: "object",
 } as const;
-
-declare module "fastify" {
-  interface FastifyInstance {
-    config: {
-      LOG_LEVEL: string;
-      BONDERY_PUBLIC_ANDROID_SHA256_CERT_FINGERPRINTS: string;
-      BONDERY_PUBLIC_WEBAPP_URL: string;
-      BONDERY_PUBLIC_WEBAUTHN_RP_ID: string;
-      BONDERY_PUBLIC_WEBSITE_URL: string;
-      BONDERY_PUBLIC_API_URL: string;
-      BONDERY_PUBLIC_EXTRA_ALLOWED_ORIGINS: string;
-      API_PORT: number;
-      API_HOST: string;
-      DATABASE_URL: string;
-      BONDERY_PRIVATE_EMAIL_HOST: string;
-      BONDERY_PRIVATE_EMAIL_USER: string;
-      BONDERY_PRIVATE_EMAIL_PASS: string;
-      BONDERY_PRIVATE_EMAIL_ADDRESS: string;
-      BONDERY_PRIVATE_EMAIL_REPLY_TO: string;
-      BONDERY_PRIVATE_EMAIL_PORT: number;
-      BONDERY_PUBLIC_POSTHOG_HOST: string;
-      BONDERY_PUBLIC_POSTHOG_KEY: string;
-      BONDERY_PRIVATE_ANTHROPIC_API_KEY: string;
-      BONDERY_PRIVATE_STRIPE_SECRET_KEY: string;
-      BONDERY_PRIVATE_STRIPE_WEBHOOK_SECRET: string;
-      BONDERY_PUBLIC_BILLING_UPGRADES_ENABLED: string;
-      BONDERY_PUBLIC_STRIPE_PRICE_ID_ANNUAL: string;
-      BONDERY_PUBLIC_STRIPE_PRICE_ID_MONTHLY: string;
-      BONDERY_PUBLIC_STRIPE_PUBLISHABLE_KEY: string;
-      BONDERY_PUBLIC_STORAGE_URL: string;
-      BONDERY_PUBLIC_MAPS_URL: string;
-      BONDERY_PRIVATE_MAPS_KEY: string;
-      BONDERY_PRIVATE_REDIS_URL: string;
-      BONDERY_PRIVATE_S3_ACCESS_KEY_ID: string;
-      BONDERY_PRIVATE_S3_ENDPOINT: string;
-      BONDERY_PRIVATE_S3_REGION: string;
-      BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY: string;
-      BONDERY_PRIVATE_SERVICE_SECRET: string;
-      SYNC_WAKE_ENABLED: string;
-    };
-  }
-}

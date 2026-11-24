@@ -10,13 +10,13 @@ Production default: **`next-smtp.useplunk.com:587`** (STARTTLS).
 
 Required in dev/prod for API (`packages/helpers/src/env/manifest.ts`, group `Email`):
 
-| Variable | Purpose |
-|----------|---------|
-| `BONDERY_PRIVATE_EMAIL_HOST` | SMTP host (Plunk: `next-smtp.useplunk.com`) |
-| `BONDERY_PRIVATE_EMAIL_PORT` | Port — **587** (STARTTLS, production) or **465** (implicit TLS) |
-| `BONDERY_PRIVATE_EMAIL_USER` | SMTP username |
-| `BONDERY_PRIVATE_EMAIL_PASS` | SMTP password |
-| `BONDERY_PRIVATE_EMAIL_ADDRESS` | From address (e.g. `robot@usebondery.com`) |
+| Variable                        | Purpose                                                         |
+| ------------------------------- | --------------------------------------------------------------- |
+| `BONDERY_PRIVATE_EMAIL_HOST`    | SMTP host (Plunk: `next-smtp.useplunk.com`)                     |
+| `BONDERY_PRIVATE_EMAIL_PORT`    | Port — **587** (STARTTLS, production) or **465** (implicit TLS) |
+| `BONDERY_PRIVATE_EMAIL_USER`    | SMTP username                                                   |
+| `BONDERY_PRIVATE_EMAIL_PASS`    | SMTP password                                                   |
+| `BONDERY_PRIVATE_EMAIL_ADDRESS` | From address (e.g. `robot@usebondery.com`)                      |
 
 Declared in `apps/api/src/env-schema.ts`, `.env.local.example`, `deploy/bondery/.env.example`.
 
@@ -24,17 +24,17 @@ Declared in `apps/api/src/env-schema.ts`, `.env.local.example`, `deploy/bondery/
 
 `apps/api/src/lib/notifications/transporter.ts`:
 
-| Function | Use |
-|----------|-----|
-| `initEmailTransport(log?)` | Eager SMTP verify on `onReady` (before jobs); boot fails on missing env or verify failure in development and production |
-| `verifyEmailTransport()` | Re-verify shared pool (`/health/ready` when cache is cold) |
-| `getEmailTransportReadiness()` | Last verify result for health reporting |
-| `isEmailConfigured()` | Check SMTP env before send |
-| `getEmailConfig()` | Cached config (`fromAddress`, etc.) after first send |
-| `getEmailTransporter()` | Lazy singleton pool (internal; prefer `sendRenderedEmail`) |
-| `sendRenderedEmail(options, log?)` | Send HTML + plaintext (`multipart/alternative`) via the shared pool; logs and rethrows on failure |
-| `shutdownEmailTransporter()` | Close pool on app shutdown (`build-server.ts` `onClose`) |
-| `emailTransportOptions(config)` | Port-aware TLS + pool options (unit tests) |
+| Function                           | Use                                                                                                                     |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `initEmailTransport(log?)`         | Eager SMTP verify on `onReady` (before jobs); boot fails on missing env or verify failure in development and production |
+| `verifyEmailTransport()`           | Re-verify shared pool (`/health/ready` when cache is cold)                                                              |
+| `getEmailTransportReadiness()`     | Last verify result for health reporting                                                                                 |
+| `isEmailConfigured()`              | Check SMTP env before send                                                                                              |
+| `getEmailConfig()`                 | Cached config (`fromAddress`, etc.) after first send                                                                    |
+| `getEmailTransporter()`            | Lazy singleton pool (internal; prefer `sendRenderedEmail`)                                                              |
+| `sendRenderedEmail(options, log?)` | Send HTML + plaintext (`multipart/alternative`) via the shared pool; logs and rethrows on failure                       |
+| `shutdownEmailTransporter()`       | Close pool on app shutdown (`build-server.ts` `onClose`)                                                                |
+| `emailTransportOptions(config)`    | Port-aware TLS + pool options (unit tests)                                                                              |
 
 **Senders call `sendRenderedEmail` only** — never `createTransport` from services.
 
@@ -48,11 +48,11 @@ Declared in `apps/api/src/env-schema.ts`, `.env.local.example`, `deploy/bondery/
 
 ### TLS and port
 
-| Port | `secure` | `requireTLS` | Cert verify |
-|------|----------|--------------|-------------|
-| 465 | `true` | `false` | `rejectUnauthorized: true` |
-| 587 | `false` | `true` | `rejectUnauthorized: true` |
-| Loopback (`127.0.0.1` / `localhost`) in non-production | `false` | `false` (`ignoreTLS: true`) | unused |
+| Port                                                   | `secure` | `requireTLS`                | Cert verify                |
+| ------------------------------------------------------ | -------- | --------------------------- | -------------------------- |
+| 465                                                    | `true`   | `false`                     | `rejectUnauthorized: true` |
+| 587                                                    | `false`  | `true`                      | `rejectUnauthorized: true` |
+| Loopback (`127.0.0.1` / `localhost`) in non-production | `false`  | `false` (`ignoreTLS: true`) | unused                     |
 
 Development and other non-production, non-test boots **throw** when `BONDERY_PRIVATE_EMAIL_HOST` is not loopback. Message: start Mailpit (`pnpm run start:mailpit`) and set `BONDERY_PRIVATE_EMAIL_HOST=127.0.0.1`. Production still uses STARTTLS on 587 / implicit TLS on 465.
 
@@ -67,11 +67,11 @@ export const EMAIL_FROM_DISPLAY_NAME = `Robot from ${LEGAL_ENTITY.brandName}`;
 
 Call `formatEmailFrom(config.fromAddress)` for **every** product email (sign-in, welcome, share, digest, trial, account deleted, feedback). Do not invent per-email From names. Do not add `BONDERY_PRIVATE_EMAIL_FROM_NAME`. White-label (self-host operator name + logo + legal entity) is a product feature, not a single SMTP env var.
 
-| Email type | From | Reply-To | CC |
-|------------|------|----------|-----|
-| Automated product (trial, digest, account deleted, welcome, sign-in link) | `formatEmailFrom(address)` | From address (where set) | — |
-| User-initiated share | `formatEmailFrom(address)` | Sender's email | Sender's email |
-| Internal feedback | `formatEmailFrom(address)` | User email | User email |
+| Email type                                                                | From                       | Reply-To                 | CC             |
+| ------------------------------------------------------------------------- | -------------------------- | ------------------------ | -------------- |
+| Automated product (trial, digest, account deleted, welcome, sign-in link) | `formatEmailFrom(address)` | From address (where set) | —              |
+| User-initiated share                                                      | `formatEmailFrom(address)` | Sender's email           | Sender's email |
+| Internal feedback                                                         | `formatEmailFrom(address)` | User email               | User email     |
 
 Avoid `no-reply@` From addresses — use reply-capable addresses; set `replyTo` when the user should be able to respond.
 

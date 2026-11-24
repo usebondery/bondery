@@ -2,6 +2,8 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { Client } from "pg";
 
+import { pgConnectionConfig } from "./connection/database-tls.js";
+
 const sqlPath = fileURLToPath(new URL("../prisma/sql/functions.sql", import.meta.url));
 
 const PUBLIC_EXTENSIONS_SQL = `
@@ -67,7 +69,7 @@ $$;
 
 export async function applySqlFunctions(databaseUrl: string): Promise<void> {
   const sql = readFileSync(sqlPath, "utf8");
-  const client = new Client({ connectionString: databaseUrl });
+  const client = new Client({ ...pgConnectionConfig(databaseUrl) });
   await client.connect();
   try {
     // pg_trgm / unaccent must exist in `extensions` before functions.sql is

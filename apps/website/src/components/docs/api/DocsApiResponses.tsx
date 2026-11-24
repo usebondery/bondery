@@ -1,6 +1,9 @@
 "use client";
 
 import { CodeBlock } from "@bondery/mantine-next";
+import docs from "@bondery/translations/locales/en/platform/website/WebsiteDocs.json" with {
+  type: "json",
+};
 import { Stack, Tabs, Title } from "@mantine/core";
 import { IconCode } from "@tabler/icons-react";
 import {
@@ -8,21 +11,23 @@ import {
   useOperation,
   useResponseExamples,
 } from "fumadocs-openapi/operation";
+import { formatText } from "@/lib/i18n/message";
 import { DocsApiSchema } from "./DocsApiSchema";
 
+const EXAMPLE_LABEL_RE = /^example(\s+\S+)?$/i;
 function formatSample(sample: unknown): string {
   if (typeof sample === "string") {
     return sample;
   }
 
   try {
-    return JSON.stringify(sample, null, 2) ?? "";
+    return (JSON.stringify(sample, null, 2) as string | undefined) ?? "";
   } catch {
     return "";
   }
 }
 
-function sampleLanguage(mediaType: string | null): string {
+function sampleLanguage(mediaType: string | null): "json" | "plaintext" {
   return mediaType === "application/json" ? "json" : "plaintext";
 }
 
@@ -31,18 +36,19 @@ function sampleLanguage(mediaType: string | null): string {
  * when the spec has a single unnamed example, which adds no information here.
  */
 function exampleLabel(example: ResponseExample): string | null {
-  const label = example.label;
+  const { label } = example;
   if (typeof label !== "string" || label.length === 0) {
     return null;
   }
-  return /^example(\s+\S+)?$/i.test(label.trim()) ? null : label.trim();
+  return EXAMPLE_LABEL_RE.test(label.trim()) ? null : label.trim();
 }
 
 export function DocsApiResponses() {
   const tabs = useResponseExamples();
   const { responses } = useOperation();
 
-  if (tabs.length === 0) {
+  const [firstTab] = tabs;
+  if (firstTab === undefined) {
     return null;
   }
 
@@ -50,8 +56,8 @@ export function DocsApiResponses() {
 
   return (
     <Stack gap="sm">
-      <Title order={3}>Responses</Title>
-      <Tabs defaultValue={tabs[0].code}>
+      <Title order={3}>{docs.Api.Responses}</Title>
+      <Tabs defaultValue={firstTab.code}>
         <Tabs.List>
           {tabs.map((tab) => (
             <Tabs.Tab key={tab.code} value={tab.code}>
@@ -77,7 +83,10 @@ export function DocsApiResponses() {
                       <CodeBlock
                         code={formatSample(example.sample)}
                         icon={<IconCode size={14} />}
-                        label={`${tab.code} ${language === "json" ? "JSON" : "response"}`}
+                        label={formatText(
+                          language === "json" ? docs.Api.JsonResponseLabel : docs.Api.ResponseLabel,
+                          { code: tab.code },
+                        )}
                         language={language}
                       />
                     </Stack>

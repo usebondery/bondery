@@ -1,0 +1,9 @@
+{
+  "ApiRejectedDescription": "Servern nekade begeran eftersom udvidelseet er inaktuellt. Uuenda det.",
+  "ApiRejectedTitle": "Version Too Old",
+  "UpdateButton": "Uuenda",
+  "UpdateRequiredDescription": "Sinu Bondery laiendus on aegunud ja ei pruugi õigesti töötada. Jätkamiseks uuenda.",
+  "UpdateRequiredTitle": "Uuendus on kohustuslik",
+  "WebappNotificationDescription": "Sinu Bondery Chrome Extension needs an update to keep working properly.",
+  "WebappNotificationTitle": "Extension Uuenda Available"
+}

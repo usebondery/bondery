@@ -14,13 +14,9 @@ export function useDefaultPhoneCountry(): string | null {
     return null;
   }
 
-  const defaultPhoneCountry =
-    typeof settings.defaultPhoneCountry === "string" ? settings.defaultPhoneCountry : null;
-  const timezone = typeof settings.timezone === "string" ? settings.timezone : null;
-
   return resolveDefaultPhoneCountry({
-    defaultPhoneCountry,
-    timezone,
+    defaultPhoneCountry: settings.defaultPhoneCountry,
+    timezone: settings.timezone,
   });
 }
 

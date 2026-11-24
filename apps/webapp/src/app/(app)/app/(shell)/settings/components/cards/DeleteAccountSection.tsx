@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { Button, Group, Text } from "@mantine/core";
 import { IconTrash } from "@tabler/icons-react";
 import { ensureFreshIdentity } from "@/lib/auth/reconfirm";
@@ -38,7 +39,7 @@ export function DeleteAccountSection() {
       <Button
         color="red"
         leftSection={<IconTrash size={16} />}
-        onClick={() => void handleDeleteAccount()}
+        onClick={() => detachPromise(handleDeleteAccount())}
         variant="light"
       >
         {t("DeleteButton")}

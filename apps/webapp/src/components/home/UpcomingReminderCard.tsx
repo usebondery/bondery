@@ -4,11 +4,11 @@ import { PersonAvatar } from "@bondery/mantine-next";
 import type { ImportantDateType, UpcomingReminder } from "@bondery/schemas";
 import { Badge, Card, Divider, Group, Stack, Text, Tooltip } from "@mantine/core";
 import { IconBell, IconCircleCheck } from "@tabler/icons-react";
-import { useCurrentLocale as useLocale } from "@/components/shell/UserLocaleProvider";
 import {
   useContactImportantDatesTranslations,
   useHomePageTranslations,
 } from "@/lib/i18n/generated/hooks";
+import { useDateFormatter } from "@/lib/i18n/useDateFormatter";
 import { IMPORTANT_DATE_TYPE_OPTIONS } from "@/lib/platform/config";
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -72,7 +72,9 @@ function getDaysUntilNotification(reminder: UpcomingReminder): number {
  * - 3-7 days: violet (brand)
  * - 8+ days: gray
  */
-function getNotificationBadgeColor(daysUntilNotification: number): string {
+function getNotificationBadgeColor(
+  daysUntilNotification: number,
+): "gray" | "orange" | "red" | "violet" {
   if (daysUntilNotification <= 0) {
     return "red";
   }
@@ -102,17 +104,16 @@ function getDateEmoji(type: ImportantDateType): string {
  * - Urgency communicated through badge color alone.
  */
 export function UpcomingReminderCard({ reminder, onClick }: UpcomingReminderCardProps) {
-  const locale = useLocale();
   const t = useHomePageTranslations();
   const dateT = useContactImportantDatesTranslations();
-  const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const formatter = useDateFormatter();
 
   const importantDate = parseDateOnly(reminder.importantDate.date) ?? getTodayUtc();
-  const dateMonth = importantDate
-    .toLocaleDateString(locale, { month: "short" })
+  const dateMonth = formatter
+    .formatDateField(importantDate, "monthShort", { timeZone: "UTC" })
     .replace(".", "")
     .toUpperCase();
-  const dateDay = importantDate.toLocaleDateString(locale, { day: "2-digit" });
+  const dateDay = formatter.formatDateField(importantDate, "dayTwoDigit", { timeZone: "UTC" });
   const dateTypeLabel = dateT(`Types.${reminder.importantDate.type}`);
   const dateEmoji = getDateEmoji(reminder.importantDate.type);
   const notificationInDays = getDaysUntilNotification(reminder);
@@ -120,14 +121,12 @@ export function UpcomingReminderCard({ reminder, onClick }: UpcomingReminderCard
   const notificationColor = isNotificationSent
     ? "gray"
     : getNotificationBadgeColor(notificationInDays);
-  const personName =
-    `${reminder.person.firstName}${reminder.person.lastName ? ` ${reminder.person.lastName}` : ""}`.trim();
+  const personName = [reminder.person.firstName, reminder.person.lastName]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
   const sentAtLabel = reminder.notificationSentAt
-    ? new Intl.DateTimeFormat(locale, {
-        dateStyle: "medium",
-        timeStyle: "short",
-        timeZone: userTimeZone,
-      }).format(new Date(reminder.notificationSentAt))
+    ? formatter.formatDateTime(new Date(reminder.notificationSentAt))
     : null;
   const notificationLabel = isNotificationSent
     ? t("NotificationSent")
@@ -163,7 +162,7 @@ export function UpcomingReminderCard({ reminder, onClick }: UpcomingReminderCard
       withBorder
     >
       {/* Main row: date | divider | avatar | date info | notification */}
-      <Group align="stretch" gap={"0"} wrap="nowrap">
+      <Group align="stretch" gap="0" wrap="nowrap">
         {/* Date rail */}
         <Stack align="center" gap={0} justify="center" miw={60} px="md" py="xs">
           <Text c="var(--mantine-primary-color-filled)" fw={700} lh={1.3} size="xs">

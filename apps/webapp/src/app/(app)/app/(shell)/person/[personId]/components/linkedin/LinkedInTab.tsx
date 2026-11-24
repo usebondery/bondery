@@ -57,20 +57,20 @@ export function LinkedInTab({
   return (
     <Stack gap="lg">
       {/* Last synced timestamp */}
-      {lastSynced && (
+      {lastSynced ? (
         <Text c="dimmed" size="xs">
           {t("LastDataUpdate", {
-            date: format.dateTime(lastSynced, { dateStyle: "medium" }),
+            date: format.formatDate(lastSynced, "medium"),
           })}
         </Text>
-      )}
+      ) : null}
       {/* Bio / About section */}
-      {linkedinBio && (
+      {linkedinBio ? (
         <>
           <LinkedInBioSection bio={linkedinBio} />
           <Divider />
         </>
-      )}
+      ) : null}
 
       {/* Work history section */}
       <Stack gap="xs">

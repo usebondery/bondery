@@ -2,6 +2,7 @@
 
 import { Button, Menu, MenuItem } from "@mantine/core";
 import { IconDotsVertical, IconTrash } from "@tabler/icons-react";
+import { cn } from "cn";
 import { useState } from "react";
 import { useChatPageTranslations } from "@/lib/i18n/generated/hooks";
 
@@ -22,7 +23,7 @@ export function ChatSessionActionMenu({ onDelete }: ChatSessionActionMenuProps) 
     >
       <Menu.Target>
         <Button
-          className={`button-scale-effect ${opened ? "button-scale-effect-active" : ""}`}
+          className={cn("button-scale-effect", opened && "button-scale-effect-active")}
           leftSection={<IconDotsVertical size={18} />}
         >
           {t("actionsButton")}

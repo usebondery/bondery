@@ -5,6 +5,7 @@ import { WEBAPP_NAME, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { AnchorLink, Kbd, parseShortcutKeys } from "@bondery/mantine-next";
 import { Avatar, Box, Group, SegmentedControl, Stack, Text, Tooltip } from "@mantine/core";
 import { useHover } from "@mantine/hooks";
+import { spotlight } from "@mantine/spotlight";
 import {
   type Icon,
   IconArrowMerge,
@@ -34,7 +35,6 @@ import {
 } from "@/lib/navigation/appNavLinks";
 import { routeAssert } from "@/lib/navigation/route/assert";
 import { HOTKEYS } from "@/lib/platform/config";
-import { spotlight } from "./CommandPalette";
 import {
   NAV_LINK_ITEM_BORDER_RADIUS,
   NavLinkItem,
@@ -58,6 +58,20 @@ type NavigationLinkDef = AppNavLinkDef & { icon: Icon };
 
 function withIcons(links: AppNavLinkDef[]): NavigationLinkDef[] {
   return links.map((link) => ({ ...link, icon: navIcons[link.labelKey] }));
+}
+
+const SIDEBAR_MODE_BROWSE = "browse";
+const SIDEBAR_MODE_CHAT = "chat";
+
+interface NavigationSidebarContentProps {
+  avatarUrl: string | null;
+  collapsed: boolean;
+  hasActiveMergeRecommendations: boolean;
+  hasOverdueKeepInTouch: boolean;
+  isMobileOverlay?: boolean;
+  onExpandSidebar: () => void;
+  onSearchActivate?: () => void;
+  userName: string;
 }
 
 export const primaryLinkDefs = withIcons(primaryAppNavLinks);
@@ -89,20 +103,6 @@ export function useAppNavigationLinks(): {
   };
 }
 
-const SIDEBAR_MODE_BROWSE = "browse";
-const SIDEBAR_MODE_CHAT = "chat";
-
-interface NavigationSidebarContentProps {
-  avatarUrl: string | null;
-  collapsed: boolean;
-  hasActiveMergeRecommendations: boolean;
-  hasOverdueKeepInTouch: boolean;
-  isMobileOverlay?: boolean;
-  onExpandSidebar: () => void;
-  onSearchActivate?: () => void;
-  userName: string;
-}
-
 export function NavigationSidebarContent({
   userName,
   avatarUrl,
@@ -127,11 +127,15 @@ export function NavigationSidebarContent({
     rememberBrowsePath(pathname);
   }, [pathname]);
 
-  useEffect(() => {
+  // The pending flag ends when navigation reaches the chat route. Adjusting it while
+  // rendering avoids an extra render pass after an effect.
+  const [previousPathname, setPreviousPathname] = useState(pathname);
+  if (pathname !== previousPathname) {
+    setPreviousPathname(pathname);
     if (isChatRoute(pathname)) {
       setChatModePending(false);
     }
-  }, [pathname]);
+  }
 
   function handleModeChange(value: string) {
     if (value === SIDEBAR_MODE_CHAT) {
@@ -164,14 +168,14 @@ export function NavigationSidebarContent({
       {!isMobileOverlay && (
         <Group justify="flex-start" mb="md">
           <AnchorLink href={routeAssert(WEBAPP_ROUTES.DEFAULT_PAGE_AFTER_LOGIN)} underline="never">
-            <Box darkHidden>
+            <Box darkHidden dir="ltr">
               <BonderyDynamicLogotype
                 height={36}
                 text={collapsed ? undefined : WEBAPP_NAME}
                 theme="light"
               />
             </Box>
-            <Box lightHidden>
+            <Box dir="ltr" lightHidden>
               <BonderyDynamicLogotype
                 height={36}
                 text={collapsed ? undefined : WEBAPP_NAME}
@@ -352,8 +356,8 @@ export function NavigationSidebarContent({
               borderRadius: NAV_LINK_ITEM_BORDER_RADIUS,
               color: isMyselfActive ? "white" : "inherit",
               paddingBottom: "var(--mantine-spacing-xs)",
-              paddingLeft: "var(--sidebar-icon-pl)",
-              paddingRight: "var(--sidebar-icon-pl)",
+              paddingInlineEnd: "var(--sidebar-icon-pl)",
+              paddingInlineStart: "var(--sidebar-icon-pl)",
               paddingTop: "var(--mantine-spacing-xs)",
               textDecoration: "none",
               width: "100%",

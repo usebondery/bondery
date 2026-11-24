@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import { EnrichedMarkdownText } from "react-native-enriched-markdown";
 import { Pressable } from "@/components/ui/Pressable";
+import { useMobileContactDetailTranslations } from "@/lib/i18n/generated/hooks";
 import { NOTES_COLLAPSE_CHAR_THRESHOLD } from "../../../lib/config";
 import { useAppNavigation } from "../../../lib/navigation/useAppNavigation";
 import { notifications } from "../../../lib/toast/notifications";
@@ -29,6 +30,7 @@ export function ContactDetailNotesSection({
   notesPending = false,
   onOpenNotesEditor,
 }: ContactDetailNotesSectionProps) {
+  const t = useMobileContactDetailTranslations();
   const { openContact, openMyself } = useAppNavigation();
   const [notesExpanded, setNotesExpanded] = useState(false);
   const longNotes = notesMarkdown.length > NOTES_COLLAPSE_CHAR_THRESHOLD;
@@ -121,7 +123,9 @@ export function ContactDetailNotesSection({
             ) : null}
           </>
         ) : (
-          <Text style={[styles.notesPlaceholder, { color: colors.textMuted }]}>Add notes…</Text>
+          <Text style={[styles.notesPlaceholder, { color: colors.textMuted }]}>
+            {t("AddNotesPlaceholder")}
+          </Text>
         )}
       </Pressable>
     </View>

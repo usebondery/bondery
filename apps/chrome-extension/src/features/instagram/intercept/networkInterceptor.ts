@@ -1,10 +1,12 @@
 import { extLog } from "../../../lib/log";
+import { firstNonEmpty, nonEmpty } from "../../../lib/text";
+
 /**
  * Instagram GraphQL network interceptor (MAIN world).
  * Communicates with the content script via window.postMessage.
  */
-export const INSTAGRAM_NETWORK_MESSAGE_TYPE = "BONDERY_IG_NETWORK_META";
-export const INSTAGRAM_NETWORK_MESSAGE_SOURCE = "bondery-instagram-network-interceptor";
+const INSTAGRAM_NETWORK_MESSAGE_TYPE = "BONDERY_IG_NETWORK_META";
+const INSTAGRAM_NETWORK_MESSAGE_SOURCE = "bondery-instagram-network-interceptor";
 
 const TARGET_FRIENDLY_NAME = "PolarisProfilePageContentQuery";
 
@@ -20,9 +22,10 @@ interface GraphqlUserNode {
   profile_pic_url?: string;
   username?: string;
   zip?: string;
+  [key: string]: unknown;
 }
 
-export interface NetworkMetaPayload {
+interface NetworkMetaPayload {
   addressStreet: string;
   category: string;
   cityName: string;
@@ -92,16 +95,16 @@ function extractProfileMetaFromResponse(jsonString: string): NetworkMetaPayload 
         return null;
       }
 
-      const record = obj as Record<string, unknown>;
+      const record = obj as GraphqlUserNode;
 
-      if (record.username && typeof record.username === "string") {
-        if (
-          record.full_name !== undefined ||
+      if (
+        record.username &&
+        typeof record.username === "string" &&
+        (record.full_name !== undefined ||
           record.biography !== undefined ||
-          record.profile_pic_url !== undefined
-        ) {
-          return record as unknown as GraphqlUserNode;
-        }
+          record.profile_pic_url !== undefined)
+      ) {
+        return record;
       }
 
       for (const key of Object.keys(record)) {
@@ -120,14 +123,14 @@ function extractProfileMetaFromResponse(jsonString: string): NetworkMetaPayload 
     }
 
     return {
-      addressStreet: user.address_street || "",
-      category: user.category || "",
-      cityName: user.city_name || "",
-      description: user.biography || "",
-      displayName: user.full_name || user.username,
-      photoUrl: user.hd_profile_pic_url_info?.url || user.profile_pic_url || "",
+      addressStreet: user.address_street ?? "",
+      category: user.category ?? "",
+      cityName: user.city_name ?? "",
+      description: user.biography ?? "",
+      displayName: firstNonEmpty(user.full_name) ?? user.username,
+      photoUrl: firstNonEmpty(user.hd_profile_pic_url_info?.url, user.profile_pic_url) ?? "",
       username: user.username,
-      zip: user.zip || "",
+      zip: user.zip ?? "",
     };
   } catch {
     return null;
@@ -143,7 +146,7 @@ function isTargetRequest(
     return false;
   }
 
-  const friendlyName = headers?.["x-fb-friendly-name"] || "";
+  const friendlyName = headers?.["x-fb-friendly-name"] ?? "";
   if (friendlyName === TARGET_FRIENDLY_NAME) {
     return true;
   }
@@ -174,9 +177,10 @@ function isTargetRequest(
   return false;
 }
 
-export function installInstagramNetworkInterceptor(): void {
+function installInstagramNetworkInterceptor(): void {
   const OriginalXHR = window.XMLHttpRequest;
 
+  // biome-ignore lint/correctness/noComponentHookFactories: constructor that replaces window.XMLHttpRequest, not a React component
   function PatchedXHR(this: InterceptableXhr) {
     const xhr = new OriginalXHR() as InterceptableXhr;
 
@@ -210,8 +214,8 @@ export function installInstagramNetworkInterceptor(): void {
     };
 
     xhr.addEventListener("load", () => {
-      const url = xhr.__bonderyRequestUrl || "";
-      const method = xhr.__bonderyRequestMethod || "GET";
+      const url = xhr.__bonderyRequestUrl ?? "";
+      const method = nonEmpty(xhr.__bonderyRequestMethod) ?? "GET";
       const headers = xhr.__bonderyRequestHeaders;
 
       if (!isTargetRequest(url, method, headers)) {
@@ -296,3 +300,10 @@ export function installInstagramNetworkInterceptor(): void {
 
   extLog.debug("[instagram] Network interceptor initialized");
 }
+
+export type { NetworkMetaPayload };
+export {
+  INSTAGRAM_NETWORK_MESSAGE_SOURCE,
+  INSTAGRAM_NETWORK_MESSAGE_TYPE,
+  installInstagramNetworkInterceptor,
+};

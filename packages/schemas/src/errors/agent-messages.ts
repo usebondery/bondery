@@ -8,12 +8,18 @@
  * Every error body carries this field. Codes without a specific hint fall
  * back to the docs link, so the field is never empty.
  */
-import { type ApiErrorCode, getErrorDefinition } from "./api-error-codes.generated.js";
+import {
+  type ApiErrorCode,
+  getErrorDefinition,
+  isApiErrorCode,
+} from "./api-error-codes.generated.js";
 
 /**
  * HOW sentence per code. Prefer a named tool and a named argument, because
  * that is what the model can act on without another lookup.
  */
+const PATTERN_5B2E213F5D24_RE = /[.!?]$/;
+
 const AGENT_RECOVERY_HINTS: Partial<Record<ApiErrorCode, string>> = {
   auth_required: "Reconnect the client and approve access, then retry the call.",
   bad_request:
@@ -64,18 +70,22 @@ const AGENT_RECOVERY_HINTS: Partial<Record<ApiErrorCode, string>> = {
 
 const FALLBACK_HINT = "Read doc_url for the recovery steps, then retry the call.";
 
-export function agentRecoveryHint(code: string): string {
-  return AGENT_RECOVERY_HINTS[code as ApiErrorCode] ?? FALLBACK_HINT;
-}
-
 /** Joins the developer message and the hint as two sentences. */
 function joinSentences(message: string, hint: string): string {
   const base = message.trim();
   if (base.length === 0) {
     return hint;
   }
-  const terminated = /[.!?]$/.test(base) ? base : `${base}.`;
+  const terminated = PATTERN_5B2E213F5D24_RE.test(base) ? base : `${base}.`;
   return `${terminated} ${hint}`;
+}
+
+function isServerErrorCode(code: string): boolean {
+  return isApiErrorCode(code) && getErrorDefinition(code).httpStatus >= 500;
+}
+
+export function agentRecoveryHint(code: string): string {
+  return AGENT_RECOVERY_HINTS[code as ApiErrorCode] ?? FALLBACK_HINT;
 }
 
 /**
@@ -94,9 +104,4 @@ export function buildAgentMessage(code: string, message: string): string {
     return message.trim();
   }
   return joinSentences(message, hint);
-}
-
-function isServerErrorCode(code: string): boolean {
-  const definition = getErrorDefinition(code as ApiErrorCode);
-  return definition !== undefined && definition.httpStatus >= 500;
 }

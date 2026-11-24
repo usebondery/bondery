@@ -15,7 +15,10 @@ import { z } from "zod";
 import { getAuth } from "../../lib/platform/auth/strategies.js";
 import type { AppRoutePlugin } from "../../lib/platform/fastify-types.js";
 import { withOkResponse } from "../../lib/platform/openapi/responses.js";
-import { hasPremiumAccess } from "../../services/billing/entitlements.js";
+import {
+  hasPremiumAccess,
+  PAST_DUE_ACCESS_FAILURE_LIMIT,
+} from "../../services/billing/entitlements.js";
 import {
   checkChatQuota,
   FREE_MESSAGE_LIMIT,
@@ -108,7 +111,8 @@ export const subscriptionRoutes: AppRoutePlugin = async (fastify) => {
       const quota = await checkChatQuota(user.id, premiumAccess);
 
       const paymentBlocked =
-        subscription?.status === "past_due" && (subscription.paymentFailureCount ?? 0) >= 3;
+        subscription?.status === "past_due" &&
+        (subscription.paymentFailureCount ?? 0) >= PAST_DUE_ACCESS_FAILURE_LIMIT;
 
       const status: SubscriptionStatus = {
         aiMessageLimit: quota.plan === "premium" ? PREMIUM_MESSAGE_LIMIT : FREE_MESSAGE_LIMIT,

@@ -2,7 +2,7 @@
 title: Configuration
 description: Set the BONDERY_* variables that the stack reads. Copy the generated env example, fill in the core secrets, then review each optional service.
 icon: AdjustmentsHorizontal
-last_updated: 2026-11-04
+last_updated: 2026-11-23
 ---
 
 ## Core secrets
@@ -15,7 +15,90 @@ Operators configure the stack with **`BONDERY_*`** names. Copy [`deploy/bondery/
 | `BONDERY_PRIVATE_POSTGRES_PASSWORD` | Postgres password (compose `db` service) |
 | `BONDERY_INFRA_POSTGRES_HOST_PORT` | Optional. Host loopback port for Compose Postgres (`127.0.0.1`). Default `5432`. A second stack on the same VPS must use another port (beta: `5433`). |
 | `BONDERY_PRIVATE_API_KEY_PEPPER` | API key hashing pepper |
-| `BONDERY_PRIVATE_REDIS_URL` | `redis://redis:6379` in the default stack. Stores rate-limit counters, sync wake pub/sub, WebSocket tickets (`sync:ws-ticket:*`), and Better Auth secondary storage (`bondery:auth:*` — sessions and verification records, dual-written with Postgres). |
+
+### Redis
+
+Redis stores rate-limit counters, sync wake pub/sub, WebSocket tickets (`sync:ws-ticket:*`), and Better Auth secondary storage (`bondery:auth:*`: sessions and verification records, dual-written with Postgres). Because it holds session data, Redis requires **TLS, a password, and a client certificate**.
+
+**The stack runs its own Redis.** Compose sets every Redis variable and ignores a value in `.env`, so the API connects to the bundled service. That service accepts only a caller with a certificate from its own CA.
+
+A Redis that you operate is not supported. It needs your own CA, a server certificate, and a client certificate for the API. Most managed Redis offerings cannot require a client certificate at all. Other services on the host could also share such a Redis with your sessions. Run the full Compose stack, not the API image alone.
+
+**You do not configure anything.** On each `docker compose up`, the one-shot `stack-secrets` service checks the `redis-tls-*` volumes. When the CA, certificates, or password are missing, it creates them. It keeps existing ones. Redis then accepts only TLS 1.3 connections with a client certificate and the password, and the API connects with:
+
+| Variable | Value that Compose sets |
+|----------|-------------------------|
+| `BONDERY_PRIVATE_REDIS_URL` | `rediss://${BONDERY_INFRA_TRAEFIK_PREFIX}-redis:6379` |
+| `BONDERY_PRIVATE_REDIS_PASSWORD_FILE` | `/bondery-redis/client/password` |
+| `BONDERY_PRIVATE_REDIS_TLS_CA_FILE` | `/bondery-redis/client/ca.crt` (the Redis CA, not the server leaf) |
+| `BONDERY_PRIVATE_REDIS_TLS_CERT_FILE` | `/bondery-redis/client/tls.crt` |
+| `BONDERY_PRIVATE_REDIS_TLS_KEY_FILE` | `/bondery-redis/client/tls.key` |
+
+Each volume holds only what its consumer needs:
+
+| Volume | Holds | Mounted by |
+|--------|-------|------------|
+| `redis-tls-ca` | CA key and certificate | `stack-secrets` only |
+| `redis-tls-server` | Server key, server certificate, healthcheck client certificate, ACL | `redis` (read-only) |
+| `redis-tls-client` | CA certificate, API client key and certificate, password | `api` (read-only) |
+
+An older `.env` that still has `BONDERY_PRIVATE_REDIS_URL=redis://redis:6379` is safe to keep. Compose overrides it. Your Redis data volume stays as it is.
+
+### Postgres TLS
+
+Postgres holds your whole network: contacts, notes, sessions, and OAuth tokens. Every connection to it uses **TLS that verifies the server** (`verify-full`): the API, the job queue, migrations, and your own tools. Postgres refuses plaintext TCP connections.
+
+**Default stack.** You do not configure anything. On each `docker compose up`, the one-shot `stack-secrets` service creates a private certificate authority and a server certificate signed by it, and keeps them afterwards. Each lives in its own volume, so every container sees only what it needs:
+
+| Volume | Holds | Mounted by |
+|--------|-------|------------|
+| `postgres-tls-ca` | CA key and certificate | `stack-secrets` only |
+| `postgres-tls-server` | Server key and certificate | `db` (read-only) |
+| `postgres-tls-client` | CA certificate | `api` (read-only) |
+
+Postgres serves TLS 1.2 or newer and accepts SCRAM passwords over TLS only. The API checks the certificate against the stack CA and the hostname `${BONDERY_INFRA_TRAEFIK_PREFIX}-db`, and binds the password exchange to the TLS session (channel binding). Compose sets:
+
+| Variable | Value that Compose sets |
+|----------|-------------------------|
+| `DATABASE_SSL_MODE` | `verify-full` |
+| `DATABASE_SSL_ROOT_CERT_FILE` | `/bondery-postgres/client/ca.crt` |
+
+Backups and restores with `docker compose exec db pg_dump` or `psql` use the Unix socket inside the container, so they work as before.
+
+**Connecting your own tools** (an SSH tunnel to `127.0.0.1:5432`, then psql, pgAdmin, or a BI tool): they need TLS too. Copy the CA certificate out of the stack and verify against it:
+
+```bash
+deploy/bondery/scripts/postgres-ca.sh > bondery-postgres-ca.crt
+psql "host=localhost port=5432 dbname=bondery user=postgres sslmode=verify-full sslrootcert=bondery-postgres-ca.crt channel_binding=require"
+```
+
+The server certificate covers `localhost` and `127.0.0.1`, so a tunnel passes the hostname check.
+
+**External Postgres** (RDS, Neon, Supabase, Crunchy, or your own server). Use the overlay that drops the bundled database, and set the connection in `.env`:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.external-postgres.yml up -d
+```
+
+```bash
+DATABASE_URL=postgresql://bondery:<password>@db.example.com:5432/bondery
+DATABASE_SSL_MODE=verify-full
+# Only for a private CA (RDS: download the AWS bundle). Publicly trusted certificates need nothing:
+DATABASE_SSL_ROOT_CERT_FILE=/run/secrets/postgres-ca.pem
+# Or inline, for platforms that only take variables (write newlines as \n):
+# DATABASE_SSL_ROOT_CERT=-----BEGIN CERTIFICATE-----\n...
+```
+
+| `DATABASE_SSL_MODE` | Encrypted | Server verified | Use for |
+|---------------------|-----------|-----------------|---------|
+| `verify-full` (default) | Yes | CA and hostname | Every setup you can |
+| `verify-ca` | Yes | CA only | A server whose certificate does not name the host you connect to |
+| `require` | Yes | No | Last resort, when the provider gives you no CA |
+| `disable` | No | No | A database on the same private host network only |
+
+A `sslmode` or `sslrootcert` in the URL works too. If it disagrees with `DATABASE_SSL_*`, the API refuses to start and names both. `prefer` and `allow` are refused, because they fall back to plaintext without telling you. In production, `require` and `disable` log a warning on every boot.
+
+**Certificate expiry.** The API logs the negotiated TLS version and the days left on the server certificate at boot, and checks the certificate daily. It warns 90 days before expiry and logs an error 14 days before. See [Postgres TLS certificate](./secrets.mdx#postgres_tls_certificate) to renew it.
 
 ### Database connection
 
@@ -27,11 +110,42 @@ postgresql://postgres:<password>@db:5432/bondery
 
 | Context | Who sets it |
 |---------|-------------|
-| **Self-host compose** | You set `BONDERY_PRIVATE_POSTGRES_PASSWORD` in `.env`; compose **derives** `DATABASE_URL` for the `api` service automatically — you do not need to paste the URL into `.env`. |
+| **Self-host compose** | You set `BONDERY_PRIVATE_POSTGRES_PASSWORD` in `.env`; compose **derives** `DATABASE_URL` for the `api` service automatically — you do not need to paste the URL into `.env`. TLS settings come from `DATABASE_SSL_*` (see [Postgres TLS](#postgres-tls)), never from the URL. |
 | **Local development** | You set `DATABASE_URL` in root `.env.local` (see [Environment configuration](../contributing/environment.mdx)). |
 | **Webapp** | Does **not** use `DATABASE_URL` — it talks to the API over HTTP. |
 
 Used in: `apps/api` (Prisma client, pg-boss), `packages/db` (migrations), and one-off migration scripts under `packages/db/scripts/`.
+
+### Internal API TLS
+
+Two callers reach the API across the Docker network: Traefik, which forwards every public request (the webapp in the browser, the mobile app, the extension, AI assistants), and the webapp's server side (page rendering and the routes under `/api` that proxy to the API). Those requests carry access and refresh tokens, cookies, the webapp's OAuth client secret, and your data, and `dokploy-network` is shared with every other stack on the host. Both callers use **TLS that verifies the API**.
+
+**Default stack.** You do not configure anything. On each `docker compose up`, the one-shot `stack-secrets` service creates a private API CA and a certificate signed by it, and keeps them afterwards:
+
+| Volume | Holds | Mounted by |
+|--------|-------|------------|
+| `api-tls-ca` | CA key and certificate | `stack-secrets` only |
+| `api-tls-server` | API key and certificate | `api` (read-only) |
+| `api-tls-client` | CA certificate | `webapp`, `api` for its healthcheck, `traefik-transport` (read-only) |
+
+The API serves **HTTPS only**, WebSocket sync included, on port `26631` (TLS 1.3). It has no plain HTTP port. Both callers check the certificate against the API CA and the hostname `${BONDERY_INFRA_TRAEFIK_PREFIX}-api`; so does the container healthcheck, on `127.0.0.1`. Compose sets, so `.env` cannot weaken them:
+
+| Service | Variable | Value that Compose sets |
+|---------|----------|-------------------------|
+| `api` | `API_PORT` | `26631` |
+| `api` | `BONDERY_PRIVATE_API_TLS_CERT_FILE` / `_KEY_FILE` | `/bondery-api/server/tls.crt` / `tls.key` |
+| `webapp` | `BONDERY_INFRA_INTERNAL_API_URL` | `https://${BONDERY_INFRA_TRAEFIK_PREFIX}-api:26631` |
+| `webapp` | `BONDERY_INFRA_INTERNAL_API_CA_FILE` | `/bondery-api/client/ca.crt` |
+
+The webapp adds the CA to the certificates it trusts once, at startup, so every server-side call uses it. It refuses to start when the CA file is unreadable, or set for an `http://` internal URL.
+
+**Traefik (Dokploy).** To forward over HTTPS and check a private CA, Traefik needs a `serversTransport` that holds the CA. Compose labels can only reference one, not define it, so the one-shot `traefik-transport` service writes them. On each `docker compose up` it writes `${BONDERY_INFRA_TRAEFIK_PREFIX}-api-transport.yml` and `-storage-transport.yml`, each with its CA inline, into `/etc/dokploy/traefik/dynamic`, the folder Traefik's file provider watches. The `api` and `seaweedfs-s3` labels point Traefik at the HTTPS ports with those transports. The job writes nothing else there: a pinned `busybox` image runs `deploy/bondery/traefik/publish-transports.sh`, with no network, no Linux capabilities, and a read-only root filesystem. You see the files under **Traefik File System** in Dokploy. Do not edit them; the job rewrites them.
+
+**Your own setup.**
+- Without Traefik's folder the `traefik-transport` service fails on purpose, so a missing setup is loud. Another Traefik (Coolify, your own): set `BONDERY_INFRA_TRAEFIK_DYNAMIC_DIR` to the folder its file provider watches. Caddy, nginx, or no proxy yet: use `docker-compose.override.yml.example`, which turns the job off and binds every port to `127.0.0.1`. See [Reverse proxy](./reverse-proxy.mdx).
+- The API does not start without the two certificate variables. Compose always sets them. A platform that only forwards plain HTTP to a container `PORT` cannot run the API.
+
+**Certificate expiry.** The API logs the days left on its certificate at boot and checks it daily with the Postgres and storage certificates. It warns 90 days before expiry and logs an error 14 days before. See [Internal API TLS certificate](./secrets.mdx#api_tls_certificate) to renew it.
 
 ## Domains
 
@@ -68,7 +182,8 @@ Object storage uses **SeaweedFS** (S3-compatible gateway). The API uploads via p
 
 | Variable | Purpose |
 |---|---|
-| `BONDERY_PRIVATE_S3_ENDPOINT` | Internal S3 endpoint. Compose derives `http://${BONDERY_INFRA_TRAEFIK_PREFIX}-storage:8333` (do not use `http://seaweedfs-s3:8333` — that DNS name collides on shared `dokploy-network`). Local dev: `http://127.0.0.1:8333`. |
+| `BONDERY_PRIVATE_S3_ENDPOINT` | Internal S3 endpoint. Compose sets `https://${BONDERY_INFRA_TRAEFIK_PREFIX}-storage:8443` (see [Object storage TLS](#object-storage-tls); do not use `seaweedfs-s3` — that DNS name collides on shared `dokploy-network`). Local dev: `https://127.0.0.1:8443`. |
+| `BONDERY_PRIVATE_S3_TLS_CA_FILE` | CA certificate(s) the API trusts for the endpoint instead of the system CAs. Compose sets `/bondery-storage/client/ca.crt` |
 | `BONDERY_PRIVATE_S3_REGION` | S3 region label (e.g. `eu-central-1`) |
 | `BONDERY_PRIVATE_S3_ACCESS_KEY_ID` / `BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY` | S3 credentials (same pair seeds the `seaweedfs-s3` gateway config) |
 | `BONDERY_PUBLIC_STORAGE_URL` | Public base URL for avatar/logo reads (Traefik → storage domain in prod; `http://127.0.0.1:8333` locally) |
@@ -77,6 +192,31 @@ Object storage uses **SeaweedFS** (S3-compatible gateway). The API uploads via p
 Buckets: `avatars` (contact photos) and `linkedin-logos` (cached LinkedIn company/school logos). Created and given anonymous read policy by `api` `pre_start` → `ensure-storage-buckets`.
 
 On every deploy, `api` `pre_start` runs `release-migrate` (schema, functions, OAuth clients, platform admins) then `ensure-storage-buckets` before the main API process starts. See [Installation](./installation.mdx) and [Dokploy deployment](../contributing/dokploy.mdx).
+
+### Object storage TLS
+
+Uploads hold contact photos and the files you import. Every connection that carries them uses **TLS**, and every connection into the S3 gateway also identifies the caller with a **client certificate** (mutual TLS).
+
+**Default stack.** You do not configure anything. On each `docker compose up`, the one-shot `stack-secrets` service creates a private storage CA, one cluster certificate signed by it, and two client certificates, and keeps them afterwards:
+
+| Volume | Holds | Mounted by |
+|--------|-------|------------|
+| `storage-tls-ca` | CA key and certificate | `stack-secrets` only |
+| `storage-tls-cluster` | Cluster key and certificate, CA certificate | the four `seaweedfs-*` services (read-only) |
+| `storage-tls-client` | CA certificate, API client key and certificate | `api` (read-only) |
+| `storage-tls-traefik` | CA certificate, Traefik client key and certificate | `traefik-transport` (read-only) |
+
+The two client certificates keep the secrets apart: the job that writes into Traefik's configuration never sees the API key, and the API never sees Traefik's. Each certificate has its own common name, so the gateway's access log names the caller.
+
+- **API to gateway.** The gateway serves the API on HTTPS port `8443` and requires a client certificate signed by the storage CA. The API checks the certificate against the storage CA and the hostname `${BONDERY_INFRA_TRAEFIK_PREFIX}-storage`, and presents its own certificate. Compose sets `BONDERY_PRIVATE_S3_ENDPOINT`, `BONDERY_PRIVATE_S3_TLS_CA_FILE`, `BONDERY_PRIVATE_S3_TLS_CERT_FILE`, and `BONDERY_PRIVATE_S3_TLS_KEY_FILE`, so `.env` cannot weaken them.
+- **Between nodes.** `deploy/bondery/seaweedfs/security.toml` turns on mutual TLS: master, volume, filer, and gateway accept gRPC and HTTP only from a peer that presents the cluster certificate. File chunks between the gateway and the volume server travel over this HTTPS. The nodes refuse plaintext.
+- **Public reads.** Traefik serves `BONDERY_INFRA_STORAGE_DOMAIN` with its Let's Encrypt certificate and forwards to the gateway on HTTPS `8443`, verified with the storage CA through the published transport, which also carries Traefik's client certificate. That route takes reads only (`GET`, `HEAD`, `OPTIONS`) and drops the `Cookie` and `Authorization` headers: the session cookie of the parent domain would otherwise reach SeaweedFS with every image request. HTTP `8333` stays for the healthcheck and local development.
+
+All listeners use TLS 1.3.
+
+**External S3** (AWS S3, Cloudflare R2, Backblaze B2, or MinIO) is not supported in this stack. Compose sets `BONDERY_PRIVATE_S3_ENDPOINT` and the storage certificate files, and `.env` cannot override them, because the stack also publishes the storage CA and its client certificate to Traefik. The API image alone can reach other S3 endpoints, but nothing in this stack does.
+
+**Certificate expiry.** The API logs the TLS version and the days left on the gateway certificate at boot, and checks it daily with the Postgres certificate. It warns 90 days before expiry and logs an error 14 days before. See [Object storage TLS certificate](./secrets.mdx#storage_tls_certificate) to renew it.
 
 ## Local development parity
 

@@ -3,6 +3,7 @@ import { remapImportId } from "@bondery/helpers/ids";
 import type { ImportResult } from "@bondery/schemas";
 import type { SyncChange } from "@bondery/schemas/sync";
 import type { ParsedBonderyExport } from "../../lib/import/parse-bondery-export-zip.js";
+import { sanitizeNotesHtml } from "../../lib/notes/sanitize-notes-html.js";
 import {
   buildGroupRowChange,
   buildPeopleTagChangeFromRow,
@@ -96,7 +97,8 @@ export async function applyParsedImport(
     longitude: person.longitude,
     middleName: person.middleName,
     myself: false,
-    notes: person.notes,
+    // ZIP content is client-controlled: sanitize like any other notes write.
+    notes: sanitizeNotesHtml(person.notes),
     notesUpdatedAt: asDateOrNull(person.notesUpdatedAt),
     timezone: person.timezone,
     updatedAt: asDate(person.updatedAt),
@@ -404,11 +406,11 @@ export async function applyParsedImport(
     db.peopleTag.createManyAndReturn({ data, skipDuplicates: true }),
   );
 
-  const gisJobs: Array<Promise<void>> = [];
+  const gisJobs: Promise<void>[] = [];
   for (const person of insertedPeople) {
     if (
-      person.latitude != null &&
-      person.longitude != null &&
+      person.latitude !== null &&
+      person.longitude !== null &&
       isValidLatLng(person.latitude, person.longitude)
     ) {
       gisJobs.push(setGisPoint(db, "people", person.id, userId, person.latitude, person.longitude));
@@ -416,8 +418,8 @@ export async function applyParsedImport(
   }
   for (const address of insertedAddresses) {
     if (
-      address.latitude != null &&
-      address.longitude != null &&
+      address.latitude !== null &&
+      address.longitude !== null &&
       isValidLatLng(address.latitude, address.longitude)
     ) {
       gisJobs.push(

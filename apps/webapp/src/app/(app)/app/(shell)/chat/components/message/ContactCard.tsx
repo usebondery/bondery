@@ -4,6 +4,8 @@ import { PersonAvatar } from "@bondery/mantine-next";
 import { Badge, Group, Paper, Stack, Text } from "@mantine/core";
 import { IconBriefcase, IconCalendar, IconLanguage, IconMapPin } from "@tabler/icons-react";
 import Link from "next/link";
+import { useChatPageTranslations } from "@/lib/i18n/generated/hooks";
+import { useDateFormatter } from "@/lib/i18n/useDateFormatter";
 import { routeAssert } from "@/lib/navigation/route/assert";
 import { routePerson } from "@/lib/navigation/route/person";
 
@@ -29,30 +31,25 @@ interface ContactCardProps {
 }
 
 export function ContactCard({ contact, detailed }: ContactCardProps) {
+  const t = useChatPageTranslations();
+  const formatter = useDateFormatter();
   const link = contact.appLink ? routeAssert(contact.appLink) : routePerson(contact.id);
 
   const tags = (contact.tags ?? []).map((tag) => (typeof tag === "string" ? tag : tag.label));
 
   return (
     <Link
+      className="block rounded-md bg-(--mantine-color-default) hover:bg-(--mantine-color-default-hover)"
       href={link}
       style={{
         color: "inherit",
-        display: "block",
+        cursor: "pointer",
+        marginBottom: "var(--mantine-spacing-xs)",
         textDecoration: "none",
+        transition: "background-color 150ms ease",
       }}
     >
-      <Paper
-        className="hover:bg-(--mantine-color-default-hover)"
-        mb="xs"
-        p="sm"
-        radius="md"
-        style={{
-          cursor: "pointer",
-          transition: "background-color 150ms ease",
-        }}
-        withBorder
-      >
+      <Paper bg="transparent" p="sm" radius="md" withBorder>
         <Group align="flex-start" gap="sm" wrap="nowrap">
           <PersonAvatar
             person={{
@@ -68,68 +65,74 @@ export function ContactCard({ contact, detailed }: ContactCardProps) {
               {contact.fullName}
             </Text>
 
-            {contact.headline && (
+            {contact.headline ? (
               <Group gap={4} wrap="nowrap">
                 <IconBriefcase size={14} style={{ flexShrink: 0, opacity: 0.6 }} />
                 <Text c="dimmed" lineClamp={1} size="xs">
                   {contact.headline}
                 </Text>
               </Group>
-            )}
+            ) : null}
 
-            {contact.location && (
+            {contact.location ? (
               <Group gap={4} wrap="nowrap">
                 <IconMapPin size={14} style={{ flexShrink: 0, opacity: 0.6 }} />
                 <Text c="dimmed" lineClamp={1} size="xs">
                   {contact.location}
                 </Text>
               </Group>
-            )}
+            ) : null}
 
-            {detailed && contact.language && (
+            {detailed && contact.language ? (
               <Group gap={4} wrap="nowrap">
                 <IconLanguage size={14} style={{ flexShrink: 0, opacity: 0.6 }} />
                 <Text c="dimmed" size="xs">
                   {contact.language}
                 </Text>
               </Group>
-            )}
+            ) : null}
 
-            {contact.lastInteraction && (
+            {contact.lastInteraction ? (
               <Group gap={4} wrap="nowrap">
                 <IconCalendar size={14} style={{ flexShrink: 0, opacity: 0.6 }} />
                 <Text c="dimmed" size="xs">
-                  Last interaction: {new Date(contact.lastInteraction).toLocaleDateString()}
+                  {t("contactLastInteraction", {
+                    date: formatter.formatDate(new Date(contact.lastInteraction), "short"),
+                  })}
                 </Text>
               </Group>
-            )}
+            ) : null}
 
-            {detailed && contact.phones && contact.phones.length > 0 && (
+            {detailed && contact.phones && contact.phones.length > 0 ? (
               <Text c="dimmed" size="xs">
-                Phone: {contact.phones.map((p) => `${p.prefix}${p.value}`).join(", ")}
+                {t("contactPhone", {
+                  value: contact.phones.map((p) => `${p.prefix}${p.value}`).join(", "),
+                })}
               </Text>
-            )}
+            ) : null}
 
-            {detailed && contact.emails && contact.emails.length > 0 && (
+            {detailed && contact.emails && contact.emails.length > 0 ? (
               <Text c="dimmed" size="xs">
-                Email: {contact.emails.map((e) => e.value).join(", ")}
+                {t("contactEmail", {
+                  value: contact.emails.map((e) => e.value).join(", "),
+                })}
               </Text>
-            )}
+            ) : null}
 
-            {tags.length > 0 && (
+            {tags.length > 0 ? (
               <Group gap={4} mt={2}>
                 {tags.slice(0, 5).map((tag) => (
                   <Badge key={tag} size="xs" variant="light">
                     {tag}
                   </Badge>
                 ))}
-                {tags.length > 5 && (
+                {tags.length > 5 ? (
                   <Text c="dimmed" size="xs">
                     +{tags.length - 5}
                   </Text>
-                )}
+                ) : null}
               </Group>
-            )}
+            ) : null}
           </Stack>
         </Group>
       </Paper>

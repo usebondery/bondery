@@ -24,6 +24,14 @@ import {
 import { normalizePaginatedList } from "@/lib/api/resources/pagination";
 import { type AvatarPreset, appendAvatarParams } from "@/lib/contacts/avatarParams";
 
+/** Writes one `tag_ids=id1,id2` value. */
+function appendTagIdsParams(params: URLSearchParams, tagIds: string[] | undefined): void {
+  const value = serializeTagIdsQueryParam(tagIds ?? []);
+  if (value) {
+    params.set(TAG_IDS_QUERY_PARAM, value);
+  }
+}
+
 export type MapPinsMode = "address" | "contact";
 
 export type MapPinsBounds = {
@@ -79,14 +87,6 @@ export interface ContactsSelectableDataResult {
 export interface ContactsSelectableApiResponse {
   contacts?: ContactSelectable[];
   pagination?: PaginationMeta;
-}
-
-/** Writes one `tag_ids=id1,id2` value. */
-function appendTagIdsParams(params: URLSearchParams, tagIds: string[] | undefined): void {
-  const value = serializeTagIdsQueryParam(tagIds ?? []);
-  if (value) {
-    params.set(TAG_IDS_QUERY_PARAM, value);
-  }
 }
 
 export function buildContactsListPath({

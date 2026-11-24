@@ -1,0 +1,35 @@
+{
+  "email": {
+    "invalid": "Angiv en gyldig e-mailadressee",
+    "invalidTitle": "Ugyldig e-mail"
+  },
+  "fields": {
+    "firstName": {
+      "maxLength": "Fornavn må højst være på {max} tegn",
+      "required": "Fornavn er påkrævet"
+    },
+    "generic": {
+      "maxLength": "Værdien må højst være på {max} tegn"
+    },
+    "headline": {
+      "maxLength": "Overskrift må højst være på {max} tegn"
+    },
+    "label": {
+      "maxLength": "{field} må højst være på {max} tegn",
+      "required": "{field} er påkrævet"
+    },
+    "lastName": {
+      "maxLength": "Efternavn må højst være på {max} tegn"
+    },
+    "location": {
+      "maxLength": "Sted må højst være på {max} tegn"
+    },
+    "middleName": {
+      "maxLength": "Mellemnavn må højst være på {max} tegn"
+    }
+  },
+  "interaction": {
+    "titleRequired": "Titel er påkrævet"
+  },
+  "title": "Valideringsfejl"
+}

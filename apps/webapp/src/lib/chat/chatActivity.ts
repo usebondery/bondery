@@ -10,16 +10,16 @@ import type { ChatToolActivity, ChatToolKind } from "@bondery/schemas";
 const TOOL_PART_PREFIX = "tool-";
 const DYNAMIC_TOOL_PART = "dynamic-tool";
 
-/** `get_*` and `search_*` read. Every other tool writes. */
-export function resolveToolKind(toolName: string): ChatToolKind {
-  return toolName.startsWith("get_") || toolName.startsWith("search_") ? "read" : "write";
-}
-
 interface ToolPartShape {
   approval?: unknown;
   state?: string;
   toolName?: string;
   type: string;
+}
+
+/** `get_*` and `search_*` read. Every other tool writes. */
+export function resolveToolKind(toolName: string): ChatToolKind {
+  return toolName.startsWith("get_") || toolName.startsWith("search_") ? "read" : "write";
 }
 
 export function isToolPart(part: { type: string }): part is ToolPartShape {

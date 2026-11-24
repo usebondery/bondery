@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { createMDX as createFumadocsMDX } from "fumadocs-mdx/next";
 import type { NextConfig } from "next";
 
+const PNPM_STORE_PATH_RE = /[/\\]store[/\\]v\d+/i;
 const appDir = path.dirname(fileURLToPath(import.meta.url));
 const monorepoRoot = path.join(appDir, "../..");
 
@@ -13,13 +14,14 @@ const monorepoRoot = path.join(appDir, "../..");
  * otherwise derive from the real path of local `next`.
  */
 function resolvePnpmStorePath(): string | undefined {
-  if (process.env.PNPM_STORE_DIR) {
-    return process.env.PNPM_STORE_DIR;
+  const fromEnv = process.env["PNPM_STORE_DIR"];
+  if (fromEnv) {
+    return fromEnv;
   }
   try {
     const nextReal = fs.realpathSync(path.join(appDir, "node_modules", "next"));
-    const match = /[/\\]store[/\\]v\d+/i.exec(nextReal);
-    if (!match || match.index === undefined) {
+    const match = PNPM_STORE_PATH_RE.exec(nextReal);
+    if (!match) {
       return undefined;
     }
     return nextReal.slice(0, match.index + match[0].length);
@@ -130,6 +132,16 @@ const nextConfig: NextConfig = {
         destination: "/docs/deploy/installation",
         permanent: true,
         source: "/docs/deploy/get-started",
+      },
+      {
+        destination: "/docs/deploy/installation",
+        permanent: true,
+        source: "/docs/contributing/api-container",
+      },
+      {
+        destination: "/docs/deploy/installation",
+        permanent: true,
+        source: "/docs/contributing/api-container.md",
       },
       {
         destination: "/docs/apps/mcp",

@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import {
   errorNotificationTemplate,
   Kbd,
@@ -41,6 +42,7 @@ import { PageWrapper } from "@/components/shell/PageWrapper";
 import { peopleSearchActions } from "@/components/shell/PeopleSearchSpotlight";
 import { ShellScrollLoadMore } from "@/components/shell/ShellScrollLoadMore";
 import { useCommonTranslations, useInteractionsPageTranslations } from "@/lib/i18n/generated/hooks";
+import { useDateFormatter } from "@/lib/i18n/useDateFormatter";
 import { calendarParamFromPicker } from "@/lib/interactions/interactionListRange";
 import { routeWithQuery } from "@/lib/navigation/route/query";
 import { DEBOUNCE_MS, HOTKEYS } from "@/lib/platform/config";
@@ -56,6 +58,7 @@ import {
   timelineFilterFromParsed,
 } from "@/lib/query/interactionsListParams";
 import { SELECTABLE_CONTACTS } from "@/lib/query/sharedListParams";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 import { openNewActivityModal } from "./components/NewActivityModal";
 
 type ActivityParticipantRef = string | InteractionParticipant;
@@ -92,6 +95,8 @@ function InteractionsSearchInput({
 export function InteractionsClient() {
   const t = useInteractionsPageTranslations();
   const tCommon = useCommonTranslations();
+  const formatter = useDateFormatter();
+  const dateValueFormat = formatter.dateInputValueFormat({ withYear: true });
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -133,8 +138,8 @@ export function InteractionsClient() {
 
   const contactsById = new Map(contacts.map((contact) => [contact.id, contact]));
 
-  const resolveParticipants = (activity: Activity): PersonPreview[] => {
-    return (activity.participants || []).flatMap((participant: ActivityParticipantRef) => {
+  const resolveParticipants = (activity: Activity): PersonPreview[] =>
+    (activity.participants ?? []).flatMap((participant: ActivityParticipantRef) => {
       const participantId = typeof participant === "string" ? participant : participant.id;
       const knownContact = contactsById.get(participantId);
 
@@ -148,17 +153,16 @@ export function InteractionsClient() {
 
       return [
         {
-          avatar: participant.avatar || null,
+          avatar: nonEmpty(participant.avatar) ?? null,
           firstName: participant.firstName || t("UnknownPerson"),
           headline: participant.headline,
           id: participantId,
-          lastName: participant.lastName || null,
+          lastName: nonEmpty(participant.lastName) ?? null,
           location: participant.location,
           middleName: participant.middleName,
         },
       ];
     });
-  };
 
   const handleActivityClick = (activity: Activity) => {
     openNewActivityModal({
@@ -204,7 +208,7 @@ export function InteractionsClient() {
   };
 
   const handleDuplicate = async (activity: Activity) => {
-    const participantIds = (activity.participants || [])
+    const participantIds = (activity.participants ?? [])
       .map((participant: ActivityParticipantRef) =>
         typeof participant === "string" ? participant : participant.id,
       )
@@ -220,9 +224,9 @@ export function InteractionsClient() {
     try {
       await createInteractionMutation.mutateAsync({
         date: activity.date,
-        description: activity.description || "",
+        description: activity.description ?? "",
         participantIds,
-        title: activity.title || "",
+        title: activity.title ?? "",
         type: activity.type,
       });
 
@@ -369,7 +373,7 @@ export function InteractionsClient() {
                     placeholder={t("PickDate")}
                     popoverProps={{ withinPortal: false }}
                     value={startDate}
-                    valueFormat="YYYY-MM-DD"
+                    valueFormat={dateValueFormat}
                     w={180}
                   />
                   <DatePickerWithPresets
@@ -384,7 +388,7 @@ export function InteractionsClient() {
                     placeholder={t("PickDate")}
                     popoverProps={{ withinPortal: false }}
                     value={endDate}
-                    valueFormat="YYYY-MM-DD"
+                    valueFormat={dateValueFormat}
                     w={180}
                   />
                 </Group>
@@ -405,7 +409,7 @@ export function InteractionsClient() {
                 isFetchingNextPage={false}
                 isFetchNextPageError
                 onLoadMore={() => {
-                  void refetch();
+                  detachPromise(refetch());
                 }}
                 retryLabel={t("LoadMoreRetry")}
               />
@@ -443,7 +447,7 @@ export function InteractionsClient() {
                 isFetchingNextPage={isFetchingNextPage}
                 isFetchNextPageError={isFetchNextPageError}
                 onLoadMore={() => {
-                  void fetchNextPage();
+                  detachPromise(fetchNextPage());
                 }}
                 retryLabel={t("LoadMoreRetry")}
               />

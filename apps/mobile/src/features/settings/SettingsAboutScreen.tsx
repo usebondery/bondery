@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import { SOCIAL_LINKS } from "@bondery/helpers/globals/paths";
 import { IconBrandGithub, IconWorld } from "@tabler/icons-react-native";
 import { useRouter } from "expo-router";
@@ -8,10 +9,7 @@ import { Paper } from "../../components/ui/Paper";
 import { Stack } from "../../components/ui/Stack";
 import { ThemeIcon } from "../../components/ui/ThemeIcon";
 import { WEBSITE_URL } from "../../lib/config";
-import {
-  useCommonTranslations,
-  useMobileSettingsTranslations,
-} from "../../lib/i18n/generated/hooks";
+import { useMobileSettingsTranslations } from "../../lib/i18n/generated/hooks";
 import { goBackOrReplace } from "../../lib/navigation/goBackOrReplace";
 import { MOBILE_LAYOUT } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
@@ -19,7 +17,6 @@ import { openExternalUrl } from "./openExternalUrl";
 
 export function SettingsAboutScreen() {
   const tMobileSettings = useMobileSettingsTranslations();
-  const _t = useCommonTranslations();
   const router = useRouter();
   const colors = useMobileThemeColors();
   const websiteLabel = tMobileSettings("Website");
@@ -55,7 +52,7 @@ export function SettingsAboutScreen() {
                 </ThemeIcon>
               }
               onPress={() => {
-                void openExternalUrl(WEBSITE_URL);
+                detachPromise(openExternalUrl(WEBSITE_URL));
               }}
             />
             <NavLink
@@ -68,7 +65,7 @@ export function SettingsAboutScreen() {
                 </ThemeIcon>
               }
               onPress={() => {
-                void openExternalUrl(SOCIAL_LINKS.github);
+                detachPromise(openExternalUrl(SOCIAL_LINKS.github));
               }}
               withDivider={false}
             />

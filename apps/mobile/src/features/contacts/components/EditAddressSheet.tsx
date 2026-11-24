@@ -3,6 +3,7 @@ import {
   GEOCODE_SUGGEST_DEBOUNCE_MS,
   GEOCODE_SUGGEST_MIN_QUERY_LENGTH,
 } from "@bondery/helpers/address";
+import { detachPromise } from "@bondery/helpers/async";
 import { CONTACT_ADDRESS_TYPE_OPTIONS } from "@bondery/helpers/contact";
 import type { ContactAddressEntry, ContactAddressType } from "@bondery/schemas";
 import {
@@ -31,6 +32,7 @@ import { useSheetLocalAction } from "../../../lib/forms/useSheetLocalAction";
 import { useSheetLocalSubmit } from "../../../lib/forms/useSheetLocalSubmit";
 import type { NativeTextInputRef } from "../../../lib/native-host-refs";
 import { syncEffectState } from "../../../lib/react/syncEffectState";
+import { firstNonEmpty, nonEmpty } from "../../../lib/text";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { CountryFlag } from "./CountryFlag";
@@ -73,18 +75,19 @@ function buildAddressEntry(
   }
 
   const displayValue =
-    geocodedSuggestion.addressFormatted || geocodedSuggestion.value || addressText.trim();
+    firstNonEmpty(geocodedSuggestion.addressFormatted, geocodedSuggestion.value) ??
+    addressText.trim();
 
   return {
     ...geocodedSuggestion,
     label: trimmedNickname,
     timezone,
-    type: type,
+    type,
     value: displayValue,
   };
 }
 
-export function EditAddressSheet({
+function EditAddressSheet({
   open,
   mode,
   initialEntry,
@@ -145,7 +148,9 @@ export function EditAddressSheet({
     const entry = initialEntry;
     syncEffectState(() => {
       setSuggestions([]);
-      setGeocodeStatus(entry?.latitude != null ? "geocoded" : "idle");
+      setGeocodeStatus(
+        entry?.latitude !== null && entry?.latitude !== undefined ? "geocoded" : "idle",
+      );
       setGeocodedSuggestion(null);
     });
   }, [open, initialEntry]);
@@ -210,13 +215,13 @@ export function EditAddressSheet({
 
     debounceRef.current = setTimeout(() => {
       activeQueryRef.current = trimmed;
-      void fetchSuggestions(trimmed);
+      detachPromise(fetchSuggestions(trimmed));
     }, GEOCODE_SUGGEST_DEBOUNCE_MS);
   }
 
   function handleSelectSuggestion(suggestion: ContactAddressEntry) {
     invalidateSuggestionsFetch();
-    setValue("value", suggestion.addressFormatted || suggestion.value, {
+    setValue("value", nonEmpty(suggestion.addressFormatted) ?? suggestion.value, {
       shouldDirty: true,
       shouldValidate: true,
     });
@@ -245,7 +250,7 @@ export function EditAddressSheet({
       >
         <CountryFlag countryCode={item.addressCountryCode} />
         <Text numberOfLines={2} style={[styles.suggestionText, { color: colors.textPrimary }]}>
-          {item.addressFormatted || item.value}
+          {nonEmpty(item.addressFormatted) ?? item.value}
         </Text>
       </Pressable>
     );
@@ -437,3 +442,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
+
+export { EditAddressSheet };

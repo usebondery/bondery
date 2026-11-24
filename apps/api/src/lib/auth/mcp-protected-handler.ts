@@ -13,6 +13,7 @@ import { APIError } from "better-call";
 import type { JWTPayload } from "jose";
 import { URLS } from "../platform/config.js";
 import { assertActiveCimdMcpOAuthClient } from "./assert-mcp-oauth-client.js";
+import { BEARER_PREFIX } from "./bearer-token-format.js";
 import {
   MCP_READ_SCOPE,
   MCP_WRITE_SCOPE,
@@ -21,11 +22,13 @@ import {
 } from "./index.js";
 import { verifyBonderyAccessJwt } from "./verify-access-jwt.js";
 
+const TRAILING_SLASH_PATTERN = /\/$/;
+
 export const MCP_CHALLENGE_SCOPES = [MCP_READ_SCOPE, MCP_WRITE_SCOPE] as const;
 
 /** Product docs page an agent reads when MCP auth or scope fails. */
 export function mcpDocsUrl(): string {
-  const website = (URLS.website ?? "https://usebondery.com").replace(/\/$/, "");
+  const website = (URLS.website ?? "https://usebondery.com").replace(TRAILING_SLASH_PATTERN, "");
   return `${website}/docs/apps/mcp`;
 }
 
@@ -54,7 +57,7 @@ export function mcpUnauthorizedChallenge(
   return new Response(
     JSON.stringify({
       error: {
-        code: -32000,
+        code: -32_000,
         data: {
           agent_message: agentMessage,
           doc_url: mcpDocsUrl(),
@@ -88,8 +91,8 @@ export function createBonderyMcpAuthHandler(
   return async (request) => {
     const authorization = request.headers.get("authorization");
     const token =
-      typeof authorization === "string" && authorization.startsWith("Bearer ")
-        ? authorization.slice(7).trim()
+      typeof authorization === "string" && authorization.startsWith(BEARER_PREFIX)
+        ? authorization.slice(BEARER_PREFIX.length).trim()
         : "";
 
     let accessTokenClaims: JWTPayload;

@@ -3,19 +3,6 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import sharp from "sharp";
 
-export interface IconConfig {
-  format: "png" | "ico" | "svg";
-  name: string;
-  outDir: string;
-  size?: number;
-}
-
-export interface GenerateIconsOptions {
-  baseDir: string;
-  icons: IconConfig[];
-  svgPath: string;
-}
-
 function writeFileIfChanged(filePath: string, contents: Buffer): boolean {
   if (existsSync(filePath) && readFileSync(filePath).equals(contents)) {
     return false;
@@ -34,6 +21,18 @@ async function rasterizeIcon(svgPath: string, size: number, fileName: string): P
     rmSync(tempDir, { force: true, recursive: true });
   }
 }
+export interface IconConfig {
+  format: "png" | "ico" | "svg";
+  name: string;
+  outDir: string;
+  size?: number;
+}
+
+export interface GenerateIconsOptions {
+  baseDir: string;
+  icons: IconConfig[];
+  svgPath: string;
+}
 
 /**
  * Generates icons from an SVG source file.
@@ -47,7 +46,8 @@ export async function generateIcons(options: GenerateIconsOptions): Promise<void
 
   if (!existsSync(svgPath)) {
     console.error("❌ SVG icon not found at:", svgPath);
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   try {
@@ -64,10 +64,11 @@ export async function generateIcons(options: GenerateIconsOptions): Promise<void
       if (icon.format === "svg") {
         nextBytes = readFileSync(svgPath);
       } else {
-        const size = icon.size;
+        const { size } = icon;
         if (!size) {
           console.error(`❌ Size is required for ${icon.format} format`);
-          process.exit(1);
+          process.exitCode = 1;
+          return;
         }
         nextBytes = await rasterizeIcon(svgPath, size, icon.name);
       }
@@ -85,6 +86,6 @@ export async function generateIcons(options: GenerateIconsOptions): Promise<void
     );
   } catch (error) {
     console.error("❌ Error generating icons:", error);
-    process.exit(1);
+    process.exitCode = 1;
   }
 }

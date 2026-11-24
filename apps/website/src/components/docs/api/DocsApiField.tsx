@@ -1,10 +1,16 @@
 "use client";
 
+import docs from "@bondery/translations/locales/en/platform/website/WebsiteDocs.json" with {
+  type: "json",
+};
 import { Badge, Box, Code, Collapse, Group, Stack, Text, UnstyledButton } from "@mantine/core";
 import { IconChevronRight } from "@tabler/icons-react";
 import { type ReactNode, useId, useState } from "react";
 
-export function formatFieldValue(value: unknown): string {
+/** Enums with more allowed values than this are not listed inline. */
+const MAX_INLINE_ALLOWED_VALUES = 8;
+
+function formatFieldValue(value: unknown): string {
   if (typeof value === "string") {
     return value;
   }
@@ -31,7 +37,7 @@ type DocsApiFieldProps = {
  * One row in a parameter or response list: name, type, default, allowed values,
  * description, and an optional disclosure for child fields.
  */
-export function DocsApiField({
+function DocsApiField({
   children,
   defaultValue,
   deprecated = false,
@@ -62,9 +68,9 @@ export function DocsApiField({
               = {formatFieldValue(defaultValue)}
             </Text>
           ) : null}
-          {allowed.length > 0 && allowed.length <= 8 ? (
+          {allowed.length > 0 && allowed.length <= MAX_INLINE_ALLOWED_VALUES ? (
             <Text c="dimmed" component="span" size="sm">
-              one of{" "}
+              {docs.Api.OneOf}{" "}
               {allowed.map((value, index) => (
                 <span key={formatFieldValue(value)}>
                   {index > 0 ? <Text component="span">, </Text> : null}
@@ -75,12 +81,12 @@ export function DocsApiField({
           ) : null}
           {required ? (
             <Badge color="red" size="xs" variant="light">
-              Required
+              {docs.Api.Required}
             </Badge>
           ) : null}
           {deprecated ? (
             <Badge color="gray" size="xs" variant="light">
-              Deprecated
+              {docs.Api.Deprecated}
             </Badge>
           ) : null}
         </Group>
@@ -108,7 +114,7 @@ export function DocsApiField({
                 }}
               />
               <Text component="span" size="sm">
-                {open ? "Hide child parameters" : "Show child parameters"}
+                {open ? docs.Api.HideChildParameters : docs.Api.ShowChildParameters}
               </Text>
             </Group>
           </UnstyledButton>
@@ -124,3 +130,5 @@ export function DocsApiField({
     </Box>
   );
 }
+
+export { DocsApiField, formatFieldValue };

@@ -28,6 +28,10 @@ import { parse } from "yaml";
 
 import { createCheck } from "./check-report.mjs";
 
+const BFF_WEBAPP_RE = /\b(BFF|webapp)\b/i;
+const PATTERN_5B2E2C3B3A29_RE = /[.,;:)]$/;
+const PATTERN_5C2F2B24_RE = /\/+$/;
+
 const check = createCheck("check-docs-api-routes");
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -107,13 +111,13 @@ const URL_PATTERN = /https?:\/\/[A-Za-z0-9.-]+(\/[A-Za-z0-9{}\-_/.:]*)?/g;
  * stays correct in prose that says so.
  */
 function isBffContext(line) {
-  return /\b(BFF|webapp)\b/i.test(line);
+  return BFF_WEBAPP_RE.test(line);
 }
 
 /** Strips punctuation a sentence adds around a path, never a path character. */
 function trimPath(raw) {
   let path = raw;
-  while (path.length > 1 && /[.,;:)]$/.test(path)) {
+  while (path.length > 1 && PATTERN_5B2E2C3B3A29_RE.test(path)) {
     path = path.slice(0, -1);
   }
   return path;
@@ -124,7 +128,7 @@ function trimPath(raw) {
  * A bare trailing slash is a sentence artifact, so it is dropped too.
  */
 function normalizePath(path) {
-  const normalized = path.replace(/:([A-Za-z0-9_]+)/g, "{$1}").replace(/\/+$/, "");
+  const normalized = path.replace(/:([A-Za-z0-9_]+)/g, "{$1}").replace(PATTERN_5C2F2B24_RE, "");
   return normalized.length === 0 ? "/" : normalized;
 }
 
@@ -208,7 +212,9 @@ function loadSpecRoutes() {
 const { paths: specPaths, routes: specRoutes } = loadSpecRoutes();
 
 if (specRoutes.size === 0) {
-  check.add(`Parsed no routes from ${repoPath(specPath)}. Is the spec valid?`);
+  check.add(
+    `Parsed no routes from ${repoPath(specPath)}. Regenerate the spec with \`pnpm run generate:openapi\` and check that it lists paths.`,
+  );
   check.ok("0 pages checked");
 } else {
   const known = new Set([...specRoutes, ...ROUTES_OUTSIDE_SPEC]);
@@ -220,11 +226,11 @@ if (specRoutes.size === 0) {
     const lines = readFileSync(filePath, "utf8").split(/\r?\n/);
     pages += 1;
 
-    lines.forEach((line, index) => {
+    for (const [index, line] of lines.entries()) {
       const at = `${path}:${index + 1}`;
 
       for (const match of line.matchAll(MENTION)) {
-        const method = match[1];
+        const [, method] = match;
         const route = toSpecPath(normalizePath(trimPath(match[2])));
 
         if (route === null) {
@@ -264,12 +270,12 @@ if (specRoutes.size === 0) {
 
         check.add(
           `${at}: ${method} ${route.path} is not in the OpenAPI spec` +
-            suggestionSuffix(method, route.specPath, known),
+            suggestionSuffix(method, route.specPath, known), // diagnostic-message: remedy-in-value suggestionSuffix()
         );
       }
 
       for (const match of line.matchAll(URL_PATTERN)) {
-        const url = match[0];
+        const [url] = match;
 
         // Bare API paths apply only on an API origin. A link to a vendor site, a
         // repository file, or the website is not a route and is not checked.
@@ -288,7 +294,7 @@ if (specRoutes.size === 0) {
 
         // `/api/` on the API origin is the bug this check exists for.
         if (route.bff) {
-          const origin = new URL(url).origin;
+          const { origin } = new URL(url);
           check.add(
             `${at}: ${url} adds ${BFF_PREFIX}/ on the API origin.` +
               ` Use the bare path instead: ${origin}${route.specPath}`,
@@ -314,9 +320,11 @@ if (specRoutes.size === 0) {
           continue;
         }
 
-        check.add(`${at}: ${url} does not match any path in the OpenAPI spec`);
+        check.add(
+          `${at}: ${url} does not match any path in the OpenAPI spec. Fix the path in the page, or add the route in apps/api and run \`pnpm run generate:openapi\`.`,
+        );
       }
-    });
+    }
   }
 
   check.ok(`${mentions} route reference(s) across ${pages} pages match the OpenAPI spec`);
@@ -339,8 +347,8 @@ function isApiHost(url) {
  * The closest known route for the same method, so a typo or a stale prefix is
  * obvious from the failure. Returns `""` when nothing is close.
  */
-function suggestionSuffix(method, specPath, known) {
-  const wanted = segments(specPath);
+function suggestionSuffix(method, requestedPath, known) {
+  const wanted = segments(requestedPath);
   let best = null;
   let bestScore = 0;
 
@@ -368,7 +376,9 @@ function suggestionSuffix(method, specPath, known) {
     }
   }
 
-  return best === null ? "" : `. Did you mean ${best}?`;
+  return best === null
+    ? ". Fix the path in the page to match a route in packages/openapi-spec/openapi.yaml."
+    : `. Did you mean ${best}?`;
 }
 
 /** `true` when two segments are equal or differ by one typo (length 1). */

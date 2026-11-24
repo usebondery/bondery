@@ -56,7 +56,7 @@ function getDisplayValue(platform: ContactSocialFieldKey, value: string): string
 /**
  * Bottom sheet for adding or editing a contact social handle.
  */
-export function EditSocialSheet({
+function EditSocialSheet({
   open,
   mode,
   platform,
@@ -336,3 +336,5 @@ const styles = StyleSheet.create({
     gap: 10,
   },
 });
+
+export { EditSocialSheet };

@@ -27,31 +27,6 @@ type InteractionPersonRow = {
   updatedAt: Date;
 };
 
-export function mapInteractionParticipant(
-  userId: string,
-  person: InteractionPersonRow,
-  avatarOptions?: AvatarTransformOptions,
-) {
-  return {
-    avatar: resolveContactAvatarUrl(
-      userId,
-      {
-        avatarUpdatedAt: person.avatarUpdatedAt,
-        hasAvatar: person.hasAvatar,
-        id: person.id,
-      },
-      avatarOptions,
-    ),
-    firstName: person.firstName,
-    headline: person.headline,
-    id: person.id,
-    lastName: person.lastName,
-    location: person.location,
-    middleName: person.middleName,
-    updatedAt: person.updatedAt.toISOString(),
-  };
-}
-
 function formatInteractionRow(
   userId: string,
   interaction: {
@@ -86,6 +61,31 @@ function formatInteractionRow(
   }
 
   return formatted;
+}
+
+export function mapInteractionParticipant(
+  userId: string,
+  person: InteractionPersonRow,
+  avatarOptions?: AvatarTransformOptions,
+) {
+  return {
+    avatar: resolveContactAvatarUrl(
+      userId,
+      {
+        avatarUpdatedAt: person.avatarUpdatedAt,
+        hasAvatar: person.hasAvatar,
+        id: person.id,
+      },
+      avatarOptions,
+    ),
+    firstName: person.firstName,
+    headline: person.headline,
+    id: person.id,
+    lastName: person.lastName,
+    location: person.location,
+    middleName: person.middleName,
+    updatedAt: person.updatedAt.toISOString(),
+  };
 }
 
 export async function loadFormattedInteraction(
@@ -146,5 +146,8 @@ export async function loadFormattedInteractions(
 
   return interactionIds
     .map((id) => byId.get(id))
-    .filter((interaction): interaction is NonNullable<typeof interaction> => interaction != null);
+    .filter(
+      (interaction): interaction is NonNullable<typeof interaction> =>
+        interaction !== null && interaction !== undefined,
+    );
 }

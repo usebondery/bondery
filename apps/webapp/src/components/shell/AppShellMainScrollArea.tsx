@@ -51,8 +51,8 @@ export function AppShellMainScrollArea({
   }, []);
 
   useEffect(() => {
-    const viewport = viewportRef.current;
-    if (!pathname || !viewport) {
+    const scrollViewport = viewportRef.current;
+    if (!pathname || !scrollViewport) {
       return;
     }
 
@@ -64,7 +64,7 @@ export function AppShellMainScrollArea({
       if (cancelled) {
         return;
       }
-      if (applyShellLocationScroll(viewport, behavior) || performance.now() >= deadline) {
+      if (applyShellLocationScroll(scrollViewport, behavior) || performance.now() >= deadline) {
         return;
       }
       frame = window.requestAnimationFrame(() => {

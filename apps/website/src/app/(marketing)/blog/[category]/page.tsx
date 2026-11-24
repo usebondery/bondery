@@ -1,4 +1,7 @@
 import { formatMetadataTitle } from "@bondery/helpers";
+import blog from "@bondery/translations/locales/en/platform/website/WebsiteBlog.json" with {
+  type: "json",
+};
 import { Container, SimpleGrid, Stack, Text, Title } from "@mantine/core";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -20,15 +23,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { category } = await params;
   const label = getBlogCategoryTitle(category);
 
-  const descriptions: Record<string, string> = {
-    all: "Stay up to date with Bondery — product updates, relationship tips, and networking insights from the team behind the open-source PRM.",
-    bonds:
-      "Tips and insights on building meaningful relationships, effective networking, and strong networks.",
-    tech: "Technical deep-dives on Bondery's architecture, infrastructure, and engineering decisions.",
-    updates: "Product updates, feature releases, and development news from Bondery.",
+  const descriptions: Record<PostCategory, string> = {
+    all: blog.Descriptions.All,
+    bonds: blog.Descriptions.Bonds,
+    tech: blog.Descriptions.Tech,
+    updates: blog.Descriptions.Updates,
   };
 
-  const description = descriptions[category] ?? descriptions.all;
+  const description =
+    category in descriptions ? descriptions[category as PostCategory] : descriptions.all;
 
   return {
     alternates: {
@@ -62,13 +65,13 @@ export default async function BlogCategoryPage({ params }: Props) {
     <Container pb="xl" size="md">
       <PageTopSpacer size="large" />
       <Stack align="center" gap="xl">
-        <Title order={1}>Blog</Title>
+        <Title order={1}>{blog.Title}</Title>
 
         <CategorySwitcher activeCategory={category as PostCategory} />
 
         {posts.length === 0 ? (
           <Text c="dimmed" py="xl" ta="center">
-            No posts yet in this category.
+            {blog.EmptyCategory}
           </Text>
         ) : (
           <SimpleGrid cols={1} spacing="md" w="100%">

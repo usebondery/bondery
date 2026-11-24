@@ -1,3 +1,4 @@
+const GIS_POINT_RE = /POINT\s*\(\s*([-\d.]+)\s+([-\d.]+)\s*\)/i;
 export type ShapeOperation = "insert" | "update" | "delete";
 
 export interface ShapeRowMessage {
@@ -22,7 +23,7 @@ export function readNumber(row: Record<string, unknown>, key: string): number | 
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-export function readBoolInt(row: Record<string, unknown>, key: string): number {
+export function readBoolInt(row: Record<string, unknown>, key: string): 1 | 0 {
   const value = row[key];
   if (value === true || value === 1 || value === "1" || value === "t") {
     return 1;
@@ -38,7 +39,7 @@ export function parseGisPointLatLon(gisPoint: string | null): {
     return { latitude: null, longitude: null };
   }
 
-  const pointMatch = gisPoint.match(/POINT\s*\(\s*([-\d.]+)\s+([-\d.]+)\s*\)/i);
+  const pointMatch = gisPoint.match(GIS_POINT_RE);
   if (pointMatch) {
     const longitude = Number(pointMatch[1]);
     const latitude = Number(pointMatch[2]);

@@ -4,6 +4,9 @@ import { NextRequest } from "next/server";
 import { config, proxy } from "../../proxy.js";
 import { buildWebappProxyHeaders } from "./proxyHeaders.js";
 
+const PATTERN = /\s+/;
+const NONCE = /'nonce-([^']+)'/;
+
 function requestFor(pathname: string): NextRequest {
   return new NextRequest(new URL(pathname, "https://app.example.test"));
 }
@@ -15,7 +18,7 @@ function parsePolicy(policy: string): Map<string, string[]> {
     if (trimmed.length === 0) {
       continue;
     }
-    const [name, ...sources] = trimmed.split(/\s+/);
+    const [name, ...sources] = trimmed.split(PATTERN);
     if (name) {
       map.set(name, sources);
     }
@@ -25,7 +28,11 @@ function parsePolicy(policy: string): Map<string, string[]> {
 
 describe("webapp proxy", () => {
   it("exports the Next.js config matcher, not proxyConfig", async () => {
-    const module = (await import("../../proxy.js")) as Record<string, unknown>;
+    const module = (await import("../../proxy.js")) as {
+      config?: unknown;
+      proxy?: unknown;
+      proxyConfig?: unknown;
+    };
 
     assert.equal(module.proxyConfig, undefined, "proxyConfig is silently ignored by Next.js");
     assert.deepEqual(config.matcher, [
@@ -110,14 +117,14 @@ describe("webapp proxy", () => {
       BONDERY_PUBLIC_STORAGE_URL: "http://127.0.0.1:8333",
       NODE_ENV: "development",
     });
-    const policy = parsePolicy(headers["Content-Security-Policy"] ?? "");
+    const policy = parsePolicy(new Headers(headers).get("Content-Security-Policy") ?? "");
 
     assert.equal(policy.get("img-src")?.includes("http://127.0.0.1:8333"), true);
   });
 
   it("omits the storage origin when the variable is unset", () => {
     const { headers } = buildWebappProxyHeaders({ NODE_ENV: "development" });
-    const policy = parsePolicy(headers["Content-Security-Policy"] ?? "");
+    const policy = parsePolicy(new Headers(headers).get("Content-Security-Policy") ?? "");
 
     assert.equal(policy.get("img-src")?.includes("undefined"), false);
     assert.equal(policy.get("img-src")?.includes(""), false);
@@ -127,7 +134,7 @@ describe("webapp proxy", () => {
     const request = requestFor("/login");
     const response = await proxy(request);
     const csp = response.headers.get("Content-Security-Policy") ?? "";
-    const nonce = /'nonce-([^']+)'/.exec(csp)?.[1];
+    const nonce = NONCE.exec(csp)?.[1];
 
     assert.ok(nonce, "expected a nonce in the policy");
     assert.equal(response.headers.get("x-nonce"), null, "x-nonce is a request header");

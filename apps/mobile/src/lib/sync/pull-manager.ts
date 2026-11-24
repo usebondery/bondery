@@ -1,17 +1,9 @@
-import { buildApiErrorFromResponse } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { SyncBootstrapResponse, SyncPullResponse, SyncTableKey } from "@bondery/schemas/sync";
-import { mobileFetch } from "../api/transport";
-import { getAccessToken } from "../auth/client";
-import {
-  AuthRequiredError,
-  classifyTransportFailure,
-  endLocalSession,
-  logLocalSessionMissing,
-} from "../auth/session";
-import { API_URL } from "../config";
+import { endLocalSession } from "../auth/local-session";
+import { classifyTransportFailure, logLocalSessionMissing } from "../auth/session";
 import { flushAvatarFileJobs } from "./avatar-files";
-import { syncRequestHeaders } from "./constants";
 import { getSyncDatabase } from "./db";
 import { applyBootstrapTables, applySyncBatches } from "./materializer";
 import {
@@ -25,25 +17,19 @@ import {
   type PullLoopFailureAction,
   shouldEnterPullLoopAfterBootstrap,
 } from "./pull-auth";
+import { delay, isCurrentPullSession, syncFetch } from "./pull-fetch";
 import { type PullSessionGeneration, syncSessionGuard } from "./pull-session-guard";
+import {
+  LONG_POLL_WAIT_MS,
+  PULL_RETRY_DELAY_MS,
+  SAFETY_PULL_INTERVAL_MS,
+  type SyncPullMode,
+  type SyncPullReason,
+  type SyncSubscriber,
+} from "./pull-types";
 import { shouldSchedulePullOnWake } from "./pull-wake";
 import { refreshSqliteViews } from "./refresh-sqlite-views";
 import { logSyncPullError, logSyncPullResponse } from "./sync-logger";
-
-type SyncSubscriber = (tables: readonly SyncTableKey[]) => void;
-export type SyncPullReason =
-  | "wake"
-  | "reconnect"
-  | "safety"
-  | "foreground"
-  | "background"
-  | "long_poll"
-  | "manual";
-
-type SyncPullMode = "long_poll" | "websocket_wake";
-
-const LONG_POLL_WAIT_MS = 25_000;
-const SAFETY_PULL_INTERVAL_MS = 300_000;
 
 const subscribers = new Set<SyncSubscriber>();
 let pullAbort: AbortController | null = null;
@@ -56,19 +42,19 @@ let pullPending = false;
 let wakeDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 let lifecycleRequest = 0;
 
-export function subscribeSyncUpdates(listener: SyncSubscriber): () => void {
+function subscribeSyncUpdates(listener: SyncSubscriber): () => void {
   subscribers.add(listener);
   return () => subscribers.delete(listener);
 }
 
-export function notifySyncSubscribers(tables: readonly SyncTableKey[]): void {
+function notifySyncSubscribers(tables: readonly SyncTableKey[]): void {
   refreshSqliteViews(tables);
   for (const listener of subscribers) {
     listener(tables);
   }
 }
 
-export function getHasInitialSyncSnapshot(): boolean {
+function getHasInitialSyncSnapshot(): boolean {
   try {
     return getBootstrapCompleted();
   } catch {
@@ -76,7 +62,7 @@ export function getHasInitialSyncSnapshot(): boolean {
   }
 }
 
-export function resetInitialSyncSnapshot(): void {
+function resetInitialSyncSnapshot(): void {
   try {
     setBootstrapCompleted(false);
   } catch {
@@ -84,7 +70,7 @@ export function resetInitialSyncSnapshot(): void {
   }
 }
 
-export function setSyncPullMode(mode: SyncPullMode): void {
+function setSyncPullMode(mode: SyncPullMode): void {
   if (pullMode === mode) {
     return;
   }
@@ -100,7 +86,7 @@ export function setSyncPullMode(mode: SyncPullMode): void {
   }
 }
 
-export function onSyncWakeEvent(input: {
+function onSyncWakeEvent(input: {
   serverSequence: number;
   sourceDeviceId?: string;
   myDeviceId?: string;
@@ -122,21 +108,21 @@ export function onSyncWakeEvent(input: {
 
   wakeDebounceTimer = setTimeout(() => {
     wakeDebounceTimer = null;
-    void schedulePull({ reason: "wake" });
+    detachPromise(schedulePull({ reason: "wake" }));
   }, 50);
 }
 
-export function onSyncWakeReconnect(): void {
-  void schedulePull({ reason: "reconnect" });
+function onSyncWakeReconnect(): void {
+  detachPromise(schedulePull({ reason: "reconnect" }));
 }
 
-export function schedulePull(input: { reason: SyncPullReason }): Promise<boolean> {
+function schedulePull(input: { reason: SyncPullReason }): Promise<boolean> {
   const generation = syncSessionGuard.capture();
   if (generation === null) {
     return Promise.resolve(false);
   }
 
-  if (pullInFlight) {
+  if (pullInFlight !== null) {
     pullPending = true;
     return pullInFlight;
   }
@@ -145,95 +131,11 @@ export function schedulePull(input: { reason: SyncPullReason }): Promise<boolean
     pullInFlight = null;
     if (pullPending && syncSessionGuard.isCurrent(generation)) {
       pullPending = false;
-      void schedulePull({ reason: input.reason });
+      detachPromise(schedulePull({ reason: input.reason }));
     }
   });
 
   return pullInFlight;
-}
-
-async function getSyncAccessToken(): Promise<string | null> {
-  return getAccessToken();
-}
-
-async function delay(ms: number, signal: AbortSignal): Promise<void> {
-  await new Promise<void>((resolve) => {
-    if (signal.aborted) {
-      resolve();
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      resolve();
-    }, ms);
-
-    signal.addEventListener(
-      "abort",
-      () => {
-        clearTimeout(timer);
-        resolve();
-      },
-      { once: true },
-    );
-  });
-}
-
-type PullSession = {
-  accessToken: string;
-  generation: PullSessionGeneration;
-};
-
-async function isCurrentPullSession(session: PullSession): Promise<boolean> {
-  if (!syncSessionGuard.isCurrent(session.generation)) {
-    return false;
-  }
-  const accessToken = await getSyncAccessToken();
-  return syncSessionGuard.isCurrentSession(session.generation, session.accessToken, accessToken);
-}
-
-async function syncFetch<T>(
-  path: string,
-  generation: PullSessionGeneration,
-  signal?: AbortSignal,
-): Promise<{ payload: T; session: PullSession } | null> {
-  const token = await getSyncAccessToken();
-  if (!token) {
-    throw new AuthRequiredError("missing_local_session");
-  }
-  const session = { accessToken: token, generation };
-  if (!(await isCurrentPullSession(session))) {
-    return null;
-  }
-
-  const response = await mobileFetch(`${API_URL}${path}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      ...syncRequestHeaders(),
-    },
-    signal,
-  });
-
-  if (!(await isCurrentPullSession(session))) {
-    return null;
-  }
-
-  if (response.status === 401) {
-    await endLocalSession({ reason: "session_expired" });
-    throw new AuthRequiredError("session_revoked");
-  }
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw buildApiErrorFromResponse({
-      bodyText: text,
-      status: response.status,
-    });
-  }
-
-  return {
-    payload: (await response.json()) as T,
-    session,
-  };
 }
 
 async function runBootstrapSync(
@@ -264,7 +166,7 @@ async function runBootstrapSync(
   return true;
 }
 
-export function bootstrapSync(
+function bootstrapSync(
   signal?: AbortSignal,
   generation: PullSessionGeneration | null = syncSessionGuard.capture(),
 ): Promise<boolean> {
@@ -331,7 +233,7 @@ async function runPullOnce(
   return true;
 }
 
-export function pullOnce(
+function pullOnce(
   signal?: AbortSignal,
   reason: SyncPullReason = "manual",
   generation: PullSessionGeneration | null = syncSessionGuard.capture(),
@@ -343,13 +245,18 @@ export function pullOnce(
   );
 }
 
+/** True while abort is clear, the session is current, and `pullMode` is `"long_poll"`. */
+function isLongPollLoopActive(signal: AbortSignal, generation: PullSessionGeneration): boolean {
+  return !signal.aborted && syncSessionGuard.isCurrent(generation) && pullMode === "long_poll";
+}
+
 async function pullLoop(
   controller: AbortController,
   generation: PullSessionGeneration,
 ): Promise<void> {
-  const signal = controller.signal;
+  const { signal } = controller;
 
-  while (!signal.aborted && syncSessionGuard.isCurrent(generation) && pullMode === "long_poll") {
+  while (isLongPollLoopActive(signal, generation)) {
     try {
       await pullOnce(signal, "long_poll", generation);
     } catch (error) {
@@ -371,7 +278,7 @@ async function pullLoop(
       }
 
       logSyncPullError(error);
-      await delay(5_000, signal);
+      await delay(PULL_RETRY_DELAY_MS, signal);
     }
   }
 }
@@ -397,7 +304,7 @@ function startPullLoop(
 function startSafetyTimer(): void {
   stopSafetyTimer();
   safetyTimer = setInterval(() => {
-    void schedulePull({ reason: "safety" });
+    detachPromise(schedulePull({ reason: "safety" }));
   }, SAFETY_PULL_INTERVAL_MS);
 }
 
@@ -408,7 +315,7 @@ function stopSafetyTimer(): void {
   }
 }
 
-export async function startPullSync(): Promise<void> {
+async function startPullSync(): Promise<void> {
   const request = ++lifecycleRequest;
   await stopPullRuntime();
   if (request !== lifecycleRequest) {
@@ -416,7 +323,7 @@ export async function startPullSync(): Promise<void> {
   }
 
   pullAbort = new AbortController();
-  const signal = pullAbort.signal;
+  const { signal } = pullAbort;
   const generation = syncSessionGuard.activate();
   getSyncDatabase();
 
@@ -458,7 +365,7 @@ export async function startPullSync(): Promise<void> {
   }
 }
 
-export async function stopPullSync(): Promise<void> {
+async function stopPullSync(): Promise<void> {
   lifecycleRequest += 1;
   await stopPullRuntime();
 }
@@ -478,7 +385,7 @@ async function stopPullRuntime(): Promise<void> {
 
   await Promise.allSettled([
     trackedOperations,
-    ...(inFlight ? [inFlight] : []),
+    ...(inFlight !== null ? [inFlight] : []),
     ...(loop ? [loop] : []),
   ]);
 
@@ -487,10 +394,26 @@ async function stopPullRuntime(): Promise<void> {
   }
 }
 
-export function resumePullSync(): void {
-  void startPullSync();
+function resumePullSync(): void {
+  detachPromise(startPullSync());
 }
 
-export const startAllShapeSync = startPullSync;
-export const stopAllShapeSync = stopPullSync;
-export const resumeAllShapeSync = resumePullSync;
+export type { SyncPullReason };
+export {
+  bootstrapSync,
+  getHasInitialSyncSnapshot,
+  notifySyncSubscribers,
+  onSyncWakeEvent,
+  onSyncWakeReconnect,
+  pullOnce,
+  resetInitialSyncSnapshot,
+  resumePullSync as resumeAllShapeSync,
+  resumePullSync,
+  schedulePull,
+  setSyncPullMode,
+  startPullSync as startAllShapeSync,
+  startPullSync,
+  stopPullSync as stopAllShapeSync,
+  stopPullSync,
+  subscribeSyncUpdates,
+};

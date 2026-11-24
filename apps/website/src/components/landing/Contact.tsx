@@ -1,5 +1,8 @@
 import { SOCIAL_LINKS, SUPPORT_EMAIL } from "@bondery/helpers";
 import { AnchorLink, type AppHref } from "@bondery/mantine-next";
+import landing from "@bondery/translations/locales/en/platform/website/WebsiteLanding.json" with {
+  type: "json",
+};
 import { Container, Group, Paper, Stack, Text, ThemeIcon, Title } from "@mantine/core";
 import { IconBrandDiscord, IconBrandReddit, IconMail } from "@tabler/icons-react";
 import { PageTopSpacer } from "@/components/page-top-spacer";
@@ -23,14 +26,14 @@ const CONTACT_METHODS: {
     href: SOCIAL_LINKS.discord,
     icon: IconBrandDiscord,
     target: "_blank",
-    text: "Chat with us on Discord",
+    text: landing.Contact.Discord,
   },
   {
     color: "orange",
     href: SOCIAL_LINKS.reddit,
     icon: IconBrandReddit,
     target: "_blank",
-    text: "Post on our Reddit",
+    text: landing.Contact.Reddit,
   },
 ];
 
@@ -41,10 +44,10 @@ export function Contact() {
       <Stack align="center" gap="xl">
         <Stack align="center" gap="md">
           <Title order={1} size="h1" ta="center">
-            Contact us
+            {landing.Contact.Title}
           </Title>
           <Text c="dimmed" maw={600} size="lg" ta="center">
-            Have questions or feedback? We're here to help or just chat!
+            {landing.Contact.Subtitle}
           </Text>
         </Stack>
 
@@ -64,7 +67,7 @@ export function Contact() {
                   <method.icon size={24} />
                 </ThemeIcon>
                 <AnchorLink
-                  c={"var(--mantine-color-text)"}
+                  c="var(--mantine-color-text)"
                   fw={600}
                   href={method.href}
                   size="lg"

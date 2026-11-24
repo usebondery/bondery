@@ -4,11 +4,11 @@ Server-owned tab titles with a narrow client layer for entity routes only.
 
 ## Ownership
 
-| Layer | Module | Responsibility |
-|-------|--------|----------------|
-| Server | `generateMetadata` in `page.tsx` or `layout.tsx` | All static routes, hard refresh, bookmarks, crawlers, soft-nav metadata stream |
-| Client | `DocumentTitleProvider` in app shell | Entity routes only — optimistic nav, query-cache hit, rename patch |
-| Mutation | `usePatchDocumentTitle` in detail clients | Entity rename after load |
+| Layer    | Module                                           | Responsibility                                                                 |
+| -------- | ------------------------------------------------ | ------------------------------------------------------------------------------ |
+| Server   | `generateMetadata` in `page.tsx` or `layout.tsx` | All static routes, hard refresh, bookmarks, crawlers, soft-nav metadata stream |
+| Client   | `DocumentTitleProvider` in app shell             | Entity routes only — optimistic nav, query-cache hit, rename patch             |
+| Mutation | `usePatchDocumentTitle` in detail clients        | Entity rename after load                                                       |
 
 Do not use `router.refresh()` for titles. Do not mount `*DocumentTitle` in layouts.
 

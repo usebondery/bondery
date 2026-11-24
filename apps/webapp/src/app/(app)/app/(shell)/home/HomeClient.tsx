@@ -11,15 +11,12 @@ import {
   parseShortcutKeys,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import type { Activity, InteractionParticipant, PersonPreview } from "@bondery/schemas";
-import {
-  useCommonTranslations,
-  useHomePageTranslations,
-  useInteractionsPageTranslations,
-} from "@/lib/i18n/generated/hooks";
-
-type ActivityParticipantRef = string | InteractionParticipant;
-
+import type {
+  Activity,
+  InteractionParticipant,
+  PersonPreview,
+  UserSettingsResponse,
+} from "@bondery/schemas";
 import { Button, Group, Paper, SimpleGrid, Stack, Text, Title, Tooltip } from "@mantine/core";
 import { useHotkeys } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
@@ -32,7 +29,6 @@ import {
   IconUserPlus,
 } from "@tabler/icons-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { openNewActivityModal } from "@/app/(app)/app/(shell)/interactions/components/NewActivityModal";
 import { openAddContactModal } from "@/app/(app)/app/(shell)/people/components/modals/AddContactModal";
 import { GettingStartedRailSlot } from "@/components/home/GettingStartedRailSlot";
@@ -43,6 +39,11 @@ import { openStandardConfirmModal } from "@/components/modals/openStandardConfir
 import { PageHeader } from "@/components/shell/PageHeader";
 import { PageWrapper } from "@/components/shell/PageWrapper";
 import { peopleSearchActions } from "@/components/shell/PeopleSearchSpotlight";
+import {
+  useCommonTranslations,
+  useHomePageTranslations,
+  useInteractionsPageTranslations,
+} from "@/lib/i18n/generated/hooks";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 import { setOptimisticDocumentTitle } from "@/lib/metadata/navigationTitleStore";
 import { optimisticPersonDocumentTitle } from "@/lib/metadata/optimisticTitles";
@@ -64,9 +65,15 @@ import {
   useDeleteInteractionMutation,
 } from "@/lib/query/hooks/useInteractions";
 import { useSettingsQuery } from "@/lib/query/hooks/useSettings";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 
-export function HomeClient({ initialSettings }: { initialSettings?: Record<string, unknown> }) {
-  const _router = useRouter();
+type ActivityParticipantRef = string | InteractionParticipant;
+
+export function HomeClient({
+  initialSettings,
+}: {
+  initialSettings?: UserSettingsResponse["data"];
+}) {
   const { navigateWithTitle } = useNavigateWithTitle();
   const t = useHomePageTranslations();
   const timelineT = useInteractionsPageTranslations();
@@ -81,8 +88,8 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
   const { data: recentlyAdded } = useRecentlyAddedContactsQuery();
   const { data: recentlyInteracted } = useRecentlyInteractedContactsQuery();
   const formatter = useFormatter();
-  const currentMonth = formatter.dateTime(new Date(), { month: "long" });
-  const currentYear = formatter.dateTime(new Date(), { year: "numeric" });
+  const currentMonth = formatter.formatDateField(new Date(), "monthLong");
+  const currentYear = formatter.formatDateField(new Date(), "yearNumeric");
 
   const contactsById = new Map((timelineContacts ?? []).map((contact) => [contact.id, contact]));
 
@@ -104,15 +111,15 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
 
   const compactActivities = (() => {
     if (!timelineActivities) {
-      return undefined;
+      return;
     }
     return [...timelineActivities]
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, 5);
   })();
 
-  const resolveParticipants = (activity: Activity): PersonPreview[] => {
-    return (activity.participants || []).flatMap((participant: ActivityParticipantRef) => {
+  const resolveParticipants = (activity: Activity): PersonPreview[] =>
+    (activity.participants ?? []).flatMap((participant: ActivityParticipantRef) => {
       const participantId = typeof participant === "string" ? participant : participant.id;
       const knownContact = contactsById.get(participantId);
 
@@ -126,17 +133,16 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
 
       return [
         {
-          avatar: participant.avatar || null,
+          avatar: nonEmpty(participant.avatar) ?? null,
           firstName: participant.firstName || t("UnknownPerson"),
           headline: participant.headline,
           id: participantId,
-          lastName: participant.lastName || null,
+          lastName: nonEmpty(participant.lastName) ?? null,
           location: participant.location,
           middleName: participant.middleName,
         },
       ];
     });
-  };
 
   const handleActivityOpen = (activity: Activity) => {
     openNewActivityModal({
@@ -181,7 +187,7 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
   };
 
   const handleDuplicate = async (activity: Activity) => {
-    const participantIds = (activity.participants || [])
+    const participantIds = (activity.participants ?? [])
       .map((participant: ActivityParticipantRef) =>
         typeof participant === "string" ? participant : participant.id,
       )
@@ -197,9 +203,9 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
     try {
       await createInteractionMutation.mutateAsync({
         date: activity.date,
-        description: activity.description || "",
+        description: activity.description ?? "",
         participantIds,
-        title: activity.title || "",
+        title: activity.title ?? "",
         type: activity.type,
       });
 
@@ -277,7 +283,7 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
           initialSettings={initialSettings}
           settingsData={settingsResult?.data}
           settingsReady={settingsReady}
-          statsReady={stats != null}
+          statsReady={stats !== null && stats !== undefined}
           timelineContacts={timelineContacts ?? []}
           totalContacts={stats?.totalContacts ?? 0}
         />
@@ -321,7 +327,8 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
               </Tooltip>
             </Group>
 
-            {compactActivities == null ? null : compactActivities.length === 0 ? (
+            {compactActivities === null ||
+            compactActivities === undefined ? null : compactActivities.length === 0 ? (
               <Paper p="md" radius="md" withBorder>
                 <Text c="dimmed" size="sm">
                   {timelineT("NoActivitiesFound")}
@@ -358,7 +365,7 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
                 </Tooltip>
               </Group>
 
-              {reminders == null ? null : reminders.length === 0 ? (
+              {reminders === null || reminders === undefined ? null : reminders.length === 0 ? (
                 <Paper p="md" radius="md" withBorder>
                   <Text c="dimmed" size="sm">
                     {t("NoUpcomingReminders")}
@@ -403,7 +410,8 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
                 </Tooltip>
               </Group>
 
-              {recentlyAdded == null ? null : recentlyAdded.length === 0 ? (
+              {recentlyAdded === null ||
+              recentlyAdded === undefined ? null : recentlyAdded.length === 0 ? (
                 <Paper p="md" radius="md" withBorder>
                   <Text c="dimmed" size="sm">
                     {t("NoRecentlyAdded")}
@@ -448,7 +456,8 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
                 </Tooltip>
               </Group>
 
-              {recentlyInteracted == null ? null : recentlyInteracted.length === 0 ? (
+              {recentlyInteracted === null ||
+              recentlyInteracted === undefined ? null : recentlyInteracted.length === 0 ? (
                 <Paper p="md" radius="md" withBorder>
                   <Text c="dimmed" size="sm">
                     {t("NoRecentlyInteracted")}

@@ -2,6 +2,8 @@ import { environmentManager, QueryClient } from "@tanstack/react-query";
 import { isApiUnavailableError } from "@/lib/api/availability";
 import { isUnauthorizedApiError } from "@/lib/auth/unauthorized";
 
+let browserQueryClient: QueryClient | undefined;
+
 export function makeQueryClient(): QueryClient {
   return new QueryClient({
     defaultOptions: {
@@ -22,8 +24,6 @@ export function makeQueryClient(): QueryClient {
     },
   });
 }
-
-let browserQueryClient: QueryClient | undefined;
 
 export function getQueryClient(): QueryClient {
   if (environmentManager.isServer()) {

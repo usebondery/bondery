@@ -9,7 +9,6 @@ import Swipeable, {
 import Animated from "react-native-reanimated";
 import { Pressable } from "@/components/ui/Pressable";
 import { PersonAvatar } from "../../../components/PersonAvatar";
-import { Group } from "../../../components/ui/Group";
 import { Text } from "../../../components/ui/Text";
 import { usePressSqueeze } from "../../../components/ui/usePressSqueeze";
 import { UI_TIMING_MS } from "../../../lib/config";
@@ -43,7 +42,7 @@ const SWIPE_ACTION_ICON_SIZE = 22;
 const DISABLED_ROW_OPACITY = 0.45;
 const CONTACT_ROW_HEIGHT = 56;
 
-export function ContactRow({
+function ContactRow({
   contact,
   selected,
   selectionMode,
@@ -157,7 +156,7 @@ export function ContactRow({
           opacity: showDisabledStyle ? DISABLED_ROW_OPACITY : 1,
         }}
       >
-        <Group className="min-w-0 flex-1 pr-3" gap="sm">
+        <View className="gap-sm min-w-0 flex-1 flex-row items-center pr-3">
           {isRowSelected ? (
             <View
               className="items-center justify-center"
@@ -171,7 +170,7 @@ export function ContactRow({
           <Text className="shrink" fw={500} numberOfLines={1} size="xl">
             {name}
           </Text>
-        </Group>
+        </View>
       </Pressable>
     </Animated.View>
   );
@@ -210,3 +209,5 @@ const styles = StyleSheet.create({
     width: MOBILE_LAYOUT.avatar.list,
   },
 });
+
+export { ContactRow };

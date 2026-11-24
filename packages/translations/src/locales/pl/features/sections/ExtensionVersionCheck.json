@@ -1,0 +1,9 @@
+{
+  "ApiRejectedDescription": "Serwer odrzucił żądanie, bo Twoje rozszerzenie jest nieaktualne. Zaktualizuj je.",
+  "ApiRejectedTitle": "Zbyt stara wersja",
+  "UpdateButton": "Aktualizuj",
+  "UpdateRequiredDescription": "Rozszerzenie Bondery jest nieaktualne i może nie działać prawidłowo. Zaktualizuj je, aby kontynuować.",
+  "UpdateRequiredTitle": "Wymagana aktualizacja",
+  "WebappNotificationDescription": "Rozszerzenie Bondery do Chrome wymaga aktualizacji, aby dalej działać prawidłowo.",
+  "WebappNotificationTitle": "Dostępna aktualizacja rozszerzenia"
+}

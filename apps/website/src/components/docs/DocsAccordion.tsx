@@ -3,7 +3,7 @@
 import { Accordion, AccordionControl, AccordionItem, AccordionPanel } from "@mantine/core";
 import { type ReactNode, useId } from "react";
 
-export function DocsAccordions({ children }: { children: ReactNode }) {
+function DocsAccordions({ children }: { children: ReactNode }) {
   return <Accordion multiple={false}>{children}</Accordion>;
 }
 
@@ -13,7 +13,7 @@ type DocsAccordionProps = {
   title: string;
 };
 
-export function DocsAccordion({ children, id, title }: DocsAccordionProps) {
+function DocsAccordion({ children, id, title }: DocsAccordionProps) {
   const generatedId = useId();
   const value = id ?? generatedId;
 
@@ -24,3 +24,5 @@ export function DocsAccordion({ children, id, title }: DocsAccordionProps) {
     </AccordionItem>
   );
 }
+
+export { DocsAccordion, DocsAccordions };

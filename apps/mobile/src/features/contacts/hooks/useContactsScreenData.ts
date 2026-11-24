@@ -67,8 +67,7 @@ export function useContactsScreenData() {
     ...(groupId ? { groupId } : {}),
   });
 
-  const contacts = listResult.contacts;
-  const totalCount = listResult.totalCount;
+  const { contacts, totalCount } = listResult;
   const error = contactsError ? resolveDisplayedError(contactsError, t) : null;
 
   const sortedGroups = sortGroups(syncedGroups, groupSortOrder, groupLastOpenedAt);

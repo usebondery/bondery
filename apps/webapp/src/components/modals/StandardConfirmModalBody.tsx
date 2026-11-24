@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { ModalFooter } from "@bondery/mantine-next";
 import { Stack } from "@mantine/core";
 import { IconTrash } from "@tabler/icons-react";
@@ -54,7 +55,7 @@ export function StandardConfirmModalBody({
         cancelDisabled={isSubmitting}
         cancelLabel={cancelLabel}
         onAction={() => {
-          void handleConfirm();
+          detachPromise(handleConfirm());
         }}
         onCancel={closeModal}
       />

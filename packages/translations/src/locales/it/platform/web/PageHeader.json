@@ -1,0 +1,15 @@
+{
+  "Concepts": {
+    "FixAndMerge": "correggere e unire",
+    "GroupDetail": "questo gruppo",
+    "Groups": "gruppi",
+    "Home": "home",
+    "KeepInTouch": "resta in contatto",
+    "Map": "la mappa",
+    "People": "persone",
+    "PersonDetails": "dettagli della persona",
+    "Timeline": "interazioni"
+  },
+  "HelpLabel": "Scopri di più",
+  "LearnMoreAbout": "Scopri di più su {concept}"
+}

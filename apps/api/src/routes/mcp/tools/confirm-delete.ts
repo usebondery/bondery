@@ -14,9 +14,11 @@ import {
 import { badRequest, serviceUnavailable } from "../../../lib/platform/errors/http-errors.js";
 import { mcpJsonResult } from "./json.js";
 
-export const MCP_DELETE_CONFIRM_KEY = "confirm";
-export const MCP_DELETE_CONFIRM_TTL_MS = 5 * 60 * 1000;
+const MCP_DELETE_CONFIRM_TTL_MINUTES = 5;
+const MS_PER_MINUTE = 60_000;
 const REQUEST_STATE_VERSION = "v1";
+/** Request state is `version.payload.signature`. */
+const REQUEST_STATE_SEGMENT_COUNT = 3;
 const INVALID_CONFIRMATION_MESSAGE = "Invalid or expired confirmation";
 
 function confirmActionSchema(description: string) {
@@ -32,7 +34,7 @@ function confirmActionSchema(description: string) {
   };
 }
 
-export type McpDeleteConfirmExtra = {
+type McpDeleteConfirmExtra = {
   mcpReq: {
     inputResponses?: Record<string, unknown>;
     requestState: () => unknown;
@@ -47,10 +49,6 @@ type SignedDeletePayload = {
   tool: string;
 };
 
-export function canonicalMcpToolArgs(args: Record<string, unknown>): string {
-  return JSON.stringify(sortJson(args));
-}
-
 function sortJson(value: unknown): unknown {
   if (Array.isArray(value)) {
     return value.map(sortJson);
@@ -59,7 +57,7 @@ function sortJson(value: unknown): unknown {
     const record = value as Record<string, unknown>;
     return Object.fromEntries(
       Object.keys(record)
-        .sort()
+        .sort((left, right) => left.localeCompare(right))
         .map((key) => [key, sortJson(record[key])]),
     );
   }
@@ -67,7 +65,7 @@ function sortJson(value: unknown): unknown {
 }
 
 function getMcpHmacSecret(): string {
-  const secret = process.env.BONDERY_PRIVATE_SERVICE_SECRET;
+  const secret = process.env["BONDERY_PRIVATE_SERVICE_SECRET"];
   return typeof secret === "string" ? secret : "";
 }
 
@@ -87,6 +85,25 @@ function signaturesMatch(secret: string, payloadB64: string, signatureB64: strin
     return false;
   }
   return timingSafeEqual(actual, expected);
+}
+
+type ConfirmMcpActionParams = {
+  args: Record<string, unknown>;
+  confirmDescription?: string;
+  extra: McpDeleteConfirmExtra;
+  onConfirm: () => Promise<CallToolResult>;
+  preview: string;
+  toolName: string;
+  userId: string;
+};
+
+export type { McpDeleteConfirmExtra };
+
+export const MCP_DELETE_CONFIRM_KEY = "confirm";
+export const MCP_DELETE_CONFIRM_TTL_MS = MCP_DELETE_CONFIRM_TTL_MINUTES * MS_PER_MINUTE;
+
+export function canonicalMcpToolArgs(args: Record<string, unknown>): string {
+  return JSON.stringify(sortJson(args));
 }
 
 export function signMcpDeleteRequestState(params: {
@@ -122,11 +139,10 @@ export function verifyMcpDeleteRequestState(params: {
     return { ok: false };
   }
   const parts = params.requestState.split(".");
-  if (parts.length !== 3 || parts[0] !== REQUEST_STATE_VERSION) {
+  if (parts.length !== REQUEST_STATE_SEGMENT_COUNT || parts[0] !== REQUEST_STATE_VERSION) {
     return { ok: false };
   }
-  const payloadB64 = parts[1];
-  const signatureB64 = parts[2];
+  const [, payloadB64, signatureB64] = parts;
   if (!payloadB64 || !signatureB64) {
     return { ok: false };
   }
@@ -144,34 +160,24 @@ export function verifyMcpDeleteRequestState(params: {
     return { ok: false };
   }
   const record = payload as Record<string, unknown>;
-  if (typeof record.args !== "string" || typeof record.exp !== "number") {
+  if (typeof record["args"] !== "string" || typeof record["exp"] !== "number") {
     return { ok: false };
   }
-  if (typeof record.sub !== "string" || typeof record.tool !== "string") {
+  if (typeof record["sub"] !== "string" || typeof record["tool"] !== "string") {
     return { ok: false };
   }
   const nowSeconds = Math.floor((params.nowMs ?? Date.now()) / 1000);
-  if (record.exp < nowSeconds) {
+  if (record["exp"] < nowSeconds) {
     return { ok: false };
   }
-  if (record.sub !== params.userId || record.tool !== params.toolName) {
+  if (record["sub"] !== params.userId || record["tool"] !== params.toolName) {
     return { ok: false };
   }
-  if (record.args !== canonicalMcpToolArgs(params.args)) {
+  if (record["args"] !== canonicalMcpToolArgs(params["args"])) {
     return { ok: false };
   }
   return { ok: true };
 }
-
-type ConfirmMcpActionParams = {
-  args: Record<string, unknown>;
-  confirmDescription?: string;
-  extra: McpDeleteConfirmExtra;
-  onConfirm: () => Promise<CallToolResult>;
-  preview: string;
-  toolName: string;
-  userId: string;
-};
 
 /**
  * After ownership/not-found checks: first call elicits; retry with

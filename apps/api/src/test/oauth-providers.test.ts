@@ -65,7 +65,7 @@ async function buildOAuthProvidersApp() {
 }
 
 describe("oauth providers HTTP", () => {
-  it("GET /oauth-providers returns the boot snapshot from Fastify, not Better Auth", async () => {
+  it("gET /oauth-providers returns the boot snapshot from Fastify, not Better Auth", async () => {
     loadTestEnv();
     const app = await buildOAuthProvidersApp();
     const response = await app.inject({ method: "GET", url: API_ROUTES.OAUTH_PROVIDERS });
@@ -81,7 +81,7 @@ describe("oauth providers HTTP", () => {
     await app.close();
   });
 
-  it("POST /auth/sign-in/social returns oauth_provider_not_configured when the snapshot is false", async () => {
+  it("pOST /auth/sign-in/social returns oauth_provider_not_configured when the snapshot is false", async () => {
     loadTestEnv();
     if (oauthProviders.github) {
       // Boot-time snapshot is frozen at module init; mutating process.env

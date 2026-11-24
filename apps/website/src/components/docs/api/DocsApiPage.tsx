@@ -21,6 +21,9 @@ function DocsApiMarkdown({ md }: { md: string }) {
   return <Text>{md}</Text>;
 }
 
+/** Mantine `Title` supports orders 1 to this value, like HTML `h1` to `h6`. */
+const MAX_HEADING_ORDER = 6;
+
 function DocsApiHeading({
   children,
   depth,
@@ -30,7 +33,13 @@ function DocsApiHeading({
   id: string;
 }) {
   // Title order is 1-6. Heading depth from the renderer is a number.
-  const order = Math.min(Math.max(Math.trunc(depth), 1), 6) as 1 | 2 | 3 | 4 | 5 | 6;
+  const order = Math.min(Math.max(Math.trunc(depth), 1), MAX_HEADING_ORDER) as
+    | 1
+    | 2
+    | 3
+    | 4
+    | 5
+    | 6;
 
   return (
     <Title id={id} order={order}>

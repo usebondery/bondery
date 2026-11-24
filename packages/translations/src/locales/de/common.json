@@ -23,7 +23,9 @@
     "retry": "Erneut versuchen",
     "save": "Speichern",
     "saveChanges": "Änderungen speichern",
-    "select": "Auswählen"
+    "select": "Auswählen",
+    "viewContacts": "Kontakte ansehen",
+    "viewMergedContact": "Zusammengeführten Kontakt ansehen"
   },
   "app": {
     "description": "Das Open-Source-Personal-CRM für bessere Bindungen."
@@ -230,11 +232,13 @@
     "deleting": "Wird gelöscht...",
     "duplicating": "Wird dupliziert...",
     "errorTitle": "Fehler",
+    "mobileRuntimeError": "Laufzeitfehler der mobilen App",
     "noResults": "Keine Ergebnisse",
     "removing": "Wird entfernt...",
     "savedTitle": "Gespeichert",
     "saving": "Wird gespeichert...",
     "sending": "Wird gesendet...",
-    "successTitle": "Erfolg"
+    "successTitle": "Erfolg",
+    "unknownError": "Unbekannter Fehler"
   }
 }

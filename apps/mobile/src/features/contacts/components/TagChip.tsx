@@ -6,9 +6,10 @@ import { Pressable } from "@/components/ui/Pressable";
 import { hexWithAlpha } from "../../../components/color-picker/colorUtils";
 import { Text } from "../../../components/ui/Text";
 import { usePressSqueeze } from "../../../components/ui/usePressSqueeze";
+import { nonEmpty } from "../../../lib/text";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
-export type TagChipTag = Pick<Tag, "id" | "label" | "color">;
+type TagChipTag = Pick<Tag, "id" | "label" | "color">;
 
 interface TagChipProps {
   accessibilityLabel?: string;
@@ -21,7 +22,7 @@ interface TagChipProps {
 
 const CHIP_CLASS = "flex-row items-center gap-1.5 rounded-full px-3 py-2";
 
-export function TagChip({
+function TagChip({
   tag,
   onPress,
   isSelected = false,
@@ -31,7 +32,7 @@ export function TagChip({
 }: TagChipProps) {
   const colors = useMobileThemeColors();
   const { pressIn, pressOut, squeezeStyle } = usePressSqueeze("subtle");
-  const tagColor = tag.color || colors.textMuted;
+  const tagColor = nonEmpty(tag.color) ?? colors.textMuted;
   const chipPaint = {
     backgroundColor: tag.color ? hexWithAlpha(tagColor, 0.1) : colors.surfaceMuted,
     borderColor: isSelected
@@ -90,3 +91,6 @@ export function TagChip({
     </Animated.View>
   );
 }
+
+export type { TagChipTag };
+export { TagChip };

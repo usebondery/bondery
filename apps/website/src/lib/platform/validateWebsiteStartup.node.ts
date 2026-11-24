@@ -3,7 +3,7 @@ import "server-only";
 import { readBuildMetadata } from "@bondery/helpers/infra/build-metadata";
 import { validateWebsiteRuntimeEnv } from "@/lib/platform/readyEnv";
 
-/** Node-only startup validation (uses process.exit — never import from Edge). */
+/** Node-only startup validation (throws on failure — never import from Edge). */
 export function validateWebsiteStartup(): void {
   try {
     validateWebsiteRuntimeEnv();
@@ -13,6 +13,7 @@ export function validateWebsiteStartup(): void {
   } catch (error) {
     // biome-ignore lint/suspicious/noConsole: fail-fast boot diagnostics before logger exists
     console.error("[website] Runtime env validation failed:", error);
-    process.exit(1);
+    process.exitCode = 1;
+    throw error;
   }
 }

@@ -7,14 +7,14 @@ Bondery branding assets and icons package.
 ### Import the SVG icon
 
 ```typescript
-import iconPath from '@bondery/branding/icon';
+import iconPath from "@bondery/branding/icon";
 ```
 
 ### In Node.js scripts
 
 ```javascript
-const path = require('path');
-const iconPath = path.join(require.resolve('@bondery/branding'), '../icon.svg');
+const path = require("path");
+const iconPath = path.join(require.resolve("@bondery/branding"), "../icon.svg");
 ```
 
 ## Assets

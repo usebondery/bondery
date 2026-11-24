@@ -7,14 +7,14 @@ import type { ReactNode } from "react";
 import { useCommonTranslations, useLoginPageTranslations } from "@/lib/i18n/generated/hooks";
 import { Logo } from "./Logo";
 
-export type LoginBrandShellLeftContent = "marketing" | "shield" | "userKey";
-
 type LoginBrandShellProps = {
   children: ReactNode;
   leftContent?: LoginBrandShellLeftContent;
   loading?: boolean;
   websiteUrl: string;
 };
+
+export type LoginBrandShellLeftContent = "marketing" | "shield" | "userKey";
 
 export function LoginBrandShell({
   children,
@@ -30,16 +30,19 @@ export function LoginBrandShell({
   return (
     <Flex
       align="center"
-      className="bg-[light-dark(var(--mantine-color-gray-0),var(--mantine-color-dark-8))]"
+      bg="light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-8))"
       justify="center"
       mih="100dvh"
       p="xl"
     >
       <Card
-        className="w-full max-w-[70rem] overflow-hidden md:h-[calc(80dvh-var(--mantine-spacing-xl)*2)]"
+        h={{ md: "calc(80dvh - var(--mantine-spacing-xl) * 2)" }}
+        maw="70rem"
         padding={0}
         radius="xl"
         shadow="md"
+        style={{ overflow: "hidden" }}
+        w="100%"
         withBorder
       >
         <Flex direction={{ base: "column", md: "row" }} h="100%">

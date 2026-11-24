@@ -10,8 +10,5 @@ export function isApiUnavailableError(error: unknown): boolean {
   if (error instanceof ApiError) {
     return isApiUnavailableResponseStatus(error.status);
   }
-  if (error instanceof TypeError) {
-    return true;
-  }
-  return false;
+  return error instanceof TypeError;
 }

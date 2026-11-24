@@ -9,7 +9,7 @@ import {
 } from "./speechText.js";
 
 /** Stub speaker. Every chip token resolves to a fixed phrase. */
-const stubResolve = (token: InlineToken): string | null => {
+const stubResolve = (token: InlineToken) => {
   switch (token.type) {
     case "text":
       return token.value;
@@ -199,7 +199,8 @@ describe("splitSpeechText", () => {
     const sentence = "This sentence is short.";
     const chunks = splitSpeechText(`${sentence} ${sentence}`);
     assert.equal(chunks.length, 1);
-    assert.ok(chunks[0].length <= SPEECH_CHUNK_TARGET_LENGTH);
+    const [firstChunk] = chunks;
+    assert.ok(firstChunk !== undefined && firstChunk.length <= SPEECH_CHUNK_TARGET_LENGTH);
   });
 
   it("starts a new chunk before the target length is exceeded", () => {

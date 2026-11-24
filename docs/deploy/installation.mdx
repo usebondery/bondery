@@ -34,18 +34,22 @@ Fill domains and secrets — see [Configuration](./configuration.mdx) for the fu
 docker compose up -d
 ```
 
-**Without Traefik** (laptop smoke test):
+**Without Traefik** (laptop smoke test). The override binds the ports to `127.0.0.1`. The API serves HTTPS only, so check it with its CA:
 
 <PlatformCode
   posix={`cp docker-compose.override.yml.example docker-compose.override.yml
 docker compose up -d
-curl -sf http://localhost:26631/health/live
-curl -sf http://localhost:26632/health/live`}
+sh scripts/api-ca.sh > api-ca.crt
+curl -sf --cacert api-ca.crt https://127.0.0.1:26631/health/live
+curl -sf http://127.0.0.1:26632/health/live`}
   windows={`Copy-Item docker-compose.override.yml.example docker-compose.override.yml
 docker compose up -d
-curl.exe -sf http://localhost:26631/health/live
-curl.exe -sf http://localhost:26632/health/live`}
+docker compose exec -T webapp cat /bondery-api/client/ca.crt > api-ca.crt
+curl.exe -sf --cacert api-ca.crt https://127.0.0.1:26631/health/live
+curl.exe -sf http://127.0.0.1:26632/health/live`}
 />
+
+For the public domains, put a reverse proxy in front: see [Reverse proxy](./reverse-proxy.mdx).
 </Step>
 <Step>
 

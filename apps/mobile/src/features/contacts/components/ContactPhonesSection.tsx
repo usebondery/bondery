@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import type { PhoneEntry } from "@bondery/schemas";
 import {
   IconCopy,
@@ -57,19 +58,23 @@ export function ContactPhonesSection({ phones, onSavePhones }: ContactPhonesSect
   }
 
   function openEditSheet(index: number) {
-    setSheet({ entry: phones[index], index, mode: "edit", open: true });
+    const entry = phones[index];
+    if (!entry) {
+      return;
+    }
+    setSheet({ entry, index, mode: "edit", open: true });
   }
 
   function persistPhones(nextPhones: PhoneEntry[]) {
     try {
       onSavePhones(nextPhones);
-    } catch {
+    } catch (error) {
       notifications.show({
         message: tContactInfo("PhonesUpdateError"),
         title: errorTitle,
         type: "error",
       });
-      throw new Error("Phones update failed");
+      throw new Error("Phones update failed", { cause: error });
     }
   }
 
@@ -155,7 +160,8 @@ export function ContactPhonesSection({ phones, onSavePhones }: ContactPhonesSect
           const typeLabel =
             phone.type === "work" ? tContactInfo("TypeWork") : tContactInfo("TypeHome");
           const displayPhone = formatDisplayPhone(phone);
-          const accessibilityLabel = `${typeLabel} phone, ${displayPhone}${phone.preferred ? `, ${tContactInfo("Preferred")}` : ""}`;
+          const preferredSuffix = phone.preferred ? `, ${tContactInfo("Preferred")}` : "";
+          const accessibilityLabel = `${typeLabel} phone, ${displayPhone}${preferredSuffix}`;
 
           return (
             <ContactChannelRow
@@ -189,7 +195,7 @@ export function ContactPhonesSection({ phones, onSavePhones }: ContactPhonesSect
                   id: "copy",
                   label: tContactInfo("CopyAction"),
                   onPress: () => {
-                    void copyPhoneToClipboard(phone, copyMessages);
+                    detachPromise(copyPhoneToClipboard(phone, copyMessages));
                   },
                 },
                 {
@@ -215,7 +221,7 @@ export function ContactPhonesSection({ phones, onSavePhones }: ContactPhonesSect
               ]}
               onDoublePress={() => openPhoneCall(phone, errorTitle)}
               onLongPress={() => {
-                void copyPhoneToClipboard(phone, copyMessages);
+                detachPromise(copyPhoneToClipboard(phone, copyMessages));
               }}
               onPress={() => openPhoneSms(phone, errorTitle)}
               primaryLabel={displayPhone}

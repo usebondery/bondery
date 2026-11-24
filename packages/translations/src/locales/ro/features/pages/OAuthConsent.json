@@ -1,0 +1,30 @@
+{
+  "Approve": "Aproba",
+  "ChromeExtensionClientName": "Extensia Chrome Bondery",
+  "Deny": "Refuza",
+  "Description": "{clientName} cere acces la contul tău Bondery.",
+  "ErrorTitle": "Eroare de autorizare",
+  "InvalidRequest": "Cerere de autorizare nevalidă.",
+  "LoopbackWarning": "Această aplicație rulează pe acest computer (localhost). Continuă doar dacă tu ai pornit-o.",
+  "MissingAuthorizationId": "Lipsește cererea de autorizare. Încearcă din nou din aplicație.",
+  "PermissionFullDescription": "Poate și crea, actualiza și șterge contacte și datele lor.",
+  "PermissionFullLabel": "Acces complet",
+  "PermissionLabel": "Acces",
+  "PermissionReadDescription": "Caută și citește contactele tale și datele lor.",
+  "PermissionReadLabel": "Doar citire",
+  "RequestedPermissions": "Permisiuni cerute",
+  "Scopes": {
+    "api:access": "Folosește API-ul Bondery în numele tău",
+    "email": "Vezi adresa ta de e-mail",
+    "mcp:read": "Vezi contactele tale și datele lor",
+    "mcp:write": "Creează, actualizează și șterge contacte și datele lor",
+    "offline_access": "Rămâi conectat până revoci accesul",
+    "openid": "Verifică identitatea ta",
+    "phone": "Vezi numărul tău de telefon",
+    "profile": "Vezi informațiile profilului tău"
+  },
+  "Title": "Autorizează aplicația",
+  "UnexpectedError": "A apărut o eroare neașteptată. Încearcă din nou.",
+  "UnknownClientName": "Aplicație necunoscută",
+  "WebappClientName": "Bondery"
+}

@@ -431,6 +431,6 @@ export const countryCodes: CountryCode[] = [
   // ... (full ITU-T E.164 list continues)
 ];
 
-export const SORTED_COUNTRY_CODES_BY_DIAL_LENGTH = [...countryCodes].sort(
+export const SORTED_COUNTRY_CODES_BY_DIAL_LENGTH: CountryCode[] = [...countryCodes].sort(
   (a, b) => b.dialCode.length - a.dialCode.length,
 );

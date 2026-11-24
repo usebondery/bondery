@@ -28,6 +28,13 @@ import { useInteractionTypeLabel } from "@/lib/i18n/useInteractionTypeLabel";
 import { useSlashCommands } from "@/lib/i18n/useSlashCommands";
 import { routeAssert } from "@/lib/navigation/route/assert";
 import {
+  useCreateContactRelationshipMutation,
+  useDeleteContactRelationshipMutation,
+  usePutContactImportantDatesMutation,
+  useUpdateContactMutation,
+  useUpdateContactRelationshipMutation,
+} from "@/lib/query/hooks/useContactMutations";
+import {
   useContactGroupsQuery,
   useContactImportantDatesQuery,
   useContactInteractionsQuery,
@@ -35,11 +42,6 @@ import {
   useContactQuery,
   useContactRelationshipsQuery,
   useContactsSelectableListQuery,
-  useCreateContactRelationshipMutation,
-  useDeleteContactRelationshipMutation,
-  usePutContactImportantDatesMutation,
-  useUpdateContactMutation,
-  useUpdateContactRelationshipMutation,
 } from "@/lib/query/hooks/useContacts";
 import { useContactMergeRecommendation } from "@/lib/query/hooks/useMergeRecommendations";
 import { PERSON_SELECTABLE_CONTACTS } from "@/lib/query/personPageQueryParams";

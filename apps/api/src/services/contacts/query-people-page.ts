@@ -13,14 +13,14 @@ import { countSearchPeopleIdsWithDb, searchPeopleIdsWithDb } from "../../lib/dat
 import { internal } from "../../lib/platform/errors/http-errors.js";
 import type { ServiceLog } from "./queries-shared.js";
 
-export type PeoplePageRow = {
+type PeoplePageRow = {
   id: string;
   hasAvatar: boolean;
   updatedAt?: string;
   [key: string]: unknown;
 };
 
-export type QueryPeoplePageResult = {
+type QueryPeoplePageResult = {
   rows: PeoplePageRow[];
   count: number | null;
 };
@@ -54,6 +54,8 @@ function peopleListOrderBy(sort: PeopleListQuery["sort"]): Prisma.PeopleOrderByW
       return [{ firstName: "asc" }, { id: "asc" }];
   }
 }
+
+export type { PeoplePageRow, QueryPeoplePageResult };
 
 export async function queryPeoplePage<S extends Prisma.PeopleSelect>(
   ctx: ContactListContext,

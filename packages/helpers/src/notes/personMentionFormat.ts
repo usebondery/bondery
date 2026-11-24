@@ -1,8 +1,8 @@
-/** URL scheme used by the mobile markdown editor for person mentions. */
-export const BP_PERSON_URL_PREFIX = "bp://person/";
-
 const BP_PERSON_LINK_RE = /\[([^\]]+)\]\(bp:\/\/person\/([^)]+)\)/g;
 const BP_PERSON_TOKEN_RE = /\[\[bp:person:([^\]]+)\]\]/g;
+
+/** URL scheme used by the mobile markdown editor for person mentions. */
+export const BP_PERSON_URL_PREFIX = "bp://person/";
 
 /** Unique person IDs referenced by wire tokens or editor markdown links. */
 export function extractPersonMentionIds(markdown: string): string[] {
@@ -48,9 +48,10 @@ export function expandPersonMentionsForEditor(
  * `[@Name](bp://person/UUID)` → `[[bp:person:UUID]]`
  */
 export function collapsePersonMentionsFromEditor(markdown: string): string {
-  return markdown.replace(BP_PERSON_LINK_RE, (_, _display: string, id: string) => {
-    return `[[bp:person:${id}]]`;
-  });
+  return markdown.replace(
+    BP_PERSON_LINK_RE,
+    (_, _display: string, id: string) => `[[bp:person:${id}]]`,
+  );
 }
 
 /**

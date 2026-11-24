@@ -9,6 +9,10 @@ import type { ReactNode } from "react";
 import { useCommonTranslations } from "@/lib/i18n/generated/hooks";
 import classes from "./PageHeader.module.css";
 
+const styles = {
+  actions: classes["actions"] ?? "",
+};
+
 interface PageHeaderProps {
   action?: ReactNode;
   backHref?: AppHref;
@@ -25,7 +29,7 @@ function PageHeaderActions({ children }: { children: ReactNode }) {
   return (
     <Flex
       align={{ base: "stretch", sm: "center" }}
-      className={classes.actions}
+      className={styles.actions}
       direction={{ base: "column", sm: "row" }}
       gap="sm"
       justify="flex-end"
@@ -37,7 +41,7 @@ function PageHeaderActions({ children }: { children: ReactNode }) {
 }
 
 export function PageHeader({
-  icon: Icon,
+  icon: HeaderIcon,
   title,
   helpDoc,
   helpLabel,
@@ -84,7 +88,7 @@ export function PageHeader({
             variant="default"
           />
         )}
-        <Icon size={32} stroke={1.5} />
+        <HeaderIcon size={32} stroke={1.5} />
         <Title order={1}>{title}</Title>
         {helpLabel ? <HelpButton doc={helpDoc} label={helpLabel} /> : null}
       </Group>

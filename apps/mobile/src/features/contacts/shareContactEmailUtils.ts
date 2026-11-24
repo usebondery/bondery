@@ -1,23 +1,23 @@
 import { emailAddressSchema } from "@bondery/schemas";
 
-export const MAX_SHARE_RECIPIENTS = 10;
-export const MAX_SHARE_MESSAGE_LENGTH = 2000;
-export const MESSAGE_LENGTH_COUNTER_THRESHOLD = 1800;
+const MAX_SHARE_RECIPIENTS = 10;
+const MAX_SHARE_MESSAGE_LENGTH = 2000;
+const MESSAGE_LENGTH_COUNTER_THRESHOLD = 1800;
 
 const RECIPIENT_SPLIT_REGEX = /[\s,;]+/;
 
-export function parseRecipientTokens(text: string): string[] {
+function parseRecipientTokens(text: string): string[] {
   return text
     .split(RECIPIENT_SPLIT_REGEX)
     .map((token) => token.trim().toLowerCase())
     .filter(Boolean);
 }
 
-export function isValidRecipientEmail(email: string): boolean {
+function isValidRecipientEmail(email: string): boolean {
   return emailAddressSchema.safeParse(email).success;
 }
 
-export type ProcessRecipientInputResult =
+type ProcessRecipientInputResult =
   | { type: "single"; value: string }
   | {
       type: "multi";
@@ -26,7 +26,7 @@ export type ProcessRecipientInputResult =
       hasInvalid: boolean;
     };
 
-export function processRecipientInputChange(
+function processRecipientInputChange(
   text: string,
   existingRecipients: string[],
   maxRecipients: number = MAX_SHARE_RECIPIENTS,
@@ -65,7 +65,7 @@ export function processRecipientInputChange(
   return { added, hasInvalid, remainder, type: "multi" };
 }
 
-export function buildFinalRecipients(recipients: string[], emailInput: string): string[] {
+function buildFinalRecipients(recipients: string[], emailInput: string): string[] {
   const trimmed = emailInput.trim().toLowerCase();
 
   if (trimmed && isValidRecipientEmail(trimmed) && !recipients.includes(trimmed)) {
@@ -75,7 +75,7 @@ export function buildFinalRecipients(recipients: string[], emailInput: string): 
   return recipients;
 }
 
-export function formatShareEmailSendButtonLabel(
+function formatShareEmailSendButtonLabel(
   count: number,
   t: (key: "SendButton" | "SendButtonOne" | "SendButtonMany") => string,
 ): string {
@@ -89,3 +89,15 @@ export function formatShareEmailSendButtonLabel(
 
   return t("SendButtonMany").replace("{count}", String(count));
 }
+
+export type { ProcessRecipientInputResult };
+export {
+  buildFinalRecipients,
+  formatShareEmailSendButtonLabel,
+  isValidRecipientEmail,
+  MAX_SHARE_MESSAGE_LENGTH,
+  MAX_SHARE_RECIPIENTS,
+  MESSAGE_LENGTH_COUNTER_THRESHOLD,
+  parseRecipientTokens,
+  processRecipientInputChange,
+};

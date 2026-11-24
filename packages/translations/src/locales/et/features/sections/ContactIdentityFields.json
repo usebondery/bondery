@@ -1,0 +1,18 @@
+{
+  "ContactNameFallback": "Kontakt",
+  "FieldUpdated": "{label} uuendatud",
+  "FirstNamePlaceholder": "Eesnimi",
+  "FirstNameSuccessLabel": "Eesnimi",
+  "HeadlinePlaceholder": "Headline",
+  "HeadlineSuccessLabel": "Headline",
+  "LastNamePlaceholder": "Perekonnanimi",
+  "LastNameSuccessLabel": "Perekonnanimi",
+  "LocationPlaceholder": "Asukoht",
+  "LocationSuccessLabel": "Asukoht",
+  "LocationUpdated": "Asukoht uuendatud",
+  "MiddleNamePlaceholder": "Teine nimi",
+  "MiddleNameSuccessLabel": "Teine nimi",
+  "NameFieldUpdated": "{label} uuendatud",
+  "SavedTitle": "Salvestatud",
+  "UpdateFieldFailed": "{field} uuendamine ebaõnnestus"
+}

@@ -10,7 +10,11 @@ import {
   updateTag,
 } from "../../domains/tags/index.js";
 import { getTag, listTagMembers, listTags } from "../tags/queries.js";
-import { ASSISTANT_COLLECTION_CAP, assistantPageSize } from "./collection-cap.js";
+import {
+  ASSISTANT_COLLECTION_CAP,
+  ASSISTANT_COLOR_MAX_LENGTH,
+  assistantPageSize,
+} from "./collection-cap.js";
 
 export const searchTagsInputSchema = z.object({
   limit: z.number().int().min(1).max(ASSISTANT_COLLECTION_CAP).optional(),
@@ -38,7 +42,7 @@ export const createTagInputSchema = z.object({
 });
 
 export const updateTagInputSchema = z.object({
-  color: z.string().min(1).max(16).optional(),
+  color: z.string().min(1).max(ASSISTANT_COLOR_MAX_LENGTH).optional(),
   label: z.string().min(1).max(GROUP_LABEL_MAX_LENGTH).optional(),
   tagId: z.string().uuid(),
 });

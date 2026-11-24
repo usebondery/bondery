@@ -8,12 +8,12 @@ This mirrors how Stripe SDKs work: a thin HTTP client (`StripeClient`) plus opti
 
 ## Architecture by client
 
-| Client | Runtime | Transport | Base URL | Auth |
-|--------|---------|-----------|----------|------|
-| **Webapp (browser)** | Client component | `clientApiFetch` / `clientApiJson` / `clientApiJsonOrNull` | Same-origin `/api/*` (BFF) | BFF injects Bearer |
-| **Webapp (server)** | RSC, loaders, route handlers | `serverApiFetch` / `serverApiJson` / `serverApiJsonOrNull` | `API_URL` + path | `resolveServerSession()` → Bearer |
-| **Mobile** | React Native | `apiRequest()` via `mobileFetch()` | `EXPO_PUBLIC_API_URL` + path | Supabase session Bearer |
-| **Chrome extension** | Service worker | `authenticatedFetch()` | `config.apiUrl` + path | OAuth access token + `X-Bondery-Extension-Version` |
+| Client               | Runtime                      | Transport                                                  | Base URL                     | Auth                                               |
+| -------------------- | ---------------------------- | ---------------------------------------------------------- | ---------------------------- | -------------------------------------------------- |
+| **Webapp (browser)** | Client component             | `clientApiFetch` / `clientApiJson` / `clientApiJsonOrNull` | Same-origin `/api/*` (BFF)   | BFF injects Bearer                                 |
+| **Webapp (server)**  | RSC, loaders, route handlers | `serverApiFetch` / `serverApiJson` / `serverApiJsonOrNull` | `API_URL` + path             | `resolveServerSession()` → Bearer                  |
+| **Mobile**           | React Native                 | `apiRequest()` via `mobileFetch()`                         | `EXPO_PUBLIC_API_URL` + path | Supabase session Bearer                            |
+| **Chrome extension** | Service worker               | `authenticatedFetch()`                                     | `config.apiUrl` + path       | OAuth access token + `X-Bondery-Extension-Version` |
 
 Chrome extension transport, import policy, and 401/426 client handling live in [bondery-chrome-extension](../../bondery-chrome-extension/references/architecture.md) — this table is the HTTP contract only.
 
@@ -33,11 +33,11 @@ Chrome extension transport, import policy, and 401/426 client handling live in [
 
 Use when the caller **must** know success vs failure — mutations, form submits, detail views that show errors.
 
-| Client | Function |
-|--------|----------|
-| Webapp browser | `clientApiJson<T>(path, init?)` |
-| Webapp server | `serverApiJson<T>(path, init?, options?)` |
-| Mobile | `apiRequest<T>(path, init?)` |
+| Client         | Function                                  |
+| -------------- | ----------------------------------------- |
+| Webapp browser | `clientApiJson<T>(path, init?)`           |
+| Webapp server  | `serverApiJson<T>(path, init?, options?)` |
+| Mobile         | `apiRequest<T>(path, init?)`              |
 
 - Parses JSON on 2xx
 - Throws on non-2xx (`ApiError` via `buildApiErrorFromResponse` on webapp and mobile)
@@ -47,10 +47,10 @@ Use when the caller **must** know success vs failure — mutations, form submits
 
 Use when failure should **not** break UX — search-as-you-type, geocode suggestions, chip prefetch, optional banners.
 
-| Client | Function | On failure |
-|--------|----------|------------|
+| Client         | Function                 | On failure     |
+| -------------- | ------------------------ | -------------- |
 | Webapp browser | `clientApiJsonOrNull<T>` | Returns `null` |
-| Webapp server | `serverApiJsonOrNull<T>` | Returns `null` |
+| Webapp server  | `serverApiJsonOrNull<T>` | Returns `null` |
 
 **Do not** wrap `*JsonOrNull` in try/catch for expected failures — that is the point.
 
@@ -67,12 +67,12 @@ Use when JSON helpers are insufficient:
 - **Custom status handling** before throw (e.g. checkout 401/409)
 - **Streaming** passthrough (chat BFF routes)
 
-| Client | Function |
-|--------|----------|
-| Webapp browser | `clientApiFetch` |
-| Webapp server | `serverApiFetch` |
-| Mobile | `mobileFetch` (inside `apiRequest` for JSON) |
-| Extension | `authenticatedFetch` |
+| Client         | Function                                     |
+| -------------- | -------------------------------------------- |
+| Webapp browser | `clientApiFetch`                             |
+| Webapp server  | `serverApiFetch`                             |
+| Mobile         | `mobileFetch` (inside `apiRequest` for JSON) |
+| Extension      | `authenticatedFetch`                         |
 
 ---
 
@@ -102,9 +102,9 @@ import {
 
 class ApiError extends Error {
   status: number;
-  code: string;              // machine-readable, e.g. auth_required
+  code: string; // machine-readable, e.g. auth_required
   type: ApiErrorType | null;
-  developerMessage: string;  // server message (never shown directly in UI)
+  developerMessage: string; // server message (never shown directly in UI)
   param: string | null;
   docUrl: string | null;
   requestId: string | null;
@@ -120,10 +120,10 @@ class ApiError extends Error {
 
 **Per-app transport** (not in helpers):
 
-| Client | Parse/throw | Offline / network copy |
-|--------|-------------|------------------------|
-| Webapp | `parseResponse.ts` → `buildApiErrorFromResponse` | Browser `TypeError` via `isApiUnavailableError` |
-| Mobile | `transport.ts` → `buildApiErrorFromResponse` | `resolveFetchFailureMessage` in `parseApiErrorBody.ts` |
+| Client | Parse/throw                                      | Offline / network copy                                 |
+| ------ | ------------------------------------------------ | ------------------------------------------------------ |
+| Webapp | `parseResponse.ts` → `buildApiErrorFromResponse` | Browser `TypeError` via `isApiUnavailableError`        |
+| Mobile | `transport.ts` → `buildApiErrorFromResponse`     | `resolveFetchFailureMessage` in `parseApiErrorBody.ts` |
 
 Mobile `apiRequest` throws typed `ApiError` (same as webapp). UI shows `getUserFacingError(error, t)` with `t` from `useMobileTranslations()`.
 
@@ -131,11 +131,11 @@ Mobile `apiRequest` throws typed `ApiError` (same as webapp). UI shows `getUserF
 
 ## Failure handling — three layers (webapp)
 
-| Layer | Location | Responsibility |
-|-------|----------|----------------|
-| **Identity** | `lib/auth/getRequestSession.ts`, `app/(app)/app/layout.tsx` | Better Auth identity only: anonymous → login; hop-down stays on URL |
-| **Shell chrome** | `UserSessionProvider`, locale, sidebar | Session-backed chrome. No outage banner, no `/health/ready` polling, no app-wide offline pill |
-| **Product data** | React Query + page / route `error.tsx` | Skeleton, stale cache, or inline error — never fake `?? {}` defaults, never app-wide chrome |
+| Layer            | Location                                                    | Responsibility                                                                                |
+| ---------------- | ----------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| **Identity**     | `lib/auth/getRequestSession.ts`, `app/(app)/app/layout.tsx` | Better Auth identity only: anonymous → login; hop-down stays on URL                           |
+| **Shell chrome** | `UserSessionProvider`, locale, sidebar                      | Session-backed chrome. No outage banner, no `/health/ready` polling, no app-wide offline pill |
+| **Product data** | React Query + page / route `error.tsx`                      | Skeleton, stale cache, or inline error — never fake `?? {}` defaults, never app-wide chrome   |
 
 **Classification** (`lib/api/availability.ts`, `lib/auth/unauthorized.ts`) has no side effects. **Transport policy** (`applyTransportErrorPolicy` / `applyServerTransportPolicy`) handles 401 → login; hop-down is silent on the client and rethrown on the server.
 
@@ -145,13 +145,13 @@ Mobile `apiRequest` throws typed `ApiError` (same as webapp). UI shows `getUserF
 
 Layout loads **session** (who you are, shell + locale inputs, onboarding guard). Home and Settings load the full **settings** blob on demand via `useSettingsQuery()`. Never use `useSettingsQuery` for shell identity — use `useUserSession()` from `UserSessionProvider`. Call `refreshAppShell()` for **route gates** (onboarding) or last-resort identity — not preference field saves (patch `applyUserLocaleFromRef` / `applyUserSessionFromRef` instead).
 
-| Signal | Client action | Server action (RSC, `transportPolicy: true`) | Sign out? |
-|--------|---------------|--------------------------------------------|-----------|
-| 401 / `auth_required` | `endSession` → `/login?redirect=…` (`session_expired` only) | `handleServerUnauthorizedSession` → login with `redirect` | Yes |
-| 502 / 503 / 504 / network `TypeError` | Silent at transport; query/page shows skeleton, stale, or inline error | Rethrow → route `error.tsx` | No |
-| `*JsonOrNull` outage | Return `null` | Return `null` | No |
-| `*JsonOrNull` 401 | Ends session | Signs out + redirects | Yes |
-| BFF `app/api/**` | N/A | `bffProxyFetch` — passthrough status or nested 503 `service_unavailable` | Per status |
+| Signal                                | Client action                                                          | Server action (RSC, `transportPolicy: true`)                             | Sign out?  |
+| ------------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------ | ---------- |
+| 401 / `auth_required`                 | `endSession` → `/login?redirect=…` (`session_expired` only)            | `handleServerUnauthorizedSession` → login with `redirect`                | Yes        |
+| 502 / 503 / 504 / network `TypeError` | Silent at transport; query/page shows skeleton, stale, or inline error | Rethrow → route `error.tsx`                                              | No         |
+| `*JsonOrNull` outage                  | Return `null`                                                          | Return `null`                                                            | No         |
+| `*JsonOrNull` 401                     | Ends session                                                           | Signs out + redirects                                                    | Yes        |
+| BFF `app/api/**`                      | N/A                                                                    | `bffProxyFetch` — passthrough status or nested 503 `service_unavailable` | Per status |
 
 **Health probe:** `GET /health/live` and `GET /health/ready` on each container are for orchestration only — not product chrome. Manual recovery uses `GET /api/me/session` (BFF). `/health/ready` checks Postgres, storage, Redis, SMTP; returns HTTP 503 when critical dependencies are unhealthy.
 
@@ -165,11 +165,11 @@ Layout loads **session** (who you are, shell + locale inputs, onboarding guard).
 
 Use the **domain → query hooks** stack — do not call `clientApiJson` / `serverApiJson` directly from feature components.
 
-| Layer | Location | Responsibility |
-|-------|----------|----------------|
-| **Resources** | `lib/api/resources/*` | Path builders, response normalizers |
-| **Domains** | `lib/api/domains/*`, `lib/api/domains/server/*` | Typed fetch wrappers per feature |
-| **Query hooks** | `lib/query/hooks/*` | TanStack Query keys, mutations, invalidation |
+| Layer           | Location                                        | Responsibility                               |
+| --------------- | ----------------------------------------------- | -------------------------------------------- |
+| **Resources**   | `lib/api/resources/*`                           | Path builders, response normalizers          |
+| **Domains**     | `lib/api/domains/*`, `lib/api/domains/server/*` | Typed fetch wrappers per feature             |
+| **Query hooks** | `lib/query/hooks/*`                             | TanStack Query keys, mutations, invalidation |
 
 See `apps/webapp/src/lib/api/README.md`. Transport stays in `lib/api/client.ts` and `lib/api/server.ts`.
 
@@ -197,11 +197,11 @@ See [api-mutations.md](./api-mutations.md): create/update endpoints return the f
 
 ### When to use `endSession()`
 
-| Trigger | `reason` | Supabase sign-out scope |
-|---------|----------|-------------------------|
-| Settings → Log out | `user_initiated` | global (revokes refresh tokens) |
-| API 401 / `auth_required` | `session_expired` | `local` |
-| Account deleted | `account_deleted` | `local` |
+| Trigger                   | `reason`          | Supabase sign-out scope         |
+| ------------------------- | ----------------- | ------------------------------- |
+| Settings → Log out        | `user_initiated`  | global (revokes refresh tokens) |
+| API 401 / `auth_required` | `session_expired` | `local`                         |
+| Account deleted           | `account_deleted` | `local`                         |
 
 ### What `endSession()` clears
 
@@ -267,19 +267,19 @@ pnpm run check-api-fetch          # non-strict variant (webapp package.json)
 
 ## Reference implementations
 
-| Concern | Path |
-|---------|------|
-| Webapp browser transport | `apps/webapp/src/lib/api/client.ts` |
-| Webapp transport policy | `apps/webapp/src/lib/api/applyTransportErrorPolicy.ts` |
-| Webapp server transport policy | `apps/webapp/src/lib/api/applyServerTransportPolicy.ts` |
-| Webapp BFF proxy | `apps/webapp/src/lib/api/bffProxy.ts` |
-| Webapp server bootstrap | `apps/webapp/src/lib/auth/getRequestSession.ts` |
+| Concern                        | Path                                                                  |
+| ------------------------------ | --------------------------------------------------------------------- |
+| Webapp browser transport       | `apps/webapp/src/lib/api/client.ts`                                   |
+| Webapp transport policy        | `apps/webapp/src/lib/api/applyTransportErrorPolicy.ts`                |
+| Webapp server transport policy | `apps/webapp/src/lib/api/applyServerTransportPolicy.ts`               |
+| Webapp BFF proxy               | `apps/webapp/src/lib/api/bffProxy.ts`                                 |
+| Webapp server bootstrap        | `apps/webapp/src/lib/auth/getRequestSession.ts`                       |
 | Webapp hop-down bookmark probe | `apps/webapp/src/lib/api/availabilityStore.ts` (`retryApiConnection`) |
-| Webapp return intent | `apps/webapp/src/lib/auth/returnIntent.ts` |
-| Webapp server transport | `apps/webapp/src/lib/api/server.ts` |
-| Webapp session teardown | `apps/webapp/src/lib/auth/endSession.ts` |
-| Webapp 401 → session teardown | `apps/webapp/src/lib/auth/handleUnauthorizedSession.ts` |
-| Mobile transport + helpers | `apps/mobile/src/lib/api/client.ts` |
-| Extension transport | `apps/chrome-extension/src/lib/api/transport.ts` |
-| Extension API domains | `apps/chrome-extension/src/lib/api/domains/` |
-| Mutation response rule | [api-mutations.md](./api-mutations.md) |
+| Webapp return intent           | `apps/webapp/src/lib/auth/returnIntent.ts`                            |
+| Webapp server transport        | `apps/webapp/src/lib/api/server.ts`                                   |
+| Webapp session teardown        | `apps/webapp/src/lib/auth/endSession.ts`                              |
+| Webapp 401 → session teardown  | `apps/webapp/src/lib/auth/handleUnauthorizedSession.ts`               |
+| Mobile transport + helpers     | `apps/mobile/src/lib/api/client.ts`                                   |
+| Extension transport            | `apps/chrome-extension/src/lib/api/transport.ts`                      |
+| Extension API domains          | `apps/chrome-extension/src/lib/api/domains/`                          |
+| Mutation response rule         | [api-mutations.md](./api-mutations.md)                                |

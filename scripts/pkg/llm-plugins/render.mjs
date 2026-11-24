@@ -1,0 +1,168 @@
+/** Connect-block substitution, host tree rendering, and the MCP skill catalog. */
+import { readBrandPrimaryColor, stringifyJson } from "./json-format.mjs";
+import { claudeManifest, claudeMcp, openAiManifest, openAiMcp } from "./manifests.mjs";
+import { repoRoot } from "./paths.mjs";
+import { requireVersion, validateConfig } from "./validate-config.mjs";
+
+const CONNECT_BLOCK = /<!-- llm-plugin-connect -->[\s\S]*?<!-- \/llm-plugin-connect -->/;
+
+function toBuffer(value) {
+  if (Buffer.isBuffer(value)) {
+    return value;
+  }
+  if (typeof value === "string") {
+    return Buffer.from(value, "utf8");
+  }
+  throw new Error("Plugin file body must be a string or a Buffer.");
+}
+
+function textFile(files, rel) {
+  const body = files.get(rel);
+  if (typeof body !== "string") {
+    throw new Error(`Missing text file ${rel}.`);
+  }
+  return body;
+}
+
+function skillBodies(files) {
+  return [...files.entries()]
+    .filter(
+      ([rel, body]) =>
+        rel.startsWith("skills/") && rel.endsWith("/SKILL.md") && typeof body === "string",
+    )
+    .sort(([left], [right]) => left.localeCompare(right));
+}
+
+/** Replace the connect block, markers included, with `replacement`. */
+function applyConnectBlock(source, replacement) {
+  if (typeof source !== "string") {
+    throw new Error("Connect source must be a string.");
+  }
+  if (typeof replacement !== "string" || replacement.length === 0) {
+    throw new Error("Connect text is empty.");
+  }
+  if (replacement.includes("llm-plugin-connect")) {
+    throw new Error("Connect text must not contain a marker.");
+  }
+  const openings = source.match(/<!-- llm-plugin-connect -->/g);
+  if (openings?.length !== 1 || !CONNECT_BLOCK.test(source)) {
+    throw new Error("Connect block is missing.");
+  }
+  const next = source.replace(CONNECT_BLOCK, () => replacement);
+  if (next.includes("llm-plugin-connect")) {
+    throw new Error("Connect markers remain after replacement.");
+  }
+  return next;
+}
+
+function assertCleanTree(tree, label) {
+  for (const [rel, body] of tree) {
+    if (rel.endsWith(".png")) {
+      continue;
+    }
+    const text = body.toString("utf8");
+    if (text.includes("llm-plugin-connect")) {
+      throw new Error(`${label}/${rel} still contains a connect marker.`);
+    }
+    if (label === "openai" && text.includes("Claude")) {
+      throw new Error(`${label}/${rel} contains "Claude".`);
+    }
+  }
+}
+
+function renderHost(label, config, files, version, manifestRel, manifest, mcpRel, mcp) {
+  validateConfig(config);
+  const onboarding = config.hosts.openai.onboardingSkill.slice(2);
+  if (!files.has(onboarding)) {
+    throw new Error(`Missing onboarding skill ${onboarding}.`);
+  }
+  requireVersion(version);
+  const host = config.hosts[label];
+  const tree = new Map();
+  tree.set(manifestRel, toBuffer(stringifyJson(manifest)));
+  tree.set(mcpRel, toBuffer(stringifyJson(mcp)));
+  tree.set(
+    "README.md",
+    toBuffer(applyConnectBlock(textFile(files, "readme.md"), host.readmeConnect)),
+  );
+  tree.set("LICENSE", toBuffer(files.get("LICENSE")));
+  tree.set("assets/icon.png", toBuffer(files.get("assets/icon.png")));
+  for (const [rel, body] of skillBodies(files)) {
+    tree.set(rel, toBuffer(applyConnectBlock(body, host.skillConnect)));
+  }
+  assertCleanTree(tree, label);
+  return tree;
+}
+
+export { applyConnectBlock, skillBodies };
+
+export function renderClaudeTree(config, files, version) {
+  return renderHost(
+    "claude",
+    config,
+    files,
+    version,
+    ".claude-plugin/plugin.json",
+    claudeManifest(config, version),
+    ".mcp.json",
+    claudeMcp(config),
+  );
+}
+
+export function renderOpenAiTree(
+  config,
+  files,
+  version,
+  brandColor = readBrandPrimaryColor(repoRoot()),
+) {
+  return renderHost(
+    "openai",
+    config,
+    files,
+    version,
+    "plugin.json",
+    openAiManifest(config, version, brandColor),
+    "mcp.json",
+    openAiMcp(config),
+  );
+}
+
+/**
+ * Skills the API serves over MCP, keyed by `<skill>/SKILL.md`. Any MCP client can read them,
+ * so they follow the same rule as the OpenAI tree: no host names.
+ */
+export function renderMcpSkills(config, files) {
+  const connect = config.hosts?.mcp?.skillConnect;
+  if (typeof connect !== "string" || connect.trim() === "") {
+    throw new Error("hosts.mcp.skillConnect must be a non-empty string.");
+  }
+  const skills = new Map();
+  for (const [rel, body] of skillBodies(files)) {
+    const text = applyConnectBlock(body, connect);
+    if (text.includes("Claude")) {
+      throw new Error(`mcp/${rel} contains "Claude".`);
+    }
+    skills.set(rel.slice("skills/".length), text);
+  }
+  if (skills.size === 0) {
+    throw new Error("No skills to serve over MCP.");
+  }
+  return skills;
+}
+
+/** The TypeScript module that holds the MCP skills. The API bundles it, so it needs no file reads. */
+export function renderMcpSkillsModule(skills) {
+  const lines = [
+    "// Generated by scripts/pkg/build-llm-plugins.mjs from llm-plugins/src/skills. Do not edit.",
+    "// Change a skill in llm-plugins/src/skills, then run `pnpm run build:llm-plugins`.",
+    "",
+    "/** Skill files served over MCP, keyed by `<skill>/SKILL.md`. */",
+    "export const MCP_SKILL_FILES: Readonly<Record<string, string>> = {",
+    ...[...skills]
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([rel, body]) => `  ${JSON.stringify(rel)}: ${JSON.stringify(body)},`),
+    "};",
+    "",
+  ];
+  return toBuffer(lines.join("\n"));
+}

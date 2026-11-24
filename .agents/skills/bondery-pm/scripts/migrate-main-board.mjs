@@ -1,4 +1,23 @@
 #!/usr/bin/env node
+const BUG_FIX_BROKEN_REGRESSION_CRASH_DOESN_RE =
+  /\b(bug|fix\b|broken|regression|crash|doesn'?t work)\b/i;
+const ISO_SOC_TAX_LEGAL_GDPR_LLC_RE = /\b(ISO|SOC|tax|legal|GDPR|LLC)\b/i;
+const SPIKE_EVALUATE_RESEARCH_ADR_RE = /\b(spike|evaluate|research|ADR)\b/i;
+const UPGRADE_DEPS_COMPOSE_DOCKER_TRAEFIK_ENV_RE =
+  /\b(upgrade|deps|compose|docker|traefik|env manifest|changelog|smoke|rls|migration tests)\b/i;
+const OUTCOME_NSANITY_CHECK_NNOTES_NROADMAP_RE =
+  /^Outcome\n([\s\S]*?)(?:\nSanity check|\nNotes|\nRoadmap|$)/;
+const PATTERN_5C2E24_RE = /\.$/;
+const LLC_ISO_TRUSTPILOT_DUNS_GDPR_SOC_RE = /^(LLC|ISO\s*\d+|Trustpilot|DUNS|GDPR|SOC\s*2?)$/i;
+const LET_USERS_ENABLE_FIX_REDUCE_IMPROVE_RE =
+  /\b(let|users?|enable|fix|reduce|improve|ship|secure|file|publish|migrate|create|after|export|import|obtain|register|transfer|evaluate|research|connect|add|remove|upgrade|deploy|document)\b/i;
+const PATTERN_5C732B_RE = /\s+/;
+const DOCS_MD_DOCUMENTATION_RE = /docs\/|\.md|documentation/i;
+const APPS_MOBILE_MOBILE_RE = /apps\/mobile|Mobile:/i;
+const APPS_WEBAPP_WEBAPP_RE = /apps\/webapp|webapp/i;
+const CHROME_EXTENSION_RE = /chrome|extension/i;
+const APPS_API_API_RE = /apps\/api|\/api\//i;
+
 /**
  * Bulk-migrate MAIN Plane work items to bondery-pm conventions.
  * Run via Cursor agent with Plane MCP — this script documents migration logic.
@@ -55,12 +74,12 @@ const STATE_MAP = {
   [STATES.wontDo]: STATES.wontDo,
 };
 
-export function mapState(currentStateId) {
+function mapState(currentStateId) {
   return STATE_MAP[currentStateId] ?? currentStateId;
 }
 
 /** Strip an existing type prefix so inference can run again. */
-export function stripTitlePrefix(name) {
+function stripTitlePrefix(name) {
   return (name ?? "").trim().replace(TITLE_PREFIX_RE, "");
 }
 
@@ -73,28 +92,44 @@ const BUSINESS_OPS_RE =
 const FEATURE_RE =
   /\b(import data|export|onboarding tutorial|open contact|vcard|e2ee|encrypt|graph node|voice notes|smart (?:search|message)|related contacts|recommendation on who|mcp\/cli|ai parse|replace hero|double sidebar|monicahq|dex|filters in addition|mobile basic contact|keep in touch)\b/i;
 
+const PLACEHOLDER_OUTCOMES =
+  /^(what|overview|i18n|libsodium|maskot|tbd|pending review|see outcome(?:\s*—\s*pending review)?|n\/a)$/i;
+
+function capitalizeOutcome(sentence) {
+  const trimmed = sentence.replace(PATTERN_5C2E24_RE, "").trim();
+  if (!trimmed) {
+    return trimmed;
+  }
+  return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+if (process.argv[1]?.endsWith("migrate-main-board.mjs")) {
+  console.log(JSON.stringify({ LABELS, PROJECT_ID, STATES }, null, 2));
+}
+
 export function inferTypePrefix(item, labelIds) {
   const name = stripTitlePrefix(item.name ?? "");
   const desc = item.description_stripped ?? item.description_html ?? "";
   const text = `${name} ${desc}`;
   const labels = new Set(labelIds);
 
-  if (
-    labels.has(LABELS.legacyBugs) ||
-    /\b(bug|fix\b|broken|regression|crash|doesn'?t work)\b/i.test(name)
-  ) {
+  if (labels.has(LABELS.legacyBugs) || BUG_FIX_BROKEN_REGRESSION_CRASH_DOESN_RE.test(name)) {
     return "Bug";
   }
   if (labels.has(LABELS.legacyBigFeatures) || ROADMAP_RE.test(text)) {
     return "Feature";
   }
-  if (labels.has(LABELS.legacyBusiness) || /\b(ISO|SOC|tax|legal|GDPR|LLC)\b/i.test(name)) {
+  if (labels.has(LABELS.legacyBusiness) || ISO_SOC_TAX_LEGAL_GDPR_LLC_RE.test(name)) {
     return "Business Ops";
   }
   if (BUSINESS_OPS_RE.test(name)) {
     return "Business Ops";
   }
-  if (/\b(spike|evaluate|research|ADR)\b/i.test(text)) {
+  if (SPIKE_EVALUATE_RESEARCH_ADR_RE.test(text)) {
     return "Research";
   }
   if (FEATURE_RE.test(name)) {
@@ -103,11 +138,7 @@ export function inferTypePrefix(item, labelIds) {
   if (ENGINEERING_SUBTASK_RE.test(name)) {
     return "Chore";
   }
-  if (
-    /\b(upgrade|deps|compose|docker|traefik|env manifest|changelog|smoke|rls|migration tests)\b/i.test(
-      name,
-    )
-  ) {
+  if (UPGRADE_DEPS_COMPOSE_DOCKER_TRAEFIK_ENV_RE.test(name)) {
     return "Chore";
   }
   return "Chore";
@@ -118,13 +149,10 @@ export function formatTitle(item, typePrefix) {
   return `[${typePrefix}] ${raw}`;
 }
 
-const PLACEHOLDER_OUTCOMES =
-  /^(what|overview|i18n|libsodium|maskot|tbd|pending review|see outcome(?:\s*—\s*pending review)?|n\/a)$/i;
-
 /** First substantive line from the ## Outcome description section. */
 export function extractOutcome(descriptionStripped) {
   const text = descriptionStripped ?? "";
-  const match = text.match(/^Outcome\n([\s\S]*?)(?:\nSanity check|\nNotes|\nRoadmap|$)/);
+  const match = text.match(OUTCOME_NSANITY_CHECK_NNOTES_NROADMAP_RE);
   const line =
     match?.[1]
       ?.split("\n")
@@ -136,14 +164,6 @@ export function extractOutcome(descriptionStripped) {
   return line.replace(/\s+/g, " ").trim();
 }
 
-function capitalizeOutcome(sentence) {
-  const trimmed = sentence.replace(/\.$/, "").trim();
-  if (!trimmed) {
-    return trimmed;
-  }
-  return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
-}
-
 /** True when the title body already reads like an outcome, not a label or component. */
 export function isOutcomeOrientedTitle(body) {
   const title = (body ?? "").trim();
@@ -153,14 +173,11 @@ export function isOutcomeOrientedTitle(body) {
   if (ENGINEERING_SUBTASK_RE.test(title)) {
     return true;
   }
-  if (/^(LLC|ISO\s*\d+|Trustpilot|DUNS|GDPR|SOC\s*2?)$/i.test(title)) {
+  if (LLC_ISO_TRUSTPILOT_DUNS_GDPR_SOC_RE.test(title)) {
     return false;
   }
-  const words = title.split(/\s+/);
-  const hasOutcomeVerb =
-    /\b(let|users?|enable|fix|reduce|improve|ship|secure|file|publish|migrate|create|after|export|import|obtain|register|transfer|evaluate|research|connect|add|remove|upgrade|deploy|document)\b/i.test(
-      title,
-    );
+  const words = title.split(PATTERN_5C732B_RE);
+  const hasOutcomeVerb = LET_USERS_ENABLE_FIX_REDUCE_IMPROVE_RE.test(title);
   if (words.length <= 3 && !hasOutcomeVerb && title.length < 24) {
     return false;
   }
@@ -177,8 +194,8 @@ export function outcomeTitle(item, typePrefix) {
   if (!outcome || isOutcomeOrientedTitle(body)) {
     return formatTitle(item, typePrefix);
   }
-  const outcomeWords = outcome.split(/\s+/).length;
-  const bodyWords = body.split(/\s+/).length;
+  const outcomeWords = outcome.split(PATTERN_5C732B_RE).length;
+  const bodyWords = body.split(PATTERN_5C732B_RE).length;
   // Do not replace a descriptive title with a shorter label-like outcome.
   if (outcomeWords === 1 && bodyWords > 1) {
     return formatTitle(item, typePrefix);
@@ -210,15 +227,15 @@ export function inferLabels(item, labelIds) {
   }
 
   let surface = LABELS.surfaceInfra;
-  if (/docs\/|\.md|documentation/i.test(desc)) {
+  if (DOCS_MD_DOCUMENTATION_RE.test(desc)) {
     surface = LABELS.surfaceDocs;
-  } else if (/apps\/mobile|Mobile:/i.test(desc + name)) {
+  } else if (APPS_MOBILE_MOBILE_RE.test(desc + name)) {
     surface = LABELS.surfaceMobile;
-  } else if (/apps\/webapp|webapp/i.test(desc + name)) {
+  } else if (APPS_WEBAPP_WEBAPP_RE.test(desc + name)) {
     surface = LABELS.surfaceWebapp;
-  } else if (/chrome|extension/i.test(desc + name)) {
+  } else if (CHROME_EXTENSION_RE.test(desc + name)) {
     surface = LABELS.surfaceExtension;
-  } else if (/apps\/api|\/api\//i.test(desc + name)) {
+  } else if (APPS_API_API_RE.test(desc + name)) {
     surface = LABELS.surfaceApi;
   }
 
@@ -260,10 +277,6 @@ export function buildDescription(item) {
   return html;
 }
 
-function escapeHtml(s) {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-
 export function migrateItem(item) {
   const labelIds = item.labels ?? [];
   const typePrefix = inferTypePrefix(item, labelIds);
@@ -274,7 +287,7 @@ export function migrateItem(item) {
     .filter((id) => id && VALID_ASSIGNEES.has(id));
 
   return {
-    assignees: assigneeIds.length ? assigneeIds : [DEFAULT_OWNER],
+    assignees: assigneeIds.length > 0 ? assigneeIds : [DEFAULT_OWNER],
     description_html: buildDescription(item),
     labels: [source, surface],
     name: outcomeTitle(item, typePrefix),
@@ -286,6 +299,4 @@ export function migrateItem(item) {
   };
 }
 
-if (process.argv[1]?.endsWith("migrate-main-board.mjs")) {
-  console.log(JSON.stringify({ LABELS, PROJECT_ID, STATES }, null, 2));
-}
+export { mapState, stripTitlePrefix };

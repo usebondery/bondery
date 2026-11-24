@@ -13,14 +13,14 @@ export interface SpeechHandlers {
  * replace the browser adapter without a change in the text builder or the UI.
  */
 export interface SpeechEngine {
-  cancel(): void;
-  isSupported(): boolean;
-  pause(): void;
-  resume(): void;
+  cancel: () => void;
+  isSupported: () => boolean;
+  pause: () => void;
+  resume: () => void;
   /** Fires on natural end, cancel, and error. One listener, set once. */
-  setHandlers(handlers: SpeechHandlers): void;
+  setHandlers: (handlers: SpeechHandlers) => void;
   /** Start from the beginning. Replaces any current speech. */
-  speak(input: { lang: string; text: string }): void;
+  speak: (input: { lang: string; text: string }) => void;
 }
 
 /**

@@ -3,8 +3,6 @@
 import type { ReactNode } from "react";
 import { createContext, useContext, useState } from "react";
 
-export type OnboardingIntent = "personal" | "professional" | "both" | null;
-
 interface OnboardingContextValue {
   intent: OnboardingIntent;
   setIntent: (intent: OnboardingIntent) => void;
@@ -12,11 +10,13 @@ interface OnboardingContextValue {
 
 const OnboardingCtx = createContext<OnboardingContextValue | null>(null);
 
+export type OnboardingIntent = "personal" | "professional" | "both" | null;
+
 export function OnboardingProvider({ children }: { children: ReactNode }) {
   const [intent, setIntentState] = useState<OnboardingIntent>(null);
 
-  const setIntent = (value: OnboardingIntent) => {
-    setIntentState(value);
+  const setIntent = (nextIntent: OnboardingIntent) => {
+    setIntentState(nextIntent);
   };
 
   const value = { intent, setIntent };

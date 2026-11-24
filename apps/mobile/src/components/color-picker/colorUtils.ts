@@ -1,4 +1,5 @@
 import { hexColorSchema } from "@bondery/schemas";
+import { HEX_RADIX, parseHexChannels } from "../../lib/color";
 import { GROUP_COLOR_SWATCHES } from "./constants";
 
 const HEX_PATTERN = /^#?([0-9A-Fa-f]{6})$/;
@@ -8,11 +9,13 @@ export function normalizeHex(value: string): string {
   const candidate = trimmed.startsWith("#") ? trimmed : `#${trimmed}`;
   const match = HEX_PATTERN.exec(candidate);
 
-  if (!match) {
+  const hex = match?.[1];
+
+  if (hex === undefined) {
     return "";
   }
 
-  return `#${match[1].toLowerCase()}`;
+  return `#${hex.toLowerCase()}`;
 }
 
 export function isValidHex(value: string): boolean {
@@ -44,9 +47,7 @@ export function getContrastBorderColor(
     return defaultBorder;
   }
 
-  const red = Number.parseInt(normalized.slice(1, 3), 16);
-  const green = Number.parseInt(normalized.slice(3, 5), 16);
-  const blue = Number.parseInt(normalized.slice(5, 7), 16);
+  const { red, green, blue } = parseHexChannels(normalized.slice(1));
   const luminance = (0.299 * red + 0.587 * green + 0.114 * blue) / 255;
 
   if (luminance > 0.88 || luminance < 0.12) {
@@ -65,7 +66,7 @@ export function hexWithAlpha(hex: string, alpha: number): string {
 
   const clampedAlpha = Math.max(0, Math.min(1, alpha));
   const alphaHex = Math.round(clampedAlpha * 255)
-    .toString(16)
+    .toString(HEX_RADIX)
     .padStart(2, "0");
 
   return `${normalized}${alphaHex}`;

@@ -6,6 +6,7 @@ import type { WorkHistoryEntry } from "@bondery/schemas";
 import { Avatar, Group, Spoiler, Stack, Text } from "@mantine/core";
 import { IconBriefcase } from "@tabler/icons-react";
 import { useLinkedInDataTranslations } from "@/lib/i18n/generated/hooks";
+import { useDateFormatter } from "@/lib/i18n/useDateFormatter";
 
 interface WorkHistoryCardProps {
   entry: WorkHistoryEntry;
@@ -19,9 +20,10 @@ interface WorkHistoryCardProps {
  */
 export function WorkHistoryCard({ entry }: WorkHistoryCardProps) {
   const t = useLinkedInDataTranslations();
+  const formatter = useDateFormatter();
 
-  const dateRange = formatDateRange(entry.startDate, entry.endDate, t("Present"));
-  const duration = formatDuration(entry.startDate, entry.endDate);
+  const dateRange = formatDateRange(entry.startDate, entry.endDate, formatter.ctx, t("Present"));
+  const duration = formatDuration(entry.startDate, entry.endDate, formatter.ctx);
 
   const companyNameElement = entry.companyLinkedinUrl ? (
     <AnchorLink fw={500} href={hrefAssert(entry.companyLinkedinUrl)} size="sm" target="_blank">
@@ -46,30 +48,30 @@ export function WorkHistoryCard({ entry }: WorkHistoryCardProps) {
       </Avatar>
 
       <Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
-        {entry.title && (
+        {entry.title ? (
           <Text fw={600} lineClamp={1} size="sm">
             {entry.title}
           </Text>
-        )}
+        ) : null}
         {companyNameElement}
-        {dateRange && (
+        {dateRange ? (
           <Text c="dimmed" size="xs">
             {dateRange}
             {duration ? ` (${duration})` : ""}
           </Text>
-        )}
-        {(entry.employmentType || entry.location) && (
+        ) : null}
+        {entry.employmentType || entry.location ? (
           <Text c="dimmed" size="xs">
             {[entry.employmentType, entry.location].filter(Boolean).join(" · ")}
           </Text>
-        )}
-        {entry.description && (
+        ) : null}
+        {entry.description ? (
           <Spoiler hideLabel={t("ShowLess")} maxHeight={60} mt={4} showLabel={t("ShowMore")}>
             <Text c="dimmed" size="xs" style={{ whiteSpace: "pre-wrap" }}>
               {entry.description}
             </Text>
           </Spoiler>
-        )}
+        ) : null}
       </Stack>
     </Group>
   );

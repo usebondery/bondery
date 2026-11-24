@@ -8,7 +8,6 @@ import {
   useMobileContactIdentityTranslations,
 } from "@/lib/i18n/generated/hooks";
 import { PersonAvatar } from "../../../components/PersonAvatar";
-import { Heading } from "../../../components/ui/Heading";
 import { Text } from "../../../components/ui/Text";
 import { usePressSqueeze } from "../../../components/ui/usePressSqueeze";
 import { MOBILE_LAYOUT } from "../../../theme/tokens";
@@ -59,9 +58,15 @@ export function ContactDetailHeroSection({
         <View style={styles.heroAvatarWrap}>
           <PersonAvatar person={contact} size={MOBILE_LAYOUT.avatar.hero} uri={contact.avatar} />
         </View>
-        <Heading className="text-center text-[24px]" order={2} ta="center">
+        <Text
+          accessibilityRole="header"
+          c="default"
+          className="text-2xl font-bold"
+          size={null}
+          ta="center"
+        >
           {name}
-        </Heading>
+        </Text>
         {contact.headline ? (
           <Text c="secondary" className="text-center" size="md" ta="center">
             {contact.headline}

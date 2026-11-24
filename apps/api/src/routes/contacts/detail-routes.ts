@@ -64,7 +64,7 @@ export function registerContactDetailRoutes(fastify: AppFastifyInstance): void {
     async (request) => {
       const ctx = domainContextFromRequest(request);
       const { id } = request.params;
-      const body = request.body;
+      const { body } = request;
 
       const { data, txid } = await updateContact(ctx, {
         patch: body,

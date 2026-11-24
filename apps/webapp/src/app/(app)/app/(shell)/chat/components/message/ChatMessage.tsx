@@ -141,11 +141,8 @@ export function ChatMessage({
 
   // A stored message always has a time. Live turns carry one from send or finish.
   const sentDate = sentAt ?? new Date();
-  const timeLabel = formatter.dateTime(sentDate, { hour: "numeric", minute: "2-digit" });
-  const fullTimeLabel = formatter.dateTime(sentDate, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
+  const timeLabel = formatter.formatTime(sentDate);
+  const fullTimeLabel = formatter.formatDateTime(sentDate);
 
   const showStoppedNotice =
     !isUser && activity?.status === "incomplete" && !isStreaming && !pendingApproval;
@@ -185,7 +182,7 @@ export function ChatMessage({
       }}
     >
       {/* Assistant avatar */}
-      {!isUser && (
+      {!isUser ? (
         <Box
           style={{
             alignItems: "center",
@@ -201,24 +198,24 @@ export function ChatMessage({
         >
           <IconMessageCircle color="var(--mantine-primary-color-filled)" size={18} />
         </Box>
-      )}
+      ) : null}
 
       <Box style={{ maxWidth: "75%", minWidth: 0 }}>
-        {!isUser && (showLive || storedActivities.length > 0) && (
+        {!isUser && (showLive || storedActivities.length > 0) ? (
           <ChatToolSteps
             activities={showLive ? liveActivities : storedActivities}
             collapseReads={collapseReads}
             running={stepsRunning}
           />
-        )}
-        {pendingApproval && approval && (
+        ) : null}
+        {pendingApproval && approval ? (
           <ChatDeleteConfirm
             onCancel={approval.onCancel}
             onConfirm={approval.onConfirm}
             pending={approval.pending}
             toolName={pendingApproval.toolName}
           />
-        )}
+        ) : null}
         {isEmptyAssistant ? null : (
           <Paper
             p="sm"
@@ -272,11 +269,11 @@ export function ChatMessage({
           </Paper>
         )}
 
-        {showStoppedNotice && (
+        {showStoppedNotice ? (
           <ChatIncompleteNotice mayHaveSaved={activity?.writeMayHaveLanded === true} />
-        )}
+        ) : null}
 
-        {(showTime || showRetry || canCopy || canSpeak) && (
+        {showTime || showRetry || canCopy || canSpeak ? (
           <Box
             mt={4}
             style={{
@@ -286,16 +283,18 @@ export function ChatMessage({
               justifyContent: isUser ? "flex-end" : "flex-start",
             }}
           >
-            {canCopy && (
+            {canCopy ? (
               <CopyButton
                 className="no-scale"
                 copiedLabel={t("copyMessageSuccess")}
                 copyLabel={t("copyMessage")}
                 value={copyValue}
               />
-            )}
-            {canSpeak && <ChatMessageSpeakButton messageId={message.id} prepare={prepareSpeech} />}
-            {showRetry && (
+            ) : null}
+            {canSpeak ? (
+              <ChatMessageSpeakButton messageId={message.id} prepare={prepareSpeech} />
+            ) : null}
+            {showRetry ? (
               <Tooltip label={t("activity.regenerate")}>
                 <ActionIconButton
                   aria-label={t("activity.regenerate")}
@@ -307,20 +306,20 @@ export function ChatMessage({
                   variant="subtle"
                 />
               </Tooltip>
-            )}
-            {showTime && (
+            ) : null}
+            {showTime ? (
               <Tooltip label={fullTimeLabel}>
                 <Text c="dimmed" size="xs">
                   {timeLabel}
                 </Text>
               </Tooltip>
-            )}
+            ) : null}
           </Box>
-        )}
+        ) : null}
       </Box>
 
       {/* User avatar */}
-      {isUser && (
+      {isUser ? (
         <Box style={{ flexShrink: 0, marginTop: 4 }}>
           <Avatar
             color="var(--mantine-primary-color-filled)"
@@ -330,7 +329,7 @@ export function ChatMessage({
             src={userAvatarUrl ?? undefined}
           />
         </Box>
-      )}
+      ) : null}
     </Box>
   );
 }

@@ -28,7 +28,7 @@ describe("buildSecurityTxt", () => {
   });
 });
 
-describe("BONDERY_PGP_PUBLIC_KEY", () => {
+describe("bondery pgp public key", () => {
   it("starts with a PGP public key armor header", () => {
     assert.equal(BONDERY_PGP_PUBLIC_KEY.startsWith("-----BEGIN PGP PUBLIC KEY BLOCK-----"), true);
   });

@@ -36,7 +36,8 @@ function assertRequiredScopes(payload: JWTPayload, requiredScopes: readonly stri
   if (requiredScopes.length === 0) {
     return;
   }
-  const granted = typeof payload.scope === "string" ? payload.scope.split(" ").filter(Boolean) : [];
+  const granted =
+    typeof payload["scope"] === "string" ? payload["scope"].split(" ").filter(Boolean) : [];
   const grantedSet = new Set(granted);
   const missingScopes = requiredScopes.filter((scope) => !grantedSet.has(scope));
   if (missingScopes.length > 0) {

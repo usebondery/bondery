@@ -1,0 +1,32 @@
+{
+  "AddAction": "Pridėti datą",
+  "AddHint": "Norint pridėti naują datą, užpildyk visą informaciją.",
+  "AddImportantDate": "Pridėti svarbią datą",
+  "BirthdayDateLabel": "Pasirink gimtadienį",
+  "DatePlaceholder": "Pasirink datą",
+  "DeleteAction": "Ištrinti",
+  "DraftIncompleteError": "Norint pridėti naują datą, užpildyk visą informaciją.",
+  "Empty": "Svarbių datų dar nėra.",
+  "ErrorTitle": "Klaida",
+  "NotePlaceholder": "Neprivaloma pastaba",
+  "NotifyDayBefore": "Pranešti {count} dieną prieš",
+  "NotifyDaysBefore": "Pranešti {count} dienas prieš",
+  "NotifyMe": "Pranešti man",
+  "NotifyNone": "Nepranešti",
+  "SuccessTitle": "Pavyko",
+  "Title": "Svarbios datos",
+  "TypeDisabledBirthdateHint": "{firstName} jau turi nurodytą gimtadienį",
+  "TypeDisabledHint": "{firstName} jau turi nurodytą gimtadienį ar vardų dieną",
+  "TypeDisabledNamedateHint": "{firstName} jau turi nurodytą vardų dieną",
+  "TypePlaceholder": "Pasirink tipą",
+  "Types": {
+    "anniversary": "Jubiliejus",
+    "birthday": "Gimtadienis",
+    "graduation": "Absolvavimas",
+    "nameday": "Vardų diena",
+    "other": "Kita"
+  },
+  "UniqueTypeError": "Galima pridėti tik vieną {type}.",
+  "UpdateError": "Nepavyko atnaujinti svarbių datų",
+  "UpdateSuccess": "Svarbios datos sėkmingai atnaujintos"
+}

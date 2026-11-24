@@ -1,5 +1,6 @@
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
-import { type ComponentRef, forwardRef, type ReactNode, type Ref, useState } from "react";
+import { cn } from "cn";
+import { type ComponentRef, type ReactNode, type Ref, useState } from "react";
 import {
   TextInput as RNTextInput,
   type TextInputProps as RNTextInputProps,
@@ -9,7 +10,6 @@ import {
 import type { NativeTextInputRef } from "../../lib/native-host-refs";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { InputWrapper } from "./InputWrapper";
-import { joinClassNames } from "./joinClassNames";
 
 export type TextInputVariant = "default" | "sheet";
 
@@ -20,6 +20,7 @@ export type TextInputProps = Omit<RNTextInputProps, "style"> & {
   errorMessage?: string;
   label?: string;
   leftSection?: ReactNode;
+  ref?: Ref<NativeTextInputRef>;
   rightSection?: ReactNode;
   statusMessage?: string;
   style?: RNTextInputProps["style"];
@@ -31,32 +32,30 @@ export type TextInputProps = Omit<RNTextInputProps, "style"> & {
   wrapperStyle?: ViewStyle;
 };
 
-export const TextInput = forwardRef<NativeTextInputRef, TextInputProps>(function TextInput(
-  {
-    className,
-    description,
-    error = false,
-    errorMessage,
-    label,
-    leftSection,
-    onBlur,
-    onFocus,
-    rightSection,
-    statusMessage,
-    style,
-    variant = "default",
-    wrapperStyle,
-    ...inputRest
-  },
+export function TextInput({
+  className,
+  description,
+  error = false,
+  errorMessage,
+  label,
+  leftSection,
+  onBlur,
+  onFocus,
   ref,
-) {
+  rightSection,
+  statusMessage,
+  style,
+  variant = "default",
+  wrapperStyle,
+  ...inputRest
+}: TextInputProps) {
   const colors = useMobileThemeColors();
   const [isFocused, setIsFocused] = useState(false);
-  const hasError = error || Boolean(errorMessage);
+  const hasError = error === true || Boolean(errorMessage);
   const borderColor = hasError ? colors.dangerAccent : isFocused ? colors.primary : colors.border;
   const isSheet = variant === "sheet";
 
-  const inputClassName = joinClassNames("min-h-[44px] flex-1 text-[15px]", className);
+  const inputClassName = cn("min-h-touch text-input flex-1", className);
   const inputStyle = [{ color: colors.textPrimary }, style];
 
   const handleFocus = (event: Parameters<NonNullable<RNTextInputProps["onFocus"]>>[0]) => {
@@ -87,9 +86,9 @@ export const TextInput = forwardRef<NativeTextInputRef, TextInputProps>(function
       statusMessage={statusMessage}
     >
       <View
-        className={joinClassNames(
-          "min-h-[44px] w-full flex-row items-center rounded-[10px] border px-3",
-          leftSection || rightSection ? "gap-2" : undefined,
+        className={cn(
+          "min-h-touch rounded-control w-full flex-row items-center border px-3",
+          (leftSection || rightSection) && "gap-2",
         )}
         style={[
           {
@@ -100,7 +99,7 @@ export const TextInput = forwardRef<NativeTextInputRef, TextInputProps>(function
           hasError || isFocused ? { borderColor } : undefined,
         ]}
       >
-        {leftSection ? <View className="flex-shrink-0">{leftSection}</View> : null}
+        {leftSection ? <View className="shrink-0">{leftSection}</View> : null}
         {isSheet ? (
           <BottomSheetTextInput
             {...nativeFieldProps}
@@ -116,8 +115,8 @@ export const TextInput = forwardRef<NativeTextInputRef, TextInputProps>(function
             ref={ref as Ref<ComponentRef<typeof RNTextInput>>}
           />
         )}
-        {rightSection ? <View className="flex-shrink-0">{rightSection}</View> : null}
+        {rightSection ? <View className="shrink-0">{rightSection}</View> : null}
       </View>
     </InputWrapper>
   );
-});
+}

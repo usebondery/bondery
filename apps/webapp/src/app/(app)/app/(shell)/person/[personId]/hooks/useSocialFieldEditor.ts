@@ -8,7 +8,8 @@ import type { Contact } from "@bondery/schemas";
 import { notifications } from "@mantine/notifications";
 import { useEffect, useRef, useState } from "react";
 import { useCommonTranslations, useSocialsTranslations } from "@/lib/i18n/generated/hooks";
-import { useUpdateContactMutation } from "@/lib/query/hooks/useContacts";
+import { useUpdateContactMutation } from "@/lib/query/hooks/useContactMutations";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 import {
   createEmptySavingByField,
   getDisplayDraftForPersisted,
@@ -21,15 +22,15 @@ import {
 } from "../utils/socialFieldEditorTypes";
 import { useSocialFieldEditorInteractions } from "./useSocialFieldEditorInteractions";
 
-export type { RerouteSuggestion, SocialFieldKey } from "../utils/socialFieldEditorTypes";
-export { isSavableSocialField } from "../utils/socialFieldEditorTypes";
-
 interface UseSocialFieldEditorOptions {
   contact: Contact;
   fieldLabels: Record<SocialFieldKey, string>;
   personId: string;
   validationErrorTitle: string;
 }
+
+export type { RerouteSuggestion, SocialFieldKey } from "../utils/socialFieldEditorTypes";
+export { isSavableSocialField } from "../utils/socialFieldEditorTypes";
 
 export function useSocialFieldEditor({
   contact,
@@ -47,10 +48,10 @@ export function useSocialFieldEditor({
   const persistedRef = useRef(persisted);
 
   const [whatsappPrefix, setWhatsappPrefix] = useState(
-    () => parsePhoneNumber(contact.whatsapp || "")?.dialCode || "+1",
+    () => nonEmpty(parsePhoneNumber(contact.whatsapp ?? "")?.dialCode) ?? "+1",
   );
   const [signalPrefix, setSignalPrefix] = useState(
-    () => parsePhoneNumber(contact.signal || "")?.dialCode || "+1",
+    () => nonEmpty(parsePhoneNumber(contact.signal ?? "")?.dialCode) ?? "+1",
   );
   const whatsappPrefixRef = useRef(whatsappPrefix);
   const signalPrefixRef = useRef(signalPrefix);
@@ -61,6 +62,9 @@ export function useSocialFieldEditor({
 
   const [savingByField, setSavingByField] = useState(createEmptySavingByField);
   const savingInFlightRef = useRef(createEmptySavingByField());
+  const setSavingInFlight = (field: SocialFieldKey, inFlight: boolean) => {
+    savingInFlightRef.current[field] = inFlight;
+  };
 
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<SocialFieldKey, string>>>({});
   const [rerouteSuggestion, setRerouteSuggestion] = useState<RerouteSuggestion | null>(null);
@@ -106,10 +110,7 @@ export function useSocialFieldEditor({
     if (field === "whatsapp") {
       return whatsappPrefixRef.current;
     }
-    if (field === "signal") {
-      return signalPrefixRef.current;
-    }
-    return undefined;
+    return field === "signal" ? signalPrefixRef.current : undefined;
   };
 
   const clearFieldError = (field: SocialFieldKey) => {
@@ -117,8 +118,7 @@ export function useSocialFieldEditor({
       if (!previous[field]) {
         return previous;
       }
-      const next = { ...previous };
-      delete next[field];
+      const { [field]: _removed, ...next } = previous;
       return next;
     });
   };
@@ -152,10 +152,10 @@ export function useSocialFieldEditor({
 
     if (field === "whatsapp") {
       const parsed = parsePhoneNumber(persistedValue);
-      setWhatsappPrefix(parsed?.dialCode || "+1");
+      setWhatsappPrefix(nonEmpty(parsed?.dialCode) ?? "+1");
     } else if (field === "signal") {
       const parsed = parsePhoneNumber(persistedValue);
-      setSignalPrefix(parsed?.dialCode || "+1");
+      setSignalPrefix(nonEmpty(parsed?.dialCode) ?? "+1");
     }
 
     clearFieldError(field);
@@ -170,7 +170,7 @@ export function useSocialFieldEditor({
       return false;
     }
 
-    savingInFlightRef.current[field] = true;
+    setSavingInFlight(field, true);
     setSavingByField((previous) => ({ ...previous, [field]: true }));
 
     try {
@@ -218,7 +218,7 @@ export function useSocialFieldEditor({
       );
       return false;
     } finally {
-      savingInFlightRef.current[field] = false;
+      setSavingInFlight(field, false);
       setSavingByField((previous) => ({ ...previous, [field]: false }));
     }
   };
@@ -258,7 +258,7 @@ export function useSocialFieldEditor({
       return false;
     }
 
-    const skipReroute = options?.skipReroute || keepHereFieldsRef.current.has(field);
+    const skipReroute = options?.skipReroute === true || keepHereFieldsRef.current.has(field);
 
     const analysis = analyzeSocialFieldInput(
       field,
@@ -391,8 +391,8 @@ export function useSocialFieldEditor({
     persistedRef.current = nextPersisted;
     setPersisted(nextPersisted);
 
-    setWhatsappPrefix(parsePhoneNumber(nextPersisted.whatsapp || "")?.dialCode || "+1");
-    setSignalPrefix(parsePhoneNumber(nextPersisted.signal || "")?.dialCode || "+1");
+    setWhatsappPrefix(nonEmpty(parsePhoneNumber(nextPersisted.whatsapp ?? "")?.dialCode) ?? "+1");
+    setSignalPrefix(nonEmpty(parsePhoneNumber(nextPersisted.signal ?? "")?.dialCode) ?? "+1");
 
     setDrafts((previous) => {
       if (open && isSavableSocialField(open)) {

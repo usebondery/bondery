@@ -2,7 +2,7 @@ import { z } from "zod";
 import { AVATAR_UPLOAD, CONTACT_FIELD_MAX_LENGTHS } from "#constants/index.js";
 import { contactIdSchema } from "#contact-id/index.js";
 import { shareContactEmailSchema } from "../channels/schema.js";
-import { shareableFieldSchema } from "../contact/schema.js";
+import { shareableFieldSchema } from "../contact/share-schema.js";
 import type {
   ApiSuccessResponse,
   AvatarQuality,

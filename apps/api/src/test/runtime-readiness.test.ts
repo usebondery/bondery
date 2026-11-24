@@ -4,6 +4,12 @@ import type { S3Client } from "@aws-sdk/client-s3";
 
 import { loadTestEnv } from "./load-test-env.js";
 
+const DATABASE_URL_MUST_BE_SET_PATTERN = /DATABASE_URL must be set/;
+const POSTGRES_VERIFY_FAILED_PATTERN = /Postgres verify failed/;
+const BONDERY_PRIVATE_S3_MUST_BE_SET_PATTERN = /BONDERY_PRIVATE_S3_\* must be set/;
+const OBJECT_STORAGE_VERIFY_FAILED_PATTERN = /Object storage verify failed/;
+const BONDERY_PRIVATE_REDIS_URL_MUST_BE_SET_PATTERN = /BONDERY_PRIVATE_REDIS_URL must be set/;
+
 loadTestEnv();
 
 const { prisma } = await import("@bondery/db");
@@ -51,9 +57,9 @@ type EnvSnapshot = {
 
 function snapshotEnv(): EnvSnapshot {
   return {
-    databaseUrl: process.env.DATABASE_URL,
-    nodeEnv: process.env.NODE_ENV,
-    redisUrl: process.env.BONDERY_PRIVATE_REDIS_URL,
+    databaseUrl: process.env["DATABASE_URL"],
+    nodeEnv: process.env["NODE_ENV"],
+    redisUrl: process.env["BONDERY_PRIVATE_REDIS_URL"],
   };
 }
 
@@ -61,7 +67,7 @@ function restoreEnv(snapshot: EnvSnapshot): void {
   const restore = (key: keyof EnvSnapshot, envKey: string) => {
     const value = snapshot[key];
     if (value === undefined) {
-      delete process.env[envKey];
+      Reflect.deleteProperty(process.env, envKey);
     } else {
       process.env[envKey] = value;
     }
@@ -84,8 +90,8 @@ describe("postgres runtime readiness", () => {
   });
 
   it("initPostgres skips verify when DATABASE_URL is missing in test", async () => {
-    process.env.NODE_ENV = "test";
-    delete process.env.DATABASE_URL;
+    process.env["NODE_ENV"] = "test";
+    delete process.env["DATABASE_URL"];
 
     const readiness = await initPostgres();
 
@@ -94,25 +100,25 @@ describe("postgres runtime readiness", () => {
   });
 
   it("initPostgres throws when DATABASE_URL is missing in development", async () => {
-    process.env.NODE_ENV = "development";
-    delete process.env.DATABASE_URL;
+    process.env["NODE_ENV"] = "development";
+    delete process.env["DATABASE_URL"];
 
-    await assert.rejects(() => initPostgres(), /DATABASE_URL must be set/);
+    await assert.rejects(() => initPostgres(), DATABASE_URL_MUST_BE_SET_PATTERN);
   });
 
   it("initPostgres throws when query fails in development", async () => {
-    process.env.NODE_ENV = "development";
-    process.env.DATABASE_URL = "postgresql://user:pass@127.0.0.1:5432/bondery";
+    process.env["NODE_ENV"] = "development";
+    process.env["DATABASE_URL"] = "postgresql://user:pass@127.0.0.1:5432/bondery";
     prisma.$queryRaw = (async () => {
       throw new Error("connection refused");
     }) as typeof prisma.$queryRaw;
 
-    await assert.rejects(() => initPostgres(), /Postgres verify failed/);
+    await assert.rejects(() => initPostgres(), POSTGRES_VERIFY_FAILED_PATTERN);
   });
 
   it("verifyPostgres returns unhealthy when DATABASE_URL is missing outside test", async () => {
-    process.env.NODE_ENV = "development";
-    delete process.env.DATABASE_URL;
+    process.env["NODE_ENV"] = "development";
+    delete process.env["DATABASE_URL"];
 
     const readiness = await verifyPostgres();
 
@@ -122,8 +128,8 @@ describe("postgres runtime readiness", () => {
   });
 
   it("probePostgres delegates to verifyPostgres", async () => {
-    process.env.NODE_ENV = "test";
-    delete process.env.DATABASE_URL;
+    process.env["NODE_ENV"] = "test";
+    delete process.env["DATABASE_URL"];
 
     const result = await probePostgres();
 
@@ -140,7 +146,7 @@ describe("object storage runtime readiness", () => {
   });
 
   it("initObjectStorage skips verify when S3 env is incomplete in test", async () => {
-    process.env.NODE_ENV = "test";
+    process.env["NODE_ENV"] = "test";
 
     const readiness = await initObjectStorage(undefined, {
       ...storageConfig,
@@ -152,7 +158,7 @@ describe("object storage runtime readiness", () => {
   });
 
   it("initObjectStorage throws when S3 env is incomplete in development", async () => {
-    process.env.NODE_ENV = "development";
+    process.env["NODE_ENV"] = "development";
 
     await assert.rejects(
       () =>
@@ -160,25 +166,27 @@ describe("object storage runtime readiness", () => {
           ...storageConfig,
           secretAccessKey: "",
         }),
-      /BONDERY_PRIVATE_S3_\* must be set/,
+      BONDERY_PRIVATE_S3_MUST_BE_SET_PATTERN,
     );
   });
 
   it("initObjectStorage throws when HeadBucket fails", async () => {
-    process.env.NODE_ENV = "development";
+    process.env["NODE_ENV"] = "development";
     const client = createMockHeadBucketClient(() => {
       throw new Error("NotFound");
     });
 
     await assert.rejects(
       () => initObjectStorage(undefined, { ...storageConfig, client }),
-      /Object storage verify failed/,
+      OBJECT_STORAGE_VERIFY_FAILED_PATTERN,
     );
   });
 
   it("initObjectStorage succeeds when HeadBucket succeeds without a /status server", async () => {
-    process.env.NODE_ENV = "development";
-    const client = createMockHeadBucketClient(async () => {});
+    process.env["NODE_ENV"] = "development";
+    const client = createMockHeadBucketClient(async () => {
+      // HeadBucket succeeds: the bucket is already present.
+    });
 
     const readiness = await initObjectStorage(undefined, { ...storageConfig, client });
 
@@ -187,8 +195,10 @@ describe("object storage runtime readiness", () => {
   });
 
   it("verifyObjectStorage succeeds when HeadBucket succeeds without a /status server", async () => {
-    process.env.NODE_ENV = "development";
-    const client = createMockHeadBucketClient(async () => {});
+    process.env["NODE_ENV"] = "development";
+    const client = createMockHeadBucketClient(async () => {
+      // HeadBucket succeeds: the bucket is already present.
+    });
 
     const readiness = await verifyObjectStorage({ ...storageConfig, client });
 
@@ -197,7 +207,7 @@ describe("object storage runtime readiness", () => {
   });
 
   it("verifyObjectStorage returns unhealthy when config is incomplete outside test", async () => {
-    process.env.NODE_ENV = "development";
+    process.env["NODE_ENV"] = "development";
 
     const readiness = await verifyObjectStorage({
       ...storageConfig,
@@ -220,15 +230,15 @@ describe("prisma pool injection", () => {
   });
 
   it("initializePrisma wires an explicit pool", async () => {
-    process.env.NODE_ENV = "test";
-    process.env.DATABASE_URL = "postgresql://user:pass@127.0.0.1:5432/bondery";
+    process.env["NODE_ENV"] = "test";
+    process.env["DATABASE_URL"] = "postgresql://user:pass@127.0.0.1:5432/bondery";
 
     const { createPrismaPool, getPrismaPool, initializePrisma, resetPrismaForTests } = await import(
       "@bondery/db"
     );
     resetPrismaForTests();
 
-    const pool = createPrismaPool(process.env.DATABASE_URL);
+    const pool = createPrismaPool(process.env["DATABASE_URL"]);
     initializePrisma(pool);
 
     assert.equal(getPrismaPool(), pool);
@@ -244,7 +254,7 @@ describe("redis runtime readiness", () => {
   });
 
   it("initRedis skips verify when URL is missing in test", async () => {
-    process.env.NODE_ENV = "test";
+    process.env["NODE_ENV"] = "test";
 
     const result = await initRedis(undefined, "");
 
@@ -254,13 +264,16 @@ describe("redis runtime readiness", () => {
   });
 
   it("initRedis throws when URL is missing in development", async () => {
-    process.env.NODE_ENV = "development";
+    process.env["NODE_ENV"] = "development";
 
-    await assert.rejects(() => initRedis(undefined, ""), /BONDERY_PRIVATE_REDIS_URL must be set/);
+    await assert.rejects(
+      () => initRedis(undefined, ""),
+      BONDERY_PRIVATE_REDIS_URL_MUST_BE_SET_PATTERN,
+    );
   });
 
   it("verifyRedis returns unhealthy when URL is missing outside test", async () => {
-    process.env.NODE_ENV = "development";
+    process.env["NODE_ENV"] = "development";
 
     const readiness = await verifyRedis("");
 
@@ -270,7 +283,7 @@ describe("redis runtime readiness", () => {
   });
 
   it("probeRedis delegates to verifyRedis", async () => {
-    process.env.NODE_ENV = "test";
+    process.env["NODE_ENV"] = "test";
 
     const result = await probeRedis("");
 

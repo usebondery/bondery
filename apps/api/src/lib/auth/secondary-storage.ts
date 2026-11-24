@@ -2,13 +2,13 @@ import { redisStorage } from "@better-auth/redis-storage";
 import { requireRedisCommands } from "../data/redis.js";
 import logger from "../platform/logger.js";
 
-export const BETTER_AUTH_REDIS_KEY_PREFIX = "bondery:auth:" as const;
-
 type RedisSecondaryStorage = ReturnType<typeof redisStorage>;
 
 function warnSecondaryStorageError(operation: string, error: unknown): void {
   logger.warn({ err: error, operation }, "[auth-secondary-storage] operation failed");
 }
+
+export const BETTER_AUTH_REDIS_KEY_PREFIX = "bondery:auth:" as const;
 
 /** @internal Exported for unit tests. */
 export function wrapWithResilience(storage: RedisSecondaryStorage): RedisSecondaryStorage {

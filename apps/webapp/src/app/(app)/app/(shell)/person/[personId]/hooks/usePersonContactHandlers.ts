@@ -1,6 +1,7 @@
 "use client";
 
 import { extractUsername } from "@bondery/helpers";
+import { detachPromise } from "@bondery/helpers/async";
 import { combinePhoneNumber } from "@bondery/helpers/phone";
 import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
 import type { Contact, EmailEntry, ImportantDate, PhoneEntry } from "@bondery/schemas";
@@ -13,7 +14,7 @@ import type {
   usePutContactImportantDatesMutation,
   useUpdateContactMutation,
   useUpdateContactRelationshipMutation,
-} from "@/lib/query/hooks/useContacts";
+} from "@/lib/query/hooks/useContactMutations";
 import { usePersonAddressSave } from "./usePersonAddressSave";
 import { usePersonRelationshipHandlers } from "./usePersonRelationshipHandlers";
 
@@ -121,7 +122,7 @@ export function usePersonContactHandlers({
           title: tInteractions("SuccessTitle"),
         }),
       );
-    } catch (_error) {
+    } catch {
       notifications.show(
         errorNotificationTemplate({
           description: `Failed to update ${field === "timezone" ? "timezone" : "language"}`,
@@ -176,7 +177,7 @@ export function usePersonContactHandlers({
     if (!contact || !personId) {
       return;
     }
-    const keepFrequencyDays = value && value !== "none" ? parseInt(value, 10) : null;
+    const keepFrequencyDays = value && value !== "none" ? Number.parseInt(value, 10) : null;
     try {
       await updateContactMutation.mutateAsync({ keepFrequencyDays });
       setContact((prev) => ({ ...prev, keepFrequencyDays }) as Contact);
@@ -202,13 +203,17 @@ export function usePersonContactHandlers({
     }
 
     const sourcePhones = phonesOverride ?? phones;
-    const phonesToSave = sourcePhones
-      .filter((phone) => phone.value && phone.value.trim() !== "")
-      .map((phone) => ({
+    const phonesToSave: PhoneEntry[] = [];
+    for (const phone of sourcePhones) {
+      if (!phone.value || phone.value.trim() === "") {
+        continue;
+      }
+      phonesToSave.push({
         ...phone,
         prefix: phone.prefix || "+1",
         value: phone.value.trim(),
-      }));
+      });
+    }
 
     const currentPhones = Array.isArray(contact.phones) ? contact.phones : [];
     if (JSON.stringify(phonesToSave) === JSON.stringify(currentPhones)) {
@@ -290,7 +295,7 @@ export function usePersonContactHandlers({
       tasks.push(handleSaveEmails(payload.emails));
     }
 
-    if (!tasks.length) {
+    if (tasks.length === 0) {
       tasks.push(handleSavePhones());
       tasks.push(handleSaveEmails());
     }
@@ -407,7 +412,7 @@ export function usePersonContactHandlers({
   };
 
   const handleContactFieldBlur = (field: string, value: string) => {
-    void handleContactFieldSave(field, value);
+    detachPromise(handleContactFieldSave(field, value));
   };
 
   return {

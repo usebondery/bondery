@@ -1,7 +1,5 @@
 import type { SortOrder } from "@/lib/api/resources/contacts";
 
-export const DEFAULT_CONTACTS_SORT: SortOrder = "nameAsc";
-
 const SORT_ORDERS = new Set<SortOrder>([
   "nameAsc",
   "nameDesc",
@@ -16,6 +14,8 @@ const SORT_ORDERS = new Set<SortOrder>([
 function isSortOrder(value: string | undefined): value is SortOrder {
   return value !== undefined && SORT_ORDERS.has(value as SortOrder);
 }
+
+export const DEFAULT_CONTACTS_SORT: SortOrder = "nameAsc";
 
 /** Normalized search + sort + tag ids used for contacts list query keys, API calls, and table UI. */
 export type ContactsListFilterParams = {

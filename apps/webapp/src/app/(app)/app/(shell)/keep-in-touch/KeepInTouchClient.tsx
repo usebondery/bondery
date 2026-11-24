@@ -26,14 +26,13 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { openNewActivityModal } from "@/app/(app)/app/(shell)/interactions/components/NewActivityModal";
 import { PageHeader } from "@/components/shell/PageHeader";
-import { useCurrentLocale as useLocale } from "@/components/shell/UserLocaleProvider";
 import { useKeepInTouchTranslations } from "@/lib/i18n/generated/hooks";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 import { setOptimisticDocumentTitle } from "@/lib/metadata/navigationTitleStore";
 import { optimisticPersonDocumentTitle } from "@/lib/metadata/optimisticTitles";
 import { routeAssert } from "@/lib/navigation/route/assert";
 import { routeWithQuery } from "@/lib/navigation/route/query";
-import { usePatchContactMutation } from "@/lib/query/hooks/useContacts";
+import { usePatchContactMutation } from "@/lib/query/hooks/useContactMutations";
 import { useKeepInTouchQuery } from "@/lib/query/hooks/useKeepInTouch";
 import { KeepInTouchSelect } from "./components/KeepInTouchSelect";
 import { computeNextDueDate } from "./utils/keepInTouchConfig";
@@ -47,7 +46,7 @@ function computeDaysUntilDue(contact: Contact): number {
   const lastInteraction = contact.lastInteraction ? new Date(contact.lastInteraction) : null;
 
   if (!lastInteraction) {
-    return -Infinity;
+    return Number.NEGATIVE_INFINITY;
   }
 
   const nextDue = new Date(lastInteraction);
@@ -71,10 +70,10 @@ const WINDOW_OPTIONS = [
 function computeEndDate(days: number): string {
   const d = new Date();
   d.setDate(d.getDate() + days);
-  return d.toISOString().split("T")[0];
+  return d.toISOString().slice(0, 10);
 }
 
-function endDateToWindowValue(endDate: string): string {
+function endDateToWindowValue(endDate: string): "7" | "30" | "90" {
   const now = new Date();
   const end = new Date(`${endDate}T23:59:59`);
   const diffDays = Math.round((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
@@ -89,20 +88,18 @@ function endDateToWindowValue(endDate: string): string {
 
 export function KeepInTouchClient({ endDate }: KeepInTouchClientProps) {
   const t = useKeepInTouchTranslations();
-  const locale = useLocale();
   const formatter = useFormatter();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const patchContact = usePatchContactMutation();
-  const formatDate = (date: Date) =>
-    new Intl.DateTimeFormat(locale || "en-US", { dateStyle: "short" }).format(date);
+  const formatDate = (date: Date) => formatter.formatDate(date, "short");
 
   const activeWindow = endDateToWindowValue(endDate);
 
   const handleWindowChange = (value: string) => {
     const params = new URLSearchParams(searchParams.toString());
-    params.set("endDate", computeEndDate(parseInt(value, 10)));
+    params.set("endDate", computeEndDate(Number.parseInt(value, 10)));
     router.replace(routeWithQuery(pathname, params));
   };
 
@@ -111,21 +108,18 @@ export function KeepInTouchClient({ endDate }: KeepInTouchClientProps) {
   const contacts = (() => {
     const all = keepInTouchData?.contacts;
     if (!all) {
-      return undefined;
+      return;
     }
-    return all
-      .filter((c) => {
-        const nextDue = computeNextDueDate(c.lastInteraction, c.keepFrequencyDays);
-        if (!nextDue) {
-          return true;
-        }
-        if (nextDue <= new Date()) {
-          return true;
-        }
-        return nextDue <= new Date(`${endDate}T23:59:59`);
-      })
-      .map((c) => ({ ...c, daysUntilDue: computeDaysUntilDue(c) }))
-      .sort((a, b) => a.daysUntilDue - b.daysUntilDue);
+    const dueContacts: Array<Contact & { daysUntilDue: number }> = [];
+    for (const c of all) {
+      const nextDue = computeNextDueDate(c.lastInteraction, c.keepFrequencyDays);
+      if (nextDue && nextDue > new Date() && nextDue > new Date(`${endDate}T23:59:59`)) {
+        continue;
+      }
+      dueContacts.push({ ...c, daysUntilDue: computeDaysUntilDue(c) });
+    }
+    dueContacts.sort((a, b) => a.daysUntilDue - b.daysUntilDue);
+    return dueContacts;
   })();
 
   const [loadingIds, setLoadingIds] = useState<Set<string>>(new Set());
@@ -177,7 +171,7 @@ export function KeepInTouchClient({ endDate }: KeepInTouchClientProps) {
       return;
     }
     markLoading(contactId, true);
-    const keepFrequencyDays = value && value !== "none" ? parseInt(value, 10) : null;
+    const keepFrequencyDays = value && value !== "none" ? Number.parseInt(value, 10) : null;
 
     try {
       await patchContact.mutateAsync({ id: contactId, patch: { keepFrequencyDays } });
@@ -216,7 +210,7 @@ export function KeepInTouchClient({ endDate }: KeepInTouchClientProps) {
   // Empty state
   if (contacts.length === 0) {
     return (
-      <Stack gap="xl" p="md">
+      <Stack gap="xl" px={{ base: 0, sm: "md" }} py="md">
         <PageHeader
           helpDoc="concepts.reminders"
           helpLabel={t("Description")}
@@ -239,7 +233,7 @@ export function KeepInTouchClient({ endDate }: KeepInTouchClientProps) {
   }
 
   return (
-    <Stack gap="xl" p="md">
+    <Stack gap="xl" px={{ base: 0, sm: "md" }} py="md">
       <PageHeader
         helpDoc="concepts.reminders"
         helpLabel={t("Description")}

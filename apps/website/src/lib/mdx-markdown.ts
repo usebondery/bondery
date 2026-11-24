@@ -1,5 +1,9 @@
+import docs from "@bondery/translations/locales/en/platform/website/WebsiteDocs.json" with {
+  type: "json",
+};
 import type { LLMsOptions } from "fumadocs-core/mdx-plugins/remark-llms";
 
+const MARKDOWN_HEADING_WITH_ANCHOR_RE = /^#{1,6}\s+(.+?)(?:\s+\[#[^\]]*\])?\s*$/m;
 /**
  * Compile-time Markdown forms for docs MDX components, used by the
  * `includeProcessedMarkdown` option in `src/lib/collections.ts`.
@@ -101,9 +105,9 @@ function indent(text: string, size: number): string {
  */
 function stepBody(state: State, info: Info, children: unknown[]): string {
   const body = flow(state, info, children);
-  const heading = /^#{1,6}\s+(.+?)(?:\s+\[#[^\]]*\])?\s*$/m.exec(body);
+  const heading = MARKDOWN_HEADING_WITH_ANCHOR_RE.exec(body);
 
-  if (!heading || heading.index !== 0) {
+  if (heading?.index !== 0) {
     return body;
   }
 
@@ -139,7 +143,7 @@ function stepsMarkdown(node: JsxNode, state: State, info: Info): string {
 
   for (const [index, child] of (node.children ?? []).entries()) {
     const step = asJsx(child as Node);
-    if (!step || step.name !== "Step") {
+    if (step?.name !== "Step") {
       continue;
     }
     const body = stepBody(state, info, step.children ?? []).replace(/\n(?!\n)/g, "\n   ");
@@ -206,10 +210,13 @@ function containerMarkdown(node: JsxNode, state: State, info: Info): string {
   return `\n${flow(state, info, node.children ?? [])}\n\n`;
 }
 
+/** A Markdown code fence is at least three backticks. */
+const MIN_CODE_FENCE_LENGTH = 3;
+
 /** Fences code for Markdown, widening the fence past any backtick run inside it. */
 function fencedBlock(code: string, language: string): string {
   const runs = [...code.matchAll(/`+/g)].map((match) => match[0].length);
-  const marker = "`".repeat(Math.max(3, ...runs.map((length) => length + 1)));
+  const marker = "`".repeat(Math.max(MIN_CODE_FENCE_LENGTH, ...runs.map((length) => length + 1)));
   return `${marker}${language}\n${code}\n${marker}`;
 }
 
@@ -247,9 +254,9 @@ function platformCodeMarkdown(node: JsxNode): string | undefined {
 /** Link tile with a fixed target, so its URL stays visible to agents. */
 function bonderyRepoMarkdown(): string {
   return `${bullet(
-    "Bondery on GitHub",
+    docs.Repo.Title,
     "https://github.com/usebondery/bondery",
-    "Source code, issues, and pull requests.",
+    docs.Repo.Description,
   )}\n`;
 }
 

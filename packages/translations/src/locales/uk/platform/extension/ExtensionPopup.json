@@ -1,0 +1,32 @@
+{
+  "LoggedIn": {
+    "OpenBondery": "Відкрити Bondery",
+    "UnsupportedSiteMessage": "Відкрийте чийсь профіль в Instagram або LinkedIn, щоб побачити більше дій і можливостей розширення."
+  },
+  "LoggedOut": {
+    "Description": "Підключіть обліковий запис, щоб зберігати контакти із соцмереж.",
+    "SignIn": "Войти",
+    "Title": "Войти в Bondery"
+  },
+  "PersonActions": {
+    "AddInteraction": "Додати взаємодія з цим особою"
+  },
+  "Settings": {
+    "ApiServer": "Сервер API",
+    "SignOut": "Вийти"
+  },
+  "UpdateRequired": {
+    "Description": "Розширення Bondery устарело і может роботать некоректно. Оновіть его, щоб продолжить.",
+    "OpenExtensionsPage": "Відкрити страницу расширений",
+    "Title": "Требуется оновлення"
+  },
+  "Welcome": {
+    "ConnectButton": "Підключити обліковий запис Bondery",
+    "Description": "Підключіть обліковий запис Bondery, щоб зберігати контакти просто з профілів у соцмережах.",
+    "SignInHint": "Вам запропонують увійти до облікового запису Bondery й надати розширенню дозвіл.",
+    "SuccessClose": "Тепер цю вкладку можна закрити.",
+    "SuccessDescription": "Ваш обліковий запис Bondery підключено. Відкрийте будь-який профіль в Instagram або LinkedIn, щоб почати зберігати контакти.",
+    "SuccessTitle": "Усе готово!",
+    "Title": "Вітаємо в Bondery"
+  }
+}

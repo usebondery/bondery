@@ -1,0 +1,21 @@
+{
+  "agentActualHeading": "Aracın döndürdüğü:",
+  "agentExpectedHeading": "Aracının beklediği:",
+  "agentKindLabel": "Rapor türü:",
+  "agentRequestIdLabel": "İstek kimliği:",
+  "agentSourceHeading": "Yapay zeka aracısı raporladı",
+  "agentToolLabel": "Araç:",
+  "description": "NPS {{npsScore}} / 10 · {{timestamp}}",
+  "generalFeedbackHeading": "Genel geri bildirim:",
+  "heading": "{{userEmail}} kullanıcısından geri bildirim",
+  "notProvided": "(Belirtilmedi)",
+  "npsReasonHeading": "Bu puanı neden verdi?",
+  "npsScoreLabel": "NPS puanı:",
+  "npsScoreValue": "{{npsScore}} / 10",
+  "preview": "{{userEmail}} kullanıcısından yeni geri bildirim — NPS: {{npsScore}}",
+  "replyCta": "Yanıtla: {{userEmail}}",
+  "subject": "Bondery’den yeni geri bildirim",
+  "submittedAt": "Gönderildi: {{timestamp}}",
+  "userEmailLabel": "Kullanıcı e-postası:",
+  "userIdLabel": "Kullanıcı kimliği:"
+}

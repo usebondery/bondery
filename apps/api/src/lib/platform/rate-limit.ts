@@ -8,40 +8,46 @@ import type { Redis } from "ioredis";
 import { URLS } from "./config.js";
 import type { AppFastifyInstance } from "./fastify-types.js";
 
+const TIME_WINDOW_PATTERN = /^(\d+) (second|seconds|minute|minutes)$/;
+const DIGITS_ONLY_PATTERN = /^\d+$/;
+const TRAILING_SLASH_PATTERN = /\/$/;
+
 const DEFAULT_MAX_REQUESTS = 300;
 const DEFAULT_WINDOW = "60 seconds";
 const DEFAULT_WINDOW_SECONDS = 60;
+/** Hex characters of the bearer-token hash kept in the MCP rate-limit key. */
+const BEARER_FINGERPRINT_LENGTH = 16;
 
-export const AI_TIER = {
+const AI_TIER = {
   max: 20,
   timeWindow: "60 seconds",
 } as const;
 
-export const IMPORT_TIER = IMPORT_COMMIT_RATE_LIMIT;
+const IMPORT_TIER = IMPORT_COMMIT_RATE_LIMIT;
 
-export const ENRICH_TIER = {
+const ENRICH_TIER = {
   max: 100,
   timeWindow: "10 minutes",
 } as const;
 
-export const GEOCODE_TIER = {
+const GEOCODE_TIER = {
   max: 120,
   timeWindow: "60 seconds",
 } as const;
 
 /** CRM data ZIP export and Bondery ZIP import — expensive to generate or apply. */
-export const EXPORT_TIER = {
+const EXPORT_TIER = {
   max: 5,
   timeWindow: "10 minutes",
 } as const;
 
-export const NOT_FOUND_TIER = {
+const NOT_FOUND_TIER = {
   max: 60,
   timeWindow: "60 seconds",
 } as const;
 
 /** Readiness probe — five requests per minute per client. */
-export const HEALTH_TIER = {
+const HEALTH_TIER = {
   max: 5,
   timeWindow: "1 minute",
 } as const;
@@ -51,22 +57,22 @@ export const HEALTH_TIER = {
  * its own bucket keyed per IP and generous enough for a broken page that
  * reports on every interaction.
  */
-export const CSP_REPORT_TIER = {
+const CSP_REPORT_TIER = {
   max: 60,
   timeWindow: "1 minute",
 } as const;
 
 /** MCP JSON-RPC — keyed per user/IP and Mcp-Method/Mcp-Name (no body parse). */
-export const MCP_TIER = {
+const MCP_TIER = {
   keyGenerator: (request: FastifyRequest) => {
     const methodHeader = request.headers["mcp-method"];
     const nameHeader = request.headers["mcp-name"];
     const mcpMethod = typeof methodHeader === "string" ? methodHeader : "-";
     const mcpName = typeof nameHeader === "string" ? nameHeader : "-";
-    const authorization = request.headers.authorization;
+    const { authorization } = request.headers;
     const identity =
       typeof authorization === "string" && authorization.length > 0
-        ? `bearer:${createHash("sha256").update(authorization).digest("hex").slice(0, 16)}`
+        ? `bearer:${createHash("sha256").update(authorization).digest("hex").slice(0, BEARER_FINGERPRINT_LENGTH)}`
         : `ip:${request.ip}`;
     return `mcp:${identity}:${mcpMethod}:${mcpName}`;
   },
@@ -98,7 +104,7 @@ function timeWindowToSeconds(timeWindow: unknown): number {
     return DEFAULT_WINDOW_SECONDS;
   }
 
-  const match = /^(\d+) (second|seconds|minute|minutes)$/.exec(timeWindow);
+  const match = TIME_WINDOW_PATTERN.exec(timeWindow);
   if (!match?.[1] || !match[2]) {
     return DEFAULT_WINDOW_SECONDS;
   }
@@ -130,11 +136,14 @@ function formatDraftRateLimitHeaders(input: {
 
 function readNonNegativeIntegerHeader(reply: FastifyReply, name: string): number | undefined {
   const raw = reply.getHeader(name);
-  const value = Array.isArray(raw) ? raw[0] : raw;
+  let value: unknown = raw;
+  if (Array.isArray(raw)) {
+    [value] = raw;
+  }
   if (typeof value === "number" && Number.isInteger(value) && value >= 0) {
     return value;
   }
-  if (typeof value === "string" && /^\d+$/.test(value)) {
+  if (typeof value === "string" && DIGITS_ONLY_PATTERN.test(value)) {
     return Number(value);
   }
   return undefined;
@@ -166,38 +175,59 @@ function applyDraftRateLimitHeaders(request: FastifyRequest, reply: FastifyReply
   }
 
   const policy = resolveDraftPolicy(request);
+  const { name, windowSeconds } = policy;
   const headers = formatDraftRateLimitHeaders({
     limit,
-    name: policy.name,
+    name,
     remaining: reply.statusCode === 429 ? 0 : remaining,
     resetSeconds,
-    windowSeconds: policy.windowSeconds,
+    windowSeconds,
   });
   reply.header("RateLimit", headers.rateLimit);
   reply.header("RateLimit-Policy", headers.policy);
+}
+
+function notFoundHandler(request: FastifyRequest, reply: FastifyReply): void {
+  const website = (URLS.website ?? "https://usebondery.com").replace(TRAILING_SLASH_PATTERN, "");
+  reply.status(404).send({
+    error: {
+      agent_message: buildAgentMessage("not_found", "Not found"),
+      code: "not_found",
+      doc_url: getErrorDocUrl("not_found", website),
+      message: "Not found",
+      request_id: request.id,
+      type: "not_found_error",
+    },
+  });
 }
 
 /**
  * Adds draft-ietf-httpapi-ratelimit-headers-11 fields from the plugin headers.
  * Do not set `enableDraftSpec`. That option emits the 2021 header names.
  */
-export function registerDraftRateLimitHeaders(fastify: FastifyInstance): void {
+function registerDraftRateLimitHeaders(fastify: FastifyInstance): void {
   fastify.addHook("onSend", async (request, reply, payload) => {
     applyDraftRateLimitHeaders(request, reply);
     return payload;
   });
 }
 
-export function buildRateLimitErrorResponse(_request: FastifyRequest, context: { ttl: number }) {
+function buildRateLimitErrorResponse(_request: FastifyRequest, context: { ttl: number }) {
   const retryAfterSeconds = Math.ceil(context.ttl / 1000);
-  return Object.assign(new Error(`Rate limit exceeded. Retry in ${retryAfterSeconds} seconds.`), {
-    code: "rate_limit_exceeded",
-    retryAfter: retryAfterSeconds,
-    statusCode: 429,
-  });
+  const error = new Error(
+    `Rate limit exceeded. Retry in ${retryAfterSeconds} seconds.`,
+  ) as Error & {
+    code: string;
+    retryAfter: number;
+    statusCode: number;
+  };
+  error.code = "rate_limit_exceeded";
+  error.retryAfter = retryAfterSeconds;
+  error.statusCode = 429;
+  return error;
 }
 
-export async function registerRateLimit(fastify: AppFastifyInstance, redis: Redis): Promise<void> {
+async function registerRateLimit(fastify: AppFastifyInstance, redis: Redis): Promise<void> {
   const options: FastifyRateLimitOptions = {
     allowList: (request: FastifyRequest) => request.method === "OPTIONS",
     errorResponseBuilder: buildRateLimitErrorResponse,
@@ -231,25 +261,11 @@ export async function registerRateLimit(fastify: AppFastifyInstance, redis: Redi
   registerDraftRateLimitHeaders(fastify);
 }
 
-function notFoundHandler(request: FastifyRequest, reply: FastifyReply): void {
-  const website = (URLS.website ?? "https://usebondery.com").replace(/\/$/, "");
-  reply.status(404).send({
-    error: {
-      agent_message: buildAgentMessage("not_found", "Not found"),
-      code: "not_found",
-      doc_url: getErrorDocUrl("not_found", website),
-      message: "Not found",
-      request_id: request.id,
-      type: "not_found_error",
-    },
-  });
-}
-
-export function registerDefaultNotFoundHandler(fastify: AppFastifyInstance): void {
+function registerDefaultNotFoundHandler(fastify: AppFastifyInstance): void {
   fastify.setNotFoundHandler(notFoundHandler);
 }
 
-export function registerNotFoundRateLimit(fastify: FastifyInstance): void {
+function registerNotFoundRateLimit(fastify: FastifyInstance): void {
   // `config.rateLimit` names the draft policy. The preHandler applies that same tier.
   const notFoundOptions = {
     config: { rateLimit: NOT_FOUND_TIER },
@@ -257,3 +273,20 @@ export function registerNotFoundRateLimit(fastify: FastifyInstance): void {
   };
   fastify.setNotFoundHandler(notFoundOptions, notFoundHandler);
 }
+
+export {
+  AI_TIER,
+  buildRateLimitErrorResponse,
+  CSP_REPORT_TIER,
+  ENRICH_TIER,
+  EXPORT_TIER,
+  GEOCODE_TIER,
+  HEALTH_TIER,
+  IMPORT_TIER,
+  MCP_TIER,
+  NOT_FOUND_TIER,
+  registerDefaultNotFoundHandler,
+  registerDraftRateLimitHeaders,
+  registerNotFoundRateLimit,
+  registerRateLimit,
+};

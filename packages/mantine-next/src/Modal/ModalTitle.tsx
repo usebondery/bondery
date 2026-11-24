@@ -1,5 +1,5 @@
 import { Box, Group, Text } from "@mantine/core";
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 
 export interface ModalTitleProps {
   icon: ReactNode;
@@ -8,7 +8,12 @@ export interface ModalTitleProps {
   text: ReactNode;
 }
 
-export function ModalTitle({ text, icon, isDangerous = false, rightContent }: ModalTitleProps) {
+export function ModalTitle({
+  text,
+  icon,
+  isDangerous = false,
+  rightContent,
+}: ModalTitleProps): ReactElement {
   const color = isDangerous ? "red" : undefined;
 
   return (

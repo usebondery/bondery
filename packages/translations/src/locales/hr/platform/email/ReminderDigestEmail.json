@@ -1,0 +1,22 @@
+{
+  "cta": "Otvoriti podsjetnike",
+  "dateTypes": {
+    "anniversary": "Godišnjica",
+    "birthday": "Rođendan",
+    "graduation": "Matura / diplomiranje",
+    "nameday": "Imendan",
+    "other": "Važan datum"
+  },
+  "dayFew": "{{count}} dana",
+  "dayMany": "{{count}} dana",
+  "dayOne": "1 dan",
+  "description": "Za {{headingDate}}. Otvori osobu za detalje ili pošalji poruku.",
+  "headingFew": "Nadolaze podsjetnici: {{count}}",
+  "headingMany": "Nadolazi podsjetnika: {{count}}",
+  "headingOne": "1 nadolazeći podsjetnik",
+  "preview": "{{firstTypeLabel}} osobe {{firstPersonName}} za {{firstRemainingLabel}}",
+  "previewMore": "{{firstTypeLabel}} osobe {{firstPersonName}} za {{firstRemainingLabel}} i još {{remainingCount}}",
+  "reminderLine": "{{emoji}} {{typeLabel}} dolazi za {{remainingLabel}} – {{dateLabel}}.",
+  "subject": "Bondery podsjetnici za {{targetDate}}",
+  "whyReceiving": "Ovo primaš jer su uključeni podsjetnici za te datume."
+}

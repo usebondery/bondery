@@ -11,7 +11,7 @@ function posixPath(filePath: string): string {
   return filePath.split(path.sep).join("/");
 }
 
-export const openapi = createOpenAPI({
+const openapi = createOpenAPI({
   input: [posixPath(OPENAPI_DOCUMENT)],
 });
 
@@ -24,7 +24,7 @@ export const openapi = createOpenAPI({
  */
 const documentCache = new Map<string, ReturnType<typeof openapi.getSchema>>();
 
-export function loadOpenApiDocument(documentId: string): ReturnType<typeof openapi.getSchema> {
+function loadOpenApiDocument(documentId: string): ReturnType<typeof openapi.getSchema> {
   const cached = documentCache.get(documentId);
 
   if (cached) {
@@ -36,3 +36,5 @@ export function loadOpenApiDocument(documentId: string): ReturnType<typeof opena
 
   return pending;
 }
+
+export { loadOpenApiDocument, openapi };

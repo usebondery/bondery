@@ -8,9 +8,9 @@ import {
 import type { ComponentType } from "react";
 import type { EnrichedMarkdownTextInputInstance } from "react-native-enriched-markdown";
 
-export type SlashCommandId = "mention" | "bold" | "italic" | "underline" | "strikethrough";
+type SlashCommandId = "mention" | "bold" | "italic" | "underline" | "strikethrough";
 
-export interface SlashCommandDefinition {
+interface SlashCommandDefinition {
   description: string;
   group: "Insert" | "Format";
   icon: ComponentType<{ size?: number; stroke?: string }>;
@@ -20,7 +20,7 @@ export interface SlashCommandDefinition {
   run: (editor: EnrichedMarkdownTextInputInstance) => void;
 }
 
-export const SLASH_COMMANDS: SlashCommandDefinition[] = [
+const SLASH_COMMANDS: SlashCommandDefinition[] = [
   {
     description: "Mention a person",
     group: "Insert",
@@ -80,7 +80,7 @@ export const SLASH_COMMANDS: SlashCommandDefinition[] = [
 
 const GROUP_ORDER: SlashCommandDefinition["group"][] = ["Insert", "Format"];
 
-export function filterSlashCommands(query: string): SlashCommandDefinition[] {
+function filterSlashCommands(query: string): SlashCommandDefinition[] {
   const normalizedQuery = query.trim().toLowerCase();
 
   if (!normalizedQuery) {
@@ -95,7 +95,7 @@ export function filterSlashCommands(query: string): SlashCommandDefinition[] {
   });
 }
 
-export function groupSlashCommands(commands: SlashCommandDefinition[]): Array<{
+function groupSlashCommands(commands: SlashCommandDefinition[]): Array<{
   group: SlashCommandDefinition["group"];
   items: SlashCommandDefinition[];
 }> {
@@ -104,3 +104,6 @@ export function groupSlashCommands(commands: SlashCommandDefinition[]): Array<{
     items: commands.filter((command) => command.group === group),
   })).filter((section) => section.items.length > 0);
 }
+
+export type { SlashCommandDefinition, SlashCommandId };
+export { filterSlashCommands, groupSlashCommands, SLASH_COMMANDS };

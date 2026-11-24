@@ -107,7 +107,7 @@ export async function runReminderDigestDispatch(): Promise<
     FULL JOIN due_user_counts duc ON true
   `;
 
-  const row = rows[0];
+  const [row] = rows;
   if (!row) {
     return {
       failedUsers: 0,

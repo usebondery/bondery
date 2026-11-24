@@ -28,7 +28,9 @@ import type { OpenAPIV3 } from "openapi-types";
 import { envSchema } from "./env-schema.js";
 import { redactSensitiveAuthQuery } from "./lib/auth/redact-auth-query.js";
 import { registerExtensionVersionCheck } from "./lib/extension/version-check.js";
+import type { ApiTlsOptions } from "./lib/platform/api-tls.js";
 import { registerAuthStrategies } from "./lib/platform/auth/strategies.js";
+import { UPLOAD_LIMITS } from "./lib/platform/config.js";
 import { mapErrorToResponse } from "./lib/platform/errors/map-to-response.js";
 import type { AppFastifyInstance } from "./lib/platform/fastify-types.js";
 import { registerIdempotency } from "./lib/platform/idempotency.js";
@@ -36,6 +38,9 @@ import { IDEMPOTENCY_REPLAYED_HEADER } from "./lib/platform/idempotency-policy.j
 import logger from "./lib/platform/logger.js";
 import { swaggerOpenApiConfig } from "./openapi/swagger-config.js";
 import { registerAllRoutes } from "./routes/register-all.js";
+import { captureServerException } from "./services/analytics/capture-server-exception.js";
+
+const LEADING_SLASH_PATTERN = /^\//;
 
 const require = createRequire(import.meta.url);
 
@@ -80,10 +85,19 @@ function getLoggerConfig(env: string) {
   return { level: "info", serializers: authLogSerializers() };
 }
 
-export async function buildApp(): Promise<AppFastifyInstance> {
+export type BuildAppOptions = {
+  /**
+   * TLS for the server Fastify creates. The running API always passes it (buildServer); tests
+   * and tools that only call `inject()` or read routes leave it out.
+   */
+  https?: ApiTlsOptions;
+};
+
+export async function buildApp(options: BuildAppOptions = {}): Promise<AppFastifyInstance> {
   registerOpenApiComponentSchemas();
-  const environment = process.env.NODE_ENV || "development";
+  const environment = process.env["NODE_ENV"] || "development";
   const fastify = Fastify({
+    https: options.https ?? null,
     logger: getLoggerConfig(environment),
     routerOptions: {
       ignoreTrailingSlash: true,
@@ -98,9 +112,9 @@ export async function buildApp(): Promise<AppFastifyInstance> {
   fastify.setSerializerCompiler(serializerCompiler);
 
   fastify.setSchemaErrorFormatter((errors, dataVar) => {
-    const first = errors[0];
+    const [first] = errors;
     const field = first?.instancePath
-      ? first.instancePath.replace(/^\//, "").replace(/\//g, ".")
+      ? first.instancePath.replace(LEADING_SLASH_PATTERN, "").replace(/\//g, ".")
       : dataVar;
     const message = first?.message ?? "Invalid value";
     return new Error(`${field} ${message}`);
@@ -111,6 +125,17 @@ export async function buildApp(): Promise<AppFastifyInstance> {
       error as Parameters<typeof mapErrorToResponse>[0],
       request,
     );
+
+    // `mapErrorToResponse` already logged a 5xx. A log line notifies nobody, so a failed
+    // request also becomes an Error tracking issue. 4xx responses are ignored.
+    captureServerException(error, {
+      code: body.error.code,
+      method: request.method,
+      requestId: request.id,
+      route: request.routeOptions?.url ?? "unmatched",
+      statusCode,
+    });
+
     return reply.status(statusCode).send(body);
   });
 
@@ -131,7 +156,7 @@ export async function buildApp(): Promise<AppFastifyInstance> {
     crossOriginOpenerPolicy: false,
     crossOriginResourcePolicy: { policy: "cross-origin" },
     strictTransportSecurity:
-      environment === "production" ? { includeSubDomains: true, maxAge: 31536000 } : false,
+      environment === "production" ? { includeSubDomains: true, maxAge: 31_536_000 } : false,
   });
 
   /**
@@ -174,9 +199,11 @@ export async function buildApp(): Promise<AppFastifyInstance> {
 
   await fastify.register(formbody);
 
+  // Small default ceiling. A route that takes a larger file (ZIP and export imports) names its
+  // own cap in UPLOAD_LIMITS and passes it per call, so a new upload route is safe by default.
   await fastify.register(multipart, {
     limits: {
-      fileSize: 100 * 1024 * 1024,
+      fileSize: UPLOAD_LIMITS.default,
     },
   });
 

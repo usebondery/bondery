@@ -19,7 +19,11 @@ interface ChatMessageSpeakButtonProps {
 function speakIcon(status: SpeechStatus) {
   switch (status) {
     case "preparing":
-      return <IconLoader className="animate-spin" />;
+      return (
+        <span className="animate-spin">
+          <IconLoader style={{ display: "block", height: "100%", width: "100%" }} />
+        </span>
+      );
     case "speaking":
       return <IconPlayerPause />;
     case "paused":

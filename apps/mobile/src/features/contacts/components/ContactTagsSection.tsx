@@ -56,7 +56,7 @@ function TagsLoadingSkeleton() {
   );
 }
 
-export function ContactTagsSection({
+function ContactTagsSection({
   contactId,
   contactName,
   tags,
@@ -160,3 +160,5 @@ const styles = StyleSheet.create({
     gap: 8,
   },
 });
+
+export { ContactTagsSection };

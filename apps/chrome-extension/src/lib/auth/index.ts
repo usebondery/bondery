@@ -6,24 +6,34 @@ import { browser } from "wxt/browser";
 import { config, getOAuthResource, getOAuthTokenUrl } from "../../config";
 import { extLog } from "../log";
 
-export interface StoredTokens {
+interface StoredTokens {
   accessToken: string;
   expiresAt: number;
   refreshToken: string;
 }
 
-export interface TokenUser {
+interface TokenUser {
   email: string;
   id: string;
 }
 
-export function generateCodeVerifier(): string {
-  const array = new Uint8Array(32);
+interface JwtClaims {
+  email?: string;
+  sub?: string;
+}
+
+/** Random bytes behind a PKCE code verifier. */
+const CODE_VERIFIER_BYTES = 32;
+/** A JWT is `header.payload.signature`. */
+const JWT_PART_COUNT = 3;
+
+function generateCodeVerifier(): string {
+  const array = new Uint8Array(CODE_VERIFIER_BYTES);
   crypto.getRandomValues(array);
   return base64URLEncode(array);
 }
 
-export async function generateCodeChallenge(verifier: string): Promise<string> {
+async function generateCodeChallenge(verifier: string): Promise<string> {
   const encoder = new TextEncoder();
   const data = encoder.encode(verifier);
   const hash = await crypto.subtle.digest("SHA-256", data);
@@ -35,25 +45,25 @@ function base64URLEncode(buffer: Uint8Array): string {
   for (const byte of buffer) {
     binary += String.fromCharCode(byte);
   }
-  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/[=]/g, "");
 }
 
 const STORAGE_KEY = "bondery_auth_tokens";
 
-export async function setTokens(tokens: StoredTokens): Promise<void> {
+async function setTokens(tokens: StoredTokens): Promise<void> {
   await browser.storage.local.set({ [STORAGE_KEY]: tokens });
 }
 
-export async function getTokens(): Promise<StoredTokens | null> {
+async function getTokens(): Promise<StoredTokens | null> {
   const result = await browser.storage.local.get(STORAGE_KEY);
-  return (result[STORAGE_KEY] as StoredTokens) ?? null;
+  return (result[STORAGE_KEY] as StoredTokens | undefined) ?? null;
 }
 
-export async function clearTokens(): Promise<void> {
+async function clearTokens(): Promise<void> {
   await browser.storage.local.remove(STORAGE_KEY);
 }
 
-export async function isAuthenticated(): Promise<boolean> {
+async function isAuthenticated(): Promise<boolean> {
   const tokens = await getTokens();
   if (!tokens) {
     return false;
@@ -72,61 +82,61 @@ function buildTokenRequestBody(params: Record<string, string>): URLSearchParams 
   return body;
 }
 
-export async function refreshAccessToken(): Promise<StoredTokens | null> {
-  if (refreshInFlight) {
+async function refreshAccessToken(): Promise<StoredTokens | null> {
+  if (refreshInFlight !== null) {
     return refreshInFlight;
   }
 
-  refreshInFlight = (async () => {
-    const tokens = await getTokens();
-    if (!tokens?.refreshToken) {
-      return null;
-    }
+  const promise = performTokenRefresh();
+  refreshInFlight = promise.finally(() => {
+    refreshInFlight = null;
+  });
+  return await promise;
+}
 
-    try {
-      const response = await fetch(getOAuthTokenUrl(), {
-        body: buildTokenRequestBody({
-          grant_type: "refresh_token",
-          refresh_token: tokens.refreshToken,
-        }),
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        method: "POST",
-      });
-
-      if (!response.ok) {
-        extLog.error("[auth] Token refresh failed:", response.status);
-        if (response.status >= 400 && response.status < 500) {
-          await clearTokens();
-        }
-        return null;
-      }
-
-      const data = await response.json();
-
-      const newTokens: StoredTokens = {
-        accessToken: data.access_token,
-        expiresAt: Math.floor(Date.now() / 1000) + (data.expires_in ?? 3600),
-        refreshToken: data.refresh_token ?? tokens.refreshToken,
-      };
-
-      await setTokens(newTokens);
-      return newTokens;
-    } catch (error) {
-      extLog.error("[auth] Token refresh error:", error);
-      return null;
-    }
-  })();
+async function performTokenRefresh(): Promise<StoredTokens | null> {
+  const tokens = await getTokens();
+  if (!tokens?.refreshToken) {
+    return null;
+  }
 
   try {
-    return await refreshInFlight;
-  } finally {
-    refreshInFlight = null;
+    const response = await fetch(getOAuthTokenUrl(), {
+      body: buildTokenRequestBody({
+        grant_type: "refresh_token",
+        refresh_token: tokens.refreshToken,
+      }),
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      method: "POST",
+    });
+
+    if (!response.ok) {
+      extLog.error("[auth] Token refresh failed:", response.status);
+      if (response.status >= 400 && response.status < 500) {
+        await clearTokens();
+      }
+      return null;
+    }
+
+    const data = await response.json();
+
+    const newTokens: StoredTokens = {
+      accessToken: data.access_token,
+      expiresAt: Math.floor(Date.now() / 1000) + (data.expires_in ?? 3600),
+      refreshToken: data.refresh_token ?? tokens.refreshToken,
+    };
+
+    await setTokens(newTokens);
+    return newTokens;
+  } catch (error) {
+    extLog.error("[auth] Token refresh error:", error);
+    return null;
   }
 }
 
-export async function getAccessToken(): Promise<string | null> {
+async function getAccessToken(): Promise<string | null> {
   const tokens = await getTokens();
   if (!tokens) {
     return null;
@@ -143,36 +153,44 @@ export async function getAccessToken(): Promise<string | null> {
   return refreshed?.accessToken ?? null;
 }
 
-export function decodeJwtPayload(token: string): Record<string, unknown> | null {
+function isJwtPayload(value: unknown): value is JwtClaims {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function decodeJwtPayload(token: string): JwtClaims | null {
   try {
     const parts = token.split(".");
-    if (parts.length !== 3) {
+    if (parts.length !== JWT_PART_COUNT) {
       return null;
     }
-    const payloadPart = parts[1];
+    const [, payloadPart] = parts;
     if (!payloadPart) {
       return null;
     }
     const payload = payloadPart.replace(/-/g, "+").replace(/_/g, "/");
     const decoded = atob(payload);
-    return JSON.parse(decoded);
+    const parsed: unknown = JSON.parse(decoded);
+    if (!isJwtPayload(parsed)) {
+      return null;
+    }
+    return parsed;
   } catch {
     return null;
   }
 }
 
-export function getUserFromToken(token: string): TokenUser | null {
+function getUserFromToken(token: string): TokenUser | null {
   const payload = decodeJwtPayload(token);
   if (!payload) {
     return null;
   }
   return {
-    email: (payload.email as string) ?? "",
-    id: (payload.sub as string) ?? "",
+    email: payload.email ?? "",
+    id: payload.sub ?? "",
   };
 }
 
-export async function exchangeCodeForTokens(
+async function exchangeCodeForTokens(
   code: string,
   codeVerifier: string,
   redirectUri: string,
@@ -212,3 +230,18 @@ export async function exchangeCodeForTokens(
     return null;
   }
 }
+
+export type { StoredTokens, TokenUser };
+export {
+  clearTokens,
+  decodeJwtPayload,
+  exchangeCodeForTokens,
+  generateCodeChallenge,
+  generateCodeVerifier,
+  getAccessToken,
+  getTokens,
+  getUserFromToken,
+  isAuthenticated,
+  refreshAccessToken,
+  setTokens,
+};

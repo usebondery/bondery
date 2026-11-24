@@ -1,4 +1,5 @@
 import { buildApiErrorFromResponse } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import {
   buildSyncWsUrl,
@@ -7,15 +8,15 @@ import {
   syncWsTicketResponseSchema,
 } from "@bondery/schemas/sync";
 import { mobileFetch } from "../api/transport";
-import { getAccessToken } from "../auth/client";
-import { AuthRequiredError, endLocalSession } from "../auth/session";
+import { endLocalSession, readLocalAccessToken } from "../auth/local-session";
+import { AuthRequiredError } from "../auth/session";
 import { API_URL } from "../config";
 import { syncRequestHeaders } from "./constants";
 import { ensureDeviceId } from "./outbox/pending-mutations";
 import { shouldReconnectSyncWake } from "./pull-auth";
 import { onSyncWakeEvent, onSyncWakeReconnect, setSyncPullMode } from "./pull-manager";
 
-const MIN_RECONNECT_MS = 1_000;
+const MIN_RECONNECT_MS = 1000;
 const MAX_RECONNECT_MS = 30_000;
 
 type SyncWakeClient = {
@@ -25,7 +26,7 @@ type SyncWakeClient = {
 let activeClient: SyncWakeClient | null = null;
 
 async function fetchWsTicket(): Promise<string> {
-  const token = await getAccessToken();
+  const token = await readLocalAccessToken();
   if (!token) {
     throw new AuthRequiredError("missing_local_session");
   }
@@ -87,12 +88,12 @@ function handleServerMessage(
 }
 
 export async function startSyncWakeClient(): Promise<SyncWakeClient> {
+  const myDeviceId = await ensureDeviceId();
   activeClient?.stop();
   let stopped = false;
   let socket: WebSocket | null = null;
   let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   let reconnectDelay = MIN_RECONNECT_MS;
-  const myDeviceId = await ensureDeviceId();
 
   const connect = async () => {
     if (stopped) {
@@ -149,11 +150,11 @@ export async function startSyncWakeClient(): Promise<SyncWakeClient> {
     reconnectTimer = setTimeout(() => {
       reconnectTimer = null;
       reconnectDelay = Math.min(reconnectDelay * 2, MAX_RECONNECT_MS);
-      void connect();
+      detachPromise(connect());
     }, reconnectDelay + jitter);
   };
 
-  void connect();
+  detachPromise(connect());
 
   const client: SyncWakeClient = {
     stop: () => {

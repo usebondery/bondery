@@ -1,3 +1,5 @@
+import { detachPromise } from "@bondery/helpers/async";
+import { coerceDateFormatPreference, coerceTimeFormatPreference } from "@bondery/schemas/locale";
 import { Stack } from "expo-router";
 import { useEffect } from "react";
 import { SyncErrorToasts } from "../../src/components/SyncErrorToasts";
@@ -12,8 +14,9 @@ import type {
 import { useMobilePreferences } from "../../src/lib/preferences/useMobilePreferences";
 import { SqliteQueryProvider } from "../../src/lib/sync/SqliteQueryProvider";
 import { SyncProvider } from "../../src/lib/sync/SyncProvider";
+import { nonEmpty } from "../../src/lib/text";
 
-export const unstable_settings = {
+const unstable_settings = {
   anchor: "(tabs)",
 };
 
@@ -32,17 +35,20 @@ function PreferencesHydration() {
           return;
         }
         hydrateFromServer({
+          dateFormat: coerceDateFormatPreference(response.data.dateFormat),
           groupSortOrder: response.data.groupSortOrder as GroupSortOrder,
           leftSwipeAction: response.data.leftSwipeAction as SwipeAction,
           rightSwipeAction: response.data.rightSwipeAction as SwipeAction,
           tagSortOrder: response.data.tagSortOrder as TagSortOrder,
+          timeFormat: coerceTimeFormatPreference(response.data.timeFormat),
+          timezone: nonEmpty(response.data.timezone),
         });
       } catch {
         // Ignore hydration errors; local persisted preferences remain in use.
       }
     };
 
-    void hydrate();
+    detachPromise(hydrate());
 
     return () => {
       isSubscribed = false;
@@ -52,7 +58,7 @@ function PreferencesHydration() {
   return null;
 }
 
-export default function AppLayout() {
+function AppLayout() {
   return (
     <SqliteQueryProvider>
       <SyncProvider>
@@ -61,7 +67,7 @@ export default function AppLayout() {
           <PreferencesHydration />
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen
-              dangerouslySingular={(_name, params) => String(params?.id ?? "")}
+              dangerouslySingular={(_name, params) => String(params?.["id"] ?? "")}
               name="contact/[id]/index"
             />
           </Stack>
@@ -70,3 +76,6 @@ export default function AppLayout() {
     </SqliteQueryProvider>
   );
 }
+
+export { unstable_settings };
+export default AppLayout;

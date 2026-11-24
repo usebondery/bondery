@@ -1,3 +1,52 @@
+interface SpeechRecognitionOptions {
+  langs: string[];
+  processLocally: boolean;
+  quality: "dictation";
+}
+
+interface LocalSpeechProbe {
+  available?: (options: SpeechRecognitionOptions) => Promise<SpeechPackStatus>;
+  install?: (options: SpeechRecognitionOptions) => Promise<boolean>;
+}
+
+interface BraveNavigator {
+  brave?: { isBrave?: () => Promise<boolean> };
+}
+
+const PROBE_TIMEOUT_MS = 3000;
+const INSTALL_TIMEOUT_MS = 8000;
+
+function speechOptions(lang: string): SpeechRecognitionOptions {
+  return { langs: [lang], processLocally: true, quality: "dictation" };
+}
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T | "timeout"> {
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => resolve("timeout"), timeoutMs);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      () => {
+        clearTimeout(timer);
+        resolve("timeout");
+      },
+    );
+  });
+}
+
+function readProbe(): LocalSpeechProbe | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  const ctor = window.SpeechRecognition ?? window.webkitSpeechRecognition;
+  if (!ctor) {
+    return null;
+  }
+  return ctor as LocalSpeechProbe;
+}
+
 /**
  * Picks a speech route before the microphone opens.
  *
@@ -49,58 +98,9 @@ export function selectDictationRoute(input: {
   return "cloud";
 }
 
-interface SpeechRecognitionOptions {
-  langs: string[];
-  processLocally: boolean;
-  quality: "dictation";
-}
-
-interface LocalSpeechProbe {
-  available?: (options: SpeechRecognitionOptions) => Promise<SpeechPackStatus>;
-  install?: (options: SpeechRecognitionOptions) => Promise<boolean>;
-}
-
-interface BraveNavigator {
-  brave?: { isBrave?: () => Promise<boolean> };
-}
-
-const PROBE_TIMEOUT_MS = 3_000;
-const INSTALL_TIMEOUT_MS = 8_000;
-
-function speechOptions(lang: string): SpeechRecognitionOptions {
-  return { langs: [lang], processLocally: true, quality: "dictation" };
-}
-
-function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T | "timeout"> {
-  return new Promise((resolve) => {
-    const timer = setTimeout(() => resolve("timeout"), timeoutMs);
-    promise.then(
-      (value) => {
-        clearTimeout(timer);
-        resolve(value);
-      },
-      () => {
-        clearTimeout(timer);
-        resolve("timeout");
-      },
-    );
-  });
-}
-
-function readProbe(): LocalSpeechProbe | null {
-  if (typeof window === "undefined") {
-    return null;
-  }
-  const ctor = window.SpeechRecognition ?? window.webkitSpeechRecognition;
-  if (!ctor) {
-    return null;
-  }
-  return ctor as LocalSpeechProbe;
-}
-
 /** True when the page is Brave. Other Chromium browsers return false. */
 export async function isBraveBrowser(): Promise<boolean> {
-  const brave = (navigator as Navigator & BraveNavigator).brave;
+  const { brave } = navigator as Navigator & BraveNavigator;
   if (!brave?.isBrave) {
     return false;
   }

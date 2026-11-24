@@ -4,7 +4,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Box, Checkbox, Group, Text } from "@mantine/core";
 import { IconGripVertical } from "@tabler/icons-react";
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 
 export interface SortableColumnItemColumn {
   /** If true, checkbox is disabled */
@@ -30,7 +30,7 @@ export interface SortableColumnItemProps {
  * Draggable column item for column visibility menus.
  * Uses @dnd-kit/sortable for drag-and-drop reordering.
  */
-export function SortableColumnItem({ column, onToggle }: SortableColumnItemProps) {
+export function SortableColumnItem({ column, onToggle }: SortableColumnItemProps): ReactElement {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: column.key,
   });

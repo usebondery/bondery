@@ -5,6 +5,8 @@
  * creates the user with an empty name — fall back to the email local-part
  * without changing case.
  */
+
+const WHITESPACE_PATTERN = /\s+/;
 export function firstNameFromEmail(email: string): string {
   const trimmed = email.trim();
   const at = trimmed.indexOf("@");
@@ -24,7 +26,7 @@ export function splitDisplayName(name: string | null | undefined): {
     return { firstName: "", lastName: null };
   }
 
-  const [firstName, ...rest] = trimmed.split(/\s+/);
+  const [firstName = "", ...rest] = trimmed.split(WHITESPACE_PATTERN);
   const lastName = rest.join(" ").trim();
   return { firstName, lastName: lastName || null };
 }

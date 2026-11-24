@@ -17,7 +17,7 @@ type DocsSidebarItemProps = {
   pathname: string;
 };
 
-export function DocsSidebarItem({ activeRef, node, pathname }: DocsSidebarItemProps) {
+function DocsSidebarItem({ activeRef, node, pathname }: DocsSidebarItemProps) {
   const current = isCurrentDocsPage(node.url, pathname);
   const method = docsApiMethod(node.url);
   const errorStatus = docsErrorStatus(node.url);
@@ -47,7 +47,7 @@ export function DocsSidebarItem({ activeRef, node, pathname }: DocsSidebarItemPr
  * moves the title edge. The icon slot renders only when a row has an icon, so a row
  * without one starts its text at the row edge instead of leaving a gap.
  */
-export function SidebarRow({
+function SidebarRow({
   badge,
   icon,
   label,
@@ -58,11 +58,11 @@ export function SidebarRow({
 }) {
   return (
     <>
-      {icon !== undefined ? <span className={classes.icon}>{icon}</span> : null}
-      <span className={classes.label} title={typeof label === "string" ? label : undefined}>
+      {icon !== undefined ? <span className={classes["icon"]}>{icon}</span> : null}
+      <span className={classes["label"]} title={typeof label === "string" ? label : undefined}>
         {label}
       </span>
-      {badge !== undefined ? <span className={classes.badgeSlot}>{badge}</span> : null}
+      {badge !== undefined ? <span className={classes["badgeSlot"]}>{badge}</span> : null}
     </>
   );
 }
@@ -89,7 +89,7 @@ export function SidebarLink({
   plain = false,
   ref,
 }: SidebarLinkProps) {
-  const className = plain ? classes.rowPlain : classes.row;
+  const className = plain ? classes["rowPlain"] : classes["row"];
   const activeProps = active ? { "aria-current": "page" as const, "data-active": "true" } : {};
   const content = <SidebarRow badge={badge} icon={icon} label={label} />;
 
@@ -114,3 +114,5 @@ export function SidebarLink({
     </Link>
   );
 }
+
+export { DocsSidebarItem, SidebarRow };

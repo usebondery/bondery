@@ -5,7 +5,7 @@ import { SYNC_TABLE_KEYS } from "@bondery/schemas/sync";
 
 const SYNC_TABLE_SET = new Set<string>(SYNC_TABLE_KEYS);
 
-export type DbRow = Record<string, unknown>;
+type DbRow = Record<string, unknown>;
 
 function serializeRawRow(row: Record<string, unknown>): DbRow {
   const out: DbRow = {};
@@ -22,6 +22,24 @@ function serializeRawRow(row: Record<string, unknown>): DbRow {
   }
   return out;
 }
+
+type SyncChangeLogRow = {
+  server_sequence: number;
+  change_index: number;
+  table_name: string;
+  operation: "insert" | "update" | "delete";
+  entity_id: string;
+  row_data: Record<string, unknown> | null;
+};
+
+/**
+ * One server sequence can hold several change-log rows (one per `change_index`).
+ * The query reads up to this many rows per requested sequence, so a page of `limit`
+ * sequences fits in a single read.
+ */
+const SYNC_CHANGE_LOG_ROWS_PER_SEQUENCE = 20;
+
+export type { DbRow, SyncChangeLogRow };
 
 export async function fetchSyncTableRows(
   client: PrismaClient,
@@ -90,7 +108,7 @@ export async function fetchSyncChildIds(
     column: "person_id",
     value: personId,
   });
-  return rows.map((row) => String(row.id));
+  return rows.map((row) => String(row["id"]));
 }
 
 export async function fetchSyncPersonRow(
@@ -101,7 +119,7 @@ export async function fetchSyncPersonRow(
   const rows = await client.$queryRaw<Record<string, unknown>[]>`
     SELECT * FROM people WHERE user_id = ${userId}::uuid AND id = ${personId}::uuid LIMIT 1
   `;
-  const row = rows[0];
+  const [row] = rows;
   return row ? serializeRawRow(row) : null;
 }
 
@@ -116,18 +134,9 @@ export async function fetchSyncGroupRow(
     WHERE user_id = ${userId}::uuid AND id = ${groupId}::uuid
     LIMIT 1
   `;
-  const row = rows[0];
+  const [row] = rows;
   return row ? serializeRawRow(row) : null;
 }
-
-export type SyncChangeLogRow = {
-  server_sequence: number;
-  change_index: number;
-  table_name: string;
-  operation: "insert" | "update" | "delete";
-  entity_id: string;
-  row_data: Record<string, unknown> | null;
-};
 
 export async function fetchSyncChangeLogRows(
   client: PrismaClient,
@@ -141,7 +150,7 @@ export async function fetchSyncChangeLogRows(
     WHERE user_id = ${userId}::uuid
       AND server_sequence > ${since}
     ORDER BY server_sequence ASC, change_index ASC
-    LIMIT ${limit * 20}
+    LIMIT ${limit * SYNC_CHANGE_LOG_ROWS_PER_SEQUENCE}
   `;
 
   const parsed = rows.map((row) => serializeRawRow(row) as SyncChangeLogRow);

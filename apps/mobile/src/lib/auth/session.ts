@@ -1,8 +1,9 @@
-export type AuthRequiredReason = "missing_local_session" | "session_revoked";
+const PCT_ENCODED_RE = /%[0-9a-fA-F]{2}/;
+type AuthRequiredReason = "missing_local_session" | "session_revoked";
 
-export type EndLocalSessionReason = "account_deleted" | "session_expired" | "user_initiated";
+type EndLocalSessionReason = "account_deleted" | "session_expired" | "user_initiated";
 
-export type TransportFailureKind =
+type TransportFailureKind =
   | "aborted"
   | "missing_local_session"
   | "network"
@@ -14,7 +15,7 @@ const SESSION_TOKEN_COOKIE_NAMES = [
   "better-auth.session_token",
 ] as const;
 
-export class AuthRequiredError extends Error {
+class AuthRequiredError extends Error {
   readonly reason: AuthRequiredReason;
 
   constructor(reason: AuthRequiredReason) {
@@ -27,8 +28,6 @@ export class AuthRequiredError extends Error {
 type LocalSessionEndedListener = (reason: EndLocalSessionReason) => void;
 
 const localSessionEndedListeners = new Set<LocalSessionEndedListener>();
-
-let isSigningOutLocally = false;
 
 function decodeCookiePart(value: string): string {
   try {
@@ -45,7 +44,7 @@ function parseCookiePairs(cookieHeader: string): Map<string, string> {
     return pairs;
   }
 
-  if (!header.includes("=") && /%[0-9a-fA-F]{2}/.test(header)) {
+  if (!header.includes("=") && PCT_ENCODED_RE.test(header)) {
     header = decodeCookiePart(header);
   }
 
@@ -74,7 +73,7 @@ function parseCookiePairs(cookieHeader: string): Map<string, string> {
  * Read the opaque Better Auth session token from a Cookie header string.
  * Expo `getCookie()` already drops expired store entries.
  */
-export function parseSessionTokenFromCookieHeader(cookieHeader: string): string | null {
+function parseSessionTokenFromCookieHeader(cookieHeader: string): string | null {
   const pairs = parseCookiePairs(cookieHeader);
   for (const name of SESSION_TOKEN_COOKIE_NAMES) {
     const value = pairs.get(name);
@@ -86,7 +85,7 @@ export function parseSessionTokenFromCookieHeader(cookieHeader: string): string 
   return null;
 }
 
-export function resolveBootAuthGate(input: {
+function resolveBootAuthGate(input: {
   isAuthenticated: boolean;
   cookieToken: string | null | undefined;
   cookieReadTimedOut: boolean;
@@ -104,7 +103,7 @@ function getErrorStatus(error: unknown): number | null {
     return null;
   }
 
-  const status = error.status;
+  const { status } = error;
   return typeof status === "number" ? status : null;
 }
 
@@ -120,7 +119,7 @@ function isAbortFailure(error: unknown): boolean {
   return "code" in error && error.code === "ABORT_ERR";
 }
 
-export function classifyTransportFailure(error: unknown): TransportFailureKind {
+function classifyTransportFailure(error: unknown): TransportFailureKind {
   if (error instanceof AuthRequiredError) {
     return error.reason;
   }
@@ -141,7 +140,7 @@ export function classifyTransportFailure(error: unknown): TransportFailureKind {
   return "network";
 }
 
-export function logLocalSessionMissing(): void {
+function logLocalSessionMissing(): void {
   if (typeof __DEV__ === "undefined" || !__DEV__) {
     return;
   }
@@ -150,7 +149,7 @@ export function logLocalSessionMissing(): void {
   console.log("[auth]", "local_session_missing");
 }
 
-export function subscribeLocalSessionEnded(listener: LocalSessionEndedListener): () => void {
+function subscribeLocalSessionEnded(listener: LocalSessionEndedListener): () => void {
   localSessionEndedListeners.add(listener);
   return () => {
     localSessionEndedListeners.delete(listener);
@@ -163,44 +162,13 @@ function notifyLocalSessionEnded(reason: EndLocalSessionReason): void {
   }
 }
 
-/**
- * Local credential only. Does not call `getSession()`.
- */
-export async function readLocalAccessToken(): Promise<string | null> {
-  const { authClient } = await import("./client");
-  if (!authClient) {
-    return null;
-  }
-
-  const cookieHeader = await authClient.getCookie();
-  return parseSessionTokenFromCookieHeader(cookieHeader);
-}
-
-/**
- * Tear down the local Better Auth session. Stack.Protected handles redirect.
- */
-export async function endLocalSession({
-  reason,
-}: {
-  reason: EndLocalSessionReason;
-}): Promise<void> {
-  if (isSigningOutLocally) {
-    return;
-  }
-
-  const { authClient } = await import("./client");
-  if (!authClient) {
-    return;
-  }
-
-  isSigningOutLocally = true;
-  try {
-    notifyLocalSessionEnded(reason);
-    const result = await authClient.signOut();
-    if (reason === "user_initiated" && result.error) {
-      throw result.error;
-    }
-  } finally {
-    isSigningOutLocally = false;
-  }
-}
+export type { AuthRequiredReason, EndLocalSessionReason, TransportFailureKind };
+export {
+  AuthRequiredError,
+  classifyTransportFailure,
+  logLocalSessionMissing,
+  notifyLocalSessionEnded,
+  parseSessionTokenFromCookieHeader,
+  resolveBootAuthGate,
+  subscribeLocalSessionEnded,
+};

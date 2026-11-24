@@ -1,0 +1,9 @@
+{
+  "ApiRejectedDescription": "Serverul a respins cererea pentru că extensia ta este învechită. Actualizeaz-o.",
+  "ApiRejectedTitle": "Versiune prea veche",
+  "UpdateButton": "Actualizează",
+  "UpdateRequiredDescription": "Extensia Bondery este învechită și poate să nu funcționeze corect. Actualizeaz-o ca să continui.",
+  "UpdateRequiredTitle": "Actualizare necesară",
+  "WebappNotificationDescription": "Extensia Chrome Bondery are nevoie de o actualizare ca să funcționeze corect.",
+  "WebappNotificationTitle": "Actualizare pentru extensie disponibilă"
+}

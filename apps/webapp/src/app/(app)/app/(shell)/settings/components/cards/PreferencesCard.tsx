@@ -1,6 +1,7 @@
 // biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { APP_LANGUAGES_DATA } from "@bondery/helpers/locale";
 import {
   countryToCallingCode,
@@ -13,7 +14,13 @@ import {
   loadingNotificationTemplate,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import type { ColorSchemePreference, TimeFormatPreference } from "@bondery/schemas";
+import type {
+  ColorSchemePreference,
+  DateFormatPreference,
+  TimeFormatPreference,
+  UserSettings,
+} from "@bondery/schemas";
+import { coerceDateFormatPreference } from "@bondery/schemas/locale";
 import type { SupportedLocale } from "@bondery/translations";
 import { coerceSupportedLocale, DEFAULT_LOCALE } from "@bondery/translations";
 import { CardSection, Group, Text } from "@mantine/core";
@@ -32,11 +39,15 @@ import { TimezonePicker } from "@/components/shared/TimezonePicker";
 import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useApplyUserLanguage } from "@/lib/i18n/useApplyUserLanguage";
 import { useSettingsQuery, useUpdateSettingsMutation } from "@/lib/query/hooks/useSettings";
+import { SETTINGS_PREFERENCES_SECTION_ID } from "../../settingsSectionIds";
+import { DateFormatPicker } from "./DateFormatPicker";
 import { ReminderTimePicker } from "./ReminderTimePicker";
 import { buildReminderSendHourPayload, reminderSendHourToPickerValue } from "./reminderTimeValue";
 import { SettingsSection } from "./SettingsSection";
 import { ThemePicker } from "./ThemePicker";
 import { TimeFormatPicker } from "./TimeFormatPicker";
+
+const TIME_24H_OPTIONAL_SECONDS = /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/;
 
 function callingPrefixFromCountry(country: string | null): string {
   if (!country) {
@@ -56,21 +67,25 @@ function countryCodeFromCallingPrefix(prefix: string): string | null {
   return findTelephonePrefixOption(prefix)?.countryCode ?? null;
 }
 
-function parseSettingsPreferences(settings: Record<string, unknown>): {
+function parseSettingsPreferences(settings: UserSettings): {
   colorScheme: ColorSchemePreference;
   defaultPhoneCountry: string | null;
   language: SupportedLocale;
   reminderSendHour: string;
   timeFormat: TimeFormatPreference;
+  dateFormat: DateFormatPreference;
   timezone: string;
 } {
   const timezone = typeof settings.timezone === "string" ? settings.timezone : "UTC";
   const reminderSendHour =
     typeof settings.reminderSendHour === "string" &&
-    /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/.test(settings.reminderSendHour)
+    TIME_24H_OPTIONAL_SECONDS.test(settings.reminderSendHour)
       ? settings.reminderSendHour
       : "08:00:00";
   const timeFormat: TimeFormatPreference = settings.timeFormat === "12h" ? "12h" : "24h";
+  const dateFormat = coerceDateFormatPreference(
+    typeof settings.dateFormat === "string" ? settings.dateFormat : "locale",
+  );
   const rawLanguage = typeof settings.language === "string" ? settings.language : DEFAULT_LOCALE;
   const language = coerceSupportedLocale(rawLanguage);
   const colorScheme: ColorSchemePreference =
@@ -82,7 +97,15 @@ function parseSettingsPreferences(settings: Record<string, unknown>): {
   const defaultPhoneCountry =
     typeof settings.defaultPhoneCountry === "string" ? settings.defaultPhoneCountry : null;
 
-  return { colorScheme, defaultPhoneCountry, language, reminderSendHour, timeFormat, timezone };
+  return {
+    colorScheme,
+    dateFormat,
+    defaultPhoneCountry,
+    language,
+    reminderSendHour,
+    timeFormat,
+    timezone,
+  };
 }
 
 export function PreferencesCard() {
@@ -102,6 +125,12 @@ export function PreferencesCard() {
   );
   const [savedTimeFormat, setSavedTimeFormat] = useState<TimeFormatPreference>(
     preferences?.timeFormat ?? "24h",
+  );
+  const [dateFormat, setDateFormat] = useState<DateFormatPreference>(
+    preferences?.dateFormat ?? "locale",
+  );
+  const [savedDateFormat, setSavedDateFormat] = useState<DateFormatPreference>(
+    preferences?.dateFormat ?? "locale",
   );
   const [reminderHour, setReminderHour] = useState(() =>
     reminderSendHourToPickerValue(preferences?.reminderSendHour ?? "08:00:00"),
@@ -126,6 +155,8 @@ export function PreferencesCard() {
     setSavedTimezone(preferences.timezone);
     setTimeFormat(preferences.timeFormat);
     setSavedTimeFormat(preferences.timeFormat);
+    setDateFormat(preferences.dateFormat);
+    setSavedDateFormat(preferences.dateFormat);
     const nextReminderHour = reminderSendHourToPickerValue(preferences.reminderSendHour);
     setReminderHour(nextReminderHour);
     setSavedReminderHour(nextReminderHour);
@@ -254,6 +285,43 @@ export function PreferencesCard() {
     }
   };
 
+  const persistDateFormat = async (nextFormat: DateFormatPreference) => {
+    if (nextFormat === savedDateFormat) {
+      return;
+    }
+
+    const loadingNotification = notifications.show({
+      ...loadingNotificationTemplate({
+        description: t("PleaseWait"),
+        title: t("UpdatingDateFormat"),
+      }),
+    });
+
+    try {
+      await updateSettings.mutateAsync({ dateFormat: nextFormat });
+
+      setSavedDateFormat(nextFormat);
+
+      notifications.hide(loadingNotification);
+      notifications.show(
+        successNotificationTemplate({
+          description: t("DateFormatUpdateSuccess"),
+          title: t("UpdateSuccess"),
+        }),
+      );
+    } catch {
+      setDateFormat(savedDateFormat);
+
+      notifications.hide(loadingNotification);
+      notifications.show(
+        errorNotificationTemplate({
+          description: t("DateFormatUpdateError"),
+          title: t("UpdateError"),
+        }),
+      );
+    }
+  };
+
   const persistReminderHour = async (nextPickerValue: string) => {
     const payload = buildReminderSendHourPayload(nextPickerValue);
 
@@ -362,7 +430,7 @@ export function PreferencesCard() {
   return (
     <SettingsSection
       icon={<IconAdjustmentsHorizontal size={20} stroke={1.5} />}
-      id="preferences"
+      id={SETTINGS_PREFERENCES_SECTION_ID}
       title={t("Title")}
     >
       <CardSection inheritPadding pb="md" pt="md">
@@ -381,7 +449,7 @@ export function PreferencesCard() {
                 label={renderFieldLabel(t("Language"), t("LanguageTooltip"))}
                 languages={APP_LANGUAGES_DATA}
                 onBlur={(nextLanguage) => {
-                  void persistLanguage(nextLanguage);
+                  detachPromise(persistLanguage(nextLanguage));
                 }}
                 onChange={setLanguage}
                 placeholder={t("LanguageSearch")}
@@ -393,7 +461,7 @@ export function PreferencesCard() {
               <DefaultPhoneCountryPicker
                 label={renderFieldLabel(t("DefaultPhoneCountry"), t("DefaultPhoneCountryTooltip"))}
                 onBlur={(nextPrefix) => {
-                  void persistDefaultPhoneCountry(nextPrefix);
+                  detachPromise(persistDefaultPhoneCountry(nextPrefix));
                 }}
                 onChange={setDefaultPhonePrefix}
                 value={defaultPhonePrefix}
@@ -406,7 +474,7 @@ export function PreferencesCard() {
               <TimezonePicker
                 label={renderFieldLabel(t("Timezone"), t("TimezoneTooltip"))}
                 onBlur={(value) => {
-                  void persistTimezone(value);
+                  detachPromise(persistTimezone(value));
                 }}
                 onChange={setTimezone}
                 placeholder={t("TimezoneSearch")}
@@ -415,27 +483,39 @@ export function PreferencesCard() {
             </PreferencesField>
 
             <PreferencesField>
-              <TimeFormatPicker
-                label={renderFieldLabel(t("TimeFormat"), t("TimeFormatTooltip"))}
-                onChange={(nextFormat) => {
-                  setTimeFormat(nextFormat);
-                  void persistTimeFormat(nextFormat);
+              <ReminderTimePicker
+                label={renderFieldLabel(t("ReminderTime"), t("ReminderTimeTooltip"))}
+                onBlur={() => {
+                  detachPromise(persistReminderHour(reminderHour));
                 }}
-                value={timeFormat}
+                onChange={setReminderHour}
+                timeFormat={timeFormat}
+                value={reminderHour}
               />
             </PreferencesField>
           </PreferencesFieldRow>
 
           <PreferencesFieldRow>
             <PreferencesField>
-              <ReminderTimePicker
-                label={renderFieldLabel(t("ReminderTime"), t("ReminderTimeTooltip"))}
-                onBlur={() => {
-                  void persistReminderHour(reminderHour);
+              <TimeFormatPicker
+                label={renderFieldLabel(t("TimeFormat"), t("TimeFormatTooltip"))}
+                onChange={(nextFormat) => {
+                  setTimeFormat(nextFormat);
+                  detachPromise(persistTimeFormat(nextFormat));
                 }}
-                onChange={setReminderHour}
-                timeFormat={timeFormat}
-                value={reminderHour}
+                value={timeFormat}
+              />
+            </PreferencesField>
+
+            <PreferencesField>
+              <DateFormatPicker
+                label={renderFieldLabel(t("DateFormat"), t("DateFormatTooltip"))}
+                onBlur={(nextFormat) => {
+                  detachPromise(persistDateFormat(nextFormat));
+                }}
+                onChange={setDateFormat}
+                placeholder={t("DateFormatSearch")}
+                value={dateFormat}
               />
             </PreferencesField>
           </PreferencesFieldRow>

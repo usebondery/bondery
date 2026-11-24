@@ -2,15 +2,16 @@ import {
   CreateBucketCommand,
   HeadBucketCommand,
   PutBucketPolicyCommand,
-  S3Client,
-  type S3ClientConfig,
+  type S3Client,
 } from "@aws-sdk/client-s3";
 import { AVATARS_BUCKET, LINKEDIN_LOGOS_BUCKET } from "./get-storage.js";
+import { createS3Client } from "./s3-client.js";
 
-export const STORAGE_BUCKETS = [AVATARS_BUCKET, LINKEDIN_LOGOS_BUCKET] as const;
+const TIMEOUT_ECONNREFUSED_ENOTFOUND_ECONNRESET_ETIMEDOUT_FETCH_FA_PATTERN =
+  /timeout|ECONNREFUSED|ENOTFOUND|ECONNRESET|ETIMEDOUT|fetch failed/i;
 
 const DEFAULT_MAX_ATTEMPTS = 10;
-const DEFAULT_RETRY_DELAY_MS = 2_000;
+const DEFAULT_RETRY_DELAY_MS = 2000;
 
 type S3ErrorShape = {
   $metadata?: { httpStatusCode?: number };
@@ -87,40 +88,46 @@ const UNREACHABLE_CODES = new Set([
 ]);
 
 function isNotReadyError(error: unknown): boolean {
-  const record = asS3Error(error);
-  if (!record) {
-    return false;
-  }
+  let current: unknown = error;
 
-  if (record.name === "UnknownError" || record.message === "UnknownError") {
-    return true;
-  }
+  while (current) {
+    const record = asS3Error(current);
+    if (!record) {
+      return false;
+    }
 
-  const status = getHttpStatus(record);
-  if (typeof status === "number" && status >= 500) {
-    return true;
-  }
+    if (record.name === "UnknownError" || record.message === "UnknownError") {
+      return true;
+    }
 
-  if (
-    record.name === "AbortError" ||
-    record.name === "TimeoutError" ||
-    record.name === "TimeoutErrorException"
-  ) {
-    return true;
-  }
+    const status = getHttpStatus(record);
+    if (typeof status === "number" && status >= 500) {
+      return true;
+    }
 
-  const code = getErrorCode(record);
-  if (code && UNREACHABLE_CODES.has(code)) {
-    return true;
-  }
+    if (
+      record.name === "AbortError" ||
+      record.name === "TimeoutError" ||
+      record.name === "TimeoutErrorException"
+    ) {
+      return true;
+    }
 
-  const message = record.message ?? "";
-  if (/timeout|ECONNREFUSED|ENOTFOUND|ECONNRESET|ETIMEDOUT|fetch failed/i.test(message)) {
-    return true;
-  }
+    const code = getErrorCode(record);
+    if (code && UNREACHABLE_CODES.has(code)) {
+      return true;
+    }
 
-  if (record.cause) {
-    return isNotReadyError(record.cause);
+    const message = record.message ?? "";
+    if (TIMEOUT_ECONNREFUSED_ENOTFOUND_ECONNRESET_ETIMEDOUT_FETCH_FA_PATTERN.test(message)) {
+      return true;
+    }
+
+    if (!record.cause) {
+      return false;
+    }
+
+    current = record.cause;
   }
 
   return false;
@@ -142,19 +149,6 @@ function classifyHeadBucketError(error: unknown): Exclude<HeadBucketClass, "exis
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
-  });
-}
-
-export function createStorageAdminClient(config?: S3ClientConfig): S3Client {
-  return new S3Client({
-    credentials: {
-      accessKeyId: requireEnv("BONDERY_PRIVATE_S3_ACCESS_KEY_ID"),
-      secretAccessKey: requireEnv("BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY"),
-    },
-    endpoint: requireEnv("BONDERY_PRIVATE_S3_ENDPOINT"),
-    forcePathStyle: true,
-    region: requireEnv("BONDERY_PRIVATE_S3_REGION"),
-    ...config,
   });
 }
 
@@ -248,6 +242,17 @@ async function ensureBucketPublicReadPolicy(client: S3Client, bucket: string): P
     }),
   );
   console.log(`Public read policy applied: ${bucket}`);
+}
+
+export const STORAGE_BUCKETS = [AVATARS_BUCKET, LINKEDIN_LOGOS_BUCKET] as const;
+
+export function createStorageAdminClient(): S3Client {
+  return createS3Client({
+    accessKeyId: requireEnv("BONDERY_PRIVATE_S3_ACCESS_KEY_ID"),
+    endpoint: requireEnv("BONDERY_PRIVATE_S3_ENDPOINT"),
+    region: requireEnv("BONDERY_PRIVATE_S3_REGION"),
+    secretAccessKey: requireEnv("BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY"),
+  });
 }
 
 export type EnsureStorageBucketsOptions = {

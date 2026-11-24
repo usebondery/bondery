@@ -65,9 +65,9 @@ export async function subscriptionPortalRoutes(fastify: FastifyInstance): Promis
         if (session.url) {
           return reply.redirect(session.url);
         }
-      } catch (err) {
+      } catch (error) {
         request.log.error(
-          { err, userId: user.id },
+          { err: error, userId: user.id },
           "subscription-portal: failed to create billing portal session",
         );
       }

@@ -376,22 +376,6 @@ const CATEGORY_OVERRIDES: Record<string, EmojiCategoryName> = {
   "🧠": "Humans",
 };
 
-export const CATEGORY_ORDER: EmojiCategoryName[] = [
-  "Humans",
-  "Work",
-  "Celebrations",
-  "Sports",
-  "Travel",
-  "Animals",
-  "Buildings",
-  "Nature",
-  "Food",
-  "Activities",
-  "Hearts",
-  "Objects",
-  "Miscellaneous",
-];
-
 const getBaseCategoryByIndex = (index: number): EmojiCategoryName => {
   const range = BASE_CATEGORY_RANGES.find((item) => index >= item.start && index < item.end);
   return range?.name ?? "Miscellaneous";
@@ -421,20 +405,35 @@ EMOJI_LIST.forEach((emojiData, index) => {
   grouped[targetCategory].push(emojiData);
 });
 
-export const EMOJI_CATEGORIES = CATEGORY_ORDER.reduce<Record<string, EmojiData[]>>(
-  (acc, category) => {
-    const categoryItems = grouped[category];
+export const CATEGORY_ORDER: EmojiCategoryName[] = [
+  "Humans",
+  "Work",
+  "Celebrations",
+  "Sports",
+  "Travel",
+  "Animals",
+  "Buildings",
+  "Nature",
+  "Food",
+  "Activities",
+  "Hearts",
+  "Objects",
+  "Miscellaneous",
+];
 
-    if (categoryItems.length > 0) {
-      acc[category] = categoryItems;
-    }
+export const EMOJI_CATEGORIES: Record<string, EmojiData[]> = CATEGORY_ORDER.reduce<
+  Record<string, EmojiData[]>
+>((acc, category) => {
+  const categoryItems = grouped[category];
 
-    return acc;
-  },
-  {},
-);
+  if (categoryItems.length > 0) {
+    acc[category] = categoryItems;
+  }
 
-export const ALL_EMOJIS = EMOJI_LIST.map((item) => item.emoji);
+  return acc;
+}, {});
+
+export const ALL_EMOJIS: string[] = EMOJI_LIST.map((item) => item.emoji);
 
 /**
  * Returns a random emoji from the available emoji catalog.
@@ -442,7 +441,7 @@ export const ALL_EMOJIS = EMOJI_LIST.map((item) => item.emoji);
  * @returns A single emoji string selected randomly from `ALL_EMOJIS`.
  */
 export function getRandomEmoji(): string {
-  return ALL_EMOJIS[Math.floor(Math.random() * ALL_EMOJIS.length)];
+  return ALL_EMOJIS[Math.floor(Math.random() * ALL_EMOJIS.length)] ?? "";
 }
 
 export type { EmojiCategoryName, EmojiData };

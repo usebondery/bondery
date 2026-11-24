@@ -56,7 +56,7 @@ export type SelectBaseProps<TValue extends string> = {
   accessibilityHint?: string;
   accessibilityLabel?: string;
   className?: string;
-  data: Array<SelectDataItem<TValue>>;
+  data: SelectDataItem<TValue>[];
   description?: string;
   disabled?: boolean;
   emptySearchLabel?: string;

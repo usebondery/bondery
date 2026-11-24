@@ -3,8 +3,8 @@ import type { TOCItemType } from "fumadocs-core/toc";
 import { changelogVersionHeadingId } from "@/lib/changelog-github";
 import { type Page, source } from "@/lib/source";
 
-export const CHANGELOG_INDEX_SLUGS = ["changelog"] as const;
-export const UNRELEASED_SLUGS = ["changelog", "unreleased"] as const;
+const CHANGELOG_INDEX_SLUGS = ["changelog"] as const;
+const UNRELEASED_SLUGS = ["changelog", "unreleased"] as const;
 
 function isChangelogReleasePage(page: Page): boolean {
   const [section, version] = page.slugs;
@@ -17,7 +17,7 @@ function isChangelogReleasePage(page: Page): boolean {
   );
 }
 
-export function isUnpublishedChangelogSlug(slug: string[] | undefined): boolean {
+function isUnpublishedChangelogSlug(slug: string[] | undefined): boolean {
   return (
     slug?.length === UNRELEASED_SLUGS.length &&
     slug[0] === UNRELEASED_SLUGS[0] &&
@@ -25,11 +25,11 @@ export function isUnpublishedChangelogSlug(slug: string[] | undefined): boolean 
   );
 }
 
-export function isChangelogIndexSlug(slug: string[] | undefined): boolean {
+function isChangelogIndexSlug(slug: string[] | undefined): boolean {
   return slug?.length === CHANGELOG_INDEX_SLUGS.length && slug[0] === CHANGELOG_INDEX_SLUGS[0];
 }
 
-export function getChangelogFeedPages() {
+function getChangelogFeedPages() {
   const releases = source
     .getPages()
     .filter(isChangelogReleasePage)
@@ -38,8 +38,8 @@ export function getChangelogFeedPages() {
   return { releases };
 }
 
-export function releaseHeadingLabel(page: Page): string {
-  const version = page.slugs[1];
+function releaseHeadingLabel(page: Page): string {
+  const [, version] = page.slugs;
   const heading = page.data.toc.find((item) => item.depth === 2);
   if (heading && typeof heading.title === "string") {
     return heading.title;
@@ -47,11 +47,11 @@ export function releaseHeadingLabel(page: Page): string {
   return version ? `[${version}]` : "Changelog";
 }
 
-export function getChangelogIndexToc(): TOCItemType[] {
+function getChangelogIndexToc(): TOCItemType[] {
   const toc: TOCItemType[] = [];
 
   for (const page of getChangelogFeedPages().releases) {
-    const version = page.slugs[1];
+    const [, version] = page.slugs;
     if (!version) {
       continue;
     }
@@ -64,3 +64,13 @@ export function getChangelogIndexToc(): TOCItemType[] {
 
   return toc;
 }
+
+export {
+  CHANGELOG_INDEX_SLUGS,
+  getChangelogFeedPages,
+  getChangelogIndexToc,
+  isChangelogIndexSlug,
+  isUnpublishedChangelogSlug,
+  releaseHeadingLabel,
+  UNRELEASED_SLUGS,
+};

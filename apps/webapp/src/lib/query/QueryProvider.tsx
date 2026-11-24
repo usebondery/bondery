@@ -19,7 +19,7 @@ export function QueryProvider({ children }: { children: ReactNode }) {
       <QueryErrorResetBoundary>
         <QueryProviderInner>{children}</QueryProviderInner>
       </QueryErrorResetBoundary>
-      {process.env.NODE_ENV === "development" ? (
+      {process.env["NODE_ENV"] === "development" ? (
         <ReactQueryDevtools buttonPosition="bottom-left" initialIsOpen={false} />
       ) : null}
     </QueryClientProvider>

@@ -61,7 +61,8 @@ export function buildOAuthLoginHref(search: string): string {
     return WEBAPP_ROUTES.OAUTH_LOGIN;
   }
 
-  return `${WEBAPP_ROUTES.OAUTH_LOGIN}${search.startsWith("?") ? search : `?${search}`}`;
+  const query = search.startsWith("?") ? search : `?${search}`;
+  return `${WEBAPP_ROUTES.OAUTH_LOGIN}${query}`;
 }
 
 export function buildOAuthLoginMagicLinkUrls(

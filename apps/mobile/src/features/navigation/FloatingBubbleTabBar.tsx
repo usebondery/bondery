@@ -39,8 +39,7 @@ function RootTabBubble({
 }: RootTabBubbleProps) {
   const tMobileNavigation = useMobileNavigationTranslations();
   const { focusActiveTabSearch } = useTabSearchFocusCoordinator();
-  const descriptor = descriptors[route.key];
-  const options = descriptor.options;
+  const options = descriptors[route.key]?.options;
 
   function emitTabPress() {
     return emitter.emit({
@@ -78,13 +77,13 @@ function RootTabBubble({
   return (
     <FloatingTabPill
       accessibilityHint={accessibilityHint}
-      accessibilityLabel={options.tabBarAccessibilityLabel ?? defaultLabel}
+      accessibilityLabel={options?.tabBarAccessibilityLabel ?? defaultLabel}
       accessibilityRole="tab"
       accessibilityState={isFocused ? { selected: true } : {}}
       isFocused={isFocused}
       onLongPress={onLongPress}
       onPress={onPress}
-      testID={options.tabBarButtonTestID}
+      testID={options?.tabBarButtonTestID}
     >
       {icon}
     </FloatingTabPill>
@@ -106,7 +105,7 @@ export function FloatingBubbleTabBar({
 
   const renderTabBubble = (routeName: RootTabRoute) => {
     const routeIndex = state.routes.findIndex(
-      (route: { name: string }) => route.name === routeName,
+      (candidate: { name: string }) => candidate.name === routeName,
     );
 
     if (routeIndex < 0) {
@@ -114,8 +113,12 @@ export function FloatingBubbleTabBar({
     }
 
     const route = state.routes[routeIndex];
-    const descriptor = descriptors[route.key];
-    const options = descriptor.options;
+    const options = route ? descriptors[route.key]?.options : undefined;
+
+    if (!route || !options) {
+      return null;
+    }
+
     const isFocused = state.index === routeIndex;
     const defaultLabel =
       routeName === "contacts" ? tMobileNavigation("Contacts") : tMobileNavigation("Settings");

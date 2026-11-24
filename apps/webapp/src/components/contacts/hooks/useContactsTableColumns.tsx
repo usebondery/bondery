@@ -6,6 +6,8 @@ import type { Contact } from "@bondery/schemas";
 import { Stack, Text, Tooltip } from "@mantine/core";
 import type { ReactNode } from "react";
 import type { ColumnKey } from "@/lib/contacts/table-types";
+import { useContactsTableTranslations } from "@/lib/i18n/generated/hooks";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 import { ContactSocialIcons } from "../ContactSocialIcons";
 import type { ColumnConfig } from "../contacts-table-types";
 import {
@@ -15,8 +17,8 @@ import {
 } from "../utils/contacts-table-channel-helpers";
 
 interface UseContactsTableColumnsParams {
-  dateFormatter: Intl.DateTimeFormat;
   disableNameLink?: boolean;
+  formatDate: (date: Date) => string;
   renderLocationCell?: (contact: Contact) => ReactNode;
   sourceColumns: ColumnConfig[];
 }
@@ -24,9 +26,11 @@ interface UseContactsTableColumnsParams {
 export function useContactsTableColumns({
   sourceColumns,
   disableNameLink,
-  dateFormatter,
+  formatDate,
   renderLocationCell,
 }: UseContactsTableColumnsParams): DataColumnConfig<Contact>[] {
+  const t = useContactsTableTranslations();
+
   return sourceColumns.map((column) => ({
     fixed: column.fixed,
     hideHeader: column.hideHeader ?? column.key === "name",
@@ -51,7 +55,7 @@ export function useContactsTableColumns({
             />
           );
         case "headline": {
-          const headlineValue = contact.headline || "-";
+          const headlineValue = nonEmpty(contact.headline) ?? "-";
           return (
             <Tooltip label={headlineValue}>
               <Text lineClamp={1} size="sm">
@@ -64,7 +68,7 @@ export function useContactsTableColumns({
           if (renderLocationCell) {
             return renderLocationCell(contact);
           }
-          const locationValue = contact.location || "-";
+          const locationValue = nonEmpty(contact.location) ?? "-";
           const shortLocation = contact.location
             ? abbreviateLocationCountry(contact.location)
             : "-";
@@ -77,9 +81,7 @@ export function useContactsTableColumns({
           );
         }
         case "lastInteraction":
-          return contact.lastInteraction
-            ? dateFormatter.format(new Date(contact.lastInteraction))
-            : "-";
+          return contact.lastInteraction ? formatDate(new Date(contact.lastInteraction)) : "-";
         case "social":
           return <ContactSocialIcons contact={contact} />;
         case "phone": {
@@ -98,7 +100,7 @@ export function useContactsTableColumns({
                 </Text>
                 {otherPhoneCount > 0 && (
                   <Text c="dimmed" size="xs">
-                    +{otherPhoneCount} other {otherPhoneCount === 1 ? "phone" : "phones"}
+                    +{t("OtherPhones", { count: otherPhoneCount })}
                   </Text>
                 )}
               </Stack>
@@ -120,7 +122,7 @@ export function useContactsTableColumns({
                 </Text>
                 {otherEmailCount > 0 && (
                   <Text c="dimmed" size="xs">
-                    +{otherEmailCount} other {otherEmailCount === 1 ? "email" : "emails"}
+                    +{t("OtherEmails", { count: otherEmailCount })}
                   </Text>
                 )}
               </Stack>

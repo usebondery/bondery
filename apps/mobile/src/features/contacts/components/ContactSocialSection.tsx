@@ -24,7 +24,7 @@ type SheetState =
 /**
  * Icon-only social link row with add / edit / remove support.
  */
-export function ContactSocialSection({
+function ContactSocialSection({
   contact,
   contactFirstName,
   onUpdateSocial,
@@ -84,13 +84,13 @@ export function ContactSocialSection({
         title: value ? "Saved" : "Removed",
         type: "success",
       });
-    } catch {
+    } catch (error) {
       notifications.show({
         message: `Failed to update ${platform}`,
         title: "Could not save",
         type: "error",
       });
-      throw new Error("Social update failed");
+      throw new Error("Social update failed", { cause: error });
     }
   }
 
@@ -171,3 +171,5 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {},
 });
+
+export { ContactSocialSection };

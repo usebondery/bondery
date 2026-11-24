@@ -60,8 +60,15 @@ const COLOR_SWATCHES = [
 
 // Get a random color from swatches
 function getRandomColor(): string {
-  return COLOR_SWATCHES[Math.floor(Math.random() * COLOR_SWATCHES.length)];
+  return (
+    COLOR_SWATCHES[Math.floor(Math.random() * COLOR_SWATCHES.length)] ??
+    DEFAULT_THEME.colors.blue[6]
+  );
 }
+
+type GroupFormFieldErrors = {
+  emoji?: string;
+};
 
 interface OpenAddGroupModalOptions {
   initialLabel?: string;
@@ -75,25 +82,7 @@ function AddGroupModalTitle() {
   return <ModalTitle icon={<IconUsersGroup size={24} />} text={t("AddGroupModal.Title")} />;
 }
 
-export function openAddGroupModal(options: OpenAddGroupModalOptions = {}) {
-  const modalId = createModalId("add-group");
-
-  modals.open({
-    children: (
-      <AddGroupForm
-        initialLabel={options.initialLabel}
-        initialSelectedIds={options.initialSelectedIds}
-        modalId={modalId}
-        onCreated={options.onCreated}
-        repeatable={options.repeatable}
-      />
-    ),
-    modalId,
-    size: "md",
-    title: <AddGroupModalTitle />,
-    trapFocus: true,
-  });
-}
+const NO_SELECTED_IDS: string[] = [];
 
 interface AddGroupFormProps {
   initialLabel?: string;
@@ -105,7 +94,7 @@ interface AddGroupFormProps {
 
 function AddGroupForm({
   modalId,
-  initialSelectedIds = [],
+  initialSelectedIds = NO_SELECTED_IDS,
   initialLabel = "",
   onCreated,
   repeatable = true,
@@ -229,8 +218,10 @@ function AddGroupForm({
             <EmojiPicker
               disabled={isBlocking}
               emptyLabel={t("EmojiEmptySearch")}
-              error={form.errors.emoji as string | undefined}
+              error={(form.errors as GroupFormFieldErrors).emoji}
+              label={t("EmojiLabel")}
               onChange={(emoji) => form.setFieldValue("emoji", emoji)}
+              placeholder={t("EmojiSelectPlaceholder")}
               searchDebounceMs={DEBOUNCE_MS.localFilter}
               searchPlaceholder={t("EmojiSearchPlaceholder")}
               value={form.values.emoji}
@@ -316,4 +307,24 @@ function AddGroupForm({
       </Stack>
     </form>
   );
+}
+
+export function openAddGroupModal(options: OpenAddGroupModalOptions = {}) {
+  const modalId = createModalId("add-group");
+
+  modals.open({
+    children: (
+      <AddGroupForm
+        initialLabel={options.initialLabel}
+        initialSelectedIds={options.initialSelectedIds}
+        modalId={modalId}
+        onCreated={options.onCreated}
+        repeatable={options.repeatable}
+      />
+    ),
+    modalId,
+    size: "md",
+    title: <AddGroupModalTitle />,
+    trapFocus: true,
+  });
 }

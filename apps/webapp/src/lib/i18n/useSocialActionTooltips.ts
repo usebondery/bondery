@@ -15,7 +15,7 @@ const TOOLTIP_KEY: Record<SocialActionKey, string> = {
 };
 
 function normalizeFirstName(firstName: string | null | undefined): string {
-  const trimmed = String(firstName || "").trim();
+  const trimmed = (firstName ?? "").trim();
   return trimmed.length > 0 ? trimmed : "contact";
 }
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { errorNotificationTemplate, warningNotificationTemplate } from "@bondery/mantine-next";
 import { notifications } from "@mantine/notifications";
 import { useRef } from "react";
@@ -24,6 +25,10 @@ function toTagsInputTag(tag: { color?: string | null; id: string; label: string 
     id: tag.id,
     label: tag.label,
   };
+}
+
+function ignoreTagEditorCallback() {
+  // no-op: person tags refresh from the contact-tags query, not modal callbacks
 }
 
 export function PersonTagsInput({ personId }: PersonTagsInputProps) {
@@ -52,26 +57,28 @@ export function PersonTagsInput({ personId }: PersonTagsInputProps) {
 
     addInFlightRef.current.add(tag.id);
 
-    void addTagMutation.mutateAsync(tag.id).then(
-      () => {
-        addInFlightRef.current.delete(tag.id);
-      },
-      () => {
-        addInFlightRef.current.delete(tag.id);
-        notifications.show(
-          errorNotificationTemplate({
-            description: t("AddError"),
-            title: t("AddError"),
-          }),
-        );
-      },
+    detachPromise(
+      addTagMutation.mutateAsync(tag.id).then(
+        () => {
+          addInFlightRef.current.delete(tag.id);
+        },
+        () => {
+          addInFlightRef.current.delete(tag.id);
+          notifications.show(
+            errorNotificationTemplate({
+              description: t("AddError"),
+              title: t("AddError"),
+            }),
+          );
+        },
+      ),
     );
 
     return true;
   };
 
   const handleRemoveTag = (tagId: string) => {
-    void removeTagMutation.mutateAsync(tagId).catch(() => {
+    detachPromise(removeTagMutation.mutateAsync(tagId), () => {
       notifications.show(
         errorNotificationTemplate({
           description: t("RemoveError"),
@@ -99,9 +106,9 @@ export function PersonTagsInput({ personId }: PersonTagsInputProps) {
           initialLabel: label,
           initialSelectedPersonIds: [personId],
           mode: "create",
-          onCreated: () => {},
-          onDeleted: () => {},
-          onUpdated: () => {},
+          onCreated: ignoreTagEditorCallback,
+          onDeleted: ignoreTagEditorCallback,
+          onUpdated: ignoreTagEditorCallback,
         });
       }}
       onEdit={(tag) => {
@@ -111,9 +118,9 @@ export function PersonTagsInput({ personId }: PersonTagsInputProps) {
         }
         openTagEditorModal({
           mode: "edit",
-          onCreated: () => {},
-          onDeleted: () => {},
-          onUpdated: () => {},
+          onCreated: ignoreTagEditorCallback,
+          onDeleted: ignoreTagEditorCallback,
+          onUpdated: ignoreTagEditorCallback,
           tag: source,
         });
       }}

@@ -100,7 +100,7 @@ export async function setGisPoint(
 }
 
 export function upsertChange(table: SyncChange["table"], row: Record<string, unknown>): SyncChange {
-  const id = String(row.id);
+  const id = String(row["id"]);
   return { entityId: id, operation: "update", table, value: row };
 }
 

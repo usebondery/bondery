@@ -1,0 +1,21 @@
+{
+  "AllEnrichedDescription": "Minden LinkedIn-profillal rendelkező kapcsolat már ki van egészítve.",
+  "AllEnrichedTitle": "Minden kapcsolat ki van egészítve",
+  "Badge": "LinkedIn",
+  "CurrentlyEnriching": "Éppen kiegészítjük:",
+  "EligibleLabel_one": "{count} személy kiegészíthető",
+  "EligibleLabel_other": "{count} személy kiegészíthető",
+  "Enrich": "Kiegészítés",
+  "EnrichAll": "Összes kiegészítése",
+  "HelpTooltip": "A legfrissebb LinkedIn-profiladatok betöltése ehhez a kapcsolathoz. Kattints, ha többet szeretnél tudni a kiegészítésről.",
+  "Pause": "Szünet",
+  "PausingTooltip": "Aktuális kapcsolat befejezése, utána szünet…",
+  "PersonEligibleLabel": "Ez a kapcsolat kiegészíthető LinkedInről",
+  "ProcessingPerson": "Kiegészítés: {name}…",
+  "ProgressLabel": "Kiegészítés: {completed} / {totalEligible} kész",
+  "ProgressLabelWithFailed": "Kiegészítés: {completed} / {totalEligible} kész ({failed} sikertelen)",
+  "Resume": "Folytatás",
+  "ResumeLabel": "A kiegészítés megszakadt: {completed} kész, {pending} hátra",
+  "SkipRemaining": "Maradék kihagyása",
+  "Tooltip": "Ezeknek a kapcsolatoknak van LinkedIn-profiljuk, de még nincsenek kiegészítve. Egészítsd ki őket a legfrissebb munkatörténetért, végzettségért és bemutatkozásért."
+}

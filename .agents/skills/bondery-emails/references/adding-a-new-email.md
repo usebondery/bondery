@@ -6,12 +6,12 @@ Step-by-step recipe for a new transactional email. Follow this even if you are o
 
 Templates live under `packages/emails/src/templates/<folder>/YourEmail.tsx`. Never drop a new file in the templates root.
 
-| Folder | Use for | Today |
-|--------|---------|-------|
-| `account/` | Sign-up, sign-in, account lifecycle | Magic link, welcome, account deleted |
-| `billing/` | Subscriptions, trials, invoices | Trial ending |
-| `internal/` | Mail the Bondery team reads | Feedback |
-| `notifications/` | Product mail triggered from client apps (and scheduled product reminders) | Share contact, reminder digest |
+| Folder           | Use for                                                                   | Today                                |
+| ---------------- | ------------------------------------------------------------------------- | ------------------------------------ |
+| `account/`       | Sign-up, sign-in, account lifecycle                                       | Magic link, welcome, account deleted |
+| `billing/`       | Subscriptions, trials, invoices                                           | Trial ending                         |
+| `internal/`      | Mail the Bondery team reads                                               | Feedback                             |
+| `notifications/` | Product mail triggered from client apps (and scheduled product reminders) | Share contact, reminder digest       |
 
 If it does not fit, extend this table in [templates-and-branding.md](./templates-and-branding.md) — do not invent a fifth folder without documenting it.
 
@@ -85,12 +85,12 @@ import {
 
 ## 7. Wire the trigger
 
-| Trigger type | Where to wire |
-|--------------|---------------|
-| User API action | Route handler → service |
-| Stripe webhook | `services/billing/webhook-handlers/` |
-| Scheduled job | `lib/jobs/schedules.ts` + worker |
-| Auth lifecycle | `lib/auth/` teardown or hooks |
+| Trigger type    | Where to wire                        |
+| --------------- | ------------------------------------ |
+| User API action | Route handler → service              |
+| Stripe webhook  | `services/billing/webhook-handlers/` |
+| Scheduled job   | `lib/jobs/schedules.ts` + worker     |
+| Auth lifecycle  | `lib/auth/` teardown or hooks        |
 
 For automated sends, add idempotency — see [triggers-and-idempotency.md](./triggers-and-idempotency.md).
 

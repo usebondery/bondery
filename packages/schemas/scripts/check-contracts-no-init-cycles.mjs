@@ -8,6 +8,8 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "../../../scripts/check/check-report.mjs";
 
+const TS_TSX_RE = /\.(ts|tsx)$/;
+
 const check = createCheck("check-contracts-no-init-cycles");
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -42,7 +44,7 @@ function collectSourceFiles(dir) {
       files.push(...collectSourceFiles(fullPath));
       continue;
     }
-    if (/\.(ts|tsx)$/.test(entry) && !entry.endsWith(".d.ts")) {
+    if (TS_TSX_RE.test(entry) && !entry.endsWith(".d.ts")) {
       files.push(fullPath);
     }
   }

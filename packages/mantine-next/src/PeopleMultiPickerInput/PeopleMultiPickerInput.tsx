@@ -4,7 +4,7 @@
 import { formatContactName } from "@bondery/helpers/contact";
 import type { ContactSelectable } from "@bondery/schemas";
 import { Combobox, getDefaultZIndex, Pill, PillsInput, useCombobox } from "@mantine/core";
-import { useEffect, useState } from "react";
+import { type ReactElement, useEffect, useState } from "react";
 import { PersonChip } from "#nextjs/PersonChip/index.js";
 import { PeoplePickerDropdownBody } from "#peoplePicker/PeoplePickerDropdownBody.js";
 import {
@@ -114,32 +114,6 @@ function ReadonlySelectedPeoplePills({
   );
 }
 
-/**
- * Controlled multi-select input for picking contacts by id.
- * Keeps `selectedIds` order when rendering chips and appending new selections,
- * supports searching available contacts, and allows removing selections via chip clear or backspace.
- *
- * When `onSearch` is provided, typing triggers a debounced server-side search
- * instead of filtering the local `contacts` array, allowing the picker to find
- * contacts that were not included in the initial prefetch.
- *
- * `isReadonly` renders the same chip field without search, dropdown, or removal.
- */
-export function PeopleMultiPickerInput(props: PeopleMultiPickerInputProps) {
-  if (props.isReadonly) {
-    return (
-      <ReadonlySelectedPeoplePills
-        contacts={props.contacts}
-        disabled={props.disabled}
-        error={props.error}
-        selectedIds={props.selectedIds}
-      />
-    );
-  }
-
-  return <EditablePeopleMultiPickerInput {...props} />;
-}
-
 function EditablePeopleMultiPickerInput({
   contacts,
   contactsHasMore = false,
@@ -162,9 +136,8 @@ function EditablePeopleMultiPickerInput({
   const selectedIdSet = new Set(selectedIds);
   const filterAvailable = (contact: ContactSelectable) =>
     !selectedIdSet.has(contact.id) && !contact.myself;
-  const matchQuery = (contact: ContactSelectable, query: string) => {
-    return formatContactName(contact).toLowerCase().includes(query.toLowerCase());
-  };
+  const matchQuery = (contact: ContactSelectable, query: string) =>
+    formatContactName(contact).toLowerCase().includes(query.toLowerCase());
 
   const {
     canLoadMore,
@@ -279,7 +252,7 @@ function EditablePeopleMultiPickerInput({
               <PillsInput.Field
                 disabled={disabled}
                 onChange={(event) => {
-                  const value = event.currentTarget.value;
+                  const { value } = event.currentTarget;
                   setQuery(value);
                   contactsCombobox.openDropdown();
                   contactsCombobox.updateSelectedOptionIndex("active");
@@ -287,7 +260,7 @@ function EditablePeopleMultiPickerInput({
                 onFocus={() => contactsCombobox.openDropdown()}
                 onKeyDown={(event) => {
                   if (event.key === "Backspace" && search.length === 0) {
-                    const lastSelectedId = selectedIds[selectedIds.length - 1];
+                    const lastSelectedId = selectedIds.at(-1);
 
                     if (lastSelectedId) {
                       onChange(selectedIds.slice(0, -1));
@@ -327,4 +300,30 @@ function EditablePeopleMultiPickerInput({
       </Combobox.Dropdown>
     </Combobox>
   );
+}
+
+/**
+ * Controlled multi-select input for picking contacts by id.
+ * Keeps `selectedIds` order when rendering chips and appending new selections,
+ * supports searching available contacts, and allows removing selections via chip clear or backspace.
+ *
+ * When `onSearch` is provided, typing triggers a debounced server-side search
+ * instead of filtering the local `contacts` array, allowing the picker to find
+ * contacts that were not included in the initial prefetch.
+ *
+ * `isReadonly` renders the same chip field without search, dropdown, or removal.
+ */
+export function PeopleMultiPickerInput(props: PeopleMultiPickerInputProps): ReactElement {
+  if (props.isReadonly) {
+    return (
+      <ReadonlySelectedPeoplePills
+        contacts={props.contacts}
+        disabled={props.disabled}
+        error={props.error}
+        selectedIds={props.selectedIds}
+      />
+    );
+  }
+
+  return <EditablePeopleMultiPickerInput {...props} />;
 }

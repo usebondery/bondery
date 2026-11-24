@@ -2,6 +2,13 @@ import type { CreateContactInput, UpdateContactInput } from "#entities/contact/t
 import type { CreateGroupInput } from "#entities/group/types.js";
 import type { ReplaceImportantDatesInput } from "#entities/important-date/types.js";
 
+type SyncMutationBase = {
+  baseUpdatedAt?: string;
+  clientSequence: number;
+  id: string;
+};
+
+type OmitUnion<T, K extends keyof T> = T extends unknown ? Omit<T, K> : never;
 export type SyncMutationType =
   | "contact.create"
   | "contact.update"
@@ -50,12 +57,6 @@ export type TagUpdatePayload = Partial<{
   color: string;
   label: string;
 }>;
-
-type SyncMutationBase = {
-  baseUpdatedAt?: string;
-  clientSequence: number;
-  id: string;
-};
 
 export type SyncMutation =
   | (SyncMutationBase & { payload: ContactCreatePayload; type: "contact.create" })
@@ -108,8 +109,6 @@ export type SyncMutation =
       payload?: Record<string, never>;
       type: "tag.delete";
     });
-
-type OmitUnion<T, K extends keyof T> = T extends unknown ? Omit<T, K> : never;
 
 /** Client-side mutation before id / clientSequence are assigned. */
 export type SyncMutationInput = OmitUnion<SyncMutation, "id" | "clientSequence"> & {

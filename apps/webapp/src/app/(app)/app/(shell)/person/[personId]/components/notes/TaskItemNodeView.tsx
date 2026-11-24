@@ -3,6 +3,10 @@
 import { Checkbox, Group } from "@mantine/core";
 import { NodeViewContent, type NodeViewProps, NodeViewWrapper } from "@tiptap/react";
 
+type TaskItemAttrs = {
+  checked?: boolean;
+};
+
 /**
  * NodeView for TaskItem extension.
  * Renders each task list entry with a Mantine Checkbox instead of the
@@ -10,7 +14,7 @@ import { NodeViewContent, type NodeViewProps, NodeViewWrapper } from "@tiptap/re
  * Checked items also get a strikethrough on their text.
  */
 export function TaskItemNodeView({ node, updateAttributes, editor }: NodeViewProps) {
-  const isChecked = Boolean(node.attrs.checked);
+  const isChecked = Boolean((node.attrs as TaskItemAttrs).checked);
 
   return (
     <NodeViewWrapper
@@ -27,7 +31,9 @@ export function TaskItemNodeView({ node, updateAttributes, editor }: NodeViewPro
       <Group align="flex-start" gap="xs" style={{ minHeight: "1.5rem" }} wrap="nowrap">
         <Checkbox
           checked={isChecked}
-          onChange={() => {}}
+          onChange={() => {
+            // no-op: checkbox state is applied on mouse down to keep editor focus
+          }}
           onMouseDown={(event) => {
             event.preventDefault();
             if (editor.isEditable) {

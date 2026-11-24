@@ -4,7 +4,7 @@ icon: Sparkles
 description: "Let Claude, Cursor, or another AI assistant search your Bondery contacts, brief you before a meeting, and log what you talked about. Setup takes one URL."
 docId: bondery.mcp
 docPath: apps/mcp
-last_updated: 2026-11-13
+last_updated: 2026-11-17
 ---
 
 MCP (Model Context Protocol) is a standard connector. Your assistant speaks MCP, Bondery answers on MCP, and the two work together without custom code. Think of a wall socket that accepts any appliance: the shape is agreed in advance, so nothing needs rewiring.
@@ -266,6 +266,21 @@ Assistants that support MCP prompts can start from these templates:
 | Organize a contact | Add someone to groups or tags (Full access) |
 
 The server also sends usage instructions at initialize: search first, never dump the address book, Full access for writes.
+
+## Skills
+
+A skill is a written playbook the assistant follows for one job. Assistants that support MCP skills can load these from the server. You do not need to install a plugin:
+
+| Skill | What it does |
+|---|---|
+| `onboarding` | Introduces Bondery and the jobs below |
+| `catch-up` | Briefs you on one person before a meeting or a call |
+| `get-to-know` | Tells you what someone does, what you have in common, and who you both know |
+| `remember` | Saves a person or a conversation (Full access) |
+| `reach-out` | Lists who is overdue for keep-in-touch and which dates are coming up |
+| `share-person` | Emails a contact card after you confirm the recipients and the fields (Full access) |
+
+The skills are the same ones the Claude and OpenAI plugins ship. The server lists them at `skill://bondery/<skill>/SKILL.md`.
 
 ## Related
 

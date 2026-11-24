@@ -54,11 +54,7 @@ for (const file of walk(root)) {
       line.includes('from "@/lib/i18n/generated/hooks"'),
     );
     if (hookImport >= 0) {
-      lines[hookImport] = lines[hookImport].replace(
-        "useCommonTranslations",
-        "useCommonTranslations",
-      );
-      if (!lines[hookImport].includes("useCommonTranslations")) {
+      if (!lines[hookImport]?.includes("useCommonTranslations")) {
         lines.splice(
           hookImport + 1,
           0,

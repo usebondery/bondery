@@ -1,3 +1,4 @@
+const JS_TS_FILE_EXT_RE = /\.(js|ts|tsx)$/;
 const fs = require("node:fs");
 const { getDefaultConfig } = require("expo/metro-config");
 const path = require("node:path");
@@ -13,16 +14,22 @@ const { withUniwindConfig } = require("uniwind/metro");
 // not fs.promises — so this patch fills that gap. require('fs') and
 // require('node:fs') return the same object, so this one patch covers both.
 const _origReadFile = fs.promises.readFile;
+const READ_FILE_MAX_ATTEMPTS = 10;
 fs.promises.readFile = async function emfileRetryReadFile(...args) {
-  for (let attempt = 0; attempt < 10; attempt++) {
+  for (let attempt = 0; attempt < READ_FILE_MAX_ATTEMPTS; attempt++) {
     try {
       return await _origReadFile.apply(fs.promises, args);
-    } catch (err) {
-      if ((err.code === "EMFILE" || err.code === "ENFILE") && attempt < 9) {
-        await new Promise((resolve) => setTimeout(resolve, 50 * (attempt + 1)));
+    } catch (error) {
+      if (
+        (error.code === "EMFILE" || error.code === "ENFILE") &&
+        attempt < READ_FILE_MAX_ATTEMPTS - 1
+      ) {
+        await new Promise((resolve) => {
+          setTimeout(resolve, 50 * (attempt + 1));
+        });
         continue;
       }
-      throw err;
+      throw error;
     }
   }
 };
@@ -51,7 +58,7 @@ const workspacePackageFolders = fs
     if (!fs.existsSync(pkgJsonPath)) {
       return null;
     }
-    const name = JSON.parse(fs.readFileSync(pkgJsonPath, "utf8")).name;
+    const { name } = JSON.parse(fs.readFileSync(pkgJsonPath, "utf8"));
     return { folderPath, name };
   })
   .filter((entry) => entry !== null && mobileDeps.has(entry.name))
@@ -129,7 +136,7 @@ function normalizePath(filePath) {
 }
 
 function resolveWorkspaceSourceFile(pkgRoot, subpath) {
-  const clean = subpath.replace(/\.(js|ts|tsx)$/, "");
+  const clean = subpath.replace(JS_TS_FILE_EXT_RE, "");
   const candidates = [
     path.join(pkgRoot, "src", `${clean}.ts`),
     path.join(pkgRoot, "src", `${clean}.tsx`),
@@ -171,7 +178,7 @@ function resolveWorkspaceRelativeJs(originModulePath, moduleName) {
     return null;
   }
   const originDir = path.dirname(originModulePath);
-  const withoutExt = moduleName.replace(/\.(js|ts|tsx)$/, "");
+  const withoutExt = moduleName.replace(JS_TS_FILE_EXT_RE, "");
   const candidates = [
     path.join(originDir, `${withoutExt}.ts`),
     path.join(originDir, `${withoutExt}.tsx`),
@@ -207,7 +214,7 @@ function resolveWorkspaceHashImport(originModulePath, moduleName) {
 }
 
 config.resolver.resolveRequest = (context, moduleName, platform) => {
-  const base = moduleName.split("/")[0];
+  const [base] = moduleName.split("/");
 
   // Only override if the import is coming from *outside* the local node_modules,
   // e.g. from root workspace packages or shared packages. This avoids infinite

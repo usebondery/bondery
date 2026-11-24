@@ -15,7 +15,7 @@ A concise guide for creating blog posts on the Bondery website.
 
 Place your file in the correct category folder:
 
-```
+```text
 apps/website/content/blog/<category>/<slug>.mdx
 ```
 
@@ -27,7 +27,7 @@ apps/website/content/blog/<category>/<slug>.mdx
 
 Create a companion `<slug>.meta.ts` file alongside the MDX file:
 
-```
+```text
 apps/website/content/blog/<category>/<slug>.meta.ts
 ```
 
@@ -60,30 +60,30 @@ export { postMeta } from "./your-post-slug.meta";
 
 ### Field reference
 
-| Field | Required | Notes |
-|---|---|---|
-| `title` | Yes | H1 of the post and `<title>` tag. Keep concise and descriptive. |
-| `slug` | Yes | Must match the filename (without `.mdx`). |
-| `date` | Yes | ISO format `YYYY-MM-DD`. |
-| `modifiedDate` | No | Set when substantially updating a post. Falls back to `date`. |
-| `description` | Yes | Max 160 chars. Used in meta description, OG, and blog cards. |
-| `category` | Yes | Use `updatesCategoryConfig.slug`, `techCategoryConfig.slug`, or `bondsCategoryConfig.slug` imported from `categories.ts`. |
-| `author` | No | Use `sveetya.name` imported from `src/data/team.ts`. |
-| `tags` | No | Array of keywords for OG `article:tag` and meta keywords. 3–7 tags recommended. |
-| `announce` | No | Controls whether and where this post is announced. See below. |
+| Field          | Required | Notes                                                                                                                     |
+| -------------- | -------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `title`        | Yes      | H1 of the post and `<title>` tag. Keep concise and descriptive.                                                           |
+| `slug`         | Yes      | Must match the filename (without `.mdx`).                                                                                 |
+| `date`         | Yes      | ISO format `YYYY-MM-DD`.                                                                                                  |
+| `modifiedDate` | No       | Set when substantially updating a post. Falls back to `date`.                                                             |
+| `description`  | Yes      | Max 160 chars. Used in meta description, OG, and blog cards.                                                              |
+| `category`     | Yes      | Use `updatesCategoryConfig.slug`, `techCategoryConfig.slug`, or `bondsCategoryConfig.slug` imported from `categories.ts`. |
+| `author`       | No       | Use `sveetya.name` imported from `src/data/team.ts`.                                                                      |
+| `tags`         | No       | Array of keywords for OG `article:tag` and meta keywords. 3–7 tags recommended.                                           |
+| `announce`     | No       | Controls whether and where this post is announced. See below.                                                             |
 
 #### Announce fields
 
 Set `announce` when you want the post published on Discord and/or Reddit via the release pipeline.
 
-| Field | Type | Default | Notes |
-|---|---|---|---|
-| `announce.enabled` | `boolean` | — | **Required to be `true`** for any announcement to happen. |
-| `announce.discord` | `boolean` | `true` | Set `false` to skip Discord for this post. |
-| `announce.reddit` | `boolean` | `true` | Set `false` to skip Reddit for this post. |
-| `announce.subreddit` | `string` | `"bondery"` | Subreddit to post to (no `r/` prefix). Override for category-specific communities. |
-| `announce.redditTitle` | `string` | Post title | Custom title for the Reddit submission if different from the post title. |
-| `announce.redditFlair` | `string` | — | Optional flair text for the subreddit (requires the subreddit to have flairs set up). |
+| Field                  | Type      | Default     | Notes                                                                                 |
+| ---------------------- | --------- | ----------- | ------------------------------------------------------------------------------------- |
+| `announce.enabled`     | `boolean` | —           | **Required to be `true`** for any announcement to happen.                             |
+| `announce.discord`     | `boolean` | `true`      | Set `false` to skip Discord for this post.                                            |
+| `announce.reddit`      | `boolean` | `true`      | Set `false` to skip Reddit for this post.                                             |
+| `announce.subreddit`   | `string`  | `"bondery"` | Subreddit to post to (no `r/` prefix). Override for category-specific communities.    |
+| `announce.redditTitle` | `string`  | Post title  | Custom title for the Reddit submission if different from the post title.              |
+| `announce.redditFlair` | `string`  | —           | Optional flair text for the subreddit (requires the subreddit to have flairs set up). |
 
 Example:
 
@@ -108,12 +108,12 @@ import MyNewPost, { postMeta as myNewPost } from "./updates/my-new-post.mdx";
 
 export const allPosts: PostMeta[] = [
   introducingBondery,
-  myNewPost,              // ← add here (newest first)
+  myNewPost, // ← add here (newest first)
 ];
 
 export const postComponents: Record<string, ComponentType> = {
   [`${introducingBondery.category}/${introducingBondery.slug}`]: IntroducingBondery,
-  [`${myNewPost.category}/${myNewPost.slug}`]: MyNewPost,    // ← add here
+  [`${myNewPost.category}/${myNewPost.slug}`]: MyNewPost, // ← add here
 };
 ```
 
@@ -135,11 +135,15 @@ Write standard MDX (Markdown + JSX) below the metadata block. No frontmatter —
 
 Follow this general pattern:
 
-```
+```md
 ## Opening hook / story (grab attention)
+
 ## Problem statement (why this matters)
+
 ## What we built / the solution
+
 ## How it works (details, screenshots)
+
 ## What's next / call to action
 ```
 
@@ -234,22 +238,25 @@ Study how Ente writes their blog — this is the structure and quality to aim fo
 - Don't start with "We're excited to announce..." — get to the point.
 - The first paragraph should make the reader understand what they'll learn or what's new.
 
-**Good:** *"When David Rockefeller passed away in 2017, one of his most prized possessions wasn't a painting — it was his Rolodex."*
+**Good:** _"When David Rockefeller passed away in 2017, one of his most prized possessions wasn't a painting — it was his Rolodex."_
 
-**Bad:** *"We are thrilled to announce the release of our new product that we've been working on for a long time."*
+**Bad:** _"We are thrilled to announce the release of our new product that we've been working on for a long time."_
 
 ### Feature descriptions
 
 For each feature or section:
+
 1. **What it is** — one sentence.
 2. **Why it matters** — one sentence connecting it to the reader's life.
 3. **How it works** — brief explanation or screenshot. Don't over-explain.
 
 **Good (Ente style):**
-> *Rituals lets you start a habit and track your progress through photos. Take a photo every day or start a new workout ritual.*
+
+> _Rituals lets you start a habit and track your progress through photos. Take a photo every day or start a new workout ritual._
 
 **Bad:**
-> *We have implemented a new feature called Rituals which is designed to help users build habits through the use of photographic documentation of their daily activities.*
+
+> _We have implemented a new feature called Rituals which is designed to help users build habits through the use of photographic documentation of their daily activities._
 
 ### Closing
 

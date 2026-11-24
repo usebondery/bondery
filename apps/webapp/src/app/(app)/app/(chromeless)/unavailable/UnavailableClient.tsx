@@ -1,10 +1,11 @@
 // biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { Box, Button, Group, Loader, Stack, Text, Title } from "@mantine/core";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { retryApiConnection } from "@/lib/api/availabilityStore";
 import { OUTAGE_RESUME_DELAY_MS } from "@/lib/auth/constants";
 import { handleUnauthorizedSession } from "@/lib/auth/handleUnauthorizedSession";
@@ -13,7 +14,7 @@ import { useUnavailablePageTranslations } from "@/lib/i18n/generated/hooks";
 import { routeAssert } from "@/lib/navigation/route/assert";
 import { STATUS_URL } from "@/lib/platform/config";
 
-const POLL_INTERVAL_MS = 5_000;
+const POLL_INTERVAL_MS = 5000;
 
 export function UnavailableClient() {
   const t = useUnavailablePageTranslations();
@@ -23,7 +24,9 @@ export function UnavailableClient() {
   const [isNavigating, setIsNavigating] = useState(false);
   const [sessionReachable, setSessionReachable] = useState<boolean | null>(null);
   const [secondsUntilPoll, setSecondsUntilPoll] = useState(POLL_INTERVAL_MS / 1000);
-  const isNavigatingRef = useRef(false);
+  const isNavigatingRef = useRef<boolean>(false);
+  const compactPollDescriptionId = useId();
+  const widePollDescriptionId = useId();
 
   const navigateBack = async () => {
     if (isNavigatingRef.current) {
@@ -44,12 +47,12 @@ export function UnavailableClient() {
   const probeSession = async (): Promise<boolean> => {
     const result = await retryApiConnection();
     if (result === "unauthorized") {
-      void handleUnauthorizedSession();
+      detachPromise(handleUnauthorizedSession());
       return false;
     }
     if (result === "ok") {
       setSessionReachable(true);
-      void navigateBack();
+      detachPromise(navigateBack());
       return true;
     }
     setSessionReachable(false);
@@ -57,7 +60,7 @@ export function UnavailableClient() {
   };
 
   useEffect(() => {
-    void probeSession();
+    detachPromise(probeSession());
   }, [probeSession]);
 
   useEffect(() => {
@@ -68,12 +71,12 @@ export function UnavailableClient() {
     const countdown = setInterval(() => {
       setSecondsUntilPoll((seconds) => {
         if (seconds <= 1) {
-          void probeSession();
+          detachPromise(probeSession());
           return POLL_INTERVAL_MS / 1000;
         }
         return seconds - 1;
       });
-    }, 1_000);
+    }, 1000);
 
     return () => clearInterval(countdown);
   }, [isNavigating, probeSession, sessionReachable]);
@@ -113,18 +116,18 @@ export function UnavailableClient() {
     </Stack>
   );
 
-  const actionStack = (centered: boolean) => (
+  const actionStack = (centered: boolean, pollDescriptionId: string) => (
     <Stack align={centered ? "center" : "flex-start"} gap={4}>
       {isChecking ? (
         <Loader />
       ) : (
         <Group gap="sm" justify={centered ? "center" : "flex-start"} wrap="wrap">
           <Button
-            aria-describedby={showPollCountdown ? "unavailable-poll-description" : undefined}
+            aria-describedby={showPollCountdown ? pollDescriptionId : undefined}
             className="min-w-40"
             disabled={isNavigating}
             loading={isRetrying || isNavigating}
-            onClick={() => void handleRetry()}
+            onClick={() => detachPromise(handleRetry())}
           >
             {t("Retry")}
           </Button>
@@ -147,12 +150,7 @@ export function UnavailableClient() {
         </Group>
       )}
       {showPollCountdown ? (
-        <Text
-          c="dimmed"
-          id="unavailable-poll-description"
-          size="xs"
-          ta={centered ? "center" : "left"}
-        >
+        <Text c="dimmed" id={pollDescriptionId} size="xs" ta={centered ? "center" : "left"}>
           {t("CheckingAgain", { seconds: secondsUntilPoll })}
         </Text>
       ) : null}
@@ -172,7 +170,7 @@ export function UnavailableClient() {
             🤖
           </Text>
           {copyStack(true)}
-          {actionStack(true)}
+          {actionStack(true, compactPollDescriptionId)}
         </Stack>
 
         <Box
@@ -198,7 +196,7 @@ export function UnavailableClient() {
             🤖
           </Text>
           {copyStack(false)}
-          {actionStack(false)}
+          {actionStack(false, widePollDescriptionId)}
         </Box>
       </Box>
 

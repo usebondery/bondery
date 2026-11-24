@@ -1,0 +1,15 @@
+{
+  "Concepts": {
+    "FixAndMerge": "taisyti ir sujungti",
+    "GroupDetail": "ši grupė",
+    "Groups": "Grupės",
+    "Home": "Pradžia",
+    "KeepInTouch": "Palaikyk ryšį",
+    "Map": "žemėlapį",
+    "People": "Žmonės",
+    "PersonDetails": "žmogaus duomenis",
+    "Timeline": "Sąveikos"
+  },
+  "HelpLabel": "Sužinok daugiau",
+  "LearnMoreAbout": "Sužinok daugiau apie {concept}"
+}

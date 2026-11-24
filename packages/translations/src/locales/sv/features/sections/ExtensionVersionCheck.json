@@ -1,0 +1,9 @@
+{
+  "ApiRejectedDescription": "Servern nekade begäran eftersom tillägget är inaktuellt. Uppdatera det.",
+  "ApiRejectedTitle": "Versionen för gammal",
+  "UpdateButton": "Uppdatera",
+  "UpdateRequiredDescription": "Ditt Bondery-tillägg är inaktuellt och kanske inte fungerar som det ska. Uppdatera det för att fortsätta.",
+  "UpdateRequiredTitle": "Uppdatering krävs",
+  "WebappNotificationDescription": "Ditt Bondery Chrome-tillägg behöver en uppdatering för att fungera korrekt.",
+  "WebappNotificationTitle": "Tilläggsuppdatering tillgänglig"
+}

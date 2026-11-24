@@ -1,0 +1,35 @@
+{
+  "email": {
+    "invalid": "Įvesk galiojantį el. pašto adresą",
+    "invalidTitle": "Netinkamas el. paštas"
+  },
+  "fields": {
+    "firstName": {
+      "maxLength": "Vardas gali būti ne ilgesnis nei {max} simbolių",
+      "required": "Vardas būtinas"
+    },
+    "generic": {
+      "maxLength": "Reikšmė gali būti ne ilgesnė nei {max} simbolių"
+    },
+    "headline": {
+      "maxLength": "Antraštė gali būti ne ilgesnė nei {max} simbolių"
+    },
+    "label": {
+      "maxLength": "Laukas „{field}“ gali būti ne ilgesnis nei {max} simbolių",
+      "required": "Laukas „{field}“ būtinas"
+    },
+    "lastName": {
+      "maxLength": "Pavardė gali būti ne ilgesnė nei {max} simbolių"
+    },
+    "location": {
+      "maxLength": "Vieta gali būti ne ilgesnė nei {max} simbolių"
+    },
+    "middleName": {
+      "maxLength": "Antras vardas gali būti ne ilgesnis nei {max} simbolių"
+    }
+  },
+  "interaction": {
+    "titleRequired": "Pavadinimas būtinas"
+  },
+  "title": "Patvirtinimo klaida"
+}

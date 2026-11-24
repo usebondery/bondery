@@ -1,8 +1,8 @@
 "use client";
 
-export { isUnauthorizedApiError, isUnauthorizedResponseStatus } from "@/lib/auth/unauthorized";
-
 import { endSession } from "@/lib/auth/endSession";
+
+export { isUnauthorizedApiError, isUnauthorizedResponseStatus } from "@/lib/auth/unauthorized";
 
 /**
  * Clears client caches, ends the local session, and redirects to login.

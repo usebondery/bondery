@@ -8,7 +8,7 @@ import {
   View,
 } from "react-native";
 import { Pressable } from "@/components/ui/Pressable";
-import { useCommonTranslations } from "@/lib/i18n/generated/hooks";
+import { useCommonTranslations, useMobileContactsTranslations } from "@/lib/i18n/generated/hooks";
 import { PersonAvatar } from "../../../components/PersonAvatar";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
@@ -44,12 +44,13 @@ function MentionContactRow({ contact, onPress }: { contact: Contact; onPress: ()
   );
 }
 
-export function MentionContactListContent({
+function MentionContactListContent({
   contacts,
   loading,
   onSelect,
 }: MentionContactListContentProps) {
   const t = useCommonTranslations();
+  const tContacts = useMobileContactsTranslations();
   const colors = useMobileThemeColors();
 
   function renderItem({ item }: ListRenderItemInfo<Contact>) {
@@ -67,9 +68,11 @@ export function MentionContactListContent({
   if (contacts.length === 0) {
     return (
       <View style={styles.centered}>
-        <Text style={[styles.emptyTitle, { color: colors.textSecondary }]}>No contacts yet</Text>
+        <Text style={[styles.emptyTitle, { color: colors.textSecondary }]}>
+          {tContacts("MentionEmptyTitle")}
+        </Text>
         <Text style={[styles.emptyCaption, { color: colors.textMuted }]}>
-          Add people to mention them in notes.
+          {tContacts("MentionEmptyCaption")}
         </Text>
       </View>
     );
@@ -128,3 +131,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 });
+
+export { MentionContactListContent };

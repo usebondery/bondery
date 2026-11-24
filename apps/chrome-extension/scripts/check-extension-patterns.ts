@@ -8,6 +8,11 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "../../../scripts/check/check-report.mjs";
 
+const FROM_SHARED_IMPORT_RE = /\bfrom\s+["'][./]*(?:src\/)?shared\//;
+const FROM_LIB_API_IMPORT_RE = /\bfrom\s+["'][^"']*lib\/api\//;
+const FROM_MANTINE_NEXT_IMPORT_RE = /\bfrom\s+["']@bondery\/mantine-next["']/;
+const FROM_UTILS_IMPORT_RE = /\bfrom\s+["'][./]*(?:src\/)?utils\//;
+const SOURCE_FILE_EXT_RE = /\.(tsx?|jsx?)$/;
 const report = createCheck("check-extension-patterns");
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -23,7 +28,7 @@ function walk(dir: string, acc: string[] = []): string[] {
         continue;
       }
       walk(full, acc);
-    } else if (/\.(tsx?|jsx?)$/.test(entry)) {
+    } else if (SOURCE_FILE_EXT_RE.test(entry)) {
       acc.push(full);
     }
   }
@@ -40,10 +45,7 @@ function checkFile(abs: string): Violation[] {
   const text = readFileSync(abs, "utf8");
   const violations: Violation[] = [];
 
-  if (
-    /\bfrom\s+["'][./]*(?:src\/)?utils\//.test(text) ||
-    /\bfrom\s+["'][./]*(?:src\/)?shared\//.test(text)
-  ) {
+  if (FROM_UTILS_IMPORT_RE.test(text) || FROM_SHARED_IMPORT_RE.test(text)) {
     violations.push({
       detail: "Import from lib/ or features/ instead of utils/ or shared/",
       file: rel,
@@ -51,7 +53,7 @@ function checkFile(abs: string): Violation[] {
     });
   }
 
-  if (!isApiAllowed(rel) && /\bfrom\s+["'][^"']*lib\/api\//.test(text)) {
+  if (!isApiAllowed(rel) && FROM_LIB_API_IMPORT_RE.test(text)) {
     violations.push({
       detail: "lib/api imports are limited to features/background/ and lib/api/",
       file: rel,
@@ -59,7 +61,7 @@ function checkFile(abs: string): Violation[] {
     });
   }
 
-  if (/\bfrom\s+["']@bondery\/mantine-next["']/.test(text)) {
+  if (FROM_MANTINE_NEXT_IMPORT_RE.test(text)) {
     violations.push({
       detail:
         "Import @bondery/mantine-next subpaths (e.g. /ActionIconButton, /theme). The package barrel re-exports next/link, which crashes in the extension (process is not defined)",

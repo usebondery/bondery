@@ -2,17 +2,24 @@
   "$schema": "https://v2-10-1.turborepo.dev/schema.json",
   "concurrency": "20",
   "globalPassThroughEnv": [
+    "BONDERY_AUTH_REVIEWER_EMAIL",
+    "BONDERY_DEV_MOBILE_API_URL",
     "BONDERY_DEV_SKIP_RELEASE_MIGRATE",
     "BONDERY_DEV_SKIP_STORAGE_BUCKETS",
+    "BONDERY_DEV_TAILSCALE_HOST",
+    "BONDERY_DEV_TLS_TEST_CA_FILE",
+    "BONDERY_DEV_TLS_TEST_DATABASE_URL",
     "BONDERY_EXTENSION_FLAVOR",
     "BONDERY_INFRA_API_DOMAIN",
     "BONDERY_INFRA_CHROME_EXTENSION_ID",
     "BONDERY_INFRA_GIT_SHA",
+    "BONDERY_INFRA_INTERNAL_API_CA_FILE",
     "BONDERY_INFRA_INTERNAL_API_URL",
     "BONDERY_INFRA_PLAUSIBLE_DISABLE_REGISTRATION",
     "BONDERY_INFRA_PLAUSIBLE_DOMAIN",
     "BONDERY_INFRA_POSTGRES_HOST_PORT",
     "BONDERY_INFRA_STORAGE_DOMAIN",
+    "BONDERY_INFRA_TRAEFIK_DYNAMIC_DIR",
     "BONDERY_INFRA_TRAEFIK_PREFIX",
     "BONDERY_INFRA_VERSION",
     "BONDERY_INFRA_WEBAPP_DOMAIN",
@@ -42,6 +49,8 @@
     "BONDERY_OPS_TURBO_TEAM",
     "BONDERY_OPS_TURBO_TOKEN",
     "BONDERY_PRIVATE_ANTHROPIC_API_KEY",
+    "BONDERY_PRIVATE_API_TLS_CERT_FILE",
+    "BONDERY_PRIVATE_API_TLS_KEY_FILE",
     "BONDERY_PRIVATE_AUTH_GITHUB_CLIENT_ID",
     "BONDERY_PRIVATE_AUTH_GITHUB_CLIENT_SECRET",
     "BONDERY_PRIVATE_AUTH_LINKEDIN_CLIENT_ID",
@@ -60,11 +69,18 @@
     "BONDERY_PRIVATE_PLAUSIBLE_SECRET_KEY_BASE",
     "BONDERY_PRIVATE_PLAUSIBLE_TOTP_VAULT_KEY",
     "BONDERY_PRIVATE_POSTGRES_PASSWORD",
+    "BONDERY_PRIVATE_REDIS_PASSWORD_FILE",
+    "BONDERY_PRIVATE_REDIS_TLS_CA_FILE",
+    "BONDERY_PRIVATE_REDIS_TLS_CERT_FILE",
+    "BONDERY_PRIVATE_REDIS_TLS_KEY_FILE",
     "BONDERY_PRIVATE_REDIS_URL",
     "BONDERY_PRIVATE_S3_ACCESS_KEY_ID",
     "BONDERY_PRIVATE_S3_ENDPOINT",
     "BONDERY_PRIVATE_S3_REGION",
     "BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY",
+    "BONDERY_PRIVATE_S3_TLS_CA_FILE",
+    "BONDERY_PRIVATE_S3_TLS_CERT_FILE",
+    "BONDERY_PRIVATE_S3_TLS_KEY_FILE",
     "BONDERY_PRIVATE_SERVICE_SECRET",
     "BONDERY_PRIVATE_STRIPE_SECRET_KEY",
     "BONDERY_PRIVATE_STRIPE_WEBHOOK_SECRET",
@@ -93,6 +109,9 @@
     "BONDERY_PUBLIC_WEBAUTHN_RP_ID",
     "BONDERY_PUBLIC_WEBSITE_URL",
     "CI",
+    "DATABASE_SSL_MODE",
+    "DATABASE_SSL_ROOT_CERT",
+    "DATABASE_SSL_ROOT_CERT_FILE",
     "DATABASE_URL",
     "DO_NOT_TRACK",
     "FORCE_COLOR",
@@ -124,15 +143,18 @@
     "@bondery/db#build": {
       "dependsOn": ["db:generate", "^build"],
       "env": ["DATABASE_URL"],
-      "outputs": ["dist/**", ".cache/tsconfig.tsbuildinfo"]
+      "outputs": ["dist/**", "tsconfig.tsbuildinfo"]
     },
     "api#build": {
       "dependsOn": ["^build"],
       "env": [
+        "BONDERY_AUTH_REVIEWER_EMAIL",
         "BONDERY_INFRA_CHROME_EXTENSION_ID",
         "BONDERY_INFRA_GIT_SHA",
         "BONDERY_INFRA_STORAGE_DOMAIN",
         "BONDERY_PRIVATE_ANTHROPIC_API_KEY",
+        "BONDERY_PRIVATE_API_TLS_CERT_FILE",
+        "BONDERY_PRIVATE_API_TLS_KEY_FILE",
         "BONDERY_PRIVATE_AUTH_GITHUB_CLIENT_ID",
         "BONDERY_PRIVATE_AUTH_GITHUB_CLIENT_SECRET",
         "BONDERY_PRIVATE_AUTH_LINKEDIN_CLIENT_ID",
@@ -147,11 +169,18 @@
         "BONDERY_PRIVATE_MAPS_KEY",
         "BONDERY_PRIVATE_PLATFORM_ADMIN_EMAILS",
         "BONDERY_PRIVATE_PLATFORM_ADMIN_USER_IDS",
+        "BONDERY_PRIVATE_REDIS_PASSWORD_FILE",
+        "BONDERY_PRIVATE_REDIS_TLS_CA_FILE",
+        "BONDERY_PRIVATE_REDIS_TLS_CERT_FILE",
+        "BONDERY_PRIVATE_REDIS_TLS_KEY_FILE",
         "BONDERY_PRIVATE_REDIS_URL",
         "BONDERY_PRIVATE_S3_ACCESS_KEY_ID",
         "BONDERY_PRIVATE_S3_ENDPOINT",
         "BONDERY_PRIVATE_S3_REGION",
         "BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY",
+        "BONDERY_PRIVATE_S3_TLS_CA_FILE",
+        "BONDERY_PRIVATE_S3_TLS_CERT_FILE",
+        "BONDERY_PRIVATE_S3_TLS_KEY_FILE",
         "BONDERY_PRIVATE_SERVICE_SECRET",
         "BONDERY_PRIVATE_STRIPE_SECRET_KEY",
         "BONDERY_PRIVATE_STRIPE_WEBHOOK_SECRET",
@@ -172,6 +201,9 @@
         "BONDERY_PUBLIC_WEBAPP_URL",
         "BONDERY_PUBLIC_WEBAUTHN_RP_ID",
         "BONDERY_PUBLIC_WEBSITE_URL",
+        "DATABASE_SSL_MODE",
+        "DATABASE_SSL_ROOT_CERT",
+        "DATABASE_SSL_ROOT_CERT_FILE",
         "DATABASE_URL",
         "DO_NOT_TRACK"
       ],
@@ -182,13 +214,7 @@
         "apps/website/.env.production.local",
         "apps/api/.env.production.local"
       ],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**",
-        ".cache/tsconfig.tsbuildinfo",
-        "dist/**",
-        "public/**"
-      ],
+      "outputs": [".next/**", "!.next/cache/**", "tsconfig.tsbuildinfo", "dist/**", "public/**"],
       "passThroughEnv": [
         "SYSTEMROOT",
         "WINDIR",
@@ -207,10 +233,13 @@
     "api#dev": {
       "cache": false,
       "env": [
+        "BONDERY_AUTH_REVIEWER_EMAIL",
         "BONDERY_INFRA_CHROME_EXTENSION_ID",
         "BONDERY_INFRA_GIT_SHA",
         "BONDERY_INFRA_STORAGE_DOMAIN",
         "BONDERY_PRIVATE_ANTHROPIC_API_KEY",
+        "BONDERY_PRIVATE_API_TLS_CERT_FILE",
+        "BONDERY_PRIVATE_API_TLS_KEY_FILE",
         "BONDERY_PRIVATE_AUTH_GITHUB_CLIENT_ID",
         "BONDERY_PRIVATE_AUTH_GITHUB_CLIENT_SECRET",
         "BONDERY_PRIVATE_AUTH_LINKEDIN_CLIENT_ID",
@@ -225,11 +254,18 @@
         "BONDERY_PRIVATE_MAPS_KEY",
         "BONDERY_PRIVATE_PLATFORM_ADMIN_EMAILS",
         "BONDERY_PRIVATE_PLATFORM_ADMIN_USER_IDS",
+        "BONDERY_PRIVATE_REDIS_PASSWORD_FILE",
+        "BONDERY_PRIVATE_REDIS_TLS_CA_FILE",
+        "BONDERY_PRIVATE_REDIS_TLS_CERT_FILE",
+        "BONDERY_PRIVATE_REDIS_TLS_KEY_FILE",
         "BONDERY_PRIVATE_REDIS_URL",
         "BONDERY_PRIVATE_S3_ACCESS_KEY_ID",
         "BONDERY_PRIVATE_S3_ENDPOINT",
         "BONDERY_PRIVATE_S3_REGION",
         "BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY",
+        "BONDERY_PRIVATE_S3_TLS_CA_FILE",
+        "BONDERY_PRIVATE_S3_TLS_CERT_FILE",
+        "BONDERY_PRIVATE_S3_TLS_KEY_FILE",
         "BONDERY_PRIVATE_SERVICE_SECRET",
         "BONDERY_PRIVATE_STRIPE_SECRET_KEY",
         "BONDERY_PRIVATE_STRIPE_WEBHOOK_SECRET",
@@ -250,6 +286,9 @@
         "BONDERY_PUBLIC_WEBAPP_URL",
         "BONDERY_PUBLIC_WEBAUTHN_RP_ID",
         "BONDERY_PUBLIC_WEBSITE_URL",
+        "DATABASE_SSL_MODE",
+        "DATABASE_SSL_ROOT_CERT",
+        "DATABASE_SSL_ROOT_CERT_FILE",
         "DATABASE_URL",
         "DO_NOT_TRACK"
       ],
@@ -276,13 +315,7 @@
         "apps/website/.env.production.local",
         "apps/api/.env.production.local"
       ],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**",
-        ".cache/tsconfig.tsbuildinfo",
-        "dist/**",
-        "public/**"
-      ],
+      "outputs": [".next/**", "!.next/cache/**", "tsconfig.tsbuildinfo", "dist/**", "public/**"],
       "passThroughEnv": [
         "SYSTEMROOT",
         "WINDIR",
@@ -303,7 +336,7 @@
     },
     "check:types": {
       "dependsOn": ["transit"],
-      "outputs": [".cache/tsconfig.tsbuildinfo"]
+      "outputs": ["tsconfig.tsbuildinfo"]
     },
     "chrome-extension#build": {
       "dependsOn": ["^build"],
@@ -326,13 +359,7 @@
         "apps/website/.env.production.local",
         "apps/api/.env.production.local"
       ],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**",
-        ".cache/tsconfig.tsbuildinfo",
-        "dist/**",
-        "public/**"
-      ],
+      "outputs": [".next/**", "!.next/cache/**", "tsconfig.tsbuildinfo", "dist/**", "public/**"],
       "passThroughEnv": [
         "SYSTEMROOT",
         "WINDIR",
@@ -409,13 +436,7 @@
         "apps/website/.env.production.local",
         "apps/api/.env.production.local"
       ],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**",
-        ".cache/tsconfig.tsbuildinfo",
-        "dist/**",
-        "public/**"
-      ],
+      "outputs": [".next/**", "!.next/cache/**", "tsconfig.tsbuildinfo", "dist/**", "public/**"],
       "passThroughEnv": [
         "SYSTEMROOT",
         "WINDIR",
@@ -466,6 +487,7 @@
       "dependsOn": ["^build"],
       "env": [
         "BONDERY_INFRA_GIT_SHA",
+        "BONDERY_INFRA_INTERNAL_API_CA_FILE",
         "BONDERY_INFRA_INTERNAL_API_URL",
         "BONDERY_PRIVATE_WEBAPP_OAUTH_CLIENT_SECRET",
         "BONDERY_PRIVATE_WEBAPP_SESSION_SECRET",
@@ -489,13 +511,7 @@
         "apps/website/.env.production.local",
         "apps/api/.env.production.local"
       ],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**",
-        ".cache/tsconfig.tsbuildinfo",
-        "dist/**",
-        "public/**"
-      ],
+      "outputs": [".next/**", "!.next/cache/**", "tsconfig.tsbuildinfo", "dist/**", "public/**"],
       "passThroughEnv": [
         "SYSTEMROOT",
         "WINDIR",
@@ -515,6 +531,7 @@
       "cache": false,
       "env": [
         "BONDERY_INFRA_GIT_SHA",
+        "BONDERY_INFRA_INTERNAL_API_CA_FILE",
         "BONDERY_INFRA_INTERNAL_API_URL",
         "BONDERY_PRIVATE_WEBAPP_OAUTH_CLIENT_SECRET",
         "BONDERY_PRIVATE_WEBAPP_SESSION_SECRET",
@@ -562,13 +579,7 @@
         "apps/website/.env.production.local",
         "apps/api/.env.production.local"
       ],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**",
-        ".cache/tsconfig.tsbuildinfo",
-        "dist/**",
-        "public/**"
-      ],
+      "outputs": [".next/**", "!.next/cache/**", "tsconfig.tsbuildinfo", "dist/**", "public/**"],
       "passThroughEnv": [
         "SYSTEMROOT",
         "WINDIR",

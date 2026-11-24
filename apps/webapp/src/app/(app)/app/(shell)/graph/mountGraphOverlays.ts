@@ -1,6 +1,18 @@
 import type { RelationshipGraphGroup } from "@bondery/schemas";
 import { type Selection, type SimulationLinkDatum, type SimulationNodeDatum, select } from "d3";
+import { eachSelected } from "./eachSelected";
 import { groupCaption, groupCircle, groupColor } from "./graphHull";
+
+type PointNode = SimulationNodeDatum & { id: string };
+
+type Viewport = Selection<SVGGElement, unknown, null, undefined>;
+
+function linkCoord(endpoint: SpokeSimLink["source"], axis: "x" | "y"): number {
+  if (typeof endpoint === "object" && endpoint) {
+    return endpoint[axis] ?? 0;
+  }
+  return 0;
+}
 
 export const COMPANY_HUB_COLOR = "var(--mantine-color-indigo-6)";
 export const SCHOOL_HUB_COLOR = "var(--mantine-color-grape-6)";
@@ -12,23 +24,12 @@ export type HubSimNode = SimulationNodeDatum & {
   nodeKind: "hub";
 };
 
-type PointNode = SimulationNodeDatum & { id: string };
-
 export type SpokeSimLink = SimulationLinkDatum<PointNode> & {
   color: string;
   hubId: string;
   key: string;
   personId: string;
 };
-
-type Viewport = Selection<SVGGElement, unknown, null, undefined>;
-
-function linkCoord(endpoint: SpokeSimLink["source"], axis: "x" | "y"): number {
-  if (typeof endpoint === "object" && endpoint) {
-    return endpoint[axis] ?? 0;
-  }
-  return 0;
-}
 
 /**
  * Group circles and spokes sit behind relationship lines.
@@ -53,9 +54,9 @@ export function mountGraphOverlays(input: {
     .join("g")
     .attr("class", "graph-hull");
 
-  hull.each(function drawHull(row) {
+  eachSelected(hull, (element, row) => {
     const color = groupColor(row);
-    const group = select(this);
+    const group = select(element);
     group
       .append("circle")
       .attr("fill", color)
@@ -101,17 +102,22 @@ export function mountGraphOverlays(input: {
         .attr("y1", (row) => linkCoord(row.source, "y"))
         .attr("x2", (row) => linkCoord(row.target, "x"))
         .attr("y2", (row) => linkCoord(row.target, "y"));
-      hull.each(function placeHull(row) {
+      eachSelected(hull, (element, row) => {
         const points: [number, number][] = [];
         for (const personId of row.personIds) {
           const node = nodeById.get(personId);
-          if (node?.x == null || node.y == null) {
+          if (
+            node?.x === null ||
+            node?.x === undefined ||
+            node.y === null ||
+            node.y === undefined
+          ) {
             continue;
           }
           points.push([node.x, node.y]);
         }
         const circle = groupCircle(points, pad);
-        const group = select(this);
+        const group = select(element);
         if (!circle) {
           group.select("circle").attr("r", 0);
           return;

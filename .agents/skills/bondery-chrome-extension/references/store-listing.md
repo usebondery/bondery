@@ -22,13 +22,13 @@ Copy is **hardcoded EN** in `_lib/copy.ts`. i18next lint ignores `apps/webapp/sr
 - **24-bit PNG, no alpha** (Playwright clip of `[data-store-shot]`)
 - Five shots, all CWS screenshot slots:
 
-| File | Slug | Intent |
-|------|------|--------|
-| `01-open-source.png` | `open-source` | Headline + `PersonCard`s + GitHub / EU / Docker |
-| `02-save-a-profile.png` | `save-a-profile` | LinkedIn + Instagram → Bondery |
-| `03-remember.png` | `remember` | `InteractionsList` / group call |
-| `04-stay-organized.png` | `stay-organized` | Tags, `GroupCard`s, `PeopleMap`, AI prompt |
-| `05-every-surface.png` | `every-surface` | Web, mobile, API, MCP as surface labels |
+| File                    | Slug             | Intent                                          |
+| ----------------------- | ---------------- | ----------------------------------------------- |
+| `01-open-source.png`    | `open-source`    | Headline + `PersonCard`s + GitHub / EU / Docker |
+| `02-save-a-profile.png` | `save-a-profile` | LinkedIn + Instagram → Bondery                  |
+| `03-remember.png`       | `remember`       | `InteractionsList` / group call                 |
+| `04-stay-organized.png` | `stay-organized` | Tags, `GroupCard`s, `PeopleMap`, AI prompt      |
+| `05-every-surface.png`  | `every-surface`  | Web, mobile, API, MCP as surface labels         |
 
 Output: gitignored `tmp/cws-shots/` (repo `/tmp/` gitignore). **Do not commit the PNGs.**
 
@@ -40,7 +40,7 @@ E2E_REUSE_SERVER=1 pnpm --filter webapp run store-shots
 
 That is `pnpm dlx --package @playwright/test@1.62.1 playwright test -c e2e/store-shots.playwright.config.mjs`. Do **not** add `@playwright/test` to `apps/webapp` — Next's optional Playwright peer re-keys the lockfile and breaks docker prune. It does **not** start the API.
 
-**Do not** use `scripts/run-playwright.mjs` — that runner probes API port 26631.
+**Do not** use `scripts/run-playwright.mjs` — that runner probes the API.
 
 **Host is `localhost`, not `127.0.0.1`.** Next dev serves client chunks from `localhost`; `127.0.0.1` leaves PeopleMap tiles unhydrated (403). This is the opposite of webapp login E2E, which requires `127.0.0.1` — see [bondery-e2e-tests](../../bondery-e2e-tests/SKILL.md). Do not fold store-shots into the login Playwright projects.
 

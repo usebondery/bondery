@@ -2,6 +2,7 @@
 "use client";
 
 import { ApiError, getUserFacingError } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import { CountChip, ModalFooter } from "@bondery/mantine-next";
 import { Alert, Button, Center, Group, Loader, Stack, Text } from "@mantine/core";
 import { modals } from "@mantine/modals";
@@ -56,7 +57,6 @@ export function BonderyExportModal({ modalId }: BonderyExportModalProps) {
   const closeModal = () => modals.close(modalId);
 
   useEffect(() => {
-    void summaryAttempt;
     const summaryAbort = new AbortController();
     setCountsFailed(false);
     setPeople(null);
@@ -64,8 +64,8 @@ export function BonderyExportModal({ modalId }: BonderyExportModalProps) {
     setTags(null);
     setInteractions(null);
 
-    void getExportSummary({ signal: summaryAbort.signal })
-      .then((response) => {
+    detachPromise(
+      getExportSummary({ signal: summaryAbort.signal }).then((response) => {
         if (!response) {
           setCountsFailed(true);
           return;
@@ -74,24 +74,26 @@ export function BonderyExportModal({ modalId }: BonderyExportModalProps) {
         setGroups(response.exportSummary.groups);
         setTags(response.exportSummary.tags);
         setInteractions(response.exportSummary.interactions);
-      })
-      .catch((error: unknown) => {
+      }),
+      (error: unknown) => {
         if (error instanceof Error && error.name === "AbortError") {
           return;
         }
         setCountsFailed(true);
-      });
+      },
+    );
 
     return () => {
       summaryAbort.abort();
     };
   }, [summaryAttempt]);
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       abortRef.current?.abort();
-    };
-  }, []);
+    },
+    [],
+  );
 
   const isEmptyAccount = people === 0 && groups === 0 && tags === 0 && interactions === 0;
 
@@ -122,8 +124,8 @@ export function BonderyExportModal({ modalId }: BonderyExportModalProps) {
       const result = await downloadBonderyExport({ signal: controller.signal });
       saveBonderyExportFile(result.blob, result.filename);
       closeModal();
-    } catch (caught) {
-      if (caught instanceof Error && caught.name === "AbortError") {
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
         if (abortReasonRef.current === "timeout") {
           setErrorKind("timeout");
           setPhase("error");
@@ -132,16 +134,16 @@ export function BonderyExportModal({ modalId }: BonderyExportModalProps) {
         return;
       }
 
-      if (caught instanceof BonderyExportDownloadBlockedError) {
+      if (error instanceof BonderyExportDownloadBlockedError) {
         setErrorKind("blocked");
         setPhase("error");
         captureEvent("account_settings:export_fail", { error_code: "download_blocked" });
         return;
       }
 
-      const errorCode = caught instanceof ApiError ? caught.code : "export_failed_to_generate";
+      const errorCode = error instanceof ApiError ? error.code : "export_failed_to_generate";
       setErrorKind("api");
-      setErrorMessage(getUserFacingError(caught, tCommon));
+      setErrorMessage(getUserFacingError(error, tCommon));
       setPhase("error");
       captureEvent("account_settings:export_fail", { error_code: errorCode });
     } finally {

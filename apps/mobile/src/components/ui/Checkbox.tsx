@@ -1,8 +1,8 @@
 import { Checkbox as ExpoCheckbox } from "expo-checkbox";
 import { MOBILE_LAYOUT } from "../../theme/layout";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
-import { joinClassNames } from "./joinClassNames";
 
+const CHECKBOX_RADIUS = 6;
 const CHECKBOX_SIZE = 22;
 
 export type CheckboxProps = {
@@ -31,11 +31,15 @@ export function Checkbox({
     <ExpoCheckbox
       accessibilityHint={accessibilityHint}
       accessibilityLabel={accessibilityLabel}
-      className={joinClassNames("rounded-[6px]", className)}
+      className={className}
       color={checked ? colors.primary : colors.borderStrong}
       disabled={disabled}
       onValueChange={onCheckedChange}
-      style={{ height: CHECKBOX_SIZE, width: CHECKBOX_SIZE }}
+      style={{
+        borderRadius: CHECKBOX_RADIUS,
+        height: CHECKBOX_SIZE,
+        width: CHECKBOX_SIZE,
+      }}
       value={checked}
     />
   );

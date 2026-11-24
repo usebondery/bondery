@@ -1,6 +1,7 @@
 // biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import {
   ActionIconButton,
   ActionIconLink,
@@ -118,23 +119,21 @@ export function ContactEmailsSection({
   };
 
   const handleRemoveEmail = (index: number) => {
-    const newEmails = localEmails.filter((_, i) => i !== index);
-    if (localEmails[index].preferred && newEmails.length > 0) {
-      newEmails[0].preferred = true;
-    }
+    const removedWasPreferred = localEmails[index]?.preferred;
+    const remaining = localEmails.filter((_, i) => i !== index);
+    const newEmails =
+      removedWasPreferred && remaining.length > 0
+        ? remaining.map((email, i) => (i === 0 ? { ...email, preferred: true } : email))
+        : remaining;
     persistEmails(newEmails);
   };
 
   const handleEmailChange = (index: number, value: string) => {
-    const newEmails = [...localEmails];
-    newEmails[index] = { ...newEmails[index], value };
-    setLocalEmails(newEmails);
+    setLocalEmails(localEmails.map((email, i) => (i === index ? { ...email, value } : email)));
   };
 
   const handleEmailTypeChange = (index: number, type: ContactType) => {
-    const newEmails = [...localEmails];
-    newEmails[index] = { ...newEmails[index], type };
-    persistEmails(newEmails);
+    persistEmails(localEmails.map((email, i) => (i === index ? { ...email, type } : email)));
   };
 
   const handleEmailPreferredChange = (index: number) => {
@@ -171,6 +170,7 @@ export function ContactEmailsSection({
 
             <TextInput
               aria-label={text.emailPlaceholder}
+              dir="ltr"
               disabled={savingField === "emails"}
               onBlur={saveCurrentEmails}
               onChange={(e) => handleEmailChange(index, e.target.value)}
@@ -227,7 +227,7 @@ export function ContactEmailsSection({
                   disabled={!email.value}
                   leftSection={<IconCopy size={14} />}
                   onClick={() => {
-                    void navigator.clipboard.writeText(email.value || "");
+                    detachPromise(navigator.clipboard.writeText(email.value || ""));
                     notifications.show(
                       successNotificationTemplate({
                         description: text.emailCopiedMessage,
@@ -274,6 +274,7 @@ export function ContactEmailsSection({
 
             <TextInput
               aria-label={text.emailPlaceholder}
+              dir="ltr"
               disabled={savingField === "emails"}
               onBlur={handleCommitDraftEmail}
               onChange={(event) =>

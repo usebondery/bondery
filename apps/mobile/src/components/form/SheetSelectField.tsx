@@ -10,7 +10,7 @@ type SheetSelectFieldProps<TFieldValues extends FieldValues, TValue extends stri
   emptySearchLabel?: string;
   label: string;
   name: FieldPath<TFieldValues>;
-  options: Array<SelectItem<TValue>>;
+  options: SelectItem<TValue>[];
   placeholder?: string;
   searchable?: SelectSearchable;
   searchPlaceholder?: string;

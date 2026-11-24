@@ -4,6 +4,18 @@ import { createContactApiInputSchema, updateContactInputSchema } from "#entities
 import { replaceImportantDatesSchema } from "#entities/important-date/index.js";
 import type { SyncMutation, SyncMutationType } from "./types.js";
 
+const syncMutationBaseSchema = z.object({
+  baseUpdatedAt: updatedAtSchema
+    .optional()
+    .describe("Client last-seen `updatedAt` for conflict checks"),
+  clientSequence: z
+    .number()
+    .int()
+    .positive()
+    .describe("Client-assigned sequence for this mutation"),
+  id: z.uuid().describe("Mutation identifier"),
+});
+
 export const syncMutationTypeSchema: z.ZodType<SyncMutationType> = z.enum([
   "contact.create",
   "contact.update",
@@ -20,18 +32,6 @@ export const syncMutationTypeSchema: z.ZodType<SyncMutationType> = z.enum([
   "tag.update",
   "tag.delete",
 ]);
-
-const syncMutationBaseSchema = z.object({
-  baseUpdatedAt: updatedAtSchema
-    .optional()
-    .describe("Client last-seen `updatedAt` for conflict checks"),
-  clientSequence: z
-    .number()
-    .int()
-    .positive()
-    .describe("Client-assigned sequence for this mutation"),
-  id: z.uuid().describe("Mutation identifier"),
-});
 
 export const contactCreatePayloadSchema = createContactApiInputSchema.extend({
   id: z

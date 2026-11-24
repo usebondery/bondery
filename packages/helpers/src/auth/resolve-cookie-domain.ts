@@ -1,3 +1,13 @@
+const PATTERN_5E5C647B312C_RE = /^\d{1,3}(\.\d{1,3}){3}$/;
+
+function isIpHostname(hostname: string): boolean {
+  if (hostname.includes(":")) {
+    return true;
+  }
+
+  return PATTERN_5E5C647B312C_RE.test(hostname);
+}
+
 /**
  * Resolves the parent domain for Better Auth `crossSubDomainCookies` from a
  * public webapp URL (e.g. `https://app.usebondery.com` → `usebondery.com`).
@@ -31,12 +41,4 @@ export function resolveCookieDomain(webappUrl: string | undefined): string | und
   }
 
   return parts.slice(1).join(".");
-}
-
-function isIpHostname(hostname: string): boolean {
-  if (hostname.includes(":")) {
-    return true;
-  }
-
-  return /^\d{1,3}(\.\d{1,3}){3}$/.test(hostname);
 }

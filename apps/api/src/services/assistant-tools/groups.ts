@@ -9,7 +9,12 @@ import {
   updateGroup,
 } from "../../domains/groups/index.js";
 import { getGroup, listGroupMembers, listGroups } from "../groups/queries.js";
-import { ASSISTANT_COLLECTION_CAP, assistantPageSize } from "./collection-cap.js";
+import {
+  ASSISTANT_COLLECTION_CAP,
+  ASSISTANT_COLOR_MAX_LENGTH,
+  ASSISTANT_EMOJI_MAX_LENGTH,
+  assistantPageSize,
+} from "./collection-cap.js";
 
 export const searchGroupsInputSchema = z.object({
   limit: z.number().int().min(1).max(ASSISTANT_COLLECTION_CAP).optional(),
@@ -27,14 +32,14 @@ export const getGroupInputSchema = z.object({
 });
 
 export const createGroupInputSchema = z.object({
-  color: z.string().min(1).max(16).describe("Hex color, e.g. #3b82f6"),
-  emoji: z.string().min(1).max(16),
+  color: z.string().min(1).max(ASSISTANT_COLOR_MAX_LENGTH).describe("Hex color, e.g. #3b82f6"),
+  emoji: z.string().min(1).max(ASSISTANT_EMOJI_MAX_LENGTH),
   label: z.string().min(1).max(GROUP_LABEL_MAX_LENGTH),
 });
 
 export const updateGroupInputSchema = z.object({
-  color: z.string().min(1).max(16).optional(),
-  emoji: z.string().min(1).max(16).optional(),
+  color: z.string().min(1).max(ASSISTANT_COLOR_MAX_LENGTH).optional(),
+  emoji: z.string().min(1).max(ASSISTANT_EMOJI_MAX_LENGTH).optional(),
   groupId: z.string().uuid(),
   label: z.string().min(1).max(GROUP_LABEL_MAX_LENGTH).optional(),
 });

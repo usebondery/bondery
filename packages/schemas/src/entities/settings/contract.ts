@@ -3,6 +3,7 @@ import type { Assert, IsEqual } from "#internal/type-equality.js";
 import type {
   authUserSchema,
   colorSchemePreferenceSchema,
+  dateFormatPreferenceSchema,
   groupSortOrderPreferenceSchema,
   importFollowupPlatformSchema,
   importFollowupStatusSchema,
@@ -21,6 +22,7 @@ import type {
 import type {
   AuthUser,
   ColorSchemePreference,
+  DateFormatPreference,
   GroupSortOrderPreference,
   ImportFollowupPlatform,
   ImportFollowupStatus,
@@ -37,45 +39,48 @@ import type {
   UserSettingsResponse,
 } from "./types.js";
 
-type _ColorSchemePreference = Assert<
+export type _ColorSchemePreference = Assert<
   IsEqual<ColorSchemePreference, z.infer<typeof colorSchemePreferenceSchema>>
 >;
-type _TimeFormatPreference = Assert<
+export type _TimeFormatPreference = Assert<
   IsEqual<TimeFormatPreference, z.infer<typeof timeFormatPreferenceSchema>>
 >;
-type _SwipeActionPreference = Assert<
+export type _DateFormatPreference = Assert<
+  IsEqual<DateFormatPreference, z.infer<typeof dateFormatPreferenceSchema>>
+>;
+export type _SwipeActionPreference = Assert<
   IsEqual<SwipeActionPreference, z.infer<typeof swipeActionPreferenceSchema>>
 >;
-type _GroupSortOrderPreference = Assert<
+export type _GroupSortOrderPreference = Assert<
   IsEqual<GroupSortOrderPreference, z.infer<typeof groupSortOrderPreferenceSchema>>
 >;
-type _TagSortOrderPreference = Assert<
+export type _TagSortOrderPreference = Assert<
   IsEqual<TagSortOrderPreference, z.infer<typeof tagSortOrderPreferenceSchema>>
 >;
-type _UserSettings = Assert<IsEqual<UserSettings, z.infer<typeof userSettingsSchema>>>;
-type _UserIdentity = Assert<IsEqual<UserIdentity, z.infer<typeof userIdentitySchema>>>;
-type _UserSettingsResponse = Assert<
+export type _UserSettings = Assert<IsEqual<UserSettings, z.infer<typeof userSettingsSchema>>>;
+export type _UserIdentity = Assert<IsEqual<UserIdentity, z.infer<typeof userIdentitySchema>>>;
+export type _UserSettingsResponse = Assert<
   IsEqual<UserSettingsResponse, z.infer<typeof userSettingsResponseSchema>>
 >;
-type _UpdateUserSettingsInput = Assert<
+export type _UpdateUserSettingsInput = Assert<
   IsEqual<UpdateUserSettingsInput, z.infer<typeof updateUserSettingsInputSchema>>
 >;
-type _AuthUser = Assert<IsEqual<AuthUser, z.infer<typeof authUserSchema>>>;
-type _UserAccountResponse = Assert<
+export type _AuthUser = Assert<IsEqual<AuthUser, z.infer<typeof authUserSchema>>>;
+export type _UserAccountResponse = Assert<
   IsEqual<UserAccountResponse, z.infer<typeof userAccountResponseSchema>>
 >;
-type _UpdateAccountInput = Assert<
+export type _UpdateAccountInput = Assert<
   IsEqual<UpdateAccountInput, z.infer<typeof updateAccountInputSchema>>
 >;
-type _ImportFollowupStatus = Assert<
+export type _ImportFollowupStatus = Assert<
   IsEqual<ImportFollowupStatus, z.infer<typeof importFollowupStatusSchema>>
 >;
-type _ImportFollowupPlatform = Assert<
+export type _ImportFollowupPlatform = Assert<
   IsEqual<ImportFollowupPlatform, z.infer<typeof importFollowupPlatformSchema>>
 >;
-type _UpdateImportFollowupBody = Assert<
+export type _UpdateImportFollowupBody = Assert<
   IsEqual<UpdateImportFollowupBody, z.infer<typeof updateImportFollowupBodySchema>>
 >;
-type _UpdateSettingsBody = Assert<
+export type _UpdateSettingsBody = Assert<
   IsEqual<UpdateSettingsBody, z.infer<typeof updateSettingsBodySchema>>
 >;

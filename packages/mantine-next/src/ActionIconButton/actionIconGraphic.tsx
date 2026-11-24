@@ -7,16 +7,6 @@ import {
   type ReactNode,
 } from "react";
 
-/** Default graphic scale inside Mantine `ActionIcon` (matches ThemeIcon icon inset). */
-export const ACTION_ICON_GRAPHIC_SCALE = 0.7;
-
-/**
- * Graphic passed to {@link ActionIconButton} / {@link ActionIconLink}.
- * Use a Tabler icon, `next/image`, or SVG without `size`, `stroke`, or fixed `width`/`height` —
- * the wrapper applies inset scaling from the ActionIcon `size` prop.
- */
-export type ActionIconGraphic = ReactElement;
-
 type NormalizableGraphicProps = {
   style?: CSSProperties;
   size?: number | string;
@@ -31,6 +21,16 @@ const graphicFillStyle: CSSProperties = {
   objectFit: "contain",
   width: "100%",
 };
+
+/** Default graphic scale inside Mantine `ActionIcon` (matches ThemeIcon icon inset). */
+export const ACTION_ICON_GRAPHIC_SCALE = 0.7;
+
+/**
+ * Graphic passed to {@link ActionIconButton} / {@link ActionIconLink}.
+ * Use a Tabler icon, `next/image`, or SVG without `size`, `stroke`, or fixed `width`/`height` —
+ * the wrapper applies inset scaling from the ActionIcon `size` prop.
+ */
+export type ActionIconGraphic = ReactElement;
 
 /**
  * Strips caller-supplied dimensions so scaling is controlled only by the ActionIcon box.

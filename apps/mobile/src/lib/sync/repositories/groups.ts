@@ -7,16 +7,15 @@ export function listGroups(): GroupWithCount[] {
   const db = getSyncDatabase();
   const rows = db.getAllSync<GroupRow>(`SELECT * FROM groups ${GROUPS_ORDER_BY_LABEL}`);
 
-  return rows.map((row) => {
+  const groups: GroupWithCount[] = [];
+  for (const row of rows) {
     const countRow = db.getFirstSync<{ count: number }>(
       "SELECT COUNT(*) as count FROM people_groups WHERE group_id = ?",
       row.id,
     );
-    return {
-      ...mapGroupRow(row),
-      contactCount: countRow?.count ?? 0,
-    };
-  });
+    groups.push({ ...mapGroupRow(row), contactCount: countRow?.count ?? 0 });
+  }
+  return groups;
 }
 
 export function getGroup(groupId: string): Group | null {

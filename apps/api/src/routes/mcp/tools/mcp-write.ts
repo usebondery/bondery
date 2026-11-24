@@ -5,11 +5,11 @@ import { MCP_WRITE_SCOPE } from "../../../lib/auth/index.js";
 import { type McpToolRunResult, runMcpTool } from "./json.js";
 import { isMcpWriteToolName } from "./mcp-write-name.js";
 
-export { isMcpWriteToolName };
-
 function grantedScopes(claims: JWTPayload): string[] {
-  return typeof claims.scope === "string" ? claims.scope.split(" ").filter(Boolean) : [];
+  return typeof claims["scope"] === "string" ? claims["scope"].split(" ").filter(Boolean) : [];
 }
+
+export { isMcpWriteToolName };
 
 export function assertMcpWrite(claims: JWTPayload): void {
   if (!grantedScopes(claims).includes(MCP_WRITE_SCOPE)) {

@@ -1,9 +1,10 @@
-export type LinkKind = "external" | "internal" | "special";
+const WWW_PREFIX_RE = /^www\./;
+type LinkKind = "external" | "internal" | "special";
 
 const INTERNAL_HOST_SUFFIXES = ["usebondery.com", "localhost"] as const;
 
 function normalizeHost(host: string): string {
-  return host.toLowerCase().replace(/^www\./, "");
+  return host.toLowerCase().replace(WWW_PREFIX_RE, "");
 }
 
 function isInternalHost(host: string): boolean {
@@ -14,7 +15,7 @@ function isInternalHost(host: string): boolean {
 }
 
 /** Strip origin from same-site absolute URLs so Next.js Link receives a path. */
-export function toInternalPath(href: string): string {
+function toInternalPath(href: string): string {
   try {
     const url = new URL(href);
     if (!isInternalHost(url.hostname)) {
@@ -29,7 +30,7 @@ export function toInternalPath(href: string): string {
 /**
  * Classify an href for RichAnchor: internal (same site / relative), external http(s), or special (mailto, tel, …).
  */
-export function resolveLinkKind(href: string): LinkKind {
+function resolveLinkKind(href: string): LinkKind {
   const trimmed = href.trim();
   if (!trimmed || trimmed.startsWith("javascript:")) {
     return "special";
@@ -55,3 +56,6 @@ export function resolveLinkKind(href: string): LinkKind {
     return "internal";
   }
 }
+
+export type { LinkKind };
+export { resolveLinkKind, toInternalPath };

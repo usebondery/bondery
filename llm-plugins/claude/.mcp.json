@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "bondery": {
+      "type": "http",
+      "url": "https://api.usebondery.com/mcp"
+    }
+  }
+}

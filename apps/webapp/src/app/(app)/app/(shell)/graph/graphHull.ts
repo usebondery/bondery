@@ -1,10 +1,10 @@
 import type { RelationshipGraphGroup } from "@bondery/schemas";
 
 export function stableGroupColor(id: string): string {
-  let hash = 2166136261;
+  let hash = 2_166_136_261;
   for (let index = 0; index < id.length; index += 1) {
     hash ^= id.charCodeAt(index);
-    hash = Math.imul(hash, 16777619);
+    hash = Math.imul(hash, 16_777_619);
   }
   const hue = (hash >>> 0) % 360;
   return `hsl(${hue} 42% 46%)`;
@@ -62,7 +62,9 @@ export function pushOutsideCircles(
 ): { x: number; y: number } {
   let px = x;
   let py = y;
-  for (let pass = 0; pass < circles.length; pass += 1) {
+  // At most one relaxation pass per circle.
+  const maxPasses = circles.length;
+  for (let pass = 0; pass < maxPasses; pass += 1) {
     let changed = false;
     for (const circle of circles) {
       const dx = px - circle.cx;

@@ -1,7 +1,7 @@
 "use client";
 
 import { Chip, Loader, type MantineColor } from "@mantine/core";
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 
 export interface CountChipProps {
   /** Visible label when not loading. */
@@ -23,12 +23,13 @@ export function CountChip({
   icon,
   isLoading = false,
   label,
-}: CountChipProps) {
+}: CountChipProps): ReactElement {
   const useAccent = !isLoading && !disabled;
+  const content = isLoading ? <Loader color="gray" size={12} /> : children;
 
   return (
     <Chip
-      aria-busy={isLoading || undefined}
+      aria-busy={isLoading ? true : undefined}
       aria-label={label}
       checked={useAccent}
       color={useAccent ? color : "gray"}
@@ -40,7 +41,7 @@ export function CountChip({
       tabIndex={-1}
       variant={useAccent ? "light" : "default"}
     >
-      {isLoading ? <Loader color="gray" size={12} /> : children}
+      {content}
     </Chip>
   );
 }

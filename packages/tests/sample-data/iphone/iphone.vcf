@@ -1,0 +1,30 @@
+BEGIN:VCARD
+VERSION:3.0
+PRODID:-//Apple Inc.//iPhone OS 26.6.1//EN
+N:Brin;Sergey;;;
+FN:Sergey Brin
+ORG:Google;
+TEL;type=pref:+15550100021
+END:VCARD
+BEGIN:VCARD
+VERSION:3.0
+PRODID:-//Apple Inc.//iPhone OS 26.6.1//EN
+N:Singh;Robin;;;
+FN:Robin Singh
+ORG:;
+TEL;type=CELL;type=VOICE;type=pref:+15559990062
+END:VCARD
+BEGIN:VCARD
+VERSION:3.0
+PRODID:-//Apple Inc.//iPhone OS 26.6.1//EN
+N:Nguyen;Casey;;;
+FN:Casey Nguyen
+TEL;type=CELL;type=VOICE;type=pref:+15559990055
+END:VCARD
+BEGIN:VCARD
+VERSION:3.0
+PRODID:-//Apple Inc.//iPhone OS 26.6.1//EN
+N:Li;Fei-Fei;;;
+FN:Fei-Fei Li
+TEL;type=CELL;type=VOICE;type=pref:+15559990035
+END:VCARD

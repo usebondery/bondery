@@ -23,7 +23,9 @@
     "retry": "Zkusit znovu",
     "save": "Save",
     "saveChanges": "Save changes",
-    "select": "Vybrat"
+    "select": "Vybrat",
+    "viewContacts": "Zobrazit kontakty",
+    "viewMergedContact": "Zobrazit sloučený kontakt"
   },
   "app": {
     "description": "Open-source osobní CRM pro budování lepších vazeb."
@@ -230,11 +232,13 @@
     "deleting": "Mazání...",
     "duplicating": "Duplikování...",
     "errorTitle": "Chyba",
+    "mobileRuntimeError": "Chyba běhu mobilní aplikace",
     "noResults": "Žádné výsledky",
     "removing": "Odebírání...",
     "savedTitle": "Saved",
     "saving": "Ukládání...",
     "sending": "Odesílání...",
-    "successTitle": "Úspěch"
+    "successTitle": "Úspěch",
+    "unknownError": "Neznámá chyba"
   }
 }

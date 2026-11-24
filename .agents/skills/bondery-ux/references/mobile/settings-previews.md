@@ -6,11 +6,11 @@ Settings that change **how something looks elsewhere** need a live **Preview** o
 
 ## When to add preview
 
-| Add preview | Skip preview |
-|-------------|--------------|
-| Sort order (groups, tags) | Theme (whole app updates) |
-| Swipe actions | Simple toggles |
-| Language / timezone / time format | Sign out, delete account |
+| Add preview                       | Skip preview              |
+| --------------------------------- | ------------------------- |
+| Sort order (groups, tags)         | Theme (whole app updates) |
+| Swipe actions                     | Simple toggles            |
+| Language / timezone / time format | Sign out, delete account  |
 
 **Rule:** If the outcome is not obvious on the settings screen itself, add a preview.
 

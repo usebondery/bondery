@@ -2,7 +2,7 @@
  * Playwright generator for Chrome Web Store listing PNGs.
  *
  * Does not start the API and does not use `scripts/run-playwright.mjs`
- * (that runner probes API 26631). Reuse a running webapp with:
+ * (that runner probes the API). Reuse a running webapp with:
  *
  *   E2E_REUSE_SERVER=1 pnpm --filter webapp run store-shots
  */

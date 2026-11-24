@@ -1,7 +1,7 @@
-import type { SVGProps } from "react";
+import type { ReactElement, SVGProps } from "react";
 import * as React from "react";
 
-const BonderyIconWhite = (props: SVGProps<SVGSVGElement>) => {
+function BonderyIconWhite(props: SVGProps<SVGSVGElement>): ReactElement {
   const uniqueId = React.useId().replace(/:/g, "");
 
   return (
@@ -158,6 +158,6 @@ const BonderyIconWhite = (props: SVGProps<SVGSVGElement>) => {
       </defs>
     </svg>
   );
-};
+}
 
 export { BonderyIconWhite };

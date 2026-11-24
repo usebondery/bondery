@@ -35,7 +35,7 @@ export function buildEmojiFlatRows(sections: EmojiPickerSection[]): EmojiFlatRow
   return rows;
 }
 
-export function findEmojiFlatIndex(flatRows: EmojiFlatRow[], emoji: string): number | null {
+export function findEmojiFlatIndex(flatRows: EmojiFlatRow[], emoji: string) {
   for (let index = 0; index < flatRows.length; index += 1) {
     const row = flatRows[index];
     if (row?.type === "row" && row.items.some((item) => item.emoji === emoji)) {

@@ -11,7 +11,9 @@ import { IconLanguage } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 import { SearchableComboboxPickerOption } from "@/components/shared/SearchableComboboxItem";
 import { SearchableComboboxPicker } from "@/components/shared/SearchableComboboxPicker";
+import { useCurrentLocale } from "@/components/shell/UserLocaleProvider";
 import { useLanguagesTranslations, useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 
 type PickerLanguage = AppLanguageData | LanguageData;
 
@@ -48,6 +50,7 @@ export function LanguagePicker({
   disabled = false,
 }: LanguagePickerProps) {
   const language = value ?? initialValue;
+  const uiLocale = useCurrentLocale();
   const t = useSettingsPageTranslations("Profile");
   const tLanguages = useLanguagesTranslations();
 
@@ -88,7 +91,7 @@ export function LanguagePicker({
   };
 
   const selectedLanguage = languages.find((lang) => lang.value === language);
-  const searchPlaceholder = placeholder || t("LanguageSearch");
+  const searchPlaceholder = nonEmpty(placeholder) ?? t("LanguageSearch");
 
   return (
     <SearchableComboboxPicker
@@ -99,22 +102,26 @@ export function LanguagePicker({
       onBlur={onBlur}
       onChange={onChange}
       renderOptions={({ query, selectedValue }) =>
-        filterLanguages(query).map((lang) => {
-          const { main, supporting } = getLanguageItemText(lang);
-          return (
-            <SearchableComboboxPickerOption
-              flag={lang.flag}
-              isSelected={lang.value === selectedValue}
-              key={lang.value}
-              main={main}
-              supporting={supporting}
-              value={lang.value}
-            />
-          );
-        })
+        filterLanguages(query)
+          .toSorted((left, right) =>
+            getExonym(left).localeCompare(getExonym(right), uiLocale, { sensitivity: "base" }),
+          )
+          .map((lang) => {
+            const { main, supporting } = getLanguageItemText(lang);
+            return (
+              <SearchableComboboxPickerOption
+                flag={lang.flag}
+                isSelected={lang.value === selectedValue}
+                key={lang.value}
+                main={main}
+                supporting={supporting}
+                value={lang.value}
+              />
+            );
+          })
       }
       searchPlaceholder={searchPlaceholder}
-      targetFallback={language || searchPlaceholder}
+      targetFallback={nonEmpty(language) ?? searchPlaceholder}
       targetItem={
         selectedLanguage
           ? {

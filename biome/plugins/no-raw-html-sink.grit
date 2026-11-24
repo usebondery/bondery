@@ -1,0 +1,22 @@
+// Rejects DOM sinks that parse a string as HTML: `el.innerHTML = …`, `el.outerHTML = …`,
+// `el.insertAdjacentHTML(…)`, `document.write(…)`, and `document.writeln(…)`.
+//
+// Contact notes, imported names, and scraped profile text are attacker-influenced strings. Put
+// them in the DOM as text (React nodes, `textContent`) or through the Tiptap schema, never as
+// markup. `dangerouslySetInnerHTML` is covered by Biome's `noDangerouslySetInnerHtml`.
+//
+// Reading `innerHTML` is fine. When a write is truly needed (trusted static markup, or input
+// already reduced by the API sanitizer), suppress with
+// `// biome-ignore lint/plugin: <why this value is safe>` so the reason is reviewed.
+
+language js
+
+or {
+  `$el.innerHTML = $_`,
+  `$el.outerHTML = $_`,
+  `$el.insertAdjacentHTML($_, $_)`,
+  `document.write($_)`,
+  `document.writeln($_)`
+} as $sink where {
+  register_diagnostic(span=$sink, message="Do not write a string into the DOM as HTML (innerHTML, outerHTML, insertAdjacentHTML, document.write). Render it as a React node or with textContent, or call sanitizeNotesHtml() first and add a biome-ignore with the reason.", severity="error")
+}

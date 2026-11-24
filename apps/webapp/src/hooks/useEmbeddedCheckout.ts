@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { API_ROUTES, IDEMPOTENCY_KEY_HEADER } from "@bondery/helpers/globals/paths";
 import { generateId } from "@bondery/helpers/ids/generate-id";
 import {
@@ -80,19 +81,25 @@ export function useEmbeddedCheckout({
   const openGenerationRef = useRef(0);
   /** One Checkout open. A second click reuses this key until close, success, or a terminal error. */
   const idempotencyKeyRef = useRef<string | null>(null);
+  const clearIdempotencyKey = () => {
+    idempotencyKeyRef.current = null;
+  };
+  const storeCheckout = (checkout: StripeEmbeddedCheckout) => {
+    checkoutRef.current = checkout;
+  };
   const router = useRouter();
   const queryClient = useQueryClient();
   const t = useCheckoutTranslations();
   const { stripePublishableKey } = useWebappRuntimeConfig();
 
   const handleCheckoutConfirmed = () => {
-    void invalidateSubscription(queryClient);
+    detachPromise(invalidateSubscription(queryClient));
     onSuccess?.();
     router.refresh();
   };
 
   const stopPolling = () => {
-    if (pollTimerRef.current != null) {
+    if (pollTimerRef.current !== null && pollTimerRef.current !== undefined) {
       window.clearInterval(pollTimerRef.current);
       pollTimerRef.current = null;
     }
@@ -108,11 +115,12 @@ export function useEmbeddedCheckout({
     setIsLoading(false);
   };
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       closeCheckout();
-    };
-  }, [closeCheckout]);
+    },
+    [closeCheckout],
+  );
 
   const showCheckoutError = () => {
     notifications.show(
@@ -151,12 +159,12 @@ export function useEmbeddedCheckout({
           method: "POST",
         },
       );
-      clientSecret = checkoutSession.clientSecret;
+      ({ clientSecret } = checkoutSession);
     } catch (error) {
       if (generation !== openGenerationRef.current) {
         return;
       }
-      idempotencyKeyRef.current = null;
+      clearIdempotencyKey();
       if (error instanceof ApiError && error.status === 409 && error.code === "conflict") {
         notifications.show(
           warningNotificationTemplate({
@@ -190,7 +198,7 @@ export function useEmbeddedCheckout({
     }
 
     if (!stripe) {
-      idempotencyKeyRef.current = null;
+      clearIdempotencyKey();
       showCheckoutError();
       setIsLoading(false);
       return;
@@ -203,7 +211,7 @@ export function useEmbeddedCheckout({
     }
 
     if (!mountNode) {
-      idempotencyKeyRef.current = null;
+      clearIdempotencyKey();
       showCheckoutError();
       setIsLoading(false);
       setIsModalOpen(false);
@@ -219,39 +227,41 @@ export function useEmbeddedCheckout({
         return;
       }
 
-      checkoutRef.current = checkout;
+      storeCheckout(checkout);
       checkout.mount(mountNode);
       setIsLoading(false);
 
       const started = Date.now();
       pollTimerRef.current = window.setInterval(() => {
-        void (async () => {
-          if (generation !== openGenerationRef.current) {
-            return;
-          }
-
-          if (Date.now() - started > WEBHOOK_CONFIRM_TIMEOUT_MS) {
-            return;
-          }
-
-          try {
-            const status = await getSubscriptionStatus();
-            if (generation !== openGenerationRef.current || !isCheckoutConfirmed(status)) {
+        detachPromise(
+          (async () => {
+            if (generation !== openGenerationRef.current) {
               return;
             }
 
-            closeCheckout();
-            notifications.show(
-              successNotificationTemplate({
-                description: t("successMessage"),
-                title: t("successTitle"),
-              }),
-            );
-            handleCheckoutConfirmed();
-          } catch {
-            // Keep polling while checkout is open.
-          }
-        })();
+            if (Date.now() - started > WEBHOOK_CONFIRM_TIMEOUT_MS) {
+              return;
+            }
+
+            try {
+              const status = await getSubscriptionStatus();
+              if (generation !== openGenerationRef.current || !isCheckoutConfirmed(status)) {
+                return;
+              }
+
+              closeCheckout();
+              notifications.show(
+                successNotificationTemplate({
+                  description: t("successMessage"),
+                  title: t("successTitle"),
+                }),
+              );
+              handleCheckoutConfirmed();
+            } catch {
+              // Keep polling while checkout is open.
+            }
+          })(),
+        );
       }, CHECKOUT_POLL_INTERVAL_MS);
     } catch {
       if (generation !== openGenerationRef.current) {

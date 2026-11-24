@@ -9,6 +9,7 @@ import {
   useBottomSheetScrollableCreator,
 } from "@gorhom/bottom-sheet";
 import { IconSearch, IconX } from "@tabler/icons-react-native";
+import { cn } from "cn";
 import type { ComponentRef, ReactNode } from "react";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { ActivityIndicator, BackHandler, Platform, useWindowDimensions, View } from "react-native";
@@ -21,15 +22,12 @@ import { ActionIcon } from "./ActionIcon";
 import { Button, type ButtonLoadingProps } from "./Button";
 import { Group } from "./Group";
 import { Heading } from "./Heading";
-import { joinClassNames } from "./joinClassNames";
 import { SheetBackdrop } from "./SheetBackdrop";
 import { Stack } from "./Stack";
 import { Text } from "./Text";
 import { TextInput } from "./TextInput";
 
-export { BottomSheetFlatList, BottomSheetScrollView };
-
-export type SheetSnapPoint = keyof typeof SHEET_SNAP_POINTS;
+type SheetSnapPoint = keyof typeof SHEET_SNAP_POINTS;
 
 type SheetActionBase = {
   disabled?: boolean;
@@ -41,9 +39,9 @@ type SheetActionBase = {
 };
 
 /** When `loading` is set, `loadingText` is required and shown on the action button. */
-export type SheetAction = SheetActionBase & ButtonLoadingProps;
+type SheetAction = SheetActionBase & ButtonLoadingProps;
 
-export type SheetSearch = {
+type SheetSearch = {
   query: string;
   onQueryChange: (query: string) => void;
   placeholder: string;
@@ -51,7 +49,7 @@ export type SheetSearch = {
   rightAction?: ReactNode;
 };
 
-export type SheetProps = {
+type SheetProps = {
   opened: boolean;
   onClose: () => void;
   /** Called after Gorhom reports the modal dismissed (animation complete). */
@@ -75,7 +73,7 @@ const ACTION_ROW_HEIGHT = 44;
 const FOOTER_TOP_PADDING = 8;
 
 /** Wraps Gorhom `useBottomSheetScrollableCreator`. Call this hook inside a `Sheet` tree. */
-export function useSheetScrollable() {
+function useSheetScrollable() {
   return useBottomSheetScrollableCreator({
     enableFooterMarginAdjustment: true,
   });
@@ -103,7 +101,7 @@ function sheetActionButtonLoadingProps(action: SheetAction): {
 
 function SheetActionButtons({ actions }: { actions: NonNullable<SheetProps["actions"]> }) {
   if (actions.length === 1) {
-    const action = actions[0];
+    const [action] = actions;
     return (
       <Button
         color={action.tone ?? "primary"}
@@ -143,7 +141,7 @@ function SheetActionButtons({ actions }: { actions: NonNullable<SheetProps["acti
  * App sheet chrome over Gorhom `BottomSheetModal`.
  * Feature files import this module. They do not import `@gorhom/bottom-sheet`.
  */
-export function Sheet({
+function Sheet({
   opened,
   onClose,
   onDismissed,
@@ -166,26 +164,30 @@ export function Sheet({
   const searchInputRef = useRef<NativeTextInputRef>(null);
   const isFit = snapPoint === "fit";
   const isActionLoading = Boolean(actions?.some((action) => action.loading));
-  const isLocked = isBusy || isActionLoading;
+  const isLocked = isBusy === true || isActionLoading;
   const isLockedRef = useRef(isLocked);
   const openedRef = useRef(opened);
   /** Gorhom `dismiss()` before the first `present()` leaves status `DISMISSING` and blocks the portal. */
-  const hasPresentedRef = useRef(false);
+  const hasPresentedRef = useRef<boolean>(false);
   /** Parent set `opened` false — do not re-present while busy (e.g. submit + navigate). */
-  const dismissByParentRef = useRef(false);
+  const dismissByParentRef = useRef<boolean>(false);
   const onCloseRef = useRef(onClose);
   const onDismissedRef = useRef(onDismissed);
   const onOpenChangeRef = useRef(onOpenChange);
   const searchRef = useRef(search);
   const onSnapIndexChangeRef = useRef(onSnapIndexChange);
   const searchFocusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  isLockedRef.current = isLocked;
-  openedRef.current = opened;
-  onCloseRef.current = onClose;
-  onDismissedRef.current = onDismissed;
-  onOpenChangeRef.current = onOpenChange;
-  searchRef.current = search;
-  onSnapIndexChangeRef.current = onSnapIndexChange;
+  // Keep the latest props in the refs before any other layout effect reads them. The refs
+  // are written in the commit, not while rendering.
+  useLayoutEffect(() => {
+    isLockedRef.current = isLocked;
+    openedRef.current = opened;
+    onCloseRef.current = onClose;
+    onDismissedRef.current = onDismissed;
+    onOpenChangeRef.current = onOpenChange;
+    searchRef.current = search;
+    onSnapIndexChangeRef.current = onSnapIndexChange;
+  });
   const namedSnapPoints = isFit ? undefined : [`${SHEET_SNAP_POINTS[snapPoint]}%`];
   const maxDynamicContentSize = Math.round(windowHeight * FIT_MAX_HEIGHT_RATIO);
   const contentPaddingBottom = actions ? footerReserve(insets.bottom) : Math.max(insets.bottom, 16);
@@ -231,13 +233,14 @@ export function Sheet({
     };
   }, [isLocked, opened]);
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       if (searchFocusTimerRef.current) {
         clearTimeout(searchFocusTimerRef.current);
       }
-    };
-  }, []);
+    },
+    [],
+  );
 
   function handleDismiss() {
     if (isLockedRef.current && openedRef.current && !dismissByParentRef.current) {
@@ -346,53 +349,59 @@ export function Sheet({
             : { flex: 1, paddingBottom: contentPaddingBottom }
         }
       >
-        <View className={joinClassNames("px-4", isFit ? undefined : "min-h-0 flex-1", className)}>
-          <Group align="start" className="pb-3" justify="between">
-            <Stack className="min-w-0 flex-1" gap="sm">
-              <Heading numberOfLines={3} order={3}>
-                {title}
-              </Heading>
-              {subtitle ? (
-                <Text c="secondary" size="sm">
-                  {subtitle}
-                </Text>
-              ) : null}
-            </Stack>
-            {isLocked ? (
-              <View className="h-8 w-8 items-center justify-center">
-                <ActivityIndicator
-                  accessibilityLabel={t("a11y.loading")}
-                  color={colors.primary}
-                  size="small"
-                />
-              </View>
-            ) : (
-              <ActionIcon accessibilityLabel={t("a11y.close")} onPress={handleClosePress} size="sm">
-                <IconX size={20} stroke={colors.iconPrimary} />
-              </ActionIcon>
-            )}
-          </Group>
+        <View className={cn("px-4", !isFit && "min-h-0 flex-1", className)}>
+          <View className="pb-3">
+            <Group align="start" justify="between">
+              <Stack className="min-w-0 flex-1" gap="sm">
+                <Heading numberOfLines={3} order={3}>
+                  {title}
+                </Heading>
+                {subtitle ? (
+                  <Text c="secondary" size="sm">
+                    {subtitle}
+                  </Text>
+                ) : null}
+              </Stack>
+              {isLocked ? (
+                <View className="size-8 items-center justify-center">
+                  <ActivityIndicator
+                    accessibilityLabel={t("a11y.loading")}
+                    color={colors.primary}
+                    size="small"
+                  />
+                </View>
+              ) : (
+                <ActionIcon
+                  accessibilityLabel={t("a11y.close")}
+                  onPress={handleClosePress}
+                  size="sm"
+                >
+                  <IconX size={20} stroke={colors.iconPrimary} />
+                </ActionIcon>
+              )}
+            </Group>
+          </View>
 
           {search ? (
-            <Group className="pb-2.5" gap="sm">
-              <View className="min-w-0 flex-1">
-                <TextInput
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  editable={search.editable}
-                  leftSection={<IconSearch color={colors.iconSecondary} size={16} />}
-                  onChangeText={search.onQueryChange}
-                  placeholder={search.placeholder}
-                  ref={searchInputRef}
-                  returnKeyType="search"
-                  value={search.query}
-                  variant="sheet"
-                />
-              </View>
-              {search.rightAction ? (
-                <View className="flex-shrink-0">{search.rightAction}</View>
-              ) : null}
-            </Group>
+            <View className="pb-2.5">
+              <Group gap="sm">
+                <View className="min-w-0 flex-1">
+                  <TextInput
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    editable={search.editable}
+                    leftSection={<IconSearch color={colors.iconSecondary} size={16} />}
+                    onChangeText={search.onQueryChange}
+                    placeholder={search.placeholder}
+                    ref={searchInputRef}
+                    returnKeyType="search"
+                    value={search.query}
+                    variant="sheet"
+                  />
+                </View>
+                {search.rightAction ? <View className="shrink-0">{search.rightAction}</View> : null}
+              </Group>
+            </View>
           ) : null}
 
           {children ? (
@@ -403,3 +412,6 @@ export function Sheet({
     </BottomSheetModal>
   );
 }
+
+export type { SheetAction, SheetProps, SheetSearch, SheetSnapPoint };
+export { BottomSheetFlatList, BottomSheetScrollView, Sheet, useSheetScrollable };

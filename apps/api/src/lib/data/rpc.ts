@@ -3,6 +3,25 @@ import { prisma } from "@bondery/db";
 
 type RpcClient = PrismaClient;
 
+type MapPin = {
+  id: string;
+  latitude: number;
+  longitude: number;
+};
+
+function toIsoTimestamp(value: Date | string | null | undefined): string | null {
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value.toISOString();
+  }
+  if (typeof value === "string" && value.length > 0) {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
+  }
+  return null;
+}
+
+export type { MapPin };
+
 export async function rpcGetContactExtras(
   db: RpcClient,
   userId: string,
@@ -28,12 +47,6 @@ export async function rpcSetPersonLocation(
     SELECT set_person_location(${userId}::uuid, ${personId}::uuid, ${latitude}::double precision, ${longitude}::double precision)
   `;
 }
-
-export type MapPin = {
-  id: string;
-  latitude: number;
-  longitude: number;
-};
 
 export async function rpcGetMapPinsInBbox(
   db: RpcClient,
@@ -118,30 +131,18 @@ export async function rpcReplaceEducationHistory(
   `;
 }
 
-function toIsoTimestamp(value: Date | string | null | undefined): string | null {
-  if (value instanceof Date) {
-    return Number.isNaN(value.getTime()) ? null : value.toISOString();
-  }
-  if (typeof value === "string" && value.length > 0) {
-    const parsed = new Date(value);
-    return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
-  }
-  return null;
-}
-
 export async function rpcCheckAndIncrementAiMessages(
   db: RpcClient,
   userId: string,
   limit: number,
-  isPremium: boolean,
 ): Promise<{ allowed: boolean; messagesUsed: number; resetAt: string | null }> {
   const rows = await db.$queryRaw<
     { allowed: boolean; messages_used: number; reset_at: Date | string | null }[]
   >`
     SELECT allowed, messages_used, reset_at
-    FROM check_and_increment_ai_messages(${userId}::uuid, ${limit}::int, ${isPremium}::boolean)
+    FROM check_and_increment_ai_messages(${userId}::uuid, ${limit}::int)
   `;
-  const row = rows[0];
+  const [row] = rows;
   if (!row) {
     throw new Error("check_and_increment_ai_messages returned no row");
   }
@@ -150,6 +151,40 @@ export async function rpcCheckAndIncrementAiMessages(
     messagesUsed: Number(row.messages_used),
     resetAt: toIsoTimestamp(row.reset_at),
   };
+}
+
+/**
+ * Read the quota without consuming a message. Shares one period rule with
+ * `check_and_increment_ai_messages`, so the usage screen and the chat gate
+ * cannot report different numbers for the same quota.
+ */
+export async function rpcGetAiQuota(
+  db: RpcClient,
+  userId: string,
+): Promise<{ messagesUsed: number; resetAt: string | null }> {
+  const rows = await db.$queryRaw<{ messages_used: number; reset_at: Date | string | null }[]>`
+    SELECT messages_used, reset_at
+    FROM get_ai_quota(${userId}::uuid)
+  `;
+  const [row] = rows;
+  if (!row) {
+    throw new Error("get_ai_quota returned no row");
+  }
+  return {
+    messagesUsed: Number(row.messages_used),
+    resetAt: toIsoTimestamp(row.reset_at),
+  };
+}
+
+/** Point the AI usage period at the paid period end. Starts a new period on change. */
+export async function rpcSyncAiQuotaPeriod(
+  db: RpcClient,
+  userId: string,
+  periodEnd: Date,
+): Promise<void> {
+  await db.$executeRaw`
+    SELECT sync_ai_quota_period(${userId}::uuid, ${periodEnd}::timestamptz)
+  `;
 }
 
 /** Default Prisma client for RPC helpers. */

@@ -1,7 +1,12 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { BETTER_AUTH_BASE_PATH } from "@bondery/helpers/globals/paths";
-import { DescribedSelect, errorNotificationTemplate } from "@bondery/mantine-next";
+import {
+  DescribedSelect,
+  type DescribedSelectOption,
+  errorNotificationTemplate,
+} from "@bondery/mantine-next";
 import { Alert, Button, Group, Stack, Text, ThemeIcon, Title } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconAlertTriangle, IconCheck, IconX } from "@tabler/icons-react";
@@ -24,12 +29,26 @@ import { buildSignedOAuthQuery } from "@/lib/auth/signedOAuthQuery";
 import { useOAuthConsentTranslations } from "@/lib/i18n/generated/hooks";
 import { useWebappRuntimeConfig } from "@/lib/platform/runtimeConfig.client";
 
+const TRAILING_SLASHES = /\/+$/;
+
+type OAuthConsentRedirectPayload = {
+  redirect_to?: string;
+  redirect_uri?: string;
+  url?: string;
+};
+
+type OAuthConsentSubmitBody = {
+  accept: boolean;
+  oauth_query: string;
+  scope?: string;
+};
+
 function getRedirectUri(data: unknown): string | null {
   if (!data || typeof data !== "object") {
     return null;
   }
 
-  const candidate = data as { redirect_uri?: string; redirect_to?: string; url?: string };
+  const candidate = data as OAuthConsentRedirectPayload;
   return candidate.redirect_uri ?? candidate.redirect_to ?? candidate.url ?? null;
 }
 
@@ -101,7 +120,7 @@ export function OAuthConsentClient({
   const runtimeConfig = useWebappRuntimeConfig();
   const { websiteUrl } = runtimeConfig;
   const authClient = createWebappAuthClient(runtimeConfig);
-  const apiBaseUrl = runtimeConfig.apiBaseUrl.replace(/\/+$/, "");
+  const apiBaseUrl = runtimeConfig.apiBaseUrl.replace(TRAILING_SLASHES, "");
 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -114,20 +133,26 @@ export function OAuthConsentClient({
     scope: string;
   } | null>(null);
   const [permission, setPermission] = useState<McpAccessLevel>("read");
-  const handledRef = useRef(false);
-  const redirectingRef = useRef(false);
+  const handledRef = useRef<boolean>(false);
+  const redirectingRef = useRef<boolean>(false);
+  const markRedirecting = () => {
+    redirectingRef.current = true;
+  };
 
   const oauthQuery = buildSignedOAuthQuery(searchParams.toString()) ?? "";
   const requestedScopes = authDetails ? splitScopes(authDetails.scope) : [];
   const canOfferWrite = requestedScopes.includes("mcp:write");
-  const permissionOptions = mcpAccessOptions({
+  const permissionOptions: DescribedSelectOption[] = [];
+  for (const option of mcpAccessOptions({
     fullDescription: t("PermissionFullDescription"),
     fullLabel: t("PermissionFullLabel"),
     readDescription: t("PermissionReadDescription"),
     readLabel: t("PermissionReadLabel"),
-  }).map((option) =>
-    option.value === "full" && !canOfferWrite ? { ...option, disabled: true } : option,
-  );
+  })) {
+    permissionOptions.push(
+      option.value === "full" && !canOfferWrite ? { ...option, disabled: true } : option,
+    );
+  }
 
   const fetchDetails = async () => {
     if (!oauthQuery) {
@@ -145,7 +170,7 @@ export function OAuthConsentClient({
     try {
       const session = await authClient.getSession();
       if (!session.data?.user) {
-        redirectingRef.current = true;
+        markRedirecting();
         window.location.replace(buildOAuthLoginHref(window.location.search));
         return;
       }
@@ -180,7 +205,7 @@ export function OAuthConsentClient({
         return;
       }
 
-      let fetchedName: string | null = null;
+      let fetchedName: string | null;
       try {
         fetchedName = await fetchOAuthPublicClientName(apiBaseUrl, request.clientId, oauthQuery);
       } catch {
@@ -198,8 +223,8 @@ export function OAuthConsentClient({
         redirect_uri: request.redirectUri,
         scope: request.scope,
       });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t("UnexpectedError"));
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : t("UnexpectedError"));
     } finally {
       if (!redirectingRef.current) {
         setLoading(false);
@@ -209,7 +234,7 @@ export function OAuthConsentClient({
 
   useEffect(() => {
     // biome-ignore lint/nursery/useReactCompiler: one-time consent bootstrap on mount
-    void fetchDetails();
+    detachPromise(fetchDetails());
     // biome-ignore lint/correctness/useExhaustiveDependencies: run once on mount for OAuth consent bootstrap
   }, [fetchDetails]);
 
@@ -221,7 +246,7 @@ export function OAuthConsentClient({
     setSubmitting(true);
     try {
       const requested = splitScopes(authDetails.scope);
-      const body: Record<string, unknown> = {
+      const body: OAuthConsentSubmitBody = {
         accept,
         oauth_query: oauthQuery,
       };
@@ -244,13 +269,13 @@ export function OAuthConsentClient({
       const data = await response.json();
       const redirectUrl = getRedirectUri(data);
       if (redirectUrl) {
-        redirectingRef.current = true;
+        markRedirecting();
         window.location.href = redirectUrl;
       }
-    } catch (err) {
+    } catch (error_) {
       notifications.show(
         errorNotificationTemplate({
-          description: err instanceof Error ? err.message : t("UnexpectedError"),
+          description: error_ instanceof Error ? error_.message : t("UnexpectedError"),
           title: t("ErrorTitle"),
         }),
       );
@@ -286,8 +311,7 @@ export function OAuthConsentClient({
   }
 
   const scopes = requestedScopes;
-  const displayName = authDetails.client.name;
-  const hostname = authDetails.client.hostname;
+  const { hostname, name: displayName } = authDetails.client;
 
   return (
     <LoginBrandShell leftContent="userKey" websiteUrl={websiteUrl}>

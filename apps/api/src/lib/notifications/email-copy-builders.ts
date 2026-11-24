@@ -18,20 +18,21 @@ function readNestedLabels(
     return defaultShareLabels();
   }
 
-  const record = labels as Record<string, string>;
+  // Translation bundles come from JSON files, so any label can be missing.
+  const record = labels as Partial<Record<string, string>>;
   return {
-    address: record.address ?? "Address",
-    email: record.email ?? "Email",
-    facebook: record.facebook ?? "Facebook",
-    importantDates: record.importantDates ?? "Important dates",
-    instagram: record.instagram ?? "Instagram",
-    linkedin: record.linkedin ?? "LinkedIn",
-    location: record.location ?? "Location",
-    notes: record.notes ?? "Notes",
-    phone: record.phone ?? "Phone",
-    signal: record.signal ?? "Signal",
-    website: record.website ?? "Website",
-    whatsapp: record.whatsapp ?? "WhatsApp",
+    address: record["address"] ?? "Address",
+    email: record["email"] ?? "Email",
+    facebook: record["facebook"] ?? "Facebook",
+    importantDates: record["importantDates"] ?? "Important dates",
+    instagram: record["instagram"] ?? "Instagram",
+    linkedin: record["linkedin"] ?? "LinkedIn",
+    location: record["location"] ?? "Location",
+    notes: record["notes"] ?? "Notes",
+    phone: record["phone"] ?? "Phone",
+    signal: record["signal"] ?? "Signal",
+    website: record["website"] ?? "Website",
+    whatsapp: record["whatsapp"] ?? "WhatsApp",
   };
 }
 
@@ -53,7 +54,7 @@ function defaultShareLabels(): ShareContactEmailCopy["labels"] {
 }
 
 function readDateTypes(bundle: Record<string, unknown>): ReminderDigestEmailCopy["dateTypes"] {
-  const dateTypes = bundle.dateTypes;
+  const { dateTypes } = bundle;
   if (!dateTypes || typeof dateTypes !== "object") {
     return {
       anniversary: "Anniversary",
@@ -64,13 +65,13 @@ function readDateTypes(bundle: Record<string, unknown>): ReminderDigestEmailCopy
     };
   }
 
-  const record = dateTypes as Record<string, string>;
+  const record = dateTypes as Partial<Record<string, string>>;
   return {
-    anniversary: record.anniversary ?? "Anniversary",
-    birthday: record.birthday ?? "Birthday",
-    graduation: record.graduation ?? "Graduation",
-    nameday: record.nameday ?? "Name day",
-    other: record.other ?? "Important date",
+    anniversary: record["anniversary"] ?? "Anniversary",
+    birthday: record["birthday"] ?? "Birthday",
+    graduation: record["graduation"] ?? "Graduation",
+    nameday: record["nameday"] ?? "Name day",
+    other: record["other"] ?? "Important date",
   };
 }
 

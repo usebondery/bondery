@@ -1,31 +1,25 @@
 "use client";
 
 import { Group, Paper, Stack, Text, UnstyledButton, useMantineTheme } from "@mantine/core";
-import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
+import { type Ref, useImperativeHandle, useState } from "react";
+
+interface EmojiListProps {
+  command: (item: EmojiItem) => void;
+  items: EmojiItem[];
+  ref?: Ref<EmojiListHandle>;
+}
 
 export interface EmojiItem {
   emoji: string;
   name: string;
 }
 
-interface EmojiListProps {
-  command: (item: EmojiItem) => void;
-  items: EmojiItem[];
-}
-
 export interface EmojiListHandle {
   onKeyDown: (props: { event: KeyboardEvent }) => boolean;
 }
 
-export const EmojiList = forwardRef<EmojiListHandle, EmojiListProps>(function EmojiList(
-  { items, command },
-  ref,
-) {
+export function EmojiList({ items, command, ref }: EmojiListProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
-
-  useEffect(() => {
-    setSelectedIndex(0);
-  }, []);
 
   const selectItem = (index: number) => {
     const item = items[index];
@@ -101,4 +95,4 @@ export const EmojiList = forwardRef<EmojiListHandle, EmojiListProps>(function Em
       </Stack>
     </Paper>
   );
-});
+}

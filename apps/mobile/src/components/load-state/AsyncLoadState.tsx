@@ -4,7 +4,7 @@ import { useMobileSettingsTranslations } from "@/lib/i18n/generated/hooks";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { LoadErrorCard } from "./LoadErrorCard";
 
-export interface AsyncLoadStateProps {
+interface AsyncLoadStateProps {
   children: ReactNode;
   errorDescription?: string | null;
   errorTitle?: string | null;
@@ -13,7 +13,7 @@ export interface AsyncLoadStateProps {
   onRetry?: () => void;
 }
 
-export function AsyncLoadState({
+function AsyncLoadState({
   isLoading,
   errorTitle,
   errorDescription,
@@ -50,3 +50,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
 });
+
+export type { AsyncLoadStateProps };
+export { AsyncLoadState };

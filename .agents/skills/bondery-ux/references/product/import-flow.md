@@ -6,11 +6,11 @@ LinkedIn, Instagram, vCard, and Bondery JSON imports — shared between **onboar
 
 ## Entry points
 
-| Surface | Opener | Notes |
-|---------|--------|-------|
-| Onboarding | `StepImport` → `openLinkedInImportModal` / `openInstagramImportModal` | `showNavigationProgress: false`; `onAwaitingExport` completes onboarding with follow-up state |
-| Settings | Data management cards | Same modals; default navigation progress in modal |
-| Getting Started rail | Import task → Settings `#data-management` | User finishes import outside onboarding |
+| Surface              | Opener                                                                | Notes                                                                                         |
+| -------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Onboarding           | `StepImport` → `openLinkedInImportModal` / `openInstagramImportModal` | `showNavigationProgress: false`; `onAwaitingExport` completes onboarding with follow-up state |
+| Settings             | Data management cards                                                 | Same modals; default navigation progress in modal                                             |
+| Getting Started rail | Import task → Settings `#data-management`                             | User finishes import outside onboarding                                                       |
 
 vCard: `openVCardImportModal` — Settings **Import** only (not onboarding cards).
 
@@ -25,15 +25,17 @@ Imperative openers in `settings/components/modals/open*ImportModal.tsx`. Body co
 - `LinkedInImportModal.tsx` / `InstagramImportModal.tsx`
 - Shared steps: `ImportIntroStep`, `ImportZipUploadStep`, `ImportModalProcessingSteps`, preview + selection hooks
 
-**Typical LinkedIn steps:** intro → instructions → upload → parse preview (select rows) → commit → success.
+**Typical LinkedIn steps:** intro → instructions → upload → parse preview (select rows) → commit → finished.
 
 **Blocking:** While parsing or committing — `useModalBlocking`, hide X, disable fields ([modals.md](../desktop/modals.md)).
+
+**Finished step:** `ImportFinishedStep` stays inside the dialog and shows the imported rows. The primary action is **View contacts** (`common.actions.viewContacts`), which closes the dialog and opens `/app/people`. The secondary action is **Close** (`common.a11y.close`), which closes the dialog and keeps the current page. Do not navigate on its own, and do not show a success toast: the step is the confirmation. Onboarding passes `onSuccess`, so that path still closes and reports inline.
 
 **Selection:** `useImportContactSelection` — searchable preview table, select all / deselect, load-more if paginated parse results.
 
 **Commit:** Batched via `SOCIAL_IMPORT_COMMIT_BATCH_SIZE`; progress step during commit.
 
-**Success:** Stats `{ imported, updated, skipped }` — onboarding shows inline success; Settings may toast + navigate.
+**Success:** Stats `{ imported, updated, skipped }` — onboarding shows inline success; Settings keeps the dialog open on the finished step (imported rows, **View contacts**, **Close**).
 
 ---
 
@@ -41,9 +43,9 @@ Imperative openers in `settings/components/modals/open*ImportModal.tsx`. Body co
 
 Imperative opener: `openBonderyImportModal({ entryPoint })`. Size `lg` (same as Instagram/vCard).
 
-**Steps:** intro (“How Bondery JSON import works”) → upload ZIP → client peek (`fflate`) → review file counts → `POST /me/import` → finished in the modal.
+**Steps:** intro (“How Bondery JSON import works”) → upload ZIP → client peek (`fflate`) → review file counts → `POST /me/import` → finished in the modal (count chips, **View contacts**, **Close**).
 
-**Not used:** row picker, type checkboxes, `useImportContactSelection`, `ContactsTable` preview, LinkedIn/Instagram instructions, success toast, navigate to People.
+**Not used:** row picker, type checkboxes, `useImportContactSelection`, `ContactsTable` preview, LinkedIn/Instagram instructions, success toast.
 
 **Blocking:** While checking or importing — `useModalBlocking`. Cancel remains available during check/import (abort).
 
@@ -73,25 +75,25 @@ Platforms: `linkedin` | `instagram` (`ImportFollowupPlatform` in `@bondery/schem
 
 ## UX rules
 
-| Rule | Rationale |
-|------|-----------|
-| Opportunity framing on empty preview | [empty-states.md](../common/empty-states.md) — explain duplicates / no selectable rows |
-| No success toast when navigation shows result | [feedback-and-confirmations.md](../common/feedback-and-confirmations.md) |
-| Destructive bulk skip in preview | Confirm when discarding large selections |
-| Sentence case, second person | [ux-writing.md](../common/ux-writing.md) |
+| Rule                                          | Rationale                                                                              |
+| --------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Opportunity framing on empty preview          | [empty-states.md](../common/empty-states.md) — explain duplicates / no selectable rows |
+| No success toast when navigation shows result | [feedback-and-confirmations.md](../common/feedback-and-confirmations.md)               |
+| Destructive bulk skip in preview              | Confirm when discarding large selections                                               |
+| Sentence case, second person                  | [ux-writing.md](../common/ux-writing.md)                                               |
 
 ---
 
 ## Key files
 
-| Area | Path |
-|------|------|
-| Onboarding import step | `apps/webapp/src/app/(app)/app/(shell)/onboarding/components/StepImport.tsx` |
-| LinkedIn modal | `apps/webapp/src/app/(app)/app/(shell)/settings/components/modals/LinkedInImportModal.tsx` |
-| Instagram modal | `apps/webapp/src/app/(app)/app/(shell)/settings/components/modals/InstagramImportModal.tsx` |
-| Getting Started state | `apps/webapp/src/lib/home/gettingStartedItems.ts` |
-| Query hooks | `lib/query/hooks/useImports.ts`, `useSettings.ts` |
-| Bondery JSON modal | `apps/webapp/src/app/(app)/app/(shell)/settings/components/modals/BonderyImportModal.tsx` |
+| Area                   | Path                                                                                        |
+| ---------------------- | ------------------------------------------------------------------------------------------- |
+| Onboarding import step | `apps/webapp/src/app/(app)/app/(shell)/onboarding/components/StepImport.tsx`                |
+| LinkedIn modal         | `apps/webapp/src/app/(app)/app/(shell)/settings/components/modals/LinkedInImportModal.tsx`  |
+| Instagram modal        | `apps/webapp/src/app/(app)/app/(shell)/settings/components/modals/InstagramImportModal.tsx` |
+| Getting Started state  | `apps/webapp/src/lib/home/gettingStartedItems.ts`                                           |
+| Query hooks            | `lib/query/hooks/useImports.ts`, `useSettings.ts`                                           |
+| Bondery JSON modal     | `apps/webapp/src/app/(app)/app/(shell)/settings/components/modals/BonderyImportModal.tsx`   |
 
 ---
 

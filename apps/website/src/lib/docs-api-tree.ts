@@ -1,3 +1,6 @@
+import docs from "@bondery/translations/locales/en/platform/website/WebsiteDocs.json" with {
+  type: "json",
+};
 import type * as PageTree from "fumadocs-core/page-tree";
 import type { ReactNode } from "react";
 import { resolveDocsIcon } from "@/lib/docs-icon";
@@ -8,20 +11,20 @@ import { resolveDocsIcon } from "@/lib/docs-icon";
  * right and read as a deeper level. `Route` marks a resource this file does not know.
  */
 const RESOURCES: Record<string, { icon: string; label: string }> = {
-  chat: { icon: "Message", label: "Chat" },
-  contacts: { icon: "Users", label: "Contacts" },
-  extension: { icon: "Puzzle", label: "Browser extension" },
-  geocode: { icon: "MapPin", label: "Geocoding" },
-  groups: { icon: "BoxMultiple", label: "Groups" },
-  health: { icon: "Heartbeat", label: "Health" },
-  interactions: { icon: "History", label: "Interactions" },
-  me: { icon: "UserCircle", label: "Account" },
-  mobile: { icon: "DeviceMobile", label: "Mobile app" },
-  "oauth-providers": { icon: "Key", label: "Auth" },
-  subscriptions: { icon: "CreditCard", label: "Billing" },
-  sync: { icon: "Refresh", label: "Sync" },
-  tags: { icon: "Tags", label: "Tags" },
-  webhooks: { icon: "Webhook", label: "Webhooks" },
+  chat: { icon: "Message", label: docs.ApiGroups.Chat },
+  contacts: { icon: "Users", label: docs.ApiGroups.Contacts },
+  extension: { icon: "Puzzle", label: docs.ApiGroups.BrowserExtension },
+  geocode: { icon: "MapPin", label: docs.ApiGroups.Geocoding },
+  groups: { icon: "BoxMultiple", label: docs.ApiGroups.Groups },
+  health: { icon: "Heartbeat", label: docs.ApiGroups.Health },
+  interactions: { icon: "History", label: docs.ApiGroups.Interactions },
+  me: { icon: "UserCircle", label: docs.ApiGroups.Account },
+  mobile: { icon: "DeviceMobile", label: docs.ApiGroups.MobileApp },
+  "oauth-providers": { icon: "Key", label: docs.ApiGroups.Auth },
+  subscriptions: { icon: "CreditCard", label: docs.ApiGroups.Billing },
+  sync: { icon: "Refresh", label: docs.ApiGroups.Sync },
+  tags: { icon: "Tags", label: docs.ApiGroups.Tags },
+  webhooks: { icon: "Webhook", label: docs.ApiGroups.Webhooks },
 };
 
 /**
@@ -36,7 +39,7 @@ const GENERATED_SEGMENT = "_generated";
 const HTTP_METHODS = new Set(["DELETE", "GET", "PATCH", "POST", "PUT"]);
 
 /** HTTP method a generated docs URL ends with, or `null` for a hand-written page. */
-export function docsApiMethod(url: string): string | null {
+function docsApiMethod(url: string): string | null {
   if (!url.startsWith(`${API_REFERENCE_PREFIX}/`)) {
     return null;
   }
@@ -159,9 +162,11 @@ function decorateNodes(
  * Replace the generated `_generated` folder with readable resource groups.
  * Page titles come from `summary` in the OpenAPI spec, so they need no mapping here.
  */
-export function decorateApiTree(
+function decorateApiTree(
   nodes: PageTree.Node[],
   resolveTitle: (url: string) => string | undefined,
 ): PageTree.Node[] {
   return decorateNodes(nodes, resolveTitle);
 }
+
+export { decorateApiTree, docsApiMethod };

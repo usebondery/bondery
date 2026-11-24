@@ -11,16 +11,22 @@ import { DomainError } from "../../../domains/_shared/context.js";
 import { URLS } from "../config.js";
 import { type ErrorCode, GENERIC_500_MESSAGE } from "./codes.js";
 
+const TRAILING_SLASH_PATTERN = /\/$/;
+
 function isServerError(statusCode: number): boolean {
   return statusCode >= 500;
 }
 
 function websiteBaseUrl(): string {
-  return (URLS.website ?? "https://usebondery.com").replace(/\/$/, "");
+  return (URLS.website ?? "https://usebondery.com").replace(TRAILING_SLASH_PATTERN, "");
 }
 
 function catalogType(code: ErrorCode): ApiErrorType {
   return getErrorDefinition(code).type;
+}
+
+function wrap(body: ApiErrorBody): ApiErrorResponse {
+  return { error: body };
 }
 
 export function buildApiErrorBody(params: {
@@ -56,10 +62,6 @@ export function buildApiErrorBody(params: {
   }
 
   return body;
-}
-
-function wrap(body: ApiErrorBody): ApiErrorResponse {
-  return { error: body };
 }
 
 /**

@@ -1,4 +1,4 @@
-import { HeadBucketCommand, S3Client } from "@aws-sdk/client-s3";
+import { HeadBucketCommand, type S3Client } from "@aws-sdk/client-s3";
 import type { FastifyBaseLogger } from "fastify";
 
 import { classifyProbeError } from "../health/errors.js";
@@ -7,16 +7,13 @@ import {
   shouldSkipLiveRuntimeVerify,
 } from "../platform/runtime-env.js";
 import { STORAGE_BUCKETS } from "./ensure-buckets.js";
+import { createS3Client, type S3ConnectionConfig } from "./s3-client.js";
 
-export type StorageInitConfig = {
-  accessKeyId: string;
+type StorageInitConfig = S3ConnectionConfig & {
   client?: S3Client;
-  endpoint: string;
-  region: string;
-  secretAccessKey: string;
 };
 
-export type StorageReadiness = {
+type StorageReadiness = {
   configured: boolean;
   error?: string;
   latencyMs?: number;
@@ -60,17 +57,14 @@ async function probeBuckets(
   config: StorageInitConfig,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   const injectedClient = config.client;
-  const client =
-    injectedClient ??
-    new S3Client({
-      credentials: {
-        accessKeyId: config.accessKeyId,
-        secretAccessKey: config.secretAccessKey,
-      },
-      endpoint: config.endpoint,
-      forcePathStyle: true,
-      region: config.region,
-    });
+
+  let client: S3Client;
+  try {
+    client = injectedClient ?? createS3Client(config);
+  } catch (error) {
+    // A misconfigured endpoint or CA file: report it like any other failed probe.
+    return { error: classifyProbeError(error), ok: false };
+  }
 
   try {
     for (const bucket of STORAGE_BUCKETS) {
@@ -111,6 +105,8 @@ async function runStorageVerify(config: StorageInitConfig): Promise<StorageReadi
   };
   return storageReadiness;
 }
+
+export type { StorageInitConfig, StorageReadiness };
 
 export function getStorageReadiness(): StorageReadiness {
   return storageReadiness ?? UNCONFIGURED_READINESS;

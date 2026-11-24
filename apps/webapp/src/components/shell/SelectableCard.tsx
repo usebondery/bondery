@@ -46,13 +46,13 @@ export function SelectableCard({
             <Text fw={500} size="sm">
               {label}
             </Text>
-            {selected && <IconCheck size={14} />}
+            {selected ? <IconCheck size={14} /> : null}
           </Group>
-          {description && (
+          {description ? (
             <Text c="dimmed" lineClamp={1} size="xs">
               {description}
             </Text>
-          )}
+          ) : null}
         </Stack>
       </Paper>
     </UnstyledButton>

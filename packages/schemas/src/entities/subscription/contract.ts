@@ -17,15 +17,17 @@ import type {
   SubscriptionStatusValue,
 } from "./types.js";
 
-type _SubscriptionStatusValue = Assert<
+export type _SubscriptionStatusValue = Assert<
   IsEqual<SubscriptionStatusValue, z.infer<typeof subscriptionStatusValueSchema>>
 >;
-type _Subscription = Assert<IsEqual<Subscription, z.infer<typeof subscriptionSchema>>>;
-type _PlanTier = Assert<IsEqual<PlanTier, z.infer<typeof planTierSchema>>>;
-type _BillingSubscriptionStatus = Assert<
+export type _Subscription = Assert<IsEqual<Subscription, z.infer<typeof subscriptionSchema>>>;
+export type _PlanTier = Assert<IsEqual<PlanTier, z.infer<typeof planTierSchema>>>;
+export type _BillingSubscriptionStatus = Assert<
   IsEqual<BillingSubscriptionStatus, z.infer<typeof billingSubscriptionStatusSchema>>
 >;
-type _BillingInterval = Assert<IsEqual<BillingInterval, z.infer<typeof billingIntervalSchema>>>;
-type _SubscriptionStatus = Assert<
+export type _BillingInterval = Assert<
+  IsEqual<BillingInterval, z.infer<typeof billingIntervalSchema>>
+>;
+export type _SubscriptionStatus = Assert<
   IsEqual<SubscriptionStatus, z.infer<typeof subscriptionStatusSchema>>
 >;

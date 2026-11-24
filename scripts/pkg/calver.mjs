@@ -4,6 +4,8 @@
  */
 import { execSync } from "node:child_process";
 
+const PATTERN_5C723F5C6E_RE = /\r?\n/;
+
 export {
   compareVersions,
   highestNamedRc,
@@ -26,11 +28,11 @@ export {
 export function readGitTags(repoRoot) {
   try {
     return execSync('git tag -l "v*"', { cwd: repoRoot, encoding: "utf8" })
-      .split(/\r?\n/)
+      .split(PATTERN_5C723F5C6E_RE)
       .map((tag) => tag.trim())
       .filter(Boolean);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`Failed to list git tags: ${message}. Run: git fetch --tags`);
+    throw new Error(`Failed to list git tags: ${message}. Run: git fetch --tags`, { cause: error });
   }
 }

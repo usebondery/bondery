@@ -1,0 +1,32 @@
+{
+  "LoggedIn": {
+    "OpenBondery": "Öppna Bondery",
+    "UnsupportedSiteMessage": "Besök någons profil på Instagram eller LinkedIn för att se fler åtgärder och funktioner i tillägget."
+  },
+  "LoggedOut": {
+    "Description": "Koppla ditt konto för att spara kontakter från sociala medier.",
+    "SignIn": "Logga in",
+    "Title": "Logga in på Bondery"
+  },
+  "PersonActions": {
+    "AddInteraction": "Lägg till interaktion med den här personen"
+  },
+  "Settings": {
+    "ApiServer": "API-server",
+    "SignOut": "Logga ut"
+  },
+  "UpdateRequired": {
+    "Description": "Ditt Bondery-tillägg är inaktuellt och kanske inte fungerar som det ska. Uppdatera det för att fortsätta.",
+    "OpenExtensionsPage": "Öppna tilläggssidan",
+    "Title": "Uppdatering krävs"
+  },
+  "Welcome": {
+    "ConnectButton": "Koppla Bondery-konto",
+    "Description": "Anslut ditt Bondery-konto för att spara kontakter direkt från profiler på sociala medier.",
+    "SignInHint": "Du blir ombedd att logga in på ditt Bondery-konto och godkänna tillägget.",
+    "SuccessClose": "Du kan stänga den här fliken nu.",
+    "SuccessDescription": "Ditt Bondery-konto är nu anslutet. Besök valfri Instagram- eller LinkedIn-profil för att börja spara kontakter.",
+    "SuccessTitle": "Nu är allt klart!",
+    "Title": "Välkommen till Bondery"
+  }
+}

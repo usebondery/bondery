@@ -18,6 +18,10 @@ import { mergeContactsRequestSchema } from "@bondery/schemas";
 
 import { mergeRecommendationsQuerySchema } from "@bondery/schemas/http";
 
+const HTTP_PROTOCOL_PATTERN = /^https?:\/\//;
+const WWW_PREFIX_PATTERN = /^www\./;
+const TRAILING_SLASH_PATTERN = /\/$/;
+
 // ── Constants ────────────────────────────────────────────────────
 
 export const MERGEABLE_SCALAR_FIELDS = {
@@ -46,9 +50,10 @@ export const MERGEABLE_SCALAR_FIELDS = {
   timezone: "timezone",
 } as const;
 
-export const MERGEABLE_SET_FIELDS: Array<
-  Extract<MergeConflictField, "phones" | "emails" | "importantDates">
-> = ["phones", "emails", "importantDates"];
+export const MERGEABLE_SET_FIELDS: Extract<
+  MergeConflictField,
+  "phones" | "emails" | "importantDates"
+>[] = ["phones", "emails", "importantDates"];
 
 export const MERGEABLE_SOCIAL_FIELDS: Record<
   Extract<
@@ -138,11 +143,11 @@ export function normalizeSocialHandle(value: string | null | undefined): string 
 
     .toLowerCase()
 
-    .replace(/^https?:\/\//, "")
+    .replace(HTTP_PROTOCOL_PATTERN, "")
 
-    .replace(/^www\./, "")
+    .replace(WWW_PREFIX_PATTERN, "")
 
-    .replace(/\/$/, "");
+    .replace(TRAILING_SLASH_PATTERN, "");
 }
 
 export function toFullNameKey(person: { first_name: string; last_name: string | null }): string {
@@ -176,20 +181,20 @@ export function diceCoefficient(left: string, right: string): number {
 
   const rightBigrams = toBigrams(right);
 
-  if (!leftBigrams.length || !rightBigrams.length) {
+  if (leftBigrams.length === 0 || rightBigrams.length === 0) {
     return 0;
   }
 
   const counts = new Map<string, number>();
 
   for (const bigram of leftBigrams) {
-    counts.set(bigram, (counts.get(bigram) || 0) + 1);
+    counts.set(bigram, (counts.get(bigram) ?? 0) + 1);
   }
 
   let intersection = 0;
 
   for (const bigram of rightBigrams) {
-    const count = counts.get(bigram) || 0;
+    const count = counts.get(bigram) ?? 0;
 
     if (count > 0) {
       intersection += 1;
@@ -201,22 +206,13 @@ export function diceCoefficient(left: string, right: string): number {
   return (2 * intersection) / (leftBigrams.length + rightBigrams.length);
 }
 
-export function countSetOverlap(left: Set<string>, right: Set<string>): number {
-  if (!left.size || !right.size) {
+export function countSetOverlap(left: Set<string>, right: Set<string>) {
+  if (left.size === 0 || right.size === 0) {
     return 0;
   }
 
-  let overlap = 0;
-
   const [smallSet, largeSet] = left.size <= right.size ? [left, right] : [right, left];
-
-  for (const value of smallSet) {
-    if (largeSet.has(value)) {
-      overlap += 1;
-    }
-  }
-
-  return overlap;
+  return Array.from(smallSet).filter((value) => largeSet.has(value)).length;
 }
 
 export function hasMeaningfulValue(value: unknown): boolean {
@@ -253,7 +249,7 @@ export function normalizePhoneSet(
     | null
     | undefined,
 ): string[] {
-  return (rows || [])
+  return (rows ?? [])
 
     .map((phone) => {
       const prefix = String(phone.prefix || "").trim();
@@ -281,7 +277,7 @@ export function normalizePhoneSet(
 export function normalizeEmailSet(
   rows: Array<{ value: string; type: string; preferred: boolean }> | null | undefined,
 ): string[] {
-  return (rows || [])
+  return (rows ?? [])
 
     .map((email) => {
       const value = String(email.value || "")
@@ -322,7 +318,7 @@ export function normalizeImportantDateSet(
     | null
     | undefined,
 ): string[] {
-  return (rows || [])
+  return (rows ?? [])
 
     .map((entry) => {
       const dateType = String(entry.type || "")

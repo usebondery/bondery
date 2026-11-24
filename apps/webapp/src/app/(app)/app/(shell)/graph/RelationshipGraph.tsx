@@ -18,7 +18,13 @@ import {
 } from "./mountRelationshipGraph";
 import { paintRelationshipGraph } from "./paintRelationshipGraph";
 
-export type { RelationshipGraphControls };
+type GraphMarkerDataset = {
+  graphId?: string;
+};
+
+function markerGraphId(element: HTMLElement): string | undefined {
+  return (element.dataset as GraphMarkerDataset).graphId;
+}
 
 interface RelationshipGraphProps {
   ariaLabel: string;
@@ -39,6 +45,8 @@ interface RelationshipGraphProps {
   selectedHubId: string | null;
   selectedNodeId: string | null;
 }
+
+export type { RelationshipGraphControls };
 
 /**
  * d3 writes positions onto the SVG and the HTML markers.
@@ -140,7 +148,7 @@ export function RelationshipGraph({
     }
     const byId = new Map<string, HTMLElement>();
     for (const element of markerHost.querySelectorAll<HTMLElement>("[data-graph-id]")) {
-      const id = element.dataset.graphId;
+      const id = markerGraphId(element);
       if (id) {
         byId.set(id, element);
       }
@@ -162,7 +170,7 @@ export function RelationshipGraph({
       }
       if (personId) {
         for (const element of markerRoot.querySelectorAll<HTMLElement>("[data-graph-id]")) {
-          if (element.dataset.graphId === personId) {
+          if (markerGraphId(element) === personId) {
             element.setAttribute("data-graph-hovered", "true");
             break;
           }
@@ -189,7 +197,7 @@ export function RelationshipGraph({
   }
 
   return (
-    <Box h="100%" pos="relative" w="100%">
+    <Box dir="ltr" h="100%" pos="relative" w="100%">
       <Box h="100%" ref={hostRef} w="100%" />
       <Box
         ref={markerLayerRef}

@@ -10,9 +10,9 @@ Use parent/child nesting when work is too large for a single weekly cycle slice.
 
 ## Pattern
 
-| Role | State | Title |
-|------|-------|-------|
-| Parent | **Bet** | `[Feature] <outcome>` |
+| Role        | State                                | Title                      |
+| ----------- | ------------------------------------ | -------------------------- |
+| Parent      | **Bet**                              | `[Feature] <outcome>`      |
 | Child slice | **Icebox** or **Bet for Next Cycle** | `[Feature] <scoped slice>` |
 
 Set `parent` on child via `update_work_item` or `create_work_item`.

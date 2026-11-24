@@ -122,7 +122,8 @@ function responseLines(responses: OperationLike["responses"]): string[] {
       lines.push(`- \`${status}\``);
       continue;
     }
-    lines.push(`- \`${status}\`${response.description ? `: ${response.description}` : ""}`);
+    const description = response.description ? `: ${response.description}` : "";
+    lines.push(`- \`${status}\`${description}`);
   }
   lines.push("");
 
@@ -174,7 +175,7 @@ function operationMarkdown(document: DocumentLike, item: OperationItem): string 
  * operation detail. Build it from the OpenAPI document instead.
  */
 export function openApiPageMarkdown(document: Document, item: OperationItem): string {
-  const paths = (document as unknown as DocumentLike).paths;
+  const { paths } = document as unknown as DocumentLike;
 
   return operationMarkdown({ paths }, item).trim();
 }

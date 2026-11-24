@@ -1,0 +1,8 @@
+{
+  "documentation": "dokumentaatio",
+  "help": "Tarvitsetko apua? Katso {{support}} tai lue {{documentation}}.",
+  "internalNote": "Sisäinen toiminto · ei lähetetty asiakkaalle",
+  "logoAlt": "Bondery",
+  "manageNotifications": "Hallitse näitä ilmoituksia Bonderyssa",
+  "support": "tuki"
+}

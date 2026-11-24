@@ -1,7 +1,7 @@
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { createCliLogger } from "@bondery/helpers/cli";
-import { formatEnvFile, PLAUSIBLE_GENERATED_HEADER } from "./env-file-format.js";
+import { type EnvFileVar, formatEnvFile, PLAUSIBLE_GENERATED_HEADER } from "./env-file-format.js";
 import {
   ENV_MANIFEST,
   PLAUSIBLE_GROUP_GUIDES,
@@ -10,7 +10,7 @@ import {
 } from "./env-manifest.ts";
 
 export function collectPlausibleExampleRows() {
-  const rows = [];
+  const rows: EnvFileVar[] = [];
   for (const entry of ENV_MANIFEST) {
     const plausible = entry.plausibleExample;
     if (!plausible?.include) {

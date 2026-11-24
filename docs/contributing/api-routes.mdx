@@ -277,13 +277,13 @@ Existing query modules: `services/contacts/queries.ts`, `services/tags/queries.t
 
 ## Container deployment (GHCR + Dokploy)
 
-The API runs as a long-lived Node process in Docker, not serverless. See [API container (GHCR)](./api-container.mdx).
+The API runs as a long-lived Node process in Docker, not serverless. The image is `ghcr.io/usebondery/api`, published by CI. Deploy it with the full Compose stack: [Deployment topology](./dokploy.mdx).
 
 Build pipeline:
 
 1. **Image build** — `apps/api/Dockerfile` uses `turbo prune api --docker`, `pnpm install --frozen-lockfile --ignore-scripts`, and `turbo build --filter=api`.
 2. **CI** — GitHub Actions pushes to `ghcr.io/usebondery/api` (`:beta` on `main`, semver tags on `release`).
-3. **Runtime** — `node apps/api/dist/index.js` listens on `PORT` (default `26631`).
+3. **Runtime** — `node apps/api/dist/index.js` serves HTTPS only on `API_PORT` (default `26631`), with the certificate in `BONDERY_PRIVATE_API_TLS_CERT_FILE` and `_KEY_FILE`.
 
 Workspace packages follow the [Turborepo compiled-package model](https://turborepo.dev/docs/guides/tools/typescript#compiled-packages): `types` → `./src/*.ts` (editor IntelliSense), `import` / `node` / `default` → `./dist/*.js` (runtime). Production `build` depends on `^build`; local dev cold-starts via `compile` (`tsc` to `dist/`) with package `tsc --watch` companions. When adding package subpaths (especially directory barrels like `src/foo/index.ts`), run `pnpm run sync-exports` from the repo root.
 

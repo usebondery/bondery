@@ -1,23 +1,28 @@
 "use client";
 
+import { TileCard } from "@bondery/mantine-next";
+import { ThemeIcon } from "@mantine/core";
 import { IconAddressBook } from "@tabler/icons-react";
-import { IntegrationCard } from "@/components/shared/IntegrationCard";
 import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { openVCardImportModal } from "../modals/openVCardImportModal";
 
 export function VCardImportSection() {
   const t = useSettingsPageTranslations("DataManagement.VCardImport");
+  const tDataManagement = useSettingsPageTranslations("DataManagement");
 
   return (
-    <IntegrationCard
-      displayName={t("MobileContacts")}
-      icon={IconAddressBook}
-      iconColor="green"
-      isConnected={false}
-      isDisabled={false}
-      isLinkable={false}
+    <TileCard
+      actionLabel={t("ImportAction")}
+      caption={tDataManagement("CategoryContacts")}
+      description={t("IntroDescription1")}
+      icon={
+        <ThemeIcon radius="md" size={32} variant="filled">
+          <IconAddressBook size={19} stroke={1.7} />
+        </ThemeIcon>
+      }
       onClick={() => openVCardImportModal()}
-      provider="vcard_import"
+      title={t("MobileContacts")}
+      variant="link"
     />
   );
 }

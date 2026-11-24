@@ -3,6 +3,7 @@
 import { extractUsername, formatWhatsAppNumber } from "@bondery/helpers";
 import { getTelephoneReactMaskExpression, parsePhoneNumber } from "@bondery/helpers/phone";
 import { Group, Input, Select } from "@mantine/core";
+import { cn } from "cn";
 import type { ClipboardEvent, KeyboardEvent } from "react";
 import { IMaskInput } from "react-imask";
 import {
@@ -10,9 +11,14 @@ import {
   findTelephonePrefixSelectOption,
   TELEPHONE_PREFIX_SELECT_DATA,
 } from "@/lib/phone/telephonePrefixSelect";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 import type { SocialFieldKey } from "../../hooks/useSocialFieldEditor";
 
-const PrefixSelect = function PrefixSelect({
+function flagIconClass(code: string): string {
+  return `fi-${code}`;
+}
+
+function PrefixSelect({
   value,
   onChange,
   disabled,
@@ -28,12 +34,17 @@ const PrefixSelect = function PrefixSelect({
       data={TELEPHONE_PREFIX_SELECT_DATA}
       disabled={disabled}
       filter={filterTelephonePrefixOptions}
-      leftSection={<span className={`fi fi-${selectedOption?.flag || "us"}`} />}
+      leftSection={
+        <span className={cn("fi", flagIconClass(nonEmpty(selectedOption?.flag) ?? "us"))} />
+      }
       onChange={(val) => onChange(val || "+1")}
       renderOption={({ option }) => (
         <Group gap="xs">
           <span
-            className={`fi fi-${findTelephonePrefixSelectOption(option.value)?.flag || "us"}`}
+            className={cn(
+              "fi",
+              flagIconClass(nonEmpty(findTelephonePrefixSelectOption(option.value)?.flag) ?? "us"),
+            )}
           />
           <span>{option.label}</span>
         </Group>
@@ -44,7 +55,7 @@ const PrefixSelect = function PrefixSelect({
       value={value}
     />
   );
-};
+}
 
 interface SocialPhoneInputProps {
   autoFocus?: boolean;

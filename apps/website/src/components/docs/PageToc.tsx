@@ -1,5 +1,8 @@
 "use client";
 
+import docs from "@bondery/translations/locales/en/platform/website/WebsiteDocs.json" with {
+  type: "json",
+};
 import { Stack, Text } from "@mantine/core";
 import { useScrollSpy } from "@mantine/hooks";
 import { useLayoutEffect, useRef, useState } from "react";
@@ -11,7 +14,7 @@ const RAIL_STYLE = {
   top: "calc(var(--site-header-sticky-bottom) + var(--mantine-spacing-sm))",
 } as const;
 
-export interface DocsTocItem {
+interface DocsTocItem {
   depth: number;
   id: string;
   title: string;
@@ -30,7 +33,7 @@ interface TocHeading {
   value: string;
 }
 
-export function PageToc({ items, selector = "h2[id], h3[id], h4[id]", variant }: PageTocProps) {
+function PageToc({ items, selector = "h2[id], h3[id], h4[id]", variant }: PageTocProps) {
   const listRef = useRef<HTMLDivElement>(null);
   const [indicator, setIndicator] = useState<{ height: number; top: number } | null>(null);
   const spy = useScrollSpy({
@@ -86,19 +89,19 @@ export function PageToc({ items, selector = "h2[id], h3[id], h4[id]", variant }:
 
   return (
     <Stack
-      aria-label="On this page"
+      aria-label={docs.Navigation.OnThisPage}
       component="nav"
       gap="xs"
       style={variant === "rail" ? RAIL_STYLE : undefined}
     >
       <Text fw={600} size="xs">
-        On this page
+        {docs.Navigation.OnThisPage}
       </Text>
-      <div className={classes.list} ref={listRef}>
+      <div className={classes["list"]} ref={listRef}>
         {indicator !== null ? (
           <span
             aria-hidden
-            className={classes.indicator}
+            className={classes["indicator"]}
             style={{
               height: indicator.height,
               transform: `translateY(${indicator.top}px)`,
@@ -107,7 +110,9 @@ export function PageToc({ items, selector = "h2[id], h3[id], h4[id]", variant }:
         ) : null}
         {headings.map((heading, index) => {
           const active = index === spy.active;
-          const className = active ? `${classes.link} ${classes.linkActive}` : classes.link;
+          const className = active
+            ? `${classes["link"]} ${classes["linkActive"]}`
+            : classes["link"];
           return (
             <a
               className={className}
@@ -132,3 +137,6 @@ export function PageToc({ items, selector = "h2[id], h3[id], h4[id]", variant }:
     </Stack>
   );
 }
+
+export type { DocsTocItem };
+export { PageToc };

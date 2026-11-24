@@ -1,0 +1,217 @@
+import { buildLocalPostgresDatabaseUrl, EXAMPLE_POSTGRES_PASSWORD, t } from "./manifest-targets.js";
+import type { EnvVarDef } from "./manifest-types.js";
+
+export const PUBLIC_DATABASE_ENTRIES: EnvVarDef[] = [
+  // --- Public URLs ---
+  {
+    canonical: "BONDERY_PUBLIC_API_URL",
+    description: "Public API base URL (no trailing /api)",
+    exampleValue: "https://api.usebondery.test",
+    group: "Public URLs",
+    requiredIn: ["development", "production"],
+    secret: false,
+    syncable: true,
+    targets: [t("api"), t("webapp"), t("website"), t("chrome-extension"), t("mobile")],
+  },
+  {
+    canonical: "BONDERY_PUBLIC_WEBAPP_URL",
+    description: "Public webapp origin",
+    exampleValue: "https://app.usebondery.test",
+    group: "Public URLs",
+    requiredIn: ["development", "production"],
+    secret: false,
+    syncable: true,
+    targets: [t("api"), t("webapp"), t("website"), t("chrome-extension"), t("mobile")],
+  },
+  {
+    canonical: "BONDERY_PUBLIC_WEBSITE_URL",
+    description: "Public marketing website origin",
+    exampleValue: "https://usebondery.test",
+    group: "Public URLs",
+    requiredIn: ["development", "production"],
+    secret: false,
+    syncable: true,
+    targets: [t("api"), t("webapp"), t("website"), t("mobile")],
+  },
+  {
+    canonical: "BONDERY_PUBLIC_WEBAUTHN_RP_ID",
+    deployExample: {
+      commented: true,
+      group: "Better Auth",
+      include: true,
+      value: "",
+    },
+    description:
+      "Optional WebAuthn rpID override for self-host DNS that does not match the cookie parent domain. Do not set for hosted Bondery. Never an IP.",
+    exampleValue: "",
+    group: "Public URLs",
+    requiredIn: [],
+    secret: false,
+    targets: [t("api")],
+  },
+  {
+    canonical: "BONDERY_PUBLIC_IOS_APP_TEAM_ID",
+    deployExample: {
+      commented: true,
+      group: "Better Auth",
+      include: true,
+      value: "",
+    },
+    description:
+      "Apple Developer Team ID for apple-app-site-association (webcredentials + applinks). Optional. The website returns 404 for that file when unset. Not a secret.",
+    dokploySync: { targets: ["website"] },
+    exampleValue: "",
+    group: "Public URLs",
+    opsExample: {
+      commented: true,
+      group: "Mobile associated domains",
+      include: true,
+      value: "",
+    },
+    requiredIn: [],
+    secret: false,
+    targets: [t("website")],
+  },
+  {
+    canonical: "BONDERY_PUBLIC_ANDROID_SHA256_CERT_FINGERPRINTS",
+    deployExample: {
+      commented: true,
+      group: "Better Auth",
+      include: true,
+      value: "",
+    },
+    description:
+      "Comma-separated Android SHA-256 signing-cert fingerprints (colon hex). Used for Digital Asset Links and WebAuthn android:apk-key-hash origins. Optional. Missing values fail closed (404 / no apk origin). Not a secret.",
+    dokploySync: { targets: ["website", "services"] },
+    exampleValue: "",
+    group: "Public URLs",
+    opsExample: {
+      commented: true,
+      group: "Mobile associated domains",
+      include: true,
+      value: "",
+    },
+    requiredIn: [],
+    secret: false,
+    targets: [t("api"), t("website")],
+  },
+  {
+    canonical: "BONDERY_PUBLIC_EXTRA_ALLOWED_ORIGINS",
+    description: "Comma-separated extra CORS origins (e.g. Expo web)",
+    exampleValue: "http://localhost:26634",
+    group: "Public URLs",
+    requiredIn: [],
+    secret: false,
+    targets: [t("api")],
+  },
+  {
+    canonical: "BONDERY_PUBLIC_CSP_REPORT_ENABLED",
+    deployExample: { group: "Public hostnames", include: true, value: "true" },
+    description:
+      "Send CSP violation reports to `${BONDERY_PUBLIC_API_URL}/security/csp-report` (true | false). Default on. A self-host install set `false` to send no reports. The endpoint is derived from the API URL, so it cannot disagree with the API it posts to.",
+    exampleValue: "true",
+    group: "Public URLs",
+    requiredIn: [],
+    secret: false,
+    syncable: true,
+    targets: [t("webapp"), t("website")],
+  },
+  {
+    canonical: "BONDERY_PUBLIC_CSP_TRUSTED_TYPES",
+    description:
+      "REMOVED. Trusted Types is always report-only and needs no registered policy. This variable has no effect and is kept only so an existing deployment value does not fail the env check.",
+    exampleValue: "",
+    group: "Feature flags",
+    requiredIn: [],
+    secret: false,
+    targets: [t("webapp"), t("website")],
+  },
+
+  // --- Database ---
+  {
+    canonical: "DATABASE_URL",
+    description: "Postgres connection string (Prisma + API)",
+    exampleValue: buildLocalPostgresDatabaseUrl(EXAMPLE_POSTGRES_PASSWORD),
+    group: "Database",
+    omitFromRootExample: true,
+    requiredIn: ["development", "production"],
+    secret: true,
+    targets: [
+      {
+        deriveFrom: "BONDERY_PRIVATE_POSTGRES_PASSWORD",
+        id: "api",
+        transform: "local-postgres-database-url",
+      },
+      {
+        deriveFrom: "BONDERY_PRIVATE_POSTGRES_PASSWORD",
+        id: "db",
+        transform: "local-postgres-database-url",
+      },
+    ],
+  },
+  {
+    canonical: "DATABASE_SSL_MODE",
+    deployExample: { include: false },
+    description:
+      "TLS for every Postgres connection: verify-full (default; checks the CA and hostname), verify-ca, require (encrypted, not authenticated), or disable. Compose sets verify-full for the bundled Postgres; set it only for an external database",
+    exampleValue: "verify-full",
+    group: "Database",
+    requiredIn: [],
+    secret: false,
+    targets: [t("api"), t("db")],
+  },
+  {
+    canonical: "DATABASE_SSL_ROOT_CERT_FILE",
+    deployExample: { include: false },
+    description:
+      "Optional. PEM file with the CA certificate(s) to trust for Postgres TLS. Without it (and without DATABASE_SSL_ROOT_CERT) the system CAs apply. Compose sets it for the bundled Postgres. Local dev: created by pnpm run start:postgres; the path is relative to apps/api and packages/db",
+    exampleValue: "../../.temp/postgres-secrets/client/ca.crt",
+    group: "Database",
+    requiredIn: [],
+    secret: false,
+    targets: [t("api"), t("db")],
+  },
+  {
+    canonical: "DATABASE_SSL_ROOT_CERT",
+    deployExample: { include: false },
+    description:
+      "Optional. The same CA certificate inline, for platforms that only take variables (write newlines as \\n). Set this or DATABASE_SSL_ROOT_CERT_FILE, not both",
+    exampleValue: "",
+    group: "Database",
+    requiredIn: [],
+    secret: false,
+    targets: [t("api"), t("db")],
+  },
+  {
+    canonical: "BONDERY_PRIVATE_POSTGRES_PASSWORD",
+    deployExample: {
+      group: "Postgres",
+      include: true,
+      value: "your-super-secret-and-long-postgres-password",
+    },
+    description: "Postgres password for bundled self-hosted database",
+    exampleValue: EXAMPLE_POSTGRES_PASSWORD,
+    group: "Database",
+    requiredIn: ["development", "production"],
+    secret: true,
+    syncable: true,
+    targets: [t("db")],
+  },
+  {
+    canonical: "BONDERY_INFRA_POSTGRES_HOST_PORT",
+    deployExample: {
+      commented: true,
+      group: "Postgres",
+      include: true,
+      value: "5432",
+    },
+    description:
+      "Host loopback port for Compose Postgres (127.0.0.1). Default 5432. A second stack on the same VPS must use another port (beta: 5433). Never bind 0.0.0.0.",
+    exampleValue: "5432",
+    group: "Infra",
+    requiredIn: [],
+    secret: false,
+    targets: [],
+    turboAffectsCache: false,
+  },
+];

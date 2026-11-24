@@ -1,5 +1,3 @@
-export type AnalyticsLoginMethod = "email" | "oauth_github" | "oauth_linkedin" | "passkey";
-
 const MAGIC_LINK_VERIFY_ERROR_CODES = new Set([
   "FAILED_TO_CREATE_SESSION",
   "FAILED_TO_CREATE_USER",
@@ -8,6 +6,8 @@ const MAGIC_LINK_VERIFY_ERROR_CODES = new Set([
   "failed_to_create_session",
   "failed_to_create_user",
 ]);
+
+export type AnalyticsLoginMethod = "email" | "oauth_github" | "oauth_linkedin" | "passkey";
 
 /**
  * Better Auth `lastLoginMethod` stores OAuth callback ids (`github`, `linkedin`),

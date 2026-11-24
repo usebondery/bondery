@@ -1,7 +1,8 @@
 "use client";
 
 import { Button, Center, Group, Loader, Text, UnstyledButton } from "@mantine/core";
-import { useEffect, useRef, useState } from "react";
+import { useMounted } from "@mantine/hooks";
+import { useEffect, useEffectEvent, useRef } from "react";
 import { useCommonTranslations } from "@/lib/i18n/generated/hooks";
 import { resolveLoadMoreBranch } from "./resolveLoadMoreBranch";
 import { useShellScrollViewport } from "./ShellScrollViewportContext";
@@ -36,19 +37,14 @@ export function ShellScrollLoadMore({
   const tA11y = useCommonTranslations("a11y");
   const viewport = useShellScrollViewport();
   const targetRef = useRef<HTMLDivElement>(null);
-  const onLoadMoreRef = useRef(onLoadMore);
-  onLoadMoreRef.current = onLoadMore;
+  const requestLoadMore = useEffectEvent(onLoadMore);
   /**
    * The shell viewport lives in client state, so the server always sees `null`.
    * A streamed boundary can hydrate after that state is set, which would make
    * the client pick a different branch than the server HTML. Gate the fallback
    * on mount so the hydration render matches the server in both cases.
    */
-  const [hasMounted, setHasMounted] = useState(false);
-
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
+  const hasMounted = useMounted();
 
   useEffect(() => {
     const root = viewport;
@@ -63,7 +59,7 @@ export function ShellScrollLoadMore({
         if (
           shouldRequestNextPage(hasMore, isFetchingNextPage, isFetchNextPageError, isIntersecting)
         ) {
-          onLoadMoreRef.current();
+          requestLoadMore();
         }
       },
       { root, rootMargin: ROOT_MARGIN },

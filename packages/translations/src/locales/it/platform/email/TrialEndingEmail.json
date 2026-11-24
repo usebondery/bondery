@@ -1,0 +1,9 @@
+{
+  "body": "Poi l'abbonamento si rinnova automaticamente, a meno che tu non lo annulli.",
+  "cta": "Gestire l'abbonamento",
+  "endDateFallback": "presto",
+  "heading": "La tua prova Premium termina il {{endDate}}",
+  "preview": "L'abbonamento si rinnova se non annulli",
+  "subject": "La tua prova Bondery Premium termina presto",
+  "whyReceiving": "Ricevi questa email perché hai una prova Bondery Premium."
+}

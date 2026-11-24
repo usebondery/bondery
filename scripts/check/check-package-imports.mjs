@@ -8,6 +8,8 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "./check-report.mjs";
 
+const TS_TSX_RE = /\.(ts|tsx)$/;
+
 const check = createCheck("check-package-imports");
 
 const ROOT = join(fileURLToPath(new URL(".", import.meta.url)), "../..");
@@ -49,7 +51,7 @@ function collectViolations(code, filePath) {
   for (const pattern of [EXTENSIONLESS_RELATIVE, EXTENSIONLESS_DYNAMIC]) {
     pattern.lastIndex = 0;
     for (const match of code.matchAll(pattern)) {
-      const specifier = match[1];
+      const [, specifier] = match;
       if (isExtensionlessRelative(specifier)) {
         violations.push({ filePath, specifier });
       }
@@ -68,7 +70,7 @@ async function collectSourceFiles(dir) {
       if (info.isDirectory()) {
         return collectSourceFiles(fullPath);
       }
-      if (/\.(ts|tsx)$/.test(entry)) {
+      if (TS_TSX_RE.test(entry)) {
         if (fullPath.replaceAll("\\", "/").includes("/generated/")) {
           return [];
         }
@@ -86,7 +88,9 @@ async function main() {
     for (const filePath of files) {
       const code = await readFile(filePath, "utf8");
       for (const { filePath: violationPath, specifier } of collectViolations(code, filePath)) {
-        check.add(`${violationPath}: ${specifier}`);
+        check.add(
+          `${violationPath}: relative import "${specifier}" has no file extension. Add the .js extension to the specifier so NodeNext resolves it at runtime.`,
+        );
       }
     }
   }
@@ -96,5 +100,5 @@ async function main() {
 
 main().catch((error) => {
   console.error(error);
-  process.exit(1);
+  process.exitCode = 1;
 });

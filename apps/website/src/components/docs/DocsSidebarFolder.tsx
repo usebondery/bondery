@@ -68,7 +68,7 @@ export function DocsSidebarFolder({
   return (
     <div>
       <div
-        className={classes.folder}
+        className={classes["folder"]}
         {...(current ? { "data-active": "true" } : {})}
         {...(containsActive ? { "data-ancestor": "true" } : {})}
       >
@@ -82,7 +82,7 @@ export function DocsSidebarFolder({
             ref={current ? activeRef : undefined}
           />
         ) : (
-          <span className={classes.rowPlain}>
+          <span className={classes["rowPlain"]}>
             <SidebarRow icon={node.icon} label={node.name} />
           </span>
         )}
@@ -91,12 +91,12 @@ export function DocsSidebarFolder({
             aria-controls={panelId}
             aria-expanded={opened}
             aria-label={opened ? `Collapse ${label}` : `Expand ${label}`}
-            className={classes.toggle}
+            className={classes["toggle"]}
             onClick={() => setOpened((open) => !open)}
             type="button"
           >
             <IconChevronRight
-              className={classes.chevron}
+              className={classes["chevron"]}
               data-expanded={opened ? "true" : undefined}
               size={13}
               stroke={1.8}
@@ -105,7 +105,7 @@ export function DocsSidebarFolder({
         ) : null}
       </div>
       <Collapse expanded={expanded} id={panelId}>
-        <div className={classes.nest}>{children}</div>
+        <div className={classes["nest"]}>{children}</div>
       </Collapse>
     </div>
   );

@@ -17,3 +17,21 @@ pre-commit:
     biome:
       glob: "*"
       run: node scripts/check/run-pre-commit-biome.mjs
+      stage_fixed: true
+    no-workarounds:
+      run: node scripts/check/check-no-workarounds.mjs --staged
+    agent-files:
+      glob:
+        - ".agents/agents/**"
+        - ".agents/skills/**"
+        - ".agents/mcp/**"
+        - ".claude/agents/**"
+        - ".claude/skills/**"
+        - ".cursor/agents/**"
+        - ".mcp.json"
+        - ".cursor/mcp.json"
+      run: node scripts/dev/sync-agent-files.mjs --stage
+commit-msg:
+  commands:
+    no-workarounds:
+      run: node scripts/check/check-no-workarounds.mjs --commit-msg {1}

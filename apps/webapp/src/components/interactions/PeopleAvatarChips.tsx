@@ -2,6 +2,7 @@
 
 import { Avatar, AvatarGroup, Group, Pill, Text } from "@mantine/core";
 import { getAvatarColorFromName } from "@/lib/contacts/avatarColor";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 
 type PersonChip = {
   id: string;
@@ -9,6 +10,10 @@ type PersonChip = {
   lastName?: string | null;
   avatar?: string | null;
 };
+
+function personDisplayName(person: PersonChip): string {
+  return [person.firstName, person.lastName].filter(Boolean).join(" ").trim();
+}
 
 interface PeopleAvatarChipsProps {
   maxDisplay?: number;
@@ -51,14 +56,14 @@ export function PeopleAvatarChips({
             <Group align="center" gap={8} wrap="nowrap">
               <Avatar
                 color={getAvatarColorFromName(person.firstName, person.lastName)}
-                name={`${person.firstName}${person.lastName ? ` ${person.lastName}` : ""}`.trim()}
+                name={personDisplayName(person)}
                 radius="xl"
                 size={22}
-                src={person.avatar || undefined}
+                src={nonEmpty(person.avatar)}
               />
 
               <Text fw={500} size="sm">
-                {`${person.firstName}${person.lastName ? ` ${person.lastName}` : ""}`.trim()}
+                {personDisplayName(person)}
               </Text>
             </Group>
           </Pill>
@@ -90,10 +95,10 @@ export function PeopleAvatarChips({
         <Avatar
           color={getAvatarColorFromName(person.firstName, person.lastName)}
           key={person.id}
-          name={`${person.firstName}${person.lastName ? ` ${person.lastName}` : ""}`.trim()}
+          name={personDisplayName(person)}
           radius="xl"
           size={size}
-          src={person.avatar || undefined}
+          src={nonEmpty(person.avatar)}
         />
       ))}
       {remainingCount > 0 && (

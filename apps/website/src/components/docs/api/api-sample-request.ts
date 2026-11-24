@@ -1,26 +1,29 @@
 import { type JsonSchema, sample } from "@fumadocs/json-schema";
 
+const PRODUCTION_WORD_RE = /production/i;
+const TRAILING_SLASHES_RE = /\/+$/;
+const DEFAULT_PATH_PLACEHOLDER = "550e8400-e29b-41d4-a716-446655440000";
+
 /**
  * Fixed demo identifiers. They match the response fixtures on the same page, so a
  * copied request and the example response describe the same record.
  */
-export const PATH_PLACEHOLDERS: Readonly<Record<string, string>> = {
-  id: "550e8400-e29b-41d4-a716-446655440000",
+const PATH_PLACEHOLDERS = {
+  id: DEFAULT_PATH_PLACEHOLDER,
   relationshipId: "990e8400-e29b-41d4-a716-446655440003",
   sessionId: "aa0e8400-e29b-41d4-a716-446655440004",
   tagId: "880e8400-e29b-41d4-a716-446655440002",
-};
+} as const;
 
 /**
  * Routes that read `request.file()` and document no JSON body. The sample asks for
  * a local image instead of a body, so the copied command works as written.
  */
-export const MULTIPART_SAMPLE_ROUTES: ReadonlySet<string> = new Set([
+const MULTIPART_SAMPLE_ROUTES: ReadonlySet<string> = new Set([
   "POST /contacts/{id}/photo",
   "POST /me/photo",
 ]);
 
-const DEFAULT_PATH_PLACEHOLDER = PATH_PLACEHOLDERS.id;
 const FALLBACK_BASE_URL = "https://api.usebondery.com";
 const BEARER_VALUE = "Bearer YOUR_API_TOKEN";
 const MULTIPART_FIELD = "file";
@@ -29,27 +32,27 @@ const SHORT_QUERY_VALUE = "example";
 /** Python literal indent. Matches the four-space `headers` block below it. */
 const PYTHON_INDENT = "    ";
 
-export interface SampleRequest {
+interface SampleRequest {
   curl: string;
   javascript: string;
   python: string;
 }
 
-export interface SampleRequestParameter {
+interface SampleRequestParameter {
   /** Absent only in a malformed document. Such an item is skipped. */
   name?: string;
   required?: boolean;
   schema?: unknown;
 }
 
-export interface SampleRequestParameterGroup {
+interface SampleRequestParameterGroup {
   in?: string;
-  items: ReadonlyArray<SampleRequestParameter>;
+  items: readonly SampleRequestParameter[];
 }
 
-export interface SampleRequestInput {
+interface SampleRequestInput {
   method: string;
-  parameters: ReadonlyArray<SampleRequestParameterGroup>;
+  parameters: readonly SampleRequestParameterGroup[];
   path: string;
   requestBody?: { content: Record<string, SampleRequestBodyMedia> };
   security: ReadonlyArray<ReadonlyArray<{ key: string }>>;
@@ -57,7 +60,7 @@ export interface SampleRequestInput {
 }
 
 /** The bundled document rewrites a single `example` into `examples.default.value`. */
-export interface SampleRequestBodyMedia {
+interface SampleRequestBodyMedia {
   example?: unknown;
   examples?: Record<string, unknown>;
   schema?: unknown;
@@ -77,7 +80,7 @@ interface RequestHeader {
 }
 
 /** True when the route takes a file field instead of a JSON body. */
-export function isMultipartSample(method: string, path: string): boolean {
+function isMultipartSample(method: string, path: string): boolean {
   return MULTIPART_SAMPLE_ROUTES.has(`${method.trim().toUpperCase()} ${path.trim()}`);
 }
 
@@ -88,7 +91,7 @@ export function isMultipartSample(method: string, path: string): boolean {
  * `Authorization`, and they resolve the URL from `servers[0]`, which is the local
  * development host. This builder reads the operation and always targets production.
  */
-export function buildSampleRequest(input: SampleRequestInput): SampleRequest | null {
+function buildSampleRequest(input: SampleRequestInput): SampleRequest | null {
   const method = input.method.trim().toUpperCase();
   const path = input.path.trim();
 
@@ -140,17 +143,22 @@ function buildUrl(input: SampleRequestInput, path: string): string {
 function resolveBaseUrl(servers: SampleRequestInput["servers"]): string {
   const list = servers ?? [];
   const production = list.find(
-    (server) => server.description !== undefined && /production/i.test(server.description),
+    (server) => server.description !== undefined && PRODUCTION_WORD_RE.test(server.description),
   );
-  const chosen = production ?? list[list.length - 1];
+  const chosen = production ?? list.at(-1);
   const url = chosen?.url?.trim();
 
-  return url === undefined || url.length === 0 ? FALLBACK_BASE_URL : url.replace(/\/+$/, "");
+  return url === undefined || url.length === 0
+    ? FALLBACK_BASE_URL
+    : url.replace(TRAILING_SLASHES_RE, "");
 }
 
 function fillPath(path: string): string {
   return path.replace(/\{([^{}]+)\}/g, (_match: string, name: string) => {
-    return PATH_PLACEHOLDERS[name] ?? DEFAULT_PATH_PLACEHOLDER;
+    if (name in PATH_PLACEHOLDERS) {
+      return PATH_PLACEHOLDERS[name as keyof typeof PATH_PLACEHOLDERS];
+    }
+    return DEFAULT_PATH_PLACEHOLDER;
   });
 }
 
@@ -158,11 +166,11 @@ function fillPath(path: string): string {
  * Query defaults come from the schema. A required parameter without a default gets
  * a small placeholder value, so the sample stays short but still runs.
  */
-function queryValue(schema: unknown, required: boolean): string | undefined {
+function queryValue(schema: unknown, required: boolean) {
   const record = asRecord(schema);
 
   if (!record) {
-    return undefined;
+    return;
   }
 
   if (record.default !== undefined) {
@@ -170,7 +178,7 @@ function queryValue(schema: unknown, required: boolean): string | undefined {
   }
 
   if (!required) {
-    return undefined;
+    return;
   }
 
   if (Array.isArray(record.enum) && record.enum.length > 0) {
@@ -341,8 +349,8 @@ function jsonBodyLines(body: unknown): string[] {
 }
 
 function formatJson(value: unknown): string {
-  const json = JSON.stringify(value, null, 2);
-  return json === undefined ? String(value) : json;
+  // JSON.stringify returns undefined for undefined, functions and symbols, which its typing omits.
+  return (JSON.stringify(value, null, 2) as string | undefined) ?? String(value);
 }
 
 /**
@@ -375,7 +383,8 @@ function formatPython(value: unknown): string {
       return "[]";
     }
     const items = value.map((item) => indentLines(formatPython(item), PYTHON_INDENT));
-    return `[\n${items.map((item) => `${PYTHON_INDENT}${item},`).join("\n")}\n]`;
+    const body = items.map((item) => `${PYTHON_INDENT}${item},`).join("\n");
+    return `[\n${body}\n]`;
   }
 
   if (typeof value === "object") {
@@ -384,7 +393,8 @@ function formatPython(value: unknown): string {
       return "{}";
     }
     const lines = entries.map(([key, item]) => {
-      return `${PYTHON_INDENT}${JSON.stringify(key)}: ${indentLines(formatPython(item), PYTHON_INDENT)},`;
+      const literal = indentLines(formatPython(item), PYTHON_INDENT);
+      return `${PYTHON_INDENT}${JSON.stringify(key)}: ${literal},`;
     });
     return `{\n${lines.join("\n")}\n}`;
   }
@@ -420,10 +430,27 @@ function scalarValue(value: unknown): string {
   return "";
 }
 
-function asRecord(value: unknown): Record<string, unknown> | null {
+type JsonSchemaSampleFields = {
+  default?: unknown;
+  enum?: unknown;
+  format?: unknown;
+  type?: unknown;
+  value?: unknown;
+};
+
+function asRecord(value: unknown): JsonSchemaSampleFields | null {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     return null;
   }
 
-  return value as Record<string, unknown>;
+  return value as JsonSchemaSampleFields;
 }
+
+export type {
+  SampleRequest,
+  SampleRequestBodyMedia,
+  SampleRequestInput,
+  SampleRequestParameter,
+  SampleRequestParameterGroup,
+};
+export { buildSampleRequest, isMultipartSample, MULTIPART_SAMPLE_ROUTES, PATH_PLACEHOLDERS };

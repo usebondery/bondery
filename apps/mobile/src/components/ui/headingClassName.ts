@@ -1,4 +1,4 @@
-export type HeadingOrder = 1 | 2 | 3 | 4 | 5 | 6;
+type HeadingOrder = 1 | 2 | 3 | 4 | 5 | 6;
 
 const HEADING_CLASS_NAME: Record<HeadingOrder, string> = {
   1: "text-[28px] font-bold",
@@ -10,6 +10,9 @@ const HEADING_CLASS_NAME: Record<HeadingOrder, string> = {
 };
 
 /** Uniwind type classes for `Heading` order. Size and weight only. Color is `c="default"`. */
-export function headingClassName(order: HeadingOrder): string {
+function headingClassName(order: HeadingOrder): string {
   return HEADING_CLASS_NAME[order];
 }
+
+export type { HeadingOrder };
+export { headingClassName };

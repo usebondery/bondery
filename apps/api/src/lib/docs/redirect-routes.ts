@@ -1,8 +1,10 @@
 import { API_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers";
 import type { AppFastifyInstance } from "../platform/fastify-types.js";
 
+const TRAILING_SLASHES_PATTERN = /\/+$/;
+
 function docsApiReferenceUrl(websiteOrigin: string): string {
-  return `${websiteOrigin.replace(/\/+$/, "")}${WEBSITE_ROUTES.DOCS_API_REFERENCE}`;
+  return `${websiteOrigin.replace(TRAILING_SLASHES_PATTERN, "")}${WEBSITE_ROUTES.DOCS_API_REFERENCE}`;
 }
 
 /** Convenience pointers to the website OpenAPI reference. Not part of the REST API. */

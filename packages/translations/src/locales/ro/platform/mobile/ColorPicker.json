@@ -1,0 +1,11 @@
+{
+  "ColorCopiedMessage": "Codul culorii a fost copiat în clipboard",
+  "CopyAccessibilityLabel": "Copiază codul culorii",
+  "CopyFailedMessage": "Nu s-a putut copia codul culorii. Încearcă din nou.",
+  "CustomColorLabel": "Culoare personalizată",
+  "HexPlaceholder": "#RRGGBB",
+  "InvalidHex": "Introdu o culoare hex validă (ex. #AE3EC9)",
+  "SheetTitle": "Culoare",
+  "SwatchesLabel": "Culori rapide",
+  "TriggerAccessibilityHint": "Deschide selectorul de culoare"
+}

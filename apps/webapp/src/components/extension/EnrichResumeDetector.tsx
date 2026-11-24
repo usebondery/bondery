@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { useEffect } from "react";
 import { clientApiJsonOrNull } from "@/lib/api/client";
@@ -24,21 +25,23 @@ export function EnrichResumeDetector() {
       return;
     }
 
-    void (async () => {
-      try {
-        const data = await clientApiJsonOrNull<{
-          pending: number;
-          completed: number;
-          failed: number;
-        }>(`${API_ROUTES.CONTACTS}/enrich-queue/status`);
+    detachPromise(
+      (async () => {
+        try {
+          const data = await clientApiJsonOrNull<{
+            pending: number;
+            completed: number;
+            failed: number;
+          }>(`${API_ROUTES.CONTACTS}/enrich-queue/status`);
 
-        if (data && data.pending > 0) {
-          setPendingQueueStatus(data);
+          if (data && data.pending > 0) {
+            setPendingQueueStatus(data);
+          }
+        } catch {
+          // Network error — silently ignore, not critical.
         }
-      } catch {
-        // Network error — silently ignore, not critical.
-      }
-    })();
+      })(),
+    );
   }, []);
 
   return null;

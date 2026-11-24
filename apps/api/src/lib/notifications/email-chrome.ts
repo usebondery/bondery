@@ -3,20 +3,22 @@ import { WEBAPP_ROUTES } from "@bondery/helpers";
 import type { SupportedLocale } from "@bondery/schemas/locale/supported-locale";
 import { loadEmailNamespace, readCopyString } from "./email-i18n.js";
 
+const TRAILING_SLASHES_PATTERN = /\/+$/;
+
 const PRODUCTION_WEBAPP = "https://app.usebondery.com";
 const PRODUCTION_WEBSITE = "https://usebondery.com";
 
 function stripTrailingSlash(value: string): string {
-  return value.replace(/\/+$/, "");
+  return value.replace(TRAILING_SLASHES_PATTERN, "");
 }
 
 export function resolveAppOrigin(): string {
-  const fromEnv = process.env.BONDERY_PUBLIC_WEBAPP_URL?.trim();
+  const fromEnv = process.env["BONDERY_PUBLIC_WEBAPP_URL"]?.trim();
   return stripTrailingSlash(fromEnv || PRODUCTION_WEBAPP);
 }
 
 export function resolveWebsiteOrigin(): string {
-  const fromEnv = process.env.BONDERY_PUBLIC_WEBSITE_URL?.trim();
+  const fromEnv = process.env["BONDERY_PUBLIC_WEBSITE_URL"]?.trim();
   return stripTrailingSlash(fromEnv || PRODUCTION_WEBSITE);
 }
 

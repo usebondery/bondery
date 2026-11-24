@@ -1,6 +1,7 @@
 import { importResultResponseSchema } from "@bondery/schemas";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { applyBonderyImport } from "../../../domains/me/import.js";
+import { UPLOAD_LIMITS } from "../../../lib/platform/config.js";
 import { domainContextFromRequest } from "../../../lib/platform/domain-context.js";
 import { badRequest } from "../../../lib/platform/errors/http-errors.js";
 import type { AppRoutePlugin } from "../../../lib/platform/fastify-types.js";
@@ -29,7 +30,9 @@ export const meImportRoutes: AppRoutePlugin = async (fastify) => {
       const ctx = domainContextFromRequest(request);
       let zipBuffer: Buffer | null = null;
 
-      for await (const part of request.parts()) {
+      for await (const part of request.parts({
+        limits: { fileSize: UPLOAD_LIMITS.bonderyExport },
+      })) {
         if (part.type !== "file") {
           continue;
         }

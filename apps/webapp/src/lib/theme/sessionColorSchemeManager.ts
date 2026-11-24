@@ -6,10 +6,18 @@ import type { MantineColorSchemeManager } from "@mantine/core";
  */
 export function sessionColorSchemeManager(): MantineColorSchemeManager {
   return {
-    clear: () => {},
+    clear: () => {
+      // no-op: account theme is stored on UserSession, not in this manager
+    },
     get: (defaultValue) => defaultValue,
-    set: () => {},
-    subscribe: () => {},
-    unsubscribe: () => {},
+    set: () => {
+      // no-op: Mantine is render-only; theme writes go through UserSession
+    },
+    subscribe: () => {
+      // no-op: session theme changes arrive through React props, not this manager
+    },
+    unsubscribe: () => {
+      // no-op: this manager never registers a listener
+    },
   };
 }

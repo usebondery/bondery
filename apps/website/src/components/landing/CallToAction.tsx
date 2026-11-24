@@ -1,4 +1,7 @@
 import { ButtonLink } from "@bondery/mantine-next";
+import landing from "@bondery/translations/locales/en/platform/website/WebsiteLanding.json" with {
+  type: "json",
+};
 import { Card, Container, Stack, Title } from "@mantine/core";
 import { IconArrowUpRight } from "@tabler/icons-react";
 import { hrefWebappLogin } from "@/lib/navigation/href/webapp";
@@ -16,30 +19,25 @@ export function CallToAction() {
     >
       <Card
         bg="var(--mantine-primary-color-filled)"
-        className="flex justify-center items-center max-w-6xl "
+        display="flex"
+        maw="72rem"
         mih={400}
-        mx={"auto"}
+        mx="auto"
         p="xl"
+        style={{ alignItems: "center", justifyContent: "center" }}
       >
-        <Stack
-          align="center"
-          className="gap-y-12! max-w-4/5"
-          flex={1}
-          h="100%"
-          justify="center"
-          p="xl"
-        >
-          <Title c={"white"} className="text-3xl! inline" fw={"bold"} order={2} ta="center">
-            Ready to organize your network?{" "}
+        <Stack align="center" flex={1} gap="3rem" h="100%" justify="center" maw="80%" p="xl">
+          <Title c="white" display="inline" fw="bold" fz="1.875rem" order={2} ta="center">
+            {landing.Cta.Title}
           </Title>
           <ButtonLink
             href={hrefWebappLogin()}
-            radius={"xl"}
+            radius="xl"
             rightSection={<IconArrowUpRight />}
             size="lg"
             variant="white"
           >
-            Start building your network
+            {landing.Cta.Button}
           </ButtonLink>
         </Stack>
       </Card>

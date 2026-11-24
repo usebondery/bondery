@@ -45,7 +45,9 @@ RUN node -e "import('@bondery/db').then(() => console.log('@bondery/db resolvabl
   && sh -c 'cd node_modules/@bondery/db && node -e "import { createRequire } from '\''node:module'\''; import { execFileSync } from '\''node:child_process'\''; const entry=createRequire(import.meta.url).resolve('\''prisma/build/index.js'\''); execFileSync(process.execPath, [entry, '\''version'\''], {stdio:'\''inherit'\''}); console.log('\''prisma runnable from @bondery/db'\'')"' \
   && sh -c 'cd node_modules/@bondery/db && DATABASE_URL=postgresql://postgres:password@127.0.0.1:54322/bondery node -e "import { createRequire } from '\''node:module'\''; import { execFileSync } from '\''node:child_process'\''; const entry=createRequire(import.meta.url).resolve('\''prisma/build/index.js'\''); execFileSync(process.execPath, [entry, '\''validate'\''], {stdio:'\''inherit'\''}); console.log('\''prisma validate from @bondery/db cwd'\'')"' \
   && node --check dist/cli/release-migrate.js \
-  && node --check dist/cli/ensure-storage-buckets.js
+  && node --check dist/cli/ensure-storage-buckets.js \
+  && node --check dist/cli/ensure-redis-secrets.js \
+  && node --check dist/cli/ensure-stack-secrets.js
 
 FROM node:26-slim AS runner
 WORKDIR /app
@@ -69,8 +71,12 @@ COPY --from=builder --chown=nodejs:nodejs /deploy/api/package.json ./apps/api/pa
 USER nodejs
 EXPOSE 26631
 
+# The API serves HTTPS only (docs/adr/0031-internal-api-tls.mdx), so the healthcheck speaks TLS
+# and verifies the certificate against the API CA. Compose sets both paths; a standalone run must
+# mount the `client` volume (the CA certificate) and set these variables. A missing CA fails the
+# healthcheck loudly instead of probing plaintext or skipping verification.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-  CMD node -e "fetch('http://127.0.0.1:26631/health/live').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+  CMD node -e "const fs=require('node:fs');const ca=process.env.BONDERY_INFRA_INTERNAL_API_CA_FILE||'/bondery-api/client/ca.crt';if(!process.env.BONDERY_PRIVATE_API_TLS_CERT_FILE){console.error('BONDERY_PRIVATE_API_TLS_CERT_FILE and BONDERY_PRIVATE_API_TLS_KEY_FILE are required');process.exit(1)}if(!fs.existsSync(ca)){console.error('no API CA at '+ca+'; mount the api-tls-client volume or set BONDERY_INFRA_INTERNAL_API_CA_FILE');process.exit(1)}require('node:https').get({ca:fs.readFileSync(ca),host:'127.0.0.1',path:'/health/live',port:Number(process.env.API_PORT||26631)},(r)=>{r.resume();process.exit(r.statusCode===200?0:1)}).on('error',()=>process.exit(1))"
 
 # Required env is validated at process start (assertRequiredEnvAtStartup in index.ts)
 # before Fastify listens — fails with named missing vars (same list as scripts/check-env.ts).

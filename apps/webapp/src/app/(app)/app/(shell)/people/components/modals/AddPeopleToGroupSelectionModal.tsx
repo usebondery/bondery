@@ -1,6 +1,7 @@
 "use client";
 
 import { getUserFacingError } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
@@ -47,9 +48,8 @@ import {
 import { openAddGroupModal } from "../../../groups/components/AddGroupModal";
 import { GROUP_CARD_MAX_WIDTH_BY_VARIANT, GroupCard } from "../../../groups/components/GroupCard";
 
-export interface GroupMembershipUpdate {
-  groups: GroupWithCount[];
-  selectedGroupIds: string[];
+function ignoreGroupCardAction() {
+  // no-op: selection uses the wrapper button, not GroupCard actions
 }
 
 function toContactSelectable(contact: Contact): ContactSelectable {
@@ -77,18 +77,6 @@ interface AddPeopleToGroupSelectionFormProps extends AddPeopleToGroupSelectionMo
 function EditGroupsModalTitle() {
   const t = useAddPeopleToGroupSelectionModalTranslations();
   return <ModalTitle icon={<IconUsersGroup size={24} />} text={t("Title")} />;
-}
-
-export function openAddPeopleToGroupSelectionModal(props: AddPeopleToGroupSelectionModalProps) {
-  const modalId = createModalId("edit-groups");
-
-  modals.open({
-    children: <AddPeopleToGroupSelectionForm {...props} modalId={modalId} />,
-    modalId,
-    size: "xl",
-    title: <EditGroupsModalTitle />,
-    trapFocus: true,
-  });
 }
 
 function AddPeopleToGroupSelectionForm({
@@ -148,23 +136,22 @@ function AddPeopleToGroupSelectionForm({
     }
   }, [isGroupsError, isContactsError, membershipQueries, t, tCommon]);
 
-  useEffect(() => {
-    if (hasInitialized) {
-      return;
-    }
-
-    if (isLoadingGroups || isLoadingContacts || isLoadingMemberships || !groupsData) {
-      return;
-    }
-
+  // Seed the local selection once, when every query has loaded. Doing it while rendering
+  // shows the loaded state in the same pass instead of one render later.
+  if (
+    !hasInitialized &&
+    !isLoadingGroups &&
+    !isLoadingContacts &&
+    !isLoadingMemberships &&
+    groupsData
+  ) {
     const memberships = membershipQueries.map(
       (query) => new Set((query.data || []).map((group) => group.id)),
     );
 
     const intersection = memberships.reduce<Set<string>>(
-      (sharedGroupIds, membershipSet) => {
-        return new Set(Array.from(sharedGroupIds).filter((groupId) => membershipSet.has(groupId)));
-      },
+      (sharedGroupIds, membershipSet) =>
+        new Set(Array.from(sharedGroupIds).filter((groupId) => membershipSet.has(groupId))),
       memberships[0] ? new Set(memberships[0]) : new Set(),
     );
 
@@ -172,14 +159,7 @@ function AddPeopleToGroupSelectionForm({
     setInitialSelectedGroupIds(intersection);
     setSelectedGroupIds(new Set(intersection));
     setHasInitialized(true);
-  }, [
-    groupsData,
-    hasInitialized,
-    isLoadingContacts,
-    isLoadingGroups,
-    isLoadingMemberships,
-    membershipQueries,
-  ]);
+  }
 
   const filteredGroups = (() => {
     const trimmedSearch = search.trim().toLowerCase();
@@ -309,7 +289,7 @@ function AddPeopleToGroupSelectionForm({
           cancelLabel={t("Cancel")}
           mt={0}
           onAction={() => {
-            void handleSubmit();
+            detachPromise(handleSubmit());
           }}
           onCancel={closeModal}
         />
@@ -443,11 +423,11 @@ function AddPeopleToGroupSelectionForm({
                                 : undefined
                         }
                         interactive={false}
-                        onAddPeople={() => {}}
-                        onClick={() => {}}
-                        onDelete={() => {}}
-                        onDuplicate={() => {}}
-                        onEdit={() => {}}
+                        onAddPeople={ignoreGroupCardAction}
+                        onClick={ignoreGroupCardAction}
+                        onDelete={ignoreGroupCardAction}
+                        onDuplicate={ignoreGroupCardAction}
+                        onEdit={ignoreGroupCardAction}
                         selected={isCurrentlySelected}
                         showMenu={false}
                         variant={modalGroupCardVariant}
@@ -462,4 +442,21 @@ function AddPeopleToGroupSelectionForm({
       </Stack>
     </ModalScrollLayout>
   );
+}
+
+export function openAddPeopleToGroupSelectionModal(props: AddPeopleToGroupSelectionModalProps) {
+  const modalId = createModalId("edit-groups");
+
+  modals.open({
+    children: <AddPeopleToGroupSelectionForm {...props} modalId={modalId} />,
+    modalId,
+    size: "xl",
+    title: <EditGroupsModalTitle />,
+    trapFocus: true,
+  });
+}
+
+export interface GroupMembershipUpdate {
+  groups: GroupWithCount[];
+  selectedGroupIds: string[];
 }

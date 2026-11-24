@@ -48,7 +48,7 @@ export function enqueuePendingMutation(mutation: SyncMutation): void {
     mutation.id,
     mutation.clientSequence,
     mutation.type,
-    "entityId" in mutation ? (mutation.entityId ?? null) : null,
+    "entityId" in mutation ? mutation.entityId : null,
     normalizeSyncDatetime(mutation.baseUpdatedAt) ?? null,
     JSON.stringify(mutation.payload ?? {}),
     new Date().toISOString(),
@@ -73,29 +73,20 @@ export function listPendingMutations(limit = 50): SyncMutation[] {
     limit,
   );
 
-  return rows.map((row) => {
+  const mutations: SyncMutation[] = [];
+  for (const row of rows) {
     const payload = JSON.parse(row.payload_json) as Record<string, unknown>;
     const baseUpdatedAt = normalizeSyncDatetime(row.base_updated_at);
-    const base = {
+    mutations.push({
       clientSequence: row.client_sequence,
       id: row.id,
-      ...(baseUpdatedAt ? { baseUpdatedAt } : {}),
       payload,
-    };
-
-    if (row.entity_id) {
-      return {
-        ...base,
-        entityId: row.entity_id,
-        type: row.mutation_type,
-      } as SyncMutation;
-    }
-
-    return {
-      ...base,
       type: row.mutation_type,
-    } as SyncMutation;
-  });
+      ...(baseUpdatedAt ? { baseUpdatedAt } : {}),
+      ...(row.entity_id ? { entityId: row.entity_id } : {}),
+    } as SyncMutation);
+  }
+  return mutations;
 }
 
 export function markMutationApplied(mutationId: string): void {

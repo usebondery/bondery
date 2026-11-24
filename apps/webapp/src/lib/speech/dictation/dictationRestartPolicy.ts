@@ -73,10 +73,10 @@ export const DICTATION_CONTINUATION_DELAY_MS = 200;
  * A quiet recognizer that lives at least this long is a pause, not a failure.
  * Chrome reports `no-speech` after several seconds of quiet.
  */
-export const DICTATION_EMPTY_END_MS = 1_500;
+export const DICTATION_EMPTY_END_MS = 1500;
 
 /** Upper bound for the fault backoff. */
-export const DICTATION_FAULT_DELAY_MAX_MS = 1_600;
+export const DICTATION_FAULT_DELAY_MAX_MS = 1600;
 
 export type DictationRestartKind = "continue" | "fault" | "stop";
 

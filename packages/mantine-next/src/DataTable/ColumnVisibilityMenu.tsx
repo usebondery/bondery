@@ -17,7 +17,7 @@ import {
 } from "@dnd-kit/sortable";
 import { Box, Divider, Menu, MenuDropdown, MenuTarget, Text } from "@mantine/core";
 import { IconEye } from "@tabler/icons-react";
-import { useState } from "react";
+import { type ReactElement, useState } from "react";
 import {
   SortableColumnItem,
   type SortableColumnItemColumn,
@@ -45,7 +45,7 @@ export function ColumnVisibilityMenu<TColumn extends SortableColumnItemColumn>({
   onColumnsChange,
   labels,
   width = 250,
-}: ColumnVisibilityMenuProps<TColumn>) {
+}: ColumnVisibilityMenuProps<TColumn>): ReactElement {
   const [opened, setOpened] = useState(false);
 
   const sensors = useSensors(
@@ -55,7 +55,6 @@ export function ColumnVisibilityMenu<TColumn extends SortableColumnItemColumn>({
     }),
   );
 
-  const _fixedColumns = columns.filter((col) => col.fixed);
   const visibleColumns = columns.filter((col) => col.visible && !col.fixed);
   const hiddenColumns = columns.filter((col) => !col.visible && !col.fixed);
 

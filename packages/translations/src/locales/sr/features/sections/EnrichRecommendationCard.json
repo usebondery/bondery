@@ -1,0 +1,22 @@
+{
+  "AllEnrichedDescription": "Svi kontakti sa LinkedIn profilom su već obogaćeni.",
+  "AllEnrichedTitle": "Svi kontakti su obogaćeni",
+  "Badge": "LinkedIn",
+  "CurrentlyEnriching": "Trenutno se obogaćuje:",
+  "EligibleLabel_few": "{count}Osobe bi mogle biti obogaćene",
+  "EligibleLabel_one": "{count}Osoba bi mogla biti obogaćena",
+  "EligibleLabel_other": "{count}Osobe bi mogle biti obogaćene",
+  "Enrich": "Obogaćivanje",
+  "EnrichAll": "Obogati sve",
+  "HelpTooltip": "Preuzmi najnovije podatke sa LinkedIn profila u ovaj kontakt. Klikni da saznaš kako funkcioniše obogaćivanje.",
+  "Pause": "Pausieren",
+  "PausingTooltip": "Trenutni kontakt se završava, a zatim pauzira...",
+  "PersonEligibleLabel": "Ovaj kontakt bi mogao biti obogaćen podacima sa LinkedIn-a",
+  "ProcessingPerson": "{name}obogaćava se...",
+  "ProgressLabel": "Obogaćivanje:{completed}Od{totalEligible}Gotovo",
+  "ProgressLabelWithFailed": "Obogaćivanje:{completed}Od{totalEligible}Gotovo{failed}Неуспех",
+  "Resume": "Fortsetzen",
+  "ResumeLabel": "Obogaćivanje prekinuto:{completed}□ urađeno{pending}Необрађени",
+  "SkipRemaining": "Preskoči preostale",
+  "Tooltip": "Ovi kontakti imaju LinkedIn profil, ali još uvek nisu obogaćeni. Obogatite ih da biste preuzeli najnoviju radnu biografiju, obrazovanje i biografiju."
+}

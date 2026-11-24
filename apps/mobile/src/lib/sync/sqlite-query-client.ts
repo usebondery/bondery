@@ -1,7 +1,9 @@
 import { QueryClient } from "@tanstack/react-query";
 import { sqliteQueryKeys } from "./sqlite-query-keys";
 
-const SQLITE_QUERY_GC_TIME_MS = 5 * 60 * 1000;
+const MS_PER_MINUTE = 60_000;
+const SQLITE_QUERY_GC_TIME_MINUTES = 5;
+const SQLITE_QUERY_GC_TIME_MS = SQLITE_QUERY_GC_TIME_MINUTES * MS_PER_MINUTE;
 
 type QueryClientListener = (client: QueryClient) => void;
 

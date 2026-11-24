@@ -5,8 +5,14 @@ import type { SQLiteDatabase } from "expo-sqlite";
 import { SYNC_META_KEYS } from "../constants.ts";
 import { runSyncMigrations, wipeSyncDatabase } from "./migrations.ts";
 
+const PRAGMA_WAL_RE = /PRAGMA\s+journal_mode\s*=\s*WAL/i;
+const WHITESPACE_RE = /\s+/;
+const CREATE_TABLE_RE = /CREATE TABLE IF NOT EXISTS (\w+)/i;
+const DROP_TABLE_RE = /DROP TABLE IF EXISTS (\w+)/i;
+const ALTER_ADD_COLUMN_RE = /ALTER TABLE (\w+) ADD COLUMN (\w+)/i;
+const PRAGMA_TABLE_INFO_RE = /PRAGMA table_info\((\w+)\)/i;
 function isWalPragma(sql: string): boolean {
-  return /PRAGMA\s+journal_mode\s*=\s*WAL/i.test(sql);
+  return PRAGMA_WAL_RE.test(sql);
 }
 
 function parseCreateTableColumns(sql: string): string[] {
@@ -18,7 +24,7 @@ function parseCreateTableColumns(sql: string): string[] {
   return sql
     .slice(open + 1, close)
     .split(",")
-    .map((part) => part.trim().split(/\s+/)[0])
+    .map((part) => part.trim().split(WHITESPACE_RE)[0])
     .filter((name) => name.length > 0);
 }
 
@@ -44,22 +50,22 @@ function createMemoryDb(
           throw new Error("cannot change into wal mode from within a transaction");
         }
       }
-      const create = /CREATE TABLE IF NOT EXISTS (\w+)/i.exec(sql);
+      const create = CREATE_TABLE_RE.exec(sql);
       if (create) {
-        const table = create[1];
+        const [, table] = create;
         const existed = tables.has(table);
         tables.add(table);
         if (!existed) {
           columns.set(table, new Set(parseCreateTableColumns(sql)));
         }
       }
-      const drop = /DROP TABLE IF EXISTS (\w+)/i.exec(sql);
+      const drop = DROP_TABLE_RE.exec(sql);
       if (drop) {
         droppedTables.push(drop[1]);
         tables.delete(drop[1]);
         columns.delete(drop[1]);
       }
-      const alter = /ALTER TABLE (\w+) ADD COLUMN (\w+)/i.exec(sql);
+      const alter = ALTER_ADD_COLUMN_RE.exec(sql);
       if (alter) {
         const tableColumns = columns.get(alter[1]) ?? new Set<string>();
         tableColumns.add(alter[2]);
@@ -67,7 +73,7 @@ function createMemoryDb(
       }
     },
     getAllSync(sql: string) {
-      const pragma = /PRAGMA table_info\((\w+)\)/i.exec(sql);
+      const pragma = PRAGMA_TABLE_INFO_RE.exec(sql);
       if (pragma) {
         return [...(columns.get(pragma[1]) ?? [])].map((name) => ({ name }));
       }
@@ -167,6 +173,6 @@ describe("wipeSyncDatabase", () => {
       leftover: "1",
     });
 
-    wipeSyncDatabase(db);
+    assert.doesNotThrow(() => wipeSyncDatabase(db));
   });
 });

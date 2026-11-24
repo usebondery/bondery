@@ -2,32 +2,14 @@ import type {
   VCardAddress,
   VCardDateValue,
   VCardMedia,
+  VCardParameter,
   VCardPhone,
   VCardProperty,
   VCardRelated,
   VCardTextValue,
   VCardTimezone,
 } from "#model.js";
-
-export function getParameter(property: VCardProperty, name: string) {
-  return property.parameters.find((parameter) => parameter.name === name);
-}
-
-export function getParameterValues(property: VCardProperty, name: string): string[] {
-  return property.parameters
-    .filter((parameter) => parameter.name === name)
-    .flatMap((parameter) => parameter.values)
-    .map((value) => value.trim())
-    .filter(Boolean);
-}
-
-export function decodeTextValue(value: string): string {
-  return value
-    .replace(/\\n/gi, "\n")
-    .replace(/\\,/g, ",")
-    .replace(/\\;/g, ";")
-    .replace(/\\\\/g, "\\");
-}
+import { TEL_URI_PREFIX } from "#uri-schemes.js";
 
 function splitEscaped(value: string, separator: string): string[] {
   const parts: string[] = [];
@@ -97,8 +79,11 @@ export function parseCommonText(property: VCardProperty): VCardTextValue {
 export function parseTel(property: VCardProperty): VCardPhone {
   const valueType = getParameter(property, "VALUE")?.values[0]?.toLowerCase();
   const rawValue = decodeTextValue(property.value);
-  const uri = valueType === "uri" || rawValue.startsWith("tel:") ? rawValue : `tel:${rawValue}`;
-  const value = uri.startsWith("tel:") ? uri.slice(4) : rawValue;
+  const uri =
+    valueType === "uri" || rawValue.startsWith(TEL_URI_PREFIX)
+      ? rawValue
+      : `${TEL_URI_PREFIX}${rawValue}`;
+  const value = uri.startsWith(TEL_URI_PREFIX) ? uri.slice(TEL_URI_PREFIX.length) : rawValue;
 
   return {
     altId: getParameter(property, "ALTID")?.values[0],
@@ -210,4 +195,24 @@ export function parseRelated(property: VCardProperty): VCardRelated {
     value: decodeTextValue(property.value),
     valueType,
   };
+}
+
+export function getParameter(property: VCardProperty, name: string): VCardParameter | undefined {
+  return property.parameters.find((parameter) => parameter.name === name);
+}
+
+export function getParameterValues(property: VCardProperty, name: string): string[] {
+  return property.parameters
+    .filter((parameter) => parameter.name === name)
+    .flatMap((parameter) => parameter.values)
+    .map((value) => value.trim())
+    .filter(Boolean);
+}
+
+export function decodeTextValue(value: string): string {
+  return value
+    .replace(/\\n/gi, "\n")
+    .replace(/\\,/g, ",")
+    .replace(/\\;/g, ";")
+    .replace(/\\\\/g, "\\");
 }

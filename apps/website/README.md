@@ -6,11 +6,11 @@ The public marketing website for [bondery.app](https://bondery.app), built with 
 
 Default local URLs use [Portless](https://github.com/vercel-labs/portless) HTTPS:
 
-| App | URL |
-|---|---|
-| website | `https://usebondery.test` |
-| webapp | `https://app.usebondery.test` |
-| api | `https://api.usebondery.test` |
+| App     | URL                           |
+| ------- | ----------------------------- |
+| website | `https://usebondery.test`     |
+| webapp  | `https://app.usebondery.test` |
+| api     | `https://api.usebondery.test` |
 
 ```bash
 # From repo root (preferred)
@@ -28,9 +28,9 @@ Do not run `pnpm run dev -w website`. pnpm forwards `-w website` into the script
 2. **Trust the local CA (first run)** — from the repo root, run `pnpm exec portless trust`.
 3. **Windows hosts (required once)** — Windows does not auto-resolve `*.usebondery.test`. Open an **elevated** PowerShell, then from the repo root run:
    - `pnpm exec portless hosts sync` to write the hosts file.
-   Without Admin, Portless logs `Failed to update hosts file` and the names will not resolve in the browser.
+     Without Admin, Portless logs `Failed to update hosts file` and the names will not resolve in the browser.
 4. **Env** — local examples use Portless URLs. Sync with `pnpm run env:development` after updating root `.env.local`, or copy from `.env.development.local.example`.
-5. **OAuth consoles** — register Portless callbacks on the API host, e.g. `https://api.usebondery.test/auth/callback/github` (and `/linkedin`). Keep classic `http://localhost:26631/auth/callback/...` as an escape hatch if you use `dev:classic`.
+5. **OAuth consoles** — register Portless callbacks on the API host, e.g. `https://api.usebondery.test/auth/callback/github` (and `/linkedin`).
 6. **If the proxy timed out** — `pnpm exec portless proxy start --foreground` or `pnpm exec portless doctor`, then retry.
 7. **Open** — `https://usebondery.test`
 
@@ -48,18 +48,18 @@ HTTP on raw ports without Portless:
 pnpm --filter website run dev:classic
 ```
 
-Use matching classic URLs in env (`http://localhost:26630` / `26631` / `26632`) and classic OAuth callbacks.
+Use matching classic URLs in env (`http://localhost:26630` / `26632`). The API stays on `https://api.usebondery.test`: it serves HTTPS only.
 
 ## Scripts
 
-| Script | Description |
-|---|---|
-| `pnpm --filter website run dev` | Start Portless HTTPS dev server |
-| `pnpm --filter website run dev:classic` | Start classic `localhost` HTTP dev server |
-| `pnpm exec turbo build --filter=website` | Production build (from repo root) |
-| `pnpm --filter website run check:types` | TypeScript type check |
-| `pnpm run lint` (repo root) | Biome format (write fixes) |
-| `pnpm --filter website run announce -- --slug <slug>` | Announce a blog post |
+| Script                                                | Description                               |
+| ----------------------------------------------------- | ----------------------------------------- |
+| `pnpm --filter website run dev`                       | Start Portless HTTPS dev server           |
+| `pnpm --filter website run dev:classic`               | Start classic `localhost` HTTP dev server |
+| `pnpm exec turbo build --filter=website`              | Production build (from repo root)         |
+| `pnpm --filter website run check:types`               | TypeScript type check                     |
+| `pnpm run lint` (repo root)                           | Biome format (write fixes)                |
+| `pnpm --filter website run announce -- --slug <slug>` | Announce a blog post                      |
 
 ## Blog
 
@@ -73,6 +73,7 @@ Each post consists of two files:
 - `content/blog/<category>/<slug>.mdx` — content (re-exports `postMeta` from the sidecar)
 
 After writing a post, register it in:
+
 - `content/blog/posts.ts` — for the Next.js app (MDX component + metadata)
 - `content/blog/metadata.ts` — for the announce script (metadata only)
 
@@ -82,14 +83,14 @@ The announce script posts a new blog entry to **Discord** and **Reddit** using t
 
 ### Environment variables
 
-| Variable | Description |
-|---|---|
-| `BONDERY_PUBLIC_WEBSITE_URL` | Production website URL, e.g. `https://bondery.app` |
-| `BONDERY_OPS_DISCORD_WEBHOOK_URL` | Discord channel webhook URL |
-| `BONDERY_OPS_REDDIT_CLIENT_ID` | Reddit OAuth2 app client ID (script-type app) |
-| `BONDERY_OPS_REDDIT_CLIENT_SECRET` | Reddit OAuth2 app client secret |
-| `BONDERY_OPS_REDDIT_USERNAME` | Reddit account username |
-| `BONDERY_OPS_REDDIT_PASSWORD` | Reddit account password |
+| Variable                           | Description                                        |
+| ---------------------------------- | -------------------------------------------------- |
+| `BONDERY_PUBLIC_WEBSITE_URL`       | Production website URL, e.g. `https://bondery.app` |
+| `BONDERY_OPS_DISCORD_WEBHOOK_URL`  | Discord channel webhook URL                        |
+| `BONDERY_OPS_REDDIT_CLIENT_ID`     | Reddit OAuth2 app client ID (script-type app)      |
+| `BONDERY_OPS_REDDIT_CLIENT_SECRET` | Reddit OAuth2 app client secret                    |
+| `BONDERY_OPS_REDDIT_USERNAME`      | Reddit account username                            |
+| `BONDERY_OPS_REDDIT_PASSWORD`      | Reddit account password                            |
 
 Set product URLs in the app `.env.development.local` / production local (via `pnpm run env`), or as GitHub Actions secrets for CI. Announce loads env with `@next/env` `loadEnvConfig`.
 

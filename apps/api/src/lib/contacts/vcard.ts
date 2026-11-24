@@ -7,6 +7,9 @@ import type { Contact } from "@bondery/schemas";
 import { attachMedia, contactToVCard, serializeVCard } from "@bondery/vcard";
 import logger from "../platform/logger.js";
 
+const D_D_D_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
+const EIGHT_DIGIT_DATE_PATTERN = /^\d{8}$/;
+
 type VCardExportImportantDate = {
   type: "birthday" | "anniversary" | "nameday" | "graduation" | "other";
   date: string;
@@ -23,12 +26,12 @@ function formatVCardDate(dateString: string | null | undefined): string | null {
   }
 
   const normalized = dateString.trim();
-  const dashDateMatch = normalized.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const dashDateMatch = normalized.match(D_D_D_PATTERN);
   if (dashDateMatch) {
     return `${dashDateMatch[1]}${dashDateMatch[2]}${dashDateMatch[3]}`;
   }
 
-  const compactDateMatch = normalized.match(/^\d{8}$/);
+  const compactDateMatch = normalized.match(EIGHT_DIGIT_DATE_PATTERN);
   if (compactDateMatch) {
     return normalized;
   }
@@ -105,7 +108,7 @@ export async function generateVCard(contact: Contact, extras?: VCardExportExtras
     }
   }
 
-  const revision = formatVCardTimestamp(contact.updatedAt ?? contact.createdAt);
+  const revision = formatVCardTimestamp(contact.updatedAt);
   if (revision) {
     card = {
       ...card,

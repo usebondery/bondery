@@ -6,10 +6,10 @@ The marketing website is **not** in this stack — see [`deploy/ops`](../ops/) (
 
 Local development:
 
-- Redis: **`deploy/bondery/docker-compose.dev-redis.yml`** (`pnpm run start:redis`, port 26636)
+- Redis: **`deploy/bondery/docker-compose.dev-redis.yml`** (`pnpm run start:redis`, port 26636, mutual TLS like the stack; secrets in `.temp/redis-secrets`)
 - Postgres: **`deploy/bondery/docker-compose.dev-db.yml`** or `packages/db` migrations — not this Compose file
 
-Docs: [docs/deploy/installation.mdx](../../docs/deploy/installation.mdx) · [docs/contributing/dokploy.mdx](../../docs/contributing/dokploy.mdx) · [docs/contributing/api-container.mdx](../../docs/contributing/api-container.mdx)
+Docs: [docs/deploy/installation.mdx](../../docs/deploy/installation.mdx) · [docs/deploy/configuration.mdx](../../docs/deploy/configuration.mdx) · [docs/contributing/dokploy.mdx](../../docs/contributing/dokploy.mdx)
 
 ## Quick start
 
@@ -27,24 +27,30 @@ docker compose up -d
 
 Requires Docker Compose **v2.38+** (`pre_start` on `api`). First boot applies migrations, OAuth provisioning, and SeaweedFS buckets automatically via `api` init containers — no manual steps.
 
-Without Traefik (host ports):
+Without Traefik (Caddy or nginx on the same host). The override turns off `traefik-transport` and binds the stack ports to `127.0.0.1` only:
 
 ```bash
 cp docker-compose.override.yml.example docker-compose.override.yml
 docker compose up -d
-curl -s http://localhost:26631/health/live
-curl -s http://localhost:26632/health/live
+sh scripts/api-ca.sh > api-ca.crt                            # CA of the API's HTTPS listener (26631)
+sh scripts/storage-ca.sh --client-dir ./bondery-storage       # storage CA + client certificate (8443)
+curl -s --cacert api-ca.crt https://127.0.0.1:26631/health/live
+curl -s http://127.0.0.1:26632/health/live
 ```
+
+The storage gateway refuses a caller without a client certificate, so your proxy needs the whole `bondery-storage` directory, not only its `ca.crt`. Point your proxy at those ports with [`proxy/Caddyfile`](proxy/Caddyfile) or [`proxy/nginx.conf`](proxy/nginx.conf). Another Traefik (Coolify): keep the job and set `BONDERY_INFRA_TRAEFIK_DYNAMIC_DIR` instead. Details: [Reverse proxy](../../docs/deploy/reverse-proxy.mdx).
 
 ### Services
 
-| Service | Image | Port | Notes |
-|---------|-------|------|--------|
-| `webapp` | `ghcr.io/usebondery/webapp` | 26632 | Liveness `/health/live` |
-| `api` | `ghcr.io/usebondery/api` | 26631 | Better Auth + Prisma; waits for Redis + Postgres + SeaweedFS |
-| `redis` | `redis:8.10` | internal | AOF + volume `redis-data` |
-| `db` | `postgis/postgis:17-3.5` | `127.0.0.1:5432` | Named volume `postgres-data`. Loopback only (SSH tunnels). Second stack: `BONDERY_INFRA_POSTGRES_HOST_PORT=5433` |
-| `seaweedfs-*` | SeaweedFS | 8333 (Traefik) | S3 creds from `.env` → rendered at startup (`seaweedfs/entrypoint.sh`) |
+| Service             | Image                       | Port                      | Notes                                                                                                                                                                                                                       |
+| ------------------- | --------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `webapp`            | `ghcr.io/usebondery/webapp` | 26632                     | Liveness `/health/live`                                                                                                                                                                                                     |
+| `api`               | `ghcr.io/usebondery/api`    | 26631 HTTPS               | Better Auth + Prisma; waits for Redis + Postgres + SeaweedFS                                                                                                                                                                |
+| `redis`             | `redis:8.10`                | internal                  | Mutual TLS + password. AOF + volume `redis-data`                                                                                                                                                                            |
+| `stack-secrets`     | `ghcr.io/usebondery/api`    | none                      | One-shot. Creates the Redis CA and certificates (`redis-tls-*` volumes), and the Postgres, storage, and API CAs and certificates, when missing                                                                              |
+| `traefik-transport` | `busybox:1.37`              | none                      | One-shot. Writes `${prefix}-api-transport.yml` and `-storage-transport.yml` (the CAs) into Traefik's folder (Dokploy's, or `BONDERY_INFRA_TRAEFIK_DYNAMIC_DIR`), so Traefik reaches the API and storage over verified HTTPS |
+| `db`                | `postgis/postgis:17-3.5`    | `127.0.0.1:5432`          | Named volume `postgres-data`. Loopback only (SSH tunnels). Second stack: `BONDERY_INFRA_POSTGRES_HOST_PORT=5433`                                                                                                            |
+| `seaweedfs-*`       | SeaweedFS                   | 8443 HTTPS (API, Traefik) | S3 creds from `.env` → rendered at startup (`seaweedfs/entrypoint.sh`). Mutual TLS between nodes (`seaweedfs/security.toml`)                                                                                                |
 
 Compose entrypoint: **`docker-compose.yml`** includes **`docker-compose.postgres.yml`** and **`docker-compose.seaweedfs.yml`**. Dokploy points at this path only.
 
@@ -53,8 +59,8 @@ Compose entrypoint: **`docker-compose.yml`** includes **`docker-compose.postgres
 - `webapp`, `api`, and `seaweedfs-s3` join external `dokploy-network` (Traefik). Postgres, Redis, and the SeaweedFS cluster (master / volume / filer) stay on private `internal`.
 - Every service publishes `${BONDERY_INFRA_TRAEFIK_PREFIX}-{api|webapp|storage|db|redis|…}`. Look those names up — never the Compose service names `api`, `webapp`, or `seaweedfs-s3` (they collide when production and beta share `dokploy-network`).
 - Set hostnames (`BONDERY_INFRA_*_DOMAIN`); Compose derives `https://…` URLs.
-- Webapp SSR uses `BONDERY_INFRA_INTERNAL_API_URL=http://${BONDERY_INFRA_TRAEFIK_PREFIX}-api:26631`.
-- API storage uses `BONDERY_PRIVATE_S3_ENDPOINT=http://${BONDERY_INFRA_TRAEFIK_PREFIX}-storage:8333`.
+- Webapp SSR uses `BONDERY_INFRA_INTERNAL_API_URL=https://${BONDERY_INFRA_TRAEFIK_PREFIX}-api:26631`, the API's HTTPS listener (its only one), and trusts the API CA (`BONDERY_INFRA_INTERNAL_API_CA_FILE`). Traefik forwards to the same HTTPS port `26631` and verifies it with the published transport; there is no plaintext port.
+- API storage uses `BONDERY_PRIVATE_S3_ENDPOINT=https://${BONDERY_INFRA_TRAEFIK_PREFIX}-storage:8443` and trusts the storage CA (`BONDERY_PRIVATE_S3_TLS_CA_FILE`).
 
 ### Upgrades / rollback
 
@@ -102,14 +108,13 @@ node deploy/bondery/scripts/smoke-release.mjs --service api --tag 1.7.5
 
 A second stack on the same Traefik must set `BONDERY_INFRA_TRAEFIK_PREFIX=bondery-beta` in Infisical **staging** (beta sync). Infisical **production** should be `bondery` or omitted (compose default). Same router names on one Traefik overwrite production HTTPS routes. The same-host beta stack must also set `BONDERY_INFRA_POSTGRES_HOST_PORT=5433` so it does not steal production's `127.0.0.1:5432`.
 
-## Advanced: external Redis
+## Advanced: external Postgres
 
-1. Do **not** start this compose Redis (or omit compose entirely).
-2. Run `ghcr.io/usebondery/api:<semver>` alone with your secrets.
-3. Set `BONDERY_PRIVATE_REDIS_URL` to your managed Redis (`rediss://…` when TLS is required).
+Redis is always the bundled service. Compose sets every Redis variable, so an operator value in `.env` has no effect. Run the full stack instead of the API image alone. To use a managed Postgres, add the `docker-compose.external-postgres.yml` overlay (see [Configuration](../../docs/deploy/configuration.mdx#postgres-tls)).
 
 ## Security
 
+- Redis requires mutual TLS and a password. `stack-secrets` creates the `redis-tls-ca`, `redis-tls-server`, and `redis-tls-client` volumes on first start; rotation: [docs/deploy/secrets.mdx](../../docs/deploy/secrets.mdx#redis_password_and_certificate).
 - Never expose Redis or Postgres to the public internet. Compose publishes Postgres on `127.0.0.1` only; do not change that bind to `0.0.0.0`.
 - API secrets (`BONDERY_PRIVATE_*`) load only into the `api` service (`env_file`). Webapp receives an explicit allowlist.
 

@@ -20,7 +20,19 @@ import { pathToFileURL } from "node:url";
 
 import { DEV_URLS } from "@bondery/schemas/constants/dev-ports";
 
+const PATTERN_5C2E24_RE = /\.$/;
+const ZA_Z0_RE = /[^A-Za-z0-9]+/;
+const WSL_RE = /wsl/i;
+
 const TLD = "test";
+
+/**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+function asUnknown(value) {
+  return value;
+}
 
 /**
  * Hostnames Portless serves on HTTPS. Keep in lockstep with `DEV_URLS`.
@@ -28,18 +40,18 @@ const TLD = "test";
  * @param {typeof DEV_URLS} urls
  * @returns {string[]}
  */
-export function portlessHttpsHostnames(urls = DEV_URLS) {
+function portlessHttpsHostnames(urls = DEV_URLS) {
   const names = new Set();
   for (const value of Object.values(urls)) {
     if (typeof value !== "string" || !value.startsWith("https://")) {
       continue;
     }
-    const hostname = new URL(value).hostname;
+    const { hostname } = new URL(value);
     if (hostname.endsWith(`.${TLD}`)) {
       names.add(hostname);
     }
   }
-  return [...names].sort();
+  return [...names].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 }
 
 function runQuiet(command, args) {
@@ -57,8 +69,8 @@ function runQuiet(command, args) {
  * @param {string | undefined} value
  * @returns {string}
  */
-export function magicDnsName(value) {
-  return (value ?? "").replace(/\.$/, "").trim();
+function magicDnsName(value) {
+  return (value ?? "").replace(PATTERN_5C2E24_RE, "").trim();
 }
 
 /**
@@ -68,9 +80,9 @@ export function magicDnsName(value) {
  * @param {string | undefined} dnsName
  * @returns {string}
  */
-export function inferSshUser(hostName, dnsName) {
+function inferSshUser(hostName, dnsName) {
   const source = (hostName || magicDnsName(dnsName).split(".")[0] || "").trim();
-  const first = source.split(/[^A-Za-z0-9]+/)[0] ?? "";
+  const first = source.split(ZA_Z0_RE)[0] ?? "";
   return first.toLowerCase();
 }
 
@@ -86,13 +98,13 @@ function isOnlineLinux(node) {
  * @param {Array<{ DNSName?: string, HostName?: string }>} nodes
  * @returns {{ DNSName?: string, HostName?: string }}
  */
-export function pickLinuxDevNode(nodes) {
+function pickLinuxDevNode(nodes) {
   if (nodes.length === 1) {
     return nodes[0];
   }
   const wsl = nodes.filter((node) => {
     const name = `${node.HostName ?? ""} ${magicDnsName(node.DNSName)}`;
-    return /wsl/i.test(name);
+    return WSL_RE.test(name);
   });
   if (wsl.length === 1) {
     return wsl[0];
@@ -108,10 +120,10 @@ export function pickLinuxDevNode(nodes) {
  *   Self?: { DNSName?: string, HostName?: string, OS?: string, Online?: boolean },
  *   Peer?: Record<string, { DNSName?: string, HostName?: string, OS?: string, Online?: boolean }>,
  * }} status
- * @param {string} [sshUserOverride]
+ * @param {string} [sshUser]
  * @returns {string} `user@magic-dns-name`
  */
-export function resolveRemoteSshTarget(status, sshUserOverride) {
+function resolveRemoteSshTarget(status, sshUser) {
   const self = status.Self;
   if (!self) {
     throw new Error("Tailscale status has no Self node. Is Tailscale running?");
@@ -133,7 +145,7 @@ export function resolveRemoteSshTarget(status, sshUserOverride) {
     throw new Error("Tailscale node has no MagicDNS name. Enable MagicDNS on the tailnet.");
   }
 
-  const user = (sshUserOverride ?? "").trim() || inferSshUser(node.HostName, host);
+  const user = (sshUser ?? "").trim() || inferSshUser(node.HostName, host);
   if (!user) {
     throw new Error("Could not infer the SSH user. Set BONDERY_DEV_SSH_USER.");
   }
@@ -146,7 +158,7 @@ function readTailscaleStatus() {
   if (!raw) {
     throw new Error("Could not read `tailscale status --json`. Is Tailscale on PATH?");
   }
-  return JSON.parse(raw);
+  return asUnknown(JSON.parse(raw));
 }
 
 function sshUserOverride() {
@@ -197,7 +209,7 @@ function printHosts() {
 }
 
 function isMain() {
-  const entry = process.argv[1];
+  const [, entry] = process.argv;
   return Boolean(entry) && import.meta.url === pathToFileURL(entry).href;
 }
 
@@ -213,10 +225,18 @@ if (isMain()) {
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       console.error(message);
-      process.exit(1);
+      process.exitCode = 1;
     }
   } else {
     console.error(`Unknown command: ${command}. Use share, hosts, or target.`);
-    process.exit(1);
+    process.exitCode = 1;
   }
 }
+
+export {
+  inferSshUser,
+  magicDnsName,
+  pickLinuxDevNode,
+  portlessHttpsHostnames,
+  resolveRemoteSshTarget,
+};

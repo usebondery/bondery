@@ -17,8 +17,13 @@ import {
   assertRuntimeDependencyConfigured,
   shouldSkipLiveRuntimeVerify,
 } from "../platform/runtime-env.js";
+import {
+  describeRedisSecurity,
+  resolveRedisConnectionOptions,
+} from "./redis-connection-options.js";
+import { logRedisTls } from "./redis-tls.js";
 
-export type RedisReadiness = {
+type RedisReadiness = {
   configured: boolean;
   error?: string;
   latencyMs?: number;
@@ -26,12 +31,12 @@ export type RedisReadiness = {
   verifiedAt: string;
 };
 
-export type RedisClients = {
+type RedisClients = {
   commands: Redis;
   subscriber: Redis;
 };
 
-export type InitRedisResult = {
+type InitRedisResult = {
   readiness: RedisReadiness;
   clients: RedisClients | null;
 };
@@ -48,11 +53,12 @@ let subscriberClient: Redis | null = null;
 let redisReadiness: RedisReadiness | null = null;
 
 function trimRedisUrl(redisUrl?: string): string {
-  return (redisUrl ?? process.env.BONDERY_PRIVATE_REDIS_URL ?? "").trim();
+  return (redisUrl ?? process.env["BONDERY_PRIVATE_REDIS_URL"] ?? "").trim();
 }
 
 function createRedisClient(url: string): Redis {
   return new Redis(url, {
+    ...resolveRedisConnectionOptions(url),
     connectTimeout: 500,
     enableReadyCheck: true,
     lazyConnect: true,
@@ -72,52 +78,6 @@ function ensureUrl(redisUrl?: string): string | undefined {
   }
   configuredUrl = trimmed;
   return trimmed;
-}
-
-/** Process-scoped command connection. Undefined when URL empty. */
-export function getRedisCommands(redisUrl?: string): Redis | undefined {
-  const url = ensureUrl(redisUrl);
-  if (!url) {
-    return undefined;
-  }
-  if (!commandsClient) {
-    commandsClient = createRedisClient(url);
-  }
-  return commandsClient;
-}
-
-/** Command connection — throws when Redis URL is unset (required in all environments). */
-export function requireRedisCommands(redisUrl?: string): Redis {
-  const client = getRedisCommands(redisUrl);
-  if (!client) {
-    throw new Error(
-      "BONDERY_PRIVATE_REDIS_URL must be set. Start local Redis with: pnpm run start:redis",
-    );
-  }
-  return client;
-}
-
-/** Process-scoped subscriber connection. Undefined when URL empty. */
-export function getRedisSubscriber(redisUrl?: string): Redis | undefined {
-  const url = ensureUrl(redisUrl);
-  if (!url) {
-    return undefined;
-  }
-  if (!subscriberClient) {
-    subscriberClient = createRedisClient(url);
-  }
-  return subscriberClient;
-}
-
-/** Subscriber connection — throws when Redis URL is unset (required in all environments). */
-export function requireRedisSubscriber(redisUrl?: string): Redis {
-  const client = getRedisSubscriber(redisUrl);
-  if (!client) {
-    throw new Error(
-      "BONDERY_PRIVATE_REDIS_URL must be set. Start local Redis with: pnpm run start:redis",
-    );
-  }
-  return client;
 }
 
 function setUnconfiguredReadiness(): RedisReadiness {
@@ -223,6 +183,88 @@ async function runRedisVerify(
   }
 }
 
+/**
+ * Production Redis must use TLS and a password (see the bondery-security skill).
+ * The API still starts so that a misconfigured stack still answers health checks,
+ * but the operator sees what to fix on every boot.
+ */
+function warnOnInsecureProductionRedis(log: FastifyBaseLogger | undefined, redisUrl: string): void {
+  if (process.env["NODE_ENV"] !== "production") {
+    return;
+  }
+  const posture = describeRedisSecurity(redisUrl);
+  if (posture.tls && posture.authenticated) {
+    return;
+  }
+  log?.warn(
+    { redisAuthenticated: posture.authenticated, redisTls: posture.tls },
+    "Redis connection is not protected: production Redis must use TLS (rediss://) and a password. See https://docs.usebondery.com/deploy/configuration#redis",
+  );
+}
+
+async function quitClient(client: Redis | null): Promise<void> {
+  if (!client) {
+    return;
+  }
+  const { status } = client;
+  if (status === "end" || status === "close") {
+    return;
+  }
+  try {
+    await client.quit();
+  } catch {
+    // Already closed — idempotent shutdown
+  }
+}
+
+export type { InitRedisResult, RedisClients, RedisReadiness };
+
+/** Process-scoped command connection. Undefined when URL empty. */
+export function getRedisCommands(redisUrl?: string): Redis | undefined {
+  const url = ensureUrl(redisUrl);
+  if (!url) {
+    return undefined;
+  }
+  if (!commandsClient) {
+    commandsClient = createRedisClient(url);
+  }
+  return commandsClient;
+}
+
+/** Command connection — throws when Redis URL is unset (required in all environments). */
+export function requireRedisCommands(redisUrl?: string): Redis {
+  const client = getRedisCommands(redisUrl);
+  if (!client) {
+    throw new Error(
+      "BONDERY_PRIVATE_REDIS_URL must be set. Start local Redis with: pnpm run start:redis",
+    );
+  }
+  return client;
+}
+
+/** Process-scoped subscriber connection. Undefined when URL empty. */
+export function getRedisSubscriber(redisUrl?: string): Redis | undefined {
+  const url = ensureUrl(redisUrl);
+  if (!url) {
+    return undefined;
+  }
+  if (!subscriberClient) {
+    subscriberClient = createRedisClient(url);
+  }
+  return subscriberClient;
+}
+
+/** Subscriber connection — throws when Redis URL is unset (required in all environments). */
+export function requireRedisSubscriber(redisUrl?: string): Redis {
+  const client = getRedisSubscriber(redisUrl);
+  if (!client) {
+    throw new Error(
+      "BONDERY_PRIVATE_REDIS_URL must be set. Start local Redis with: pnpm run start:redis",
+    );
+  }
+  return client;
+}
+
 export function getRedisReadiness(): RedisReadiness {
   return redisReadiness ?? UNCONFIGURED_READINESS;
 }
@@ -244,6 +286,8 @@ export async function initRedis(
     return { clients: null, readiness: setUnconfiguredReadiness() };
   }
 
+  warnOnInsecureProductionRedis(log, trimmed);
+
   if (shouldSkipLiveRuntimeVerify()) {
     log?.info("Redis verify skipped in test environment");
     const readiness = {
@@ -264,6 +308,9 @@ export async function initRedis(
   const readiness = await runRedisVerify(trimmed);
   if (readiness.ok) {
     log?.info({ latencyMs: readiness.latencyMs }, "Redis verified");
+    if (log) {
+      await logRedisTls(log, trimmed);
+    }
   } else {
     log?.error({ error: readiness.error, latencyMs: readiness.latencyMs }, "Redis verify failed");
     throw new Error(`Redis verify failed: ${readiness.error ?? "unknown"}`);
@@ -299,21 +346,6 @@ export async function verifyRedis(redisUrl: string): Promise<RedisReadiness> {
   }
 
   return runRedisVerify(trimmed, { subscriberCheck: "status" });
-}
-
-async function quitClient(client: Redis | null): Promise<void> {
-  if (!client) {
-    return;
-  }
-  const status = client.status;
-  if (status === "end" || status === "close") {
-    return;
-  }
-  try {
-    await client.quit();
-  } catch {
-    // Already closed — idempotent shutdown
-  }
 }
 
 /** Unsubscribe paths must run first (via shutdownSyncWakeRuntime). Idempotent. */

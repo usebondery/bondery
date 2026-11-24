@@ -2,6 +2,7 @@
 "use client";
 
 import { getUserFacingError } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import { formatContactName } from "@bondery/helpers/contact";
 import { parseTagIdsQueryParam, TAG_IDS_QUERY_PARAM } from "@bondery/helpers/globals/webapp-query";
 import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
@@ -18,7 +19,6 @@ import {
   IconUser,
   IconUserCircle,
 } from "@tabler/icons-react";
-import { useQueryClient } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { openNewActivityModal } from "@/app/(app)/app/(shell)/interactions/components/NewActivityModal";
@@ -73,10 +73,12 @@ function applyColumnVisibility(
     return defaults;
   }
   const savedMap = new Map(saved.map((e) => [e.key, e.visible]));
-  return defaults.map((col) => {
+  const merged: Omit<ColumnConfig, "icon">[] = [];
+  for (const col of defaults) {
     const visible = savedMap.get(col.key);
-    return visible === undefined ? col : { ...col, visible };
-  });
+    merged.push(visible === undefined ? col : { ...col, visible });
+  }
+  return merged;
 }
 
 /**
@@ -100,7 +102,6 @@ interface PeopleClientProps {
 }
 
 export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
-  const _queryClient = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -148,19 +149,20 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
   // Initial state is derived from the server-resolved cookie prop so the server
   // HTML already has the correct columns — no mount-time localStorage read,
   // no layout shift.
-  const [columns, setColumns] = useState<ColumnConfig[]>(() =>
-    applyColumnVisibility(savedColumnVisibility, columnLabels).map((col) => ({
-      ...col,
-      icon: columnIcons[col.key],
-    })),
-  );
+  const [columns, setColumns] = useState<ColumnConfig[]>(() => {
+    const nextColumns: ColumnConfig[] = [];
+    for (const col of applyColumnVisibility(savedColumnVisibility, columnLabels)) {
+      nextColumns.push({
+        ...col,
+        icon: columnIcons[col.key],
+      });
+    }
+    return nextColumns;
+  });
 
   useEffect(() => {
     setColumns((prev) =>
-      prev.map((col) => ({
-        ...col,
-        label: columnLabels[col.key] ?? col.label,
-      })),
+      prev.map((col) => ({ ...col, label: columnLabels[col.key] ?? col.label })),
     );
   }, [columnLabels]);
 
@@ -176,7 +178,7 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
       onColumnsChange(nextColumns);
       // Write to cookie so the server can render the correct columns on the next
       // request, eliminating layout shift from client-only rehydration.
-      void saveColumnsToCookie(nextColumns);
+      detachPromise(saveColumnsToCookie(nextColumns));
       return nextColumns;
     });
   };
@@ -318,7 +320,7 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
     if (isFetchingNextPage || !hasNextPage) {
       return;
     }
-    void fetchNextPage();
+    detachPromise(fetchNextPage());
   };
 
   const handleDeleteSelected = (ids: string[]) => {
@@ -422,7 +424,7 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
             label: tEnrich("MenuLabel"),
             onClick: (contactId) => {
               const contact = contacts.find((c) => c.id === contactId);
-              startForPerson(contactId, contact?.linkedin);
+              detachPromise(startForPerson(contactId, contact?.linkedin));
             },
           },
         ]}

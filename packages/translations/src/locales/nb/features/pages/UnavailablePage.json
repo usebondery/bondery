@@ -1,0 +1,16 @@
+{
+  "CheckingAgain": "Sjekker igjen om {seconds} s …",
+  "Description": "Kontoen din er trygg og økten er fortsatt aktiv. Vi fortsetter å sjekke; dette går vanligvis raskt.",
+  "MetadataTitle": "Tjenesten er utilgjengelig",
+  "Retry": "Prøv igjen",
+  "StatusChecking": "Sjekker tilkobling …",
+  "StatusDegraded": "Noen funksjoner kan være trege akkurat nå",
+  "StatusOffline": "Bondery er midlertidig utilgjengelig",
+  "StatusOnline": "Tilbake på nett. Omdirigerer …",
+  "StatusPageLink": "Se statusside",
+  "TechnicalBackendStatus": "Backend: {status}",
+  "TechnicalDetails": "Tekniske detaljer",
+  "TechnicalHttpStatus": "HTTP-status: {status}",
+  "TechnicalUnreachable": "utilgjengelig",
+  "Title": "Vi har problemer med tilkoblingen"
+}

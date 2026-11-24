@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { LanguagePicker } from "@/components/shared/LanguagePicker";
 import { TimezonePicker } from "@/components/shared/TimezonePicker";
 import { useContactPreferenceSectionTranslations } from "@/lib/i18n/generated/hooks";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 
 interface ContactPreferenceSectionProps {
   contact: Contact;
@@ -22,12 +23,12 @@ export function ContactPreferenceSection({
   handleBlur,
 }: ContactPreferenceSectionProps) {
   const t = useContactPreferenceSectionTranslations();
-  const [language, setLanguage] = useState(contact.language || DEFAULT_LOCALE);
-  const [timezone, setTimezone] = useState(contact.timezone || "UTC");
+  const [language, setLanguage] = useState(nonEmpty(contact.language) ?? DEFAULT_LOCALE);
+  const [timezone, setTimezone] = useState(nonEmpty(contact.timezone) ?? "UTC");
 
   useEffect(() => {
-    setLanguage(contact.language || DEFAULT_LOCALE);
-    setTimezone(contact.timezone || "UTC");
+    setLanguage(nonEmpty(contact.language) ?? DEFAULT_LOCALE);
+    setTimezone(nonEmpty(contact.timezone) ?? "UTC");
   }, [contact.language, contact.timezone]);
 
   return (

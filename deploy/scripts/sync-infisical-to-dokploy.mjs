@@ -20,9 +20,12 @@ import {
 } from "@bondery/helpers/env";
 import { parseEnvContent } from "@bondery/helpers/env/check-env";
 
+const ENV_VALUE_NEEDS_QUOTES_RE = /[\s#"'$\\]/;
+const TRAILING_SLASH_RE = /\/$/;
+
 /** @see scripts/env/env-file-format.ts */
-export function quoteEnvValue(value) {
-  if (/[\s#"'$\\]/.test(value) || value === "") {
+function quoteEnvValue(value) {
+  if (ENV_VALUE_NEEDS_QUOTES_RE.test(value) || value === "") {
     return `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
   }
   return value;
@@ -36,7 +39,7 @@ const SHARED_DOKPLOY_CONFIG_KEYS = ["BONDERY_OPS_DOKPLOY_HOST", "BONDERY_OPS_DOK
  * @param {string} target
  * @returns {target is keyof typeof DOKPLOY_SYNC_TARGETS}
  */
-export function isDokploySyncTarget(target) {
+function isDokploySyncTarget(target) {
   return Object.hasOwn(DOKPLOY_SYNC_TARGETS, target);
 }
 
@@ -45,7 +48,7 @@ export function isDokploySyncTarget(target) {
  * @param {keyof typeof DOKPLOY_SYNC_TARGETS} target
  * @returns {DokployConfig}
  */
-export function readDokployConfig(env, target) {
+function readDokployConfig(env, target) {
   const targetConfig = DOKPLOY_SYNC_TARGETS[target];
   const missing = [];
 
@@ -68,14 +71,15 @@ export function readDokployConfig(env, target) {
     for (const key of missing) {
       console.error(`  - ${key}`);
     }
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   return {
     apiKey: env.BONDERY_OPS_DOKPLOY_API_KEY.trim(),
     composeId,
     deployWebhook: env[targetConfig.webhookKey]?.trim() ?? "",
-    host: env.BONDERY_OPS_DOKPLOY_HOST.trim().replace(/\/$/, ""),
+    host: env.BONDERY_OPS_DOKPLOY_HOST.trim().replace(TRAILING_SLASH_RE, ""),
     target,
     webhookKey: targetConfig.webhookKey,
   };
@@ -87,7 +91,7 @@ export function readDokployConfig(env, target) {
  * @param {Record<string, string | undefined>} env
  * @param {keyof typeof DOKPLOY_SYNC_TARGETS} target
  */
-export function buildUploadPayload(env, target) {
+function buildUploadPayload(env, target) {
   const payloadTarget = resolveDokploySyncPayloadTarget(target);
   const { missingRequired, rows } = collectDokploySyncRows(
     Object.fromEntries(
@@ -105,7 +109,8 @@ export function buildUploadPayload(env, target) {
     for (const key of missingRequired) {
       console.error(`  - ${key}`);
     }
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   const uploadKeys = rows.map((row) => row.key);
@@ -114,7 +119,8 @@ export function buildUploadPayload(env, target) {
       console.error(
         `sync-infisical-to-dokploy: internal error — config key ${configKey} in upload payload`,
       );
-      process.exit(1);
+      process.exitCode = 1;
+      return;
     }
   }
 
@@ -122,7 +128,7 @@ export function buildUploadPayload(env, target) {
 }
 
 /** @deprecated Use buildUploadPayload */
-export function buildOpsUploadPayload(env) {
+function buildOpsUploadPayload(env) {
   return buildUploadPayload(env, "website");
 }
 
@@ -130,7 +136,7 @@ export function buildOpsUploadPayload(env) {
  * @param {Array<{ key: string; value: string }>} rows
  * @param {typeof quoteEnvValue} quote
  */
-export function formatEnvPayload(rows, quote) {
+function formatEnvPayload(rows, quote) {
   return rows.map((row) => `${row.key}=${quote(row.value)}`).join("\n");
 }
 
@@ -141,7 +147,7 @@ export function formatEnvPayload(rows, quote) {
  * @param {Array<{ key: string; value: string }>} rows
  * @param {typeof quoteEnvValue} quote
  */
-export function mergeComposeEnv(existingEnv, rows, quote) {
+function mergeComposeEnv(existingEnv, rows, quote) {
   const merged = parseEnvContent(existingEnv ?? "");
   for (const row of rows) {
     merged[row.key] = row.value;
@@ -155,14 +161,14 @@ export function mergeComposeEnv(existingEnv, rows, quote) {
 }
 
 /** @deprecated Use mergeComposeEnv */
-export function mergeOpsEnv(existingEnv, rows, quote) {
+function mergeOpsEnv(existingEnv, rows, quote) {
   return mergeComposeEnv(existingEnv, rows, quote);
 }
 
 /**
  * @param {DokployConfig} config
  */
-export async function fetchComposeEnv(config) {
+async function fetchComposeEnv(config) {
   const url = new URL("/api/compose.one", config.host);
   url.searchParams.set("composeId", config.composeId);
 
@@ -175,7 +181,8 @@ export async function fetchComposeEnv(config) {
   if (!response.ok) {
     const body = await response.text();
     console.error(`sync-infisical-to-dokploy: compose.one failed (${response.status}): ${body}`);
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   const data = await response.json();
@@ -187,7 +194,7 @@ export async function fetchComposeEnv(config) {
  * @param {DokployConfig} config
  * @param {string} envPayload
  */
-export async function saveComposeEnv(config, envPayload) {
+async function saveComposeEnv(config, envPayload) {
   const response = await fetch(new URL("/api/compose.saveEnvironment", config.host), {
     body: JSON.stringify({
       composeId: config.composeId,
@@ -205,7 +212,7 @@ export async function saveComposeEnv(config, envPayload) {
     console.error(
       `sync-infisical-to-dokploy: compose.saveEnvironment failed (${response.status}): ${body}`,
     );
-    process.exit(1);
+    process.exitCode = 1;
   }
 }
 
@@ -216,7 +223,7 @@ export async function saveComposeEnv(config, envPayload) {
  * @param {readonly string[]} pathSentinels
  * @param {string} [branch]
  */
-export function buildDeployWebhookPayload(repository, pathSentinels, branch = "release") {
+function buildDeployWebhookPayload(repository, pathSentinels, branch = "release") {
   return {
     commits: [
       {
@@ -236,7 +243,7 @@ export function buildDeployWebhookPayload(repository, pathSentinels, branch = "r
  * @param {readonly string[]} pathSentinels
  * @param {string} [branch]
  */
-export async function triggerDeployWebhook(webhookUrl, repository, pathSentinels, branch) {
+async function triggerDeployWebhook(webhookUrl, repository, pathSentinels, branch) {
   const response = await fetch(webhookUrl, {
     body: JSON.stringify(buildDeployWebhookPayload(repository, pathSentinels, branch)),
     headers: {
@@ -249,30 +256,28 @@ export async function triggerDeployWebhook(webhookUrl, repository, pathSentinels
   if (!response.ok) {
     const body = await response.text();
     console.error(`sync-infisical-to-dokploy: deploy webhook failed (${response.status}): ${body}`);
-    process.exit(1);
+    process.exitCode = 1;
   }
 }
 
 function parseArgs(argv) {
-  const args = {
-    dryRun: false,
-    redeploy: false,
-    target: "",
-  };
+  let dryRun = false;
+  let redeploy = false;
+  let target = "";
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === "--dry-run") {
-      args.dryRun = true;
+      dryRun = true;
     } else if (arg === "--redeploy") {
-      args.redeploy = true;
+      redeploy = true;
     } else if (arg === "--target") {
-      args.target = argv[i + 1] ?? "";
+      target = argv[i + 1] ?? "";
       i += 1;
     }
   }
 
-  return args;
+  return { dryRun, redeploy, target };
 }
 
 async function main() {
@@ -280,14 +285,16 @@ async function main() {
 
   if (args.target === "ops") {
     console.error("sync-infisical-to-dokploy: --target ops was renamed to --target website");
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   if (!isDokploySyncTarget(args.target)) {
     console.error(
       "sync-infisical-to-dokploy: --target must be website, website-beta, plausible, services, or services-beta",
     );
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   const config = readDokployConfig(process.env, args.target);
@@ -313,7 +320,8 @@ async function main() {
       console.error(
         `sync-infisical-to-dokploy: --redeploy requires ${config.webhookKey} in Infisical`,
       );
-      process.exit(1);
+      process.exitCode = 1;
+      return;
     }
 
     const repository =
@@ -329,3 +337,18 @@ async function main() {
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   await main();
 }
+
+export {
+  buildDeployWebhookPayload,
+  buildOpsUploadPayload,
+  buildUploadPayload,
+  fetchComposeEnv,
+  formatEnvPayload,
+  isDokploySyncTarget,
+  mergeComposeEnv,
+  mergeOpsEnv,
+  quoteEnvValue,
+  readDokployConfig,
+  saveComposeEnv,
+  triggerDeployWebhook,
+};

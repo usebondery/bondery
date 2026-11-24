@@ -29,6 +29,9 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "./check-report.mjs";
 
+const PATTERN_5C723F5C6E_RE = /\r?\n/;
+const PATTERN_5C2F2B24_RE = /\/+$/;
+
 const check = createCheck("check-injected-packages");
 
 const ROOT = join(fileURLToPath(new URL(".", import.meta.url)), "../..");
@@ -65,7 +68,7 @@ function patternBody(pattern) {
   if (body.startsWith("/")) {
     body = body.slice(1);
   }
-  body = body.replace(/\/+$/, "");
+  body = body.replace(PATTERN_5C2F2B24_RE, "");
   if (body.endsWith("/**")) {
     body = body.slice(0, -3);
   }
@@ -83,7 +86,7 @@ function isAllowedInside(inside) {
   if (parts.some((part) => ALLOWED_DIR_NAMES.has(part))) {
     return true;
   }
-  const base = parts[parts.length - 1] ?? "";
+  const base = parts.at(-1) ?? "";
   return base === "*.tsbuildinfo" || base.endsWith(".tsbuildinfo");
 }
 
@@ -117,7 +120,7 @@ function isAllowedRepoPattern(body) {
 }
 
 function readIgnoreRules(filePath) {
-  return readFileSync(filePath, "utf8").split(/\r?\n/);
+  return readFileSync(filePath, "utf8").split(PATTERN_5C723F5C6E_RE);
 }
 
 function checkRootGitignore() {
@@ -129,7 +132,8 @@ function checkRootGitignore() {
       continue;
     }
     if (!isAllowedRepoPattern(body)) {
-      check.add(`.gitignore:${index + 1}: ${body} ignores a path inside a package. ${HINT}`);
+      // HINT holds the remedy.
+      check.add(`.gitignore:${index + 1}: ${body} ignores a path inside a package. ${HINT}`); // diagnostic-message: remedy-in-value HINT
     }
   }
 }
@@ -180,14 +184,15 @@ function checkIgnoredPathsOnDisk() {
     if (raw.length === 0) {
       continue;
     }
-    const repoPath = raw.replace(/\\/g, "/").replace(/\/+$/, "");
+    const repoPath = raw.replace(/\\/g, "/").replace(PATTERN_5C2F2B24_RE, "");
     const parts = repoPath.split("/");
     if (parts[0] !== "packages" || parts.length < 3) {
       check.add(`${repoPath} is gitignored inside packages/. ${HINT}`);
       continue;
     }
     if (!isAllowedOnDisk(parts.slice(2).join("/"))) {
-      check.add(`${repoPath} is gitignored inside a package. ${HINT}`);
+      // HINT holds the remedy.
+      check.add(`${repoPath} is gitignored inside a package. ${HINT}`); // diagnostic-message: remedy-in-value HINT
     }
   }
 }

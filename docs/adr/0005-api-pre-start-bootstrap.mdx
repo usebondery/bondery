@@ -39,7 +39,7 @@ The production API image ships compiled `apps/api/dist` and `packages/` only —
 
 Three layers, analogous to Postgres (`pg_isready` ≠ migrate ≠ `SELECT 1`):
 
-1. **Compose `seaweedfs-s3` healthcheck** — unsigned ListBuckets (`GET /` on port 8333). HTTP 200 with `ListAllMyBucketsResult` or HTTP 403 with S3 `Error` XML means the gateway speaks S3. Empty `GET /status` 200 is process liveness, not S3 readiness. `depends_on: seaweedfs-s3: service_healthy` is only valid with this S3-speaking probe.
+1. **Compose `seaweedfs-s3` healthcheck** — unsigned ListBuckets (`GET /` on HTTPS port 8443 with the storage CA, which the API and Traefik use, and on HTTP port 8333 for local development). HTTP 200 with `ListAllMyBucketsResult` or HTTP 403 with S3 `Error` XML means the gateway speaks S3. Empty `GET /status` 200 is process liveness, not S3 readiness. `depends_on: seaweedfs-s3: service_healthy` is only valid with this S3-speaking probe.
 
 2. **`pre_start` `ensure-storage-buckets`** (and host-run `pnpm run dev`) — signed HeadBucket wait-then-act. CreateBucket only after HeadBucket classifies the bucket as missing (404 / NotFound / NoSuchBucket). Public-read PutBucketPolicy after the bucket exists.
 

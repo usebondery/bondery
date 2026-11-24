@@ -1,4 +1,5 @@
 import { buildAndroidAssetLinks } from "@bondery/helpers/auth/associated-domains";
+import { getAndroidCertFingerprints } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
 
@@ -8,7 +9,7 @@ export const dynamic = "force-dynamic";
  */
 export function GET() {
   const links = buildAndroidAssetLinks({
-    fingerprintsCsv: process.env.BONDERY_PUBLIC_ANDROID_SHA256_CERT_FINGERPRINTS,
+    fingerprintsCsv: getAndroidCertFingerprints(),
   });
 
   if (!links) {

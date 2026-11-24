@@ -1,0 +1,13 @@
+{
+  "Create": "Bondery’ye ekle",
+  "Creating": "Kişi oluşturuluyor...",
+  "ErrorDescription": "Kişi oluşturulurken bir hata oluştu.",
+  "ErrorTitle": "Kişi oluşturulamadı",
+  "FullNameLabel": "Tam ad",
+  "FullNamePlaceholder": "ör. Ayşe Yılmaz",
+  "InvalidName": "Geçerli bir ad gir",
+  "NameRequired": "Bir ad gir",
+  "SuccessDescription": "Yeni kişi kişi listenize eklendi.",
+  "SuccessTitle": "Kişi oluşturuldu",
+  "Title": "Kişi oluştur"
+}

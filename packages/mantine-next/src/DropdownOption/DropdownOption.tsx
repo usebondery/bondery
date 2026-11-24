@@ -2,7 +2,38 @@
 
 import { Box, Group, Menu, Text } from "@mantine/core";
 import { IconCheck, IconExternalLink } from "@tabler/icons-react";
-import type { CSSProperties, ReactNode } from "react";
+import type { CSSProperties, ReactElement, ReactNode } from "react";
+
+/** Same light primary fill as a hovered or selected `Select` option. */
+function selectedOptionStyle(isSelected: boolean): CSSProperties | undefined {
+  if (!isSelected) {
+    return undefined;
+  }
+
+  return {
+    backgroundColor: "var(--mantine-primary-color-light)",
+  };
+}
+
+function renderIcon(icon: ReactNode): ReactNode {
+  if (typeof icon === "string") {
+    return (
+      <Text aria-hidden="true" size="sm">
+        {icon}
+      </Text>
+    );
+  }
+
+  return icon;
+}
+
+function SecondaryText({ children }: { children: ReactNode }) {
+  return (
+    <Text c="dimmed" component="span" size="xs">
+      {children}
+    </Text>
+  );
+}
 
 /**
  * One option inside a dropdown menu.
@@ -38,37 +69,6 @@ export interface DropdownOptionProps {
   tone?: "default" | "danger";
 }
 
-/** Same light primary fill as a hovered or selected `Select` option. */
-function selectedOptionStyle(isSelected: boolean): CSSProperties | undefined {
-  if (!isSelected) {
-    return undefined;
-  }
-
-  return {
-    backgroundColor: "var(--mantine-primary-color-light)",
-  };
-}
-
-function renderIcon(icon: ReactNode): ReactNode {
-  if (typeof icon === "string") {
-    return (
-      <Text aria-hidden="true" size="sm">
-        {icon}
-      </Text>
-    );
-  }
-
-  return icon;
-}
-
-function SecondaryText({ children }: { children: ReactNode }) {
-  return (
-    <Text c="dimmed" component="span" size="xs">
-      {children}
-    </Text>
-  );
-}
-
 export function DropdownOption({
   badge,
   description,
@@ -80,7 +80,7 @@ export function DropdownOption({
   onSelect,
   selected = false,
   tone = "default",
-}: DropdownOptionProps) {
+}: DropdownOptionProps): ReactElement {
   const isStacked = layout === "stacked";
   const toneColor = tone === "danger" ? "red" : undefined;
 

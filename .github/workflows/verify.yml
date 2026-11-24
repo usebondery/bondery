@@ -1,7 +1,7 @@
 name: Verify
 
 on:
-  pull_request:
+  pull_request: {}
 
 concurrency:
   group: verify-${{ github.ref }}
@@ -34,11 +34,45 @@ jobs:
       - name: Check package imports
         run: pnpm run check:package-imports
 
+      - name: Check every tsconfig extends a TypeScript preset
+        run: pnpm run check:tsconfig-extends
+
       - name: Check injected packages stay free of generated files
         run: pnpm run check:injected-packages
 
       - name: Check security headers come from the shared CSP builder
         run: pnpm run check:security-headers
+
+  quality-rules:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: ./.github/actions/shared/setup-pnpm
+
+      - name: Unit tests for check scripts
+        run: pnpm run test:check-scripts
+
+      - name: Agent and skill mirrors match .agents/
+        run: pnpm run check:agent-files
+
+      - name: Reject stopgap wording in added code
+        run: node scripts/check/check-no-workarounds.mjs --base "origin/${BASE_REF}"
+        env:
+          BASE_REF: ${{ github.base_ref }}
+
+      - name: Reject stopgap wording in commit messages
+        run: node scripts/check/check-no-workarounds.mjs --commits "origin/${BASE_REF}..HEAD"
+        env:
+          BASE_REF: ${{ github.base_ref }}
+
+      - name: Require every diagnostic to say how to fix the problem
+        run: pnpm run check:diagnostic-messages
 
   env:
     runs-on: ubuntu-latest
@@ -61,6 +95,7 @@ jobs:
           status=0
           pnpm run env:check || status=1
           pnpm run check:versions || status=1
+          pnpm run check:llm-plugins || status=1
           exit "$status"
 
   openapi:
@@ -135,7 +170,7 @@ jobs:
 
   # Ruleset context stays `contracts`. This job fails when any parallel check fails.
   contracts:
-    needs: [env, openapi, schema-contracts, translations]
+    needs: [ env, openapi, schema-contracts, translations ]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -211,9 +246,19 @@ jobs:
         run: |
           cp deploy/bondery/.env.example deploy/bondery/.env
           node deploy/bondery/scripts/check-compose.mjs
+          node --test deploy/bondery/scripts/*.test.mjs
 
       - name: Webapp runtime config tests
         run: pnpm run test:webapp:runtime-config
+
+      # The importers read the sample corpus and the API import code. These run on every pull
+      # request because a parser regression silently drops contacts, which no type check catches.
+      - name: Importer tests
+        run: pnpm run test:importers
+
+      # The fixture structure and the anonymizer guarantees, next to the corpus they guard.
+      - name: Sample data tests
+        run: pnpm run test:sample-data
 
       - name: API sync unit tests
         run: pnpm run test:api:sync
@@ -233,8 +278,11 @@ jobs:
       - name: Website discovery CORS tests
         run: pnpm --filter website run test:cors
 
+      - name: Website message formatter tests
+        run: pnpm --filter website run test:i18n
+
   website-docker-build:
-    needs: [lint, types, contracts]
+    needs: [ lint, types, contracts ]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -285,7 +333,7 @@ jobs:
           cache_scope: website
 
   api-docker-build:
-    needs: [lint, types, contracts]
+    needs: [ lint, types, contracts ]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -334,7 +382,7 @@ jobs:
           cache_scope: api
 
   webapp-docker-build:
-    needs: [lint, types, contracts]
+    needs: [ lint, types, contracts ]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:

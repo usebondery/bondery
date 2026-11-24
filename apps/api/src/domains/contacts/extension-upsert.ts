@@ -97,7 +97,7 @@ export async function upsertContactFromExtension(ctx: DomainContext, input: Exte
     );
   }
 
-  let existingContactId: string | null = null;
+  let existingContactId: string | null;
   try {
     existingContactId = await findPersonIdBySocial(
       db,
@@ -105,8 +105,8 @@ export async function upsertContactFromExtension(ctx: DomainContext, input: Exte
       primarySocial.platform,
       primarySocial.handle,
     );
-  } catch {
-    throw internal("contact_failed_to_look_up_contact");
+  } catch (error) {
+    throw internal("contact_failed_to_look_up_contact", error);
   }
 
   await uploadAllLinkedInLogos(user.id, workHistory, educationHistory);
@@ -172,8 +172,8 @@ export async function upsertContactFromExtension(ctx: DomainContext, input: Exte
   if (extensionGroup) {
     try {
       await assignContactsToDefaultImportGroup(ctx, extensionGroup, [newContactId]);
-    } catch {
-      throw internal("contact_failed_to_assign_default_group");
+    } catch (error) {
+      throw internal("contact_failed_to_assign_default_group", error);
     }
   }
 

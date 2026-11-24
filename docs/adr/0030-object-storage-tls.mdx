@@ -1,0 +1,57 @@
+---
+title: "ADR 0030: Object storage TLS"
+hidden: true
+last_updated: 2026-11-19
+---
+
+# ADR 0030: Object storage TLS
+
+**Status:** Accepted
+**Date:** 2026-11-19
+
+## Context
+
+After Redis and Postgres ([ADR 0029](./0029-postgres-tls.mdx)), object storage was the last service the API reached in plaintext. The API sent signed S3 requests to `http://${prefix}-storage:8333`, and the SeaweedFS nodes (master, volume, filer, gateway) talked gRPC and HTTP to each other without TLS. Uploads carry contact photos and the files people import.
+
+The gateway is on the shared `dokploy-network`, which other stacks on the host also join. SigV4 does not leak the secret key, but it does not hide the request body either. Inside the cluster, file chunks moved between the gateway and the volume server in plaintext, and any container on the `internal` network could call the volume server or the filer without credentials.
+
+## Decision
+
+1. **The API reaches the gateway over verified HTTPS.** The gateway serves the API on port `8443` with the cluster certificate. Compose sets `BONDERY_PRIVATE_S3_ENDPOINT=https://${prefix}-storage:8443` and `BONDERY_PRIVATE_S3_TLS_CA_FILE` in the api `environment:`, so `.env` cannot weaken them. The client trusts only the storage CA and checks the hostname.
+2. **Mutual TLS between nodes.** `deploy/bondery/seaweedfs/security.toml` sets `[grpc]` and `[https.*]` with a CA, so every gRPC and HTTP server requires a client certificate from the storage CA, and every client verifies the server. gRPC peers must also present the cluster common name. Plaintext gets a TLS alert or HTTP 400.
+3. **One cluster certificate, its own CA.** `stack-secrets` issues a storage CA (20 years) and one certificate (10 years) valid for server and client authentication, for `seaweedfs-master`, `-volume`, `-filer`, `-s3`, `${prefix}-storage`, `localhost`, and `127.0.0.1`. Per-node certificates would let one node's compromise stay contained, but every node can already reach every other node and the gateway holds the S3 admin credentials, so they would add rotation work without a real boundary. A separate CA per service keeps the trust narrow: a client that trusts the Postgres CA trusts nothing else. The CA and certificate logic from ADR 0029 moved into `apps/api/src/lib/infra-secrets/private-ca.ts`, which both services use.
+4. **The key reaches the `seaweed` user through a tmpfs.** The image drops from root to `seaweed` (uid 1000) before it starts `weed`, and bind mounts from Windows or macOS hosts cannot carry Unix owners. `seaweedfs/tls-entrypoint.sh` copies the files into a tmpfs as `seaweed:seaweed`, key `0600`, then runs the image entrypoint. The gateway now also runs as `seaweed` instead of root, and its rendered credentials file moved from `/tmp` into that tmpfs.
+5. **One factory creates every S3 client.** `createS3Client()` in `apps/api/src/lib/storage/s3-client.ts` loads the CA file and refuses one with an `http://` endpoint. The Biome plugin `biome/plugins/use-s3-client-factory.grit` fails the build on `new S3Client(` anywhere else in the API.
+6. **TLS 1.3 only.** Every client is Go, Node, or curl with OpenSSL 3, so there is no older client to serve.
+7. **Expiry is visible.** The API logs the TLS version and the days left on the gateway certificate at boot. The daily certificate job (`tls-certificate-check`, which also covers Postgres) warns 90 days before expiry and errors 14 days before.
+
+## Findings that shaped the details
+
+All of these were measured against `chrislusf/seaweedfs:4.40` with the real Compose files.
+
+| Finding | Consequence |
+|---|---|
+| With `[tls] min_version` but no `max_version`, SeaweedFS rejects its gRPC TLS settings and **starts gRPC in plaintext**, with only a log warning | `security.toml` sets both. `check-compose` requires both, and the release smoke checks on the running cluster that no gRPC port answers plaintext |
+| Without `-ip`, the volume server registers by container IP, which no certificate can name; the filer's HTTPS calls to it would fail the hostname check | The volume server runs with `-ip=seaweedfs-volume`. Stored data is addressed by volume ID, not by server address, so existing data stays readable |
+| Each node also listens on `127.0.0.1` inside its own container, in plain HTTP. Only processes in that container can reach it | Healthchecks probe the service name over HTTPS, the listener the network sees |
+| The gateway serves Apache Iceberg's REST catalog on `8181` by default, in plaintext | Bondery does not use it; the gateway starts with `-port.iceberg=0` |
+| Given `httpsAgent` as options (`{ ca }`), the AWS SDK builds a fresh agent without them for every request that sends `Expect: 100-continue`. Bucket checks worked and a 3 MB upload failed verification | `createS3Client()` passes an `https.Agent` instance, which the SDK keeps for every request. A unit test uploads 3 MB and checks that the header was sent |
+| An existing cluster switched to TLS in place: objects written before the switch, including a multi-chunk one, read back byte for byte, and new writes work | No migration step; the upgrade is a restart |
+
+## Not covered: the public route
+
+Traefik serves `BONDERY_INFRA_STORAGE_DOMAIN` with Let's Encrypt. This ADR first left its hop to the gateway on HTTP `8333`, reasoning that it only carries public objects. That missed the parent-domain session cookie, which browsers send with every image request. [ADR 0031](./0031-internal-api-tls.mdx) moves the route to HTTPS `8443` with a published `serversTransport`, limits it to reads, and drops `Cookie` and `Authorization`. HTTP `8333` stays for the healthcheck and local development.
+
+## Rollout
+
+One release, like ADR 0029. The SeaweedFS services restart once; stored files stay. The release smoke checks that the API reported TLS with the storage CA, that the gateway's HTTPS listener verifies against that CA only, and that master, volume, and filer refuse plaintext and peers without the cluster certificate while accepting it. Rollback is the previous release: same data, plaintext configuration.
+
+## Consequences
+
+- No plaintext object traffic leaves a container on the bundled stack, except the public read route above.
+- S3 tools for backups need the storage CA, or run inside the stack.
+- A self-hoster with external S3 sets an `https://` endpoint, and `BONDERY_PRIVATE_S3_TLS_CA_FILE` only for a private CA.
+
+## Not in scope
+
+A client certificate for the API at the gateway (SigV4 already authenticates it), JWT signing for volume writes (`[jwt.signing]`), and HTTPS from Traefik to the gateway.

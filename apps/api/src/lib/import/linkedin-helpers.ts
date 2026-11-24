@@ -13,6 +13,64 @@ import logger from "../platform/logger.js";
 import { getStorage, LINKEDIN_LOGOS_BUCKET } from "../storage/get-storage.js";
 import { LINKEDIN_LOGO_MAX_EDGE, normalizeImageToJpeg } from "../storage/normalize-image.js";
 
+const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const YEAR_MONTH_PATTERN = /^\d{4}-\d{2}$/;
+const YEAR_PATTERN = /^\d{4}$/;
+
+function parseOptionalDate(value: string | null | undefined): Date | null {
+  const normalized = toPostgresDate(value);
+  if (!normalized) {
+    return null;
+  }
+  const date = new Date(normalized);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+/**
+ * Downloads an image from a URL and uploads it to the linkedin-logos storage bucket.
+ * Uses upsert so re-imports overwrite the existing file without duplicates.
+ *
+ * @returns The public URL of the stored logo, or null on failure.
+ */
+async function uploadLinkedInLogo(
+  userId: string,
+  linkedInId: string,
+  imageUrl: string,
+): Promise<string | null> {
+  try {
+    const response = await fetch(imageUrl, { signal: AbortSignal.timeout(8000) });
+    if (!response.ok) {
+      return null;
+    }
+
+    const blob = await response.blob();
+
+    const validation = validateImageUpload({
+      size: blob.size,
+      type: blob.type,
+    });
+    if (!validation.isValid) {
+      return null;
+    }
+
+    const arrayBuffer = await blob.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    if (!validateImageMagicBytes(buffer)) {
+      return null;
+    }
+
+    const fileName = `${userId}/${linkedInId}.jpg`;
+    const storage = getStorage();
+    const normalized = await normalizeImageToJpeg(buffer, { maxEdge: LINKEDIN_LOGO_MAX_EDGE });
+    await storage.put(LINKEDIN_LOGOS_BUCKET, fileName, normalized, { contentType: "image/jpeg" });
+    return storage.getPublicUrl(LINKEDIN_LOGOS_BUCKET, fileName);
+  } catch (error) {
+    logger.error({ err: error }, "[linkedin-helpers] Error in uploadLinkedInLogo");
+    return null;
+  }
+}
+
 /**
  * Converts a loose date string (YYYY, YYYY-MM, or YYYY-MM-DD) into a
  * Postgres-safe date string (always YYYY-MM-DD).
@@ -28,25 +86,16 @@ export function toPostgresDate(val: string | null | undefined): string | null {
   if (!val) {
     return null;
   }
-  if (/^\d{4}-\d{2}-\d{2}$/.test(val)) {
+  if (ISO_DATE_PATTERN.test(val)) {
     return val;
   }
-  if (/^\d{4}-\d{2}$/.test(val)) {
+  if (YEAR_MONTH_PATTERN.test(val)) {
     return `${val}-01`;
   }
-  if (/^\d{4}$/.test(val)) {
+  if (YEAR_PATTERN.test(val)) {
     return `${val}-07-02`;
   }
   return val;
-}
-
-function parseOptionalDate(value: string | null | undefined): Date | null {
-  const normalized = toPostgresDate(value);
-  if (!normalized) {
-    return null;
-  }
-  const date = new Date(normalized);
-  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 /**
@@ -128,7 +177,7 @@ export async function updateContactPhoto(
   imageUrl: string,
 ): Promise<void> {
   try {
-    const response = await fetch(imageUrl, { signal: AbortSignal.timeout(8_000) });
+    const response = await fetch(imageUrl, { signal: AbortSignal.timeout(8000) });
     if (!response.ok) {
       return;
     }
@@ -157,51 +206,6 @@ export async function updateContactPhoto(
 }
 
 /**
- * Downloads an image from a URL and uploads it to the linkedin-logos storage bucket.
- * Uses upsert so re-imports overwrite the existing file without duplicates.
- *
- * @returns The public URL of the stored logo, or null on failure.
- */
-async function uploadLinkedInLogo(
-  userId: string,
-  linkedInId: string,
-  imageUrl: string,
-): Promise<string | null> {
-  try {
-    const response = await fetch(imageUrl, { signal: AbortSignal.timeout(8_000) });
-    if (!response.ok) {
-      return null;
-    }
-
-    const blob = await response.blob();
-
-    const validation = validateImageUpload({
-      size: blob.size,
-      type: blob.type,
-    });
-    if (!validation.isValid) {
-      return null;
-    }
-
-    const arrayBuffer = await blob.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    if (!validateImageMagicBytes(buffer)) {
-      return null;
-    }
-
-    const fileName = `${userId}/${linkedInId}.jpg`;
-    const storage = getStorage();
-    const normalized = await normalizeImageToJpeg(buffer, { maxEdge: LINKEDIN_LOGO_MAX_EDGE });
-    await storage.put(LINKEDIN_LOGOS_BUCKET, fileName, normalized, { contentType: "image/jpeg" });
-    return storage.getPublicUrl(LINKEDIN_LOGOS_BUCKET, fileName);
-  } catch (error) {
-    logger.error({ err: error }, "[linkedin-helpers] Error in uploadLinkedInLogo");
-    return null;
-  }
-}
-
-/**
  * Downloads and stores all unique LinkedIn logos from work history and education entries.
  * Returns a map of linkedInId → stored public URL for use when inserting DB rows.
  */
@@ -218,7 +222,7 @@ export async function uploadAllLinkedInLogos(
       if (
         entry.companyLinkedinId &&
         entry.companyLogoUrl &&
-        !tasks.some((t) => t.linkedInId === entry.companyLinkedinId)
+        tasks.every((t) => t.linkedInId !== entry.companyLinkedinId)
       ) {
         tasks.push({ imageUrl: entry.companyLogoUrl, linkedInId: entry.companyLinkedinId });
       }
@@ -230,7 +234,7 @@ export async function uploadAllLinkedInLogos(
       if (
         entry.schoolLinkedinId &&
         entry.schoolLogoUrl &&
-        !tasks.some((t) => t.linkedInId === entry.schoolLinkedinId)
+        tasks.every((t) => t.linkedInId !== entry.schoolLinkedinId)
       ) {
         tasks.push({ imageUrl: entry.schoolLogoUrl, linkedInId: entry.schoolLinkedinId });
       }

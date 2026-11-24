@@ -108,7 +108,9 @@ for (const app of EXPECTED_APPS) {
 
   // Directives in the proxy mean the policy was written inline.
   if (HAND_WRITTEN_POLICY.test(source)) {
-    check.add(`${at}: builds a policy from literal directives. Use the shared builder instead.`);
+    check.add(
+      `${at}: builds a policy from literal directives. Call ${SHARED_BUILDER_EXPORT}() from \`@bondery/helpers/security\` instead.`,
+    );
   }
 
   // The proxy must reach the shared builder, directly or through a module it owns.
@@ -141,8 +143,7 @@ for (const app of EXPECTED_APPS) {
     const enforcedScriptSrc = /scriptSrc\s*:\s*\[[^\]]*'unsafe-inline'/s.test(content);
     if (enforcedScriptSrc) {
       check.add(
-        `${repoPath(file)}: scriptSrc allows 'unsafe-inline'. That disables the nonce and` +
-          " lets any inline script run.",
+        `${repoPath(file)}: scriptSrc allows 'unsafe-inline'. Remove it, so the nonce is the only way an inline script runs.`,
       );
     }
   }

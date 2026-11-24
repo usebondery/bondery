@@ -1,0 +1,22 @@
+{
+  "AddError": "Etiket eklenemedi",
+  "AddNewTagTooltip": "Yeni etiket",
+  "AddSuccess": "Etiket eklendi",
+  "AddTagTooltip": "Etiket ekle",
+  "CreateError": "Etiket oluşturulamadı",
+  "CreateNewTagEmpty": "Yeni etiket",
+  "CreateNewTagOption": "Yeni etiket: „{label}”",
+  "CreateTagCancel": "İptal",
+  "CreateTagConfirm": "Oluştur ve ekle",
+  "CreateTagMessage": "„{name}” etiketi henüz yok. Oluşturup bu kişiye eklemek ister misin?",
+  "CreateTagTitle": "Yeni etiket?",
+  "Label": "Etiketler",
+  "NoTagsFound": "Etiket yok",
+  "Placeholder": "Etiket ekle…",
+  "RemoveError": "Etiket kaldırılamadı",
+  "RemoveTagTooltip": "Etiketi kaldır",
+  "SearchPlaceholder": "Etiket ara veya oluştur…",
+  "TagAlreadyAddedMessage": "„{name}” etiketi bu kişiye zaten atanmış.",
+  "TagAlreadyAddedTitle": "Etiket zaten ekli",
+  "TagAlreadyAppliedTooltip": "Etiket zaten uygulanmış"
+}

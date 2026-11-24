@@ -1,8 +1,9 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { type ActionIconProps, Tooltip } from "@mantine/core";
 import { IconCheck, IconCopy } from "@tabler/icons-react";
-import { useState } from "react";
+import { type ReactElement, useState } from "react";
 import { ActionIconButton } from "#ActionIconButton/ActionIconButton.js";
 
 export interface CopyButtonProps extends Omit<ActionIconProps, "onClick" | "children"> {
@@ -31,15 +32,17 @@ export function CopyButton({
   variant = "subtle",
   size = "xs",
   ...props
-}: CopyButtonProps) {
+}: CopyButtonProps): ReactElement {
   const [copied, setCopied] = useState(false);
 
   function handleCopy() {
-    void navigator.clipboard.writeText(value).then(() => {
-      setCopied(true);
-      onCopied?.();
-      setTimeout(() => setCopied(false), copiedDuration);
-    });
+    detachPromise(
+      navigator.clipboard.writeText(value).then(() => {
+        setCopied(true);
+        onCopied?.();
+        setTimeout(() => setCopied(false), copiedDuration);
+      }),
+    );
   }
 
   return (

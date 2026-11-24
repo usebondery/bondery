@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import { IDEMPOTENCY_KEY_HEADER, toBffApiPath } from "@bondery/helpers/globals/paths";
 import { generateId } from "@bondery/helpers/ids/generate-id";
 import { applyTransportErrorPolicy } from "@/lib/api/applyTransportErrorPolicy";
@@ -14,12 +15,6 @@ import {
   readIdempotencyErrorCode,
 } from "./idempotencyAttempt";
 import { parseApiJsonResponse, parseApiJsonResponseOrNull } from "./parseResponse";
-
-export { ApiError } from "@bondery/helpers/api";
-export {
-  applyTransportErrorPolicy,
-  applyTransportResponsePolicy,
-} from "./applyTransportErrorPolicy";
 
 /**
  * One `clientApiJson` or `clientApiFetch` call is one attempt.
@@ -138,7 +133,7 @@ function waitSeconds(seconds: number, signal?: AbortSignal | null): Promise<void
 
 function abortError(signal: AbortSignal): Error {
   if (signal.reason instanceof Error) {
-    const reason = signal.reason;
+    const { reason } = signal;
     if (reason.name === "AbortError") {
       return reason;
     }
@@ -149,6 +144,12 @@ function abortError(signal: AbortSignal): Error {
 function isAbortError(error: unknown): boolean {
   return error instanceof Error && error.name === "AbortError";
 }
+
+export { ApiError } from "@bondery/helpers/api";
+export {
+  applyTransportErrorPolicy,
+  applyTransportResponsePolicy,
+} from "./applyTransportErrorPolicy";
 
 export async function clientApiFetch(path: string, init?: RequestInit): Promise<Response> {
   return attemptClientApi(path, init);
@@ -171,7 +172,7 @@ export async function clientApiJsonOrNull<T>(path: string, init?: RequestInit): 
   try {
     const response = await attemptClientApi(path, init);
     if (isUnauthorizedResponseStatus(response.status)) {
-      void handleUnauthorizedSession();
+      detachPromise(handleUnauthorizedSession());
       return null;
     }
     return parseApiJsonResponseOrNull<T>(response);

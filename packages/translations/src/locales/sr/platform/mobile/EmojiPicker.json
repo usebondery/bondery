@@ -1,0 +1,22 @@
+{
+  "Category": {
+    "Activities": "Aktivnosti",
+    "Animals": "Životinje",
+    "Buildings": "Zgrade",
+    "Celebrations": "Proslave",
+    "Food": "Hrana",
+    "Hearts": "Srca",
+    "Humans": "Ljudi",
+    "Miscellaneous": "Razno",
+    "Nature": "Priroda",
+    "Objects": "Predmeti",
+    "Sports": "Sport",
+    "Travel": "Putovanja",
+    "Work": "Posao"
+  },
+  "EmptySearch": "Nema pronađenih emodžija",
+  "RandomAccessibilityLabel": "Izaberi nasumični emodži",
+  "SearchPlaceholder": "Pretraži emodžije…",
+  "SheetTitle": "Emodži",
+  "TriggerAccessibilityHint": "Otvara birač emodžija"
+}

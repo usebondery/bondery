@@ -2,18 +2,62 @@
 #
 #   pnpm run start:redis
 #
-# Host port 26636 (DEV_PORTS.REDIS). Ephemeral — no persistence.
+# Same protection as the bundled Compose Redis: TLS 1.3 only, a password, and a client
+# certificate. `pnpm run start:redis` first creates the password and certificates in
+# .temp/redis-secrets (`pnpm run redis:secrets`), then starts Redis. The API reads them through
+# BONDERY_PRIVATE_REDIS_PASSWORD_FILE,
+# BONDERY_PRIVATE_REDIS_TLS_CA_FILE, BONDERY_PRIVATE_REDIS_TLS_CERT_FILE, and
+# BONDERY_PRIVATE_REDIS_TLS_KEY_FILE (root .env.local; `pnpm run setup:dev` sets them).
+#
+# Host port 26636 (DEV_PORTS.REDIS), loopback only. Ephemeral — no persistence.
+# Do not run `docker compose up` on this file directly: the secrets folder must exist first.
 
 services:
   redis:
     image: redis:8.10
     container_name: bondery-redis
     restart: unless-stopped
-    command: redis-server --save "" --appendonly no
+    command:
+      - redis-server
+      - --save
+      - ""
+      - --appendonly
+      - "no"
+      - --port
+      - "0"
+      - --tls-port
+      - "6379"
+      - --tls-cert-file
+      - /bondery-redis/server/tls.crt
+      - --tls-key-file
+      - /bondery-redis/server/tls.key
+      - --tls-ca-cert-file
+      - /bondery-redis/server/ca.crt
+      - --tls-auth-clients
+      - "yes"
+      - --tls-protocols
+      - TLSv1.3
+      - --tls-ciphersuites
+      - TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256
+      - --tls-prefer-server-ciphers
+      - "yes"
+      - --aclfile
+      - /bondery-redis/server/users.acl
     ports:
-      - "26636:6379"
+      - "127.0.0.1:26636:6379"
+    volumes:
+      - type: bind
+        source: ../../.temp/redis-secrets/server
+        target: /bondery-redis/server
+        read_only: true
+        bind:
+          create_host_path: false
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test:
+        [
+          "CMD-SHELL",
+          'REDISCLI_AUTH="$$(cat /bondery-redis/server/password)" redis-cli --tls --cert /bondery-redis/server/healthcheck.crt --key /bondery-redis/server/healthcheck.key --cacert /bondery-redis/server/ca.crt -h localhost -p 6379 ping | grep -q PONG',
+        ]
       interval: 5s
       timeout: 3s
       retries: 3

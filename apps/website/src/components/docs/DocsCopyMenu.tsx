@@ -1,17 +1,21 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import {
   DropdownOption,
   DropdownOptionMenu,
   errorNotificationTemplate,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
+import docs from "@bondery/translations/locales/en/platform/website/WebsiteDocs.json" with {
+  type: "json",
+};
 import { Button, Menu } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconBrandGithub, IconChevronDown, IconMarkdown } from "@tabler/icons-react";
 import { useRef } from "react";
 
-export interface DocsCopyMenuProps {
+interface DocsCopyMenuProps {
   githubUrl: string;
   markdownUrl: string;
   pageUrl: string;
@@ -21,8 +25,8 @@ function openInNewTab(url: string) {
   window.open(url, "_blank", "noopener,noreferrer");
 }
 
-export function DocsCopyMenu({ githubUrl, markdownUrl, pageUrl }: DocsCopyMenuProps) {
-  const pending = useRef(false);
+function DocsCopyMenu({ githubUrl, markdownUrl, pageUrl }: DocsCopyMenuProps) {
+  const pending = useRef<boolean>(false);
 
   async function copyMarkdownLink() {
     const url = new URL(markdownUrl, location.origin).href;
@@ -30,26 +34,34 @@ export function DocsCopyMenu({ githubUrl, markdownUrl, pageUrl }: DocsCopyMenuPr
       await navigator.clipboard.writeText(url);
       notifications.show(
         successNotificationTemplate({
-          description: "The markdown link is on your clipboard.",
-          title: "Markdown link copied",
+          description: docs.Copy.LinkCopiedDescription,
+          title: docs.Copy.LinkCopiedTitle,
         }),
       );
     } catch {
       notifications.show(
         errorNotificationTemplate({
-          description: "Select the address and press Ctrl+C.",
-          title: "Copy failed",
+          description: docs.Copy.FailedLinkDescription,
+          title: docs.Copy.FailedTitle,
         }),
       );
     }
   }
 
-  async function copyMarkdown() {
+  function beginCopy(): boolean {
     if (pending.current) {
-      return;
+      return false;
     }
 
     pending.current = true;
+    return true;
+  }
+
+  async function copyMarkdown() {
+    if (!beginCopy()) {
+      return;
+    }
+
     try {
       const response = await fetch(markdownUrl);
       if (!response.ok) {
@@ -60,15 +72,15 @@ export function DocsCopyMenu({ githubUrl, markdownUrl, pageUrl }: DocsCopyMenuPr
       await navigator.clipboard.writeText(markdown);
       notifications.show(
         successNotificationTemplate({
-          description: "The page markdown is on your clipboard.",
-          title: "Markdown copied",
+          description: docs.Copy.MarkdownCopiedDescription,
+          title: docs.Copy.MarkdownCopiedTitle,
         }),
       );
     } catch {
       notifications.show(
         errorNotificationTemplate({
-          description: "Select the text and press Ctrl+C.",
-          title: "Copy failed",
+          description: docs.Copy.FailedMarkdownDescription,
+          title: docs.Copy.FailedTitle,
         }),
       );
     } finally {
@@ -78,31 +90,31 @@ export function DocsCopyMenu({ githubUrl, markdownUrl, pageUrl }: DocsCopyMenuPr
 
   return (
     <Button.Group data-page-url={pageUrl}>
-      <Button onClick={() => void copyMarkdownLink()} type="button" variant="default">
-        Copy markdown link
+      <Button onClick={() => detachPromise(copyMarkdownLink())} type="button" variant="default">
+        {docs.Copy.LinkLabel}
       </Button>
       <DropdownOptionMenu position="bottom-end" width={240} withinPortal>
         <Menu.Target>
-          <Button aria-haspopup="menu" aria-label="More page actions" px="xs" variant="default">
+          <Button aria-haspopup="menu" aria-label={docs.Copy.MoreActions} px="xs" variant="default">
             <IconChevronDown size={16} />
           </Button>
         </Menu.Target>
         <Menu.Dropdown miw={220}>
           <DropdownOption
             icon={<IconMarkdown size={16} />}
-            label="Copy markdown"
-            onSelect={() => void copyMarkdown()}
+            label={docs.Copy.CopyMarkdown}
+            onSelect={() => detachPromise(copyMarkdown())}
           />
           <DropdownOption
             external
             icon={<IconBrandGithub size={16} />}
-            label="Open on GitHub"
+            label={docs.Copy.OpenOnGitHub}
             onSelect={() => openInNewTab(githubUrl)}
           />
           <DropdownOption
             external
             icon={<IconMarkdown size={16} />}
-            label="View as markdown"
+            label={docs.Copy.ViewAsMarkdown}
             onSelect={() => openInNewTab(markdownUrl)}
           />
         </Menu.Dropdown>
@@ -110,3 +122,6 @@ export function DocsCopyMenu({ githubUrl, markdownUrl, pageUrl }: DocsCopyMenuPr
     </Button.Group>
   );
 }
+
+export type { DocsCopyMenuProps };
+export { DocsCopyMenu };

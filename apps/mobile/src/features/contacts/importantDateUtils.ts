@@ -1,28 +1,34 @@
-/** Epoch year used for recurring dates without a year (matches web + vCard convention). */
-export const YEARLESS_SENTINEL = 1904;
+import { type DateTimeFormatContext, formatUserDate } from "@bondery/helpers/date";
+import { buildIntlLocaleTag } from "@bondery/schemas/locale";
 
-export interface ImportantDateWheelValue {
+/** Epoch year used for recurring dates without a year (matches web + vCard convention). */
+const YEARLESS_SENTINEL = 1904;
+
+/** Characters of the year at the start of an ISO `YYYY-MM-DD` date. */
+const ISO_YEAR_LENGTH = 4;
+
+interface ImportantDateWheelValue {
   day: number;
   month: number;
   withoutYear: boolean;
   year: number;
 }
 
-export function isYearlessDate(iso: string): boolean {
-  const year = Number.parseInt(iso.slice(0, 4), 10);
+function isYearlessDate(iso: string): boolean {
+  const year = Number.parseInt(iso.slice(0, ISO_YEAR_LENGTH), 10);
   return year === YEARLESS_SENTINEL;
 }
 
-export function daysInMonth(month: number, year: number): number {
+function daysInMonth(month: number, year: number): number {
   return new Date(year, month, 0).getDate();
 }
 
-export function clampDay(day: number, month: number, year: number): number {
+function clampDay(day: number, month: number, year: number): number {
   const max = daysInMonth(month, year);
   return Math.min(Math.max(day, 1), max);
 }
 
-export function fromImportantDateIso(iso: string): ImportantDateWheelValue {
+function fromImportantDateIso(iso: string): ImportantDateWheelValue {
   const [yearPart, monthPart, dayPart] = iso.slice(0, 10).split("-").map(Number);
   const withoutYear = yearPart === YEARLESS_SENTINEL;
 
@@ -34,7 +40,7 @@ export function fromImportantDateIso(iso: string): ImportantDateWheelValue {
   };
 }
 
-export function toImportantDateIso(value: ImportantDateWheelValue): string {
+function toImportantDateIso(value: ImportantDateWheelValue): string {
   const year = value.withoutYear ? YEARLESS_SENTINEL : value.year;
   const clampYear = value.withoutYear ? YEARLESS_SENTINEL : value.year;
   const day = clampDay(value.day, value.month, clampYear);
@@ -44,19 +50,11 @@ export function toImportantDateIso(value: ImportantDateWheelValue): string {
   return `${year}-${month}-${dayStr}`;
 }
 
-export function resolveDateLocale(language: string): string {
-  if (language.startsWith("cs")) {
-    return "cs-CZ";
-  }
-
-  if (language.startsWith("de")) {
-    return "de-DE";
-  }
-
-  return "en-US";
+function resolveDateLocale(language: string): string {
+  return buildIntlLocaleTag(language, "24h");
 }
 
-export function formatImportantDate(iso: string, locale = "en-US"): string {
+function formatImportantDate(iso: string, ctx: DateTimeFormatContext): string {
   const parsed = fromImportantDateIso(iso);
   const date = new Date(
     parsed.withoutYear ? YEARLESS_SENTINEL : parsed.year,
@@ -64,29 +62,29 @@ export function formatImportantDate(iso: string, locale = "en-US"): string {
     parsed.day,
   );
 
-  return date.toLocaleDateString(locale, {
-    day: "numeric",
-    month: "long",
-    ...(parsed.withoutYear ? {} : { year: "numeric" }),
-  });
+  return formatUserDate(
+    date,
+    { ...ctx, timeZone: undefined },
+    parsed.withoutYear ? "monthDay" : "long",
+  );
 }
 
-export function getMonthLabels(locale: string): string[] {
+function getMonthLabels(locale: string): string[] {
   return Array.from({ length: 12 }, (_, index) =>
     new Date(2000, index, 1).toLocaleDateString(locale, { month: "long" }),
   );
 }
 
-export function buildYearRange(start = 1900, endOffset = 10): number[] {
+function buildYearRange(start = 1900, endOffset = 10): number[] {
   const end = new Date().getFullYear() + endOffset;
   return Array.from({ length: end - start + 1 }, (_, index) => start + index);
 }
 
-export function defaultWithoutYearForType(type: string | null | undefined): boolean {
+function defaultWithoutYearForType(type: string | null | undefined): boolean {
   return type === "birthday" || type === "nameday";
 }
 
-export function createTodayImportantDateIso(withoutYear = false): string {
+function createTodayImportantDateIso(withoutYear = false): string {
   const now = new Date();
   return toImportantDateIso({
     day: now.getDate(),
@@ -96,7 +94,7 @@ export function createTodayImportantDateIso(withoutYear = false): string {
   });
 }
 
-export function createDefaultWheelValue(
+function createDefaultWheelValue(
   type: string | null | undefined,
   existingIso?: string | null,
 ): ImportantDateWheelValue {
@@ -114,3 +112,20 @@ export function createDefaultWheelValue(
     year: now.getFullYear(),
   };
 }
+
+export type { ImportantDateWheelValue };
+export {
+  buildYearRange,
+  clampDay,
+  createDefaultWheelValue,
+  createTodayImportantDateIso,
+  daysInMonth,
+  defaultWithoutYearForType,
+  formatImportantDate,
+  fromImportantDateIso,
+  getMonthLabels,
+  isYearlessDate,
+  resolveDateLocale,
+  toImportantDateIso,
+  YEARLESS_SENTINEL,
+};

@@ -2,6 +2,15 @@ import type { ContactSocialFieldKey, SocialInputRerouteReason } from "@bondery/h
 import { parsePhoneNumber } from "@bondery/helpers/phone";
 import type { Contact } from "@bondery/schemas";
 
+const SAVABLE_FIELDS = new Set<SocialFieldKey>([
+  "linkedin",
+  "instagram",
+  "facebook",
+  "website",
+  "whatsapp",
+  "signal",
+]);
+
 export type SocialFieldKey = ContactSocialFieldKey;
 
 export interface RerouteSuggestion {
@@ -12,15 +21,6 @@ export interface RerouteSuggestion {
   value: string;
 }
 
-const SAVABLE_FIELDS = new Set<SocialFieldKey>([
-  "linkedin",
-  "instagram",
-  "facebook",
-  "website",
-  "whatsapp",
-  "signal",
-]);
-
 export function isSavableSocialField(field: string): field is SocialFieldKey {
   return SAVABLE_FIELDS.has(field as SocialFieldKey);
 }
@@ -30,33 +30,33 @@ export type SocialFieldValues = Record<SocialFieldKey, string>;
 export const SOCIAL_FIELD_CLOSE_DELAY_MS = 140;
 
 export function getDisplayValues(contact: Contact): SocialFieldValues {
-  const whatsappParsed = parsePhoneNumber(contact.whatsapp || "");
-  const signalParsed = parsePhoneNumber(contact.signal || "");
+  const whatsappParsed = parsePhoneNumber(contact.whatsapp ?? "");
+  const signalParsed = parsePhoneNumber(contact.signal ?? "");
 
   return {
-    facebook: contact.facebook || "",
-    instagram: contact.instagram || "",
-    linkedin: contact.linkedin || "",
-    signal: signalParsed?.number || "",
-    website: contact.website || "",
-    whatsapp: whatsappParsed?.number || "",
+    facebook: contact.facebook ?? "",
+    instagram: contact.instagram ?? "",
+    linkedin: contact.linkedin ?? "",
+    signal: signalParsed?.number ?? "",
+    website: contact.website ?? "",
+    whatsapp: whatsappParsed?.number ?? "",
   };
 }
 
 export function getPersistedValues(contact: Contact): SocialFieldValues {
   return {
-    facebook: contact.facebook || "",
-    instagram: contact.instagram || "",
-    linkedin: contact.linkedin || "",
-    signal: contact.signal || "",
-    website: contact.website || "",
-    whatsapp: contact.whatsapp || "",
+    facebook: contact.facebook ?? "",
+    instagram: contact.instagram ?? "",
+    linkedin: contact.linkedin ?? "",
+    signal: contact.signal ?? "",
+    website: contact.website ?? "",
+    whatsapp: contact.whatsapp ?? "",
   };
 }
 
 export function getDisplayDraftForPersisted(field: SocialFieldKey, persistedValue: string): string {
   if (field === "whatsapp" || field === "signal") {
-    return parsePhoneNumber(persistedValue)?.number || "";
+    return parsePhoneNumber(persistedValue)?.number ?? "";
   }
 
   return persistedValue;

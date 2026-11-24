@@ -20,20 +20,30 @@ export interface DomainContext {
 }
 
 export class DomainError extends Error {
+  readonly statusCode: number;
+  readonly code: ApiErrorCode;
+  override readonly cause?: unknown;
   readonly details?: Record<string, unknown>;
+  readonly type?: ApiErrorType;
+  readonly param?: string;
 
   constructor(
     message: string,
-    readonly statusCode: number,
-    readonly code: ApiErrorCode,
-    readonly cause?: unknown,
+    statusCode: number,
+    code: ApiErrorCode,
+    cause?: unknown,
     details?: Record<string, unknown>,
-    readonly type?: ApiErrorType,
-    readonly param?: string,
+    type?: ApiErrorType,
+    param?: string,
   ) {
     super(message);
     this.name = "DomainError";
+    this.statusCode = statusCode;
+    this.code = code;
+    this.cause = cause;
     this.details = details;
+    this.type = type;
+    this.param = param;
   }
 }
 

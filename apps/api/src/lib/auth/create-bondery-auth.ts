@@ -12,6 +12,7 @@ import { i18n } from "@better-auth/i18n";
 import { mcp } from "@better-auth/mcp";
 import { passkey } from "@better-auth/passkey";
 import { prisma } from "@bondery/db";
+import { detachPromise } from "@bondery/helpers/async";
 import { PLATFORM_ADMIN_ROLE, PLATFORM_USER_ROLE } from "@bondery/helpers/auth/platform-admin";
 import { resolveCookieDomain } from "@bondery/helpers/auth/resolve-cookie-domain";
 import { BETTER_AUTH_BASE_PATH } from "@bondery/helpers/globals/paths";
@@ -35,7 +36,7 @@ import {
   resolveApiResourceIdentifiers,
   resolveAuthErrorPageUrl,
   resolveBetterAuthIssuerUrl,
-  resolveMcpPluginResource,
+  resolveMcpResourceIdentifier,
   resolveMcpResourceIdentifiers,
   resolveTrustedOAuthClientIds,
   resolveUseSecureCookies,
@@ -67,7 +68,7 @@ import { touchPasskeyLastUsed } from "./touch-passkey-last-used.js";
 
 export function createBonderyAuth() {
   const betterAuthSecrets = resolveBetterAuthSecrets();
-  const crossSubdomainCookieDomain = resolveCookieDomain(process.env.BONDERY_PUBLIC_WEBAPP_URL);
+  const crossSubdomainCookieDomain = resolveCookieDomain(process.env["BONDERY_PUBLIC_WEBAPP_URL"]);
   const webAuthnRpConfig = resolveWebAuthnRpConfig();
 
   return betterAuth({
@@ -126,17 +127,17 @@ export function createBonderyAuth() {
 
             const signup_method = resolveSignupMethodFromProviderId(account.providerId);
 
-            void import("../../services/analytics/posthog-capture.js")
-              .then(({ captureProductEvent }) =>
-                captureProductEvent(
-                  { user: { email: user.email, id: user.id } },
-                  "signup_flow:user_create",
-                  { signup_method },
-                ),
-              )
-              .catch(() => {
-                // captureProductEvent is best-effort during signup
-              });
+            // captureProductEvent is best-effort during signup
+            detachPromise(
+              import("../../services/analytics/posthog-capture.js").then(
+                ({ captureProductEvent }) =>
+                  captureProductEvent(
+                    { user: { email: user.email, id: user.id } },
+                    "signup_flow:user_create",
+                    { signup_method },
+                  ),
+              ),
+            );
           },
         },
       },
@@ -151,31 +152,33 @@ export function createBonderyAuth() {
               userId: user.id,
             });
 
-            void import("../../services/notifications/welcome.js")
-              .then(({ sendWelcomeEmailIfNeeded }) =>
-                sendWelcomeEmailIfNeeded({
-                  email: user.email,
-                  language: locale,
-                  userId: user.id,
-                  userName: user.name,
-                }),
-              )
-              .catch(() => {
+            detachPromise(
+              import("../../services/notifications/welcome.js").then(
+                ({ sendWelcomeEmailIfNeeded }) =>
+                  sendWelcomeEmailIfNeeded({
+                    email: user.email,
+                    language: locale,
+                    userId: user.id,
+                    userName: user.name,
+                  }),
+              ),
+              () => {
                 // sendWelcomeEmailIfNeeded logs failures internally
-              });
+              },
+            );
 
             if (isMagicLinkSignupContext(ctx)) {
-              void import("../../services/analytics/posthog-capture.js")
-                .then(({ captureProductEvent }) =>
-                  captureProductEvent(
-                    { user: { email: user.email, id: user.id } },
-                    "signup_flow:user_create",
-                    { signup_method: SIGNUP_METHOD.email },
-                  ),
-                )
-                .catch(() => {
-                  // captureProductEvent is best-effort during signup
-                });
+              // captureProductEvent is best-effort during signup
+              detachPromise(
+                import("../../services/analytics/posthog-capture.js").then(
+                  ({ captureProductEvent }) =>
+                    captureProductEvent(
+                      { user: { email: user.email, id: user.id } },
+                      "signup_flow:user_create",
+                      { signup_method: SIGNUP_METHOD.email },
+                    ),
+                ),
+              );
             }
           },
           before: async (user) => {
@@ -259,7 +262,7 @@ export function createBonderyAuth() {
         // Canonical MCP resource. mcp() also appends this identifier to
         // `resources` if missing. REST identifiers stay in `resources` with
         // REST-only allowedScopes; first-party provisioner links only REST.
-        resource: resolveMcpPluginResource(),
+        resource: resolveMcpResourceIdentifier(),
         resources: [
           ...resolveApiResourceIdentifiers().map((identifier) => ({
             allowedScopes: [...OAUTH_PROVIDER_SCOPES],
@@ -332,7 +335,7 @@ export function createBonderyAuth() {
       // Inject tests share one client IP (Better Auth cannot read Fastify's
       // remoteAddress), so the default per-path bucket 429s `test:auth` when
       // files run in parallel against real Redis. Production keeps defaults.
-      ...(process.env.NODE_ENV === "test" ? { max: 10_000, window: 10 } : {}),
+      ...(process.env["NODE_ENV"] === "test" ? { max: 10_000, window: 10 } : {}),
     },
     secondaryStorage: createBetterAuthSecondaryStorage(),
     secrets: betterAuthSecrets,

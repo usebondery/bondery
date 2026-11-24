@@ -1,6 +1,7 @@
 // biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { Button, Paper, Stack } from "@mantine/core";
 import { useDebouncedCallback } from "@mantine/hooks";
@@ -191,7 +192,7 @@ export function GroupClient({ groupId }: GroupClientProps) {
     if (isFetchingNextPage || !hasMore) {
       return;
     }
-    void fetchNextPage();
+    detachPromise(fetchNextPage());
   };
   const bulkSelectionActions: BulkSelectionAction[] = [
     {
@@ -245,7 +246,9 @@ export function GroupClient({ groupId }: GroupClientProps) {
           group={groupCardData}
           interactive={false}
           onAddPeople={handleAddContacts}
-          onClick={() => {}}
+          onClick={() => {
+            // no-op: this card is already on the group detail page
+          }}
           onDelete={handleDeleteGroup}
           onDuplicate={handleDuplicateGroup}
           onEdit={handleEditGroup}

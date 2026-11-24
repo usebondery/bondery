@@ -33,11 +33,12 @@ export async function sendTrialEndingEmail(
   }
 
   const config = requireEmailConfig();
-  const lng = await resolveEmailLocale(input.userId);
+  const formatCtx = await resolveEmailLocale(input.userId);
+  const lng = formatCtx.locale;
   const bundle = loadEmailNamespace(lng, "TrialEndingEmail");
   const copy = buildTrialEndingCopy(bundle);
   const formattedEndDate = input.trialEndsAt
-    ? formatEmailDate(input.trialEndsAt, lng)
+    ? formatEmailDate(input.trialEndsAt, formatCtx)
     : readCopyString(bundle, "endDateFallback");
   const subject = readCopyString(bundle, "subject");
 

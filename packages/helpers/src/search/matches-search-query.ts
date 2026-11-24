@@ -1,3 +1,5 @@
+const PATTERN_5C732B_RE = /\s+/;
+
 function levenshtein(a: string, b: string): number {
   if (a === b) {
     return 0;
@@ -11,7 +13,9 @@ function levenshtein(a: string, b: string): number {
 
   const rows = a.length + 1;
   const cols = b.length + 1;
-  const matrix: number[] = new Array(rows * cols);
+  const matrix: number[] = Array.from({ length: rows * cols }, () => 0);
+  // Every index read below lies inside the rows * cols matrix, so the fallback never applies.
+  const cell = (row: number, col: number): number => matrix[row * cols + col] ?? 0;
 
   for (let i = 0; i < rows; i++) {
     matrix[i * cols] = i;
@@ -23,18 +27,14 @@ function levenshtein(a: string, b: string): number {
   for (let i = 1; i < rows; i++) {
     for (let j = 1; j < cols; j++) {
       const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-      const deletion = matrix[(i - 1) * cols + j] + 1;
-      const insertion = matrix[i * cols + (j - 1)] + 1;
-      const substitution = matrix[(i - 1) * cols + (j - 1)] + cost;
+      const deletion = cell(i - 1, j) + 1;
+      const insertion = cell(i, j - 1) + 1;
+      const substitution = cell(i - 1, j - 1) + cost;
       matrix[i * cols + j] = Math.min(deletion, insertion, substitution);
     }
   }
 
-  return matrix[(rows - 1) * cols + (cols - 1)];
-}
-
-export function normalizeSearchText(text: string): string {
-  return text.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().trim();
+  return cell(rows - 1, cols - 1);
 }
 
 function matchesSubsequence(query: string, target: string): boolean {
@@ -51,10 +51,21 @@ function matchesSubsequence(query: string, target: string): boolean {
   return false;
 }
 
-function prefixSimilar(query: string, target: string): boolean {
-  const maxDistance = query.length <= 5 ? 1 : 2;
+/** A query this short or shorter is "short": it gets the stricter edit distances. */
+const SHORT_QUERY_MAX_LENGTH = 5;
+/** Prefix lengths compared for typo tolerance, longest first. */
+const LONG_PREFIX_LENGTH = 4;
+const SHORT_PREFIX_LENGTH = 3;
+/** Fuzzy word matching ignores a query or target shorter than this. */
+const MIN_FUZZY_LENGTH = 3;
+/** Edit distance allowed against a whole word, for a short query and for a longer one. */
+const SHORT_QUERY_WORD_DISTANCE = 2;
+const LONG_QUERY_WORD_DISTANCE = 3;
 
-  for (const prefixLen of [4, 3]) {
+function prefixSimilar(query: string, target: string): boolean {
+  const maxDistance = query.length <= SHORT_QUERY_MAX_LENGTH ? 1 : 2;
+
+  for (const prefixLen of [LONG_PREFIX_LENGTH, SHORT_PREFIX_LENGTH]) {
     if (prefixLen > query.length || prefixLen > target.length) {
       continue;
     }
@@ -68,12 +79,13 @@ function prefixSimilar(query: string, target: string): boolean {
 }
 
 function matchesFuzzyWord(query: string, target: string): boolean {
-  if (query.length < 3 || target.length < 3) {
+  if (query.length < MIN_FUZZY_LENGTH || target.length < MIN_FUZZY_LENGTH) {
     return false;
   }
 
-  const words = target.split(/\s+/).filter(Boolean);
-  const threshold = query.length <= 5 ? 2 : 3;
+  const words = target.split(PATTERN_5C732B_RE).filter(Boolean);
+  const threshold =
+    query.length <= SHORT_QUERY_MAX_LENGTH ? SHORT_QUERY_WORD_DISTANCE : LONG_QUERY_WORD_DISTANCE;
 
   for (const word of words) {
     if (levenshtein(query, word) <= threshold) {
@@ -94,6 +106,10 @@ function matchesFuzzyWord(query: string, target: string): boolean {
   }
 
   return false;
+}
+
+export function normalizeSearchText(text: string): string {
+  return text.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().trim();
 }
 
 /**

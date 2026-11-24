@@ -1,0 +1,21 @@
+{
+  "AllEnrichedDescription": "Όλες οι επαφές με προφίλ LinkedIn έχουν ήδη εμπλουτιστεί.",
+  "AllEnrichedTitle": "Όλες οι επαφές εμπλουτίστηκαν",
+  "Badge": "LinkedIn",
+  "CurrentlyEnriching": "Εμπλουτίζεται τώρα:",
+  "EligibleLabel_one": "{count} άτομο μπορεί να εμπλουτιστεί",
+  "EligibleLabel_other": "{count} άτομα μπορούν να εμπλουτιστούν",
+  "Enrich": "Εμπλουτισμός",
+  "EnrichAll": "Εμπλουτισμός όλων",
+  "HelpTooltip": "Φέρε τα πιο πρόσφατα δεδομένα του προφίλ LinkedIn σε αυτή την επαφή. Κάνε κλικ για να μάθεις πώς λειτουργεί ο εμπλουτισμός.",
+  "Pause": "Παύση",
+  "PausingTooltip": "Ολοκληρώνεται η τρέχουσα επαφή και μετά γίνεται παύση...",
+  "PersonEligibleLabel": "Αυτή η επαφή μπορεί να εμπλουτιστεί από το LinkedIn",
+  "ProcessingPerson": "Εμπλουτισμός: {name}...",
+  "ProgressLabel": "Εμπλουτισμός: ολοκληρώθηκαν {completed} από {totalEligible}",
+  "ProgressLabelWithFailed": "Εμπλουτισμός: ολοκληρώθηκαν {completed} από {totalEligible} ({failed} απέτυχαν)",
+  "Resume": "Συνέχιση",
+  "ResumeLabel": "Ο εμπλουτισμός διακόπηκε: {completed} ολοκληρώθηκαν, {pending} απομένουν",
+  "SkipRemaining": "Παράλειψη υπολοίπων",
+  "Tooltip": "Αυτές οι επαφές έχουν προφίλ LinkedIn αλλά δεν έχουν εμπλουτιστεί ακόμα. Εμπλούτισέ τες για να φέρεις το πιο πρόσφατο ιστορικό εργασίας, την εκπαίδευση και το βιογραφικό τους."
+}

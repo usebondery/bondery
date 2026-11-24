@@ -1,0 +1,16 @@
+{
+  "Description": "Auta meitä parantamaan Bonderya jakamalla ideasi. <3",
+  "ErrorMessage": "Palautetta ei voitu lähettää. Yritä uudelleen.",
+  "ErrorTitle": "Virhe",
+  "GeneralFeedbackLabel": "Onko sinulla palautetta, ehdotuksia tai vikoja jaettavaksi?",
+  "GeneralFeedbackPlaceholder": "Pidän/en pidä tästä osasta sovellusta… Toivoisin… Minulla oli vaikeuksia…",
+  "NpsLabel": "Asteikolla 0–10, kuinka todennäköisesti suosittelisit Bonderya ystävälle tai kollegalle?",
+  "NpsReasonLabel": "Miksi valitsit arvon {score}?",
+  "NpsReasonPlaceholder": "Koska tämä ominaisuus on hyödyllinen / viallinen / puuttuu…",
+  "SubmitButton": "Lähetä palaute tiimille",
+  "SubmittingMessage": "Odota, kunnes lähetys valmistuu",
+  "SubmittingTitle": "Lähetetään palautetta…",
+  "SuccessMessage": "Palautteesi on vastaanotettu",
+  "SuccessTitle": "Kiitos!",
+  "Title": "Palaute"
+}

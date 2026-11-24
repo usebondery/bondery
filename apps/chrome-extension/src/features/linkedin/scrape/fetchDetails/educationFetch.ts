@@ -3,6 +3,7 @@
  */
 
 import { extLog } from "../../../../lib/log";
+import { nonEmpty } from "../../../../lib/text";
 import type { EducationEntry } from "../education";
 import { extractLogoUrlFromVoyagerImage, fetchCompanyLogo } from "./voyagerLogos";
 import {
@@ -11,14 +12,19 @@ import {
   extractLivePageJsonBlocks,
   extractProfileUrn,
   logEntityTypes,
+  type VoyagerEntity,
   voyagerFetch,
 } from "./voyagerShared";
 
+const EDUCATION_WORD_RE = /education/i;
+const SCHOOL_WORD_RE = /school/i;
+const COLLECTION_WORD_RE = /collection/i;
+const SETTING_WORD_RE = /setting/i;
 /**
  * Resolves a school name from a schoolUrn or companyUrn via the Voyager API.
  * Returns the school name string or null if resolution fails.
  */
-async function resolveSchoolName(edu: Record<string, unknown>): Promise<string | null> {
+async function resolveSchoolName(edu: VoyagerEntity): Promise<string | null> {
   // Try companyUrn first — schools are also company entities on LinkedIn
   const companyUrn = edu.companyUrn as string | undefined;
   if (companyUrn) {
@@ -29,7 +35,7 @@ async function resolveSchoolName(edu: Record<string, unknown>): Promise<string |
         `/voyager/api/identity/dash/companies?q=universalName&universalName=${companyId}`,
       );
       if (data) {
-        const included = (data.included ?? []) as Record<string, unknown>[];
+        const included = data.included ?? [];
         for (const item of included) {
           const name = (item.name ?? item.companyName) as string | undefined;
           if (name) {
@@ -38,8 +44,7 @@ async function resolveSchoolName(edu: Record<string, unknown>): Promise<string |
           }
         }
         // Check elements too
-        const elements = ((data.data as Record<string, unknown> | undefined)?.elements ??
-          data.elements) as Record<string, unknown>[] | undefined;
+        const elements = data.data?.elements ?? data.elements;
         if (elements) {
           for (const el of elements) {
             const name = (el.name ?? el.companyName) as string | undefined;
@@ -65,7 +70,7 @@ async function resolveSchoolName(edu: Record<string, unknown>): Promise<string |
         `/voyager/api/identity/dash/companies?q=universalName&universalName=${schoolId}`,
       );
       if (data) {
-        const included = (data.included ?? []) as Record<string, unknown>[];
+        const included = data.included ?? [];
         for (const item of included) {
           const name = (item.name ?? item.schoolName ?? item.companyName) as string | undefined;
           if (name) {
@@ -82,9 +87,7 @@ async function resolveSchoolName(edu: Record<string, unknown>): Promise<string |
   return null;
 }
 
-async function mapEducationEntityAsync(
-  edu: Record<string, unknown>,
-): Promise<EducationEntry | null> {
+async function mapEducationEntityAsync(edu: VoyagerEntity): Promise<EducationEntry | null> {
   // schoolName can be null in dash API — fall back to multiLocaleSchoolName or schoolUrn
   const multiLocaleSchoolName = edu.multiLocaleSchoolName as
     | Record<string, string>
@@ -92,7 +95,7 @@ async function mapEducationEntityAsync(
     | undefined;
   let schoolName = (edu.schoolName ??
     (multiLocaleSchoolName ? Object.values(multiLocaleSchoolName)[0] : null) ??
-    (edu.school as Record<string, unknown>)?.name ??
+    edu.school?.name ??
     edu.subtitle ??
     "") as string;
 
@@ -127,8 +130,8 @@ async function mapEducationEntityAsync(
   const { startDate, endDate } = extractDates(edu);
 
   let schoolLinkedinId: string | undefined;
-  const school = edu.school as Record<string, unknown> | undefined;
-  const miniSchool = (school?.miniSchool ?? edu.miniSchool) as Record<string, unknown> | undefined;
+  const { school } = edu;
+  const miniSchool = school?.miniSchool ?? edu.miniSchool;
   const schoolUniversalName = miniSchool?.universalName as string | undefined;
   if (schoolUniversalName) {
     schoolLinkedinId = schoolUniversalName;
@@ -149,9 +152,12 @@ async function mapEducationEntityAsync(
   // LinkedIn API responses often include logo data in these sub-objects (same Voyager image structure
   // as company logos). This avoids extra network requests when the logo is already in the payload.
   let schoolLogoUrl: string | undefined;
-  for (const obj of [miniSchool, school, edu].filter(Boolean) as Record<string, unknown>[]) {
+  for (const obj of [miniSchool, school, edu]) {
+    if (!obj) {
+      continue;
+    }
     for (const key of ["logo", "companyLogo", "logoV2", "logoResolutionResult"]) {
-      const logoData = obj[key] as Record<string, unknown> | undefined;
+      const logoData = obj[key] as VoyagerEntity | undefined;
       if (logoData) {
         const url = extractLogoUrlFromVoyagerImage(logoData);
         if (url) {
@@ -170,7 +176,7 @@ async function mapEducationEntityAsync(
     schoolName,
     ...(schoolLogoUrl ? { schoolLogoUrl } : {}),
     degree,
-    description: description || undefined,
+    description: nonEmpty(description),
     endDate,
     startDate,
   };
@@ -189,20 +195,21 @@ async function enrichEducationWithLogos(
   skipNetworkLogos = false,
   domLogos?: Map<string, string>,
 ): Promise<EducationEntry[]> {
-  if (domLogos && domLogos.size > 0) {
-    entries = entries.map((entry) => {
-      if (entry.schoolLogoUrl) {
-        return entry;
-      }
-      const url = domLogos.get(entry.schoolName.toLowerCase());
-      return url ? { ...entry, schoolLogoUrl: url } : entry;
-    });
-  }
+  const withDomLogos =
+    domLogos && domLogos.size > 0
+      ? entries.map((entry) => {
+          if (entry.schoolLogoUrl) {
+            return entry;
+          }
+          const url = domLogos.get(entry.schoolName.toLowerCase());
+          return url ? { ...entry, schoolLogoUrl: url } : entry;
+        })
+      : entries;
 
   // Collect distinct IDs that still need logos (deduplicated)
   const seenIds = new Set<string>();
   const tasks: string[] = [];
-  for (const entry of entries) {
+  for (const entry of withDomLogos) {
     if (entry.schoolLogoUrl || !entry.schoolLinkedinId) {
       continue;
     }
@@ -214,7 +221,7 @@ async function enrichEducationWithLogos(
   }
 
   if (skipNetworkLogos || tasks.length === 0) {
-    return entries;
+    return withDomLogos;
   }
 
   extLog.debug(`[linkedin][fetchDetails] Fetching logos for ${tasks.length} school(s):`, tasks);
@@ -233,20 +240,25 @@ async function enrichEducationWithLogos(
     }),
   );
 
-  return entries.map((entry) => {
+  const withNetworkLogos: EducationEntry[] = [];
+  for (const entry of withDomLogos) {
     if (entry.schoolLogoUrl || !entry.schoolLinkedinId) {
-      return entry;
+      withNetworkLogos.push(entry);
+      continue;
     }
     const url = idToLogo.get(entry.schoolLinkedinId);
-    return url ? { ...entry, schoolLogoUrl: url } : entry;
-  });
+    withNetworkLogos.push(url ? { ...entry, schoolLogoUrl: url } : entry);
+  }
+  return withNetworkLogos;
 }
 
 /** Endpoints to try for education history (in priority order). */
-const EDU_ENDPOINTS = (urn: string) => [
-  `/voyager/api/identity/dash/profileEducations?q=viewee&profileUrn=${encodeURIComponent(urn)}&count=100`,
-  `/voyager/api/identity/dash/profileEducations?q=viewee&profileUrn=${encodeURIComponent(urn)}&decorationId=com.linkedin.voyager.dash.deco.identity.profile.FullProfileEducation-3&count=100`,
-];
+function EDU_ENDPOINTS(urn: string): string[] {
+  return [
+    `/voyager/api/identity/dash/profileEducations?q=viewee&profileUrn=${encodeURIComponent(urn)}&count=100`,
+    `/voyager/api/identity/dash/profileEducations?q=viewee&profileUrn=${encodeURIComponent(urn)}&decorationId=com.linkedin.voyager.dash.deco.identity.profile.FullProfileEducation-3&count=100`,
+  ];
+}
 
 /**
  * Fetches the full education history for a LinkedIn profile.
@@ -268,7 +280,7 @@ export async function fetchFullEducation(
   if (profileUrn) {
     const paths = EDU_ENDPOINTS(profileUrn);
     const responses = await Promise.all(paths.map((path) => voyagerFetch(path)));
-    const data = responses.find((response) => response != null) ?? null;
+    const data = responses.find((response) => response !== null && response !== undefined) ?? null;
 
     if (data) {
       const apiEntities = collectIncludedEntities([data]);
@@ -277,10 +289,11 @@ export async function fetchFullEducation(
       const apiEducation = apiEntities.filter((e) => {
         const t = e.$type as string | undefined;
         return (
-          t != null &&
-          (/education/i.test(t) || /school/i.test(t)) &&
-          !/collection/i.test(t) &&
-          !/setting/i.test(t)
+          t !== null &&
+          t !== undefined &&
+          (EDUCATION_WORD_RE.test(t) || SCHOOL_WORD_RE.test(t)) &&
+          !COLLECTION_WORD_RE.test(t) &&
+          !SETTING_WORD_RE.test(t)
         );
       });
 
@@ -314,10 +327,11 @@ export async function fetchFullEducation(
   const educationEntities = entities.filter((e) => {
     const t = e.$type as string | undefined;
     return (
-      t != null &&
-      (/education/i.test(t) || /school/i.test(t)) &&
-      !/collection/i.test(t) &&
-      !/setting/i.test(t)
+      t !== null &&
+      t !== undefined &&
+      (EDUCATION_WORD_RE.test(t) || SCHOOL_WORD_RE.test(t)) &&
+      !COLLECTION_WORD_RE.test(t) &&
+      !SETTING_WORD_RE.test(t)
     );
   });
 

@@ -3,8 +3,9 @@ import { readBuildMetadata } from "@bondery/helpers/infra/build-metadata";
 import { WEBSITE_URL } from "@/lib/config";
 import { discoveryCorsPreflight, withDiscoveryCors } from "@/lib/discovery-cors";
 import websitePackage from "../../../../package.json" with { type: "json" };
-import catalog from "./manifest.json";
+import catalog from "./manifest.json" with { type: "json" };
 
+const TRAILING_SLASHES_RE = /\/+$/;
 /** ARD manifest schema version (not the Bondery app version). */
 const ARD_SPEC_VERSION = "1.0" as const;
 
@@ -67,7 +68,7 @@ function publisherIdentity(publisherHost: string): string {
 export const dynamic = "force-dynamic";
 
 export function GET() {
-  const origin = WEBSITE_URL.replace(/\/+$/, "");
+  const origin = WEBSITE_URL.replace(TRAILING_SLASHES_RE, "");
   const publisherHost = new URL(WEBSITE_URL).hostname;
   const version = catalogVersion();
   const identity = publisherIdentity(publisherHost);

@@ -1,5 +1,16 @@
 import type { ReactNode } from "react";
 
+type StatusNotificationPayload = {
+  autoClose: false;
+  color: "blue";
+  id: string;
+  loading: false;
+  message: ReactNode;
+  radius: "md";
+  title: string;
+  withCloseButton: false;
+};
+
 export interface StatusNotificationTemplateProps {
   id: string;
   message: ReactNode;
@@ -23,7 +34,7 @@ export function statusNotificationTemplate({
   id,
   title,
   message,
-}: StatusNotificationTemplateProps) {
+}: StatusNotificationTemplateProps): StatusNotificationPayload {
   return {
     autoClose: false as const,
     color: "blue",

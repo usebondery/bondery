@@ -1,4 +1,5 @@
 {
+  "AddNotesPlaceholder": "Přidejte poznámky…",
   "DeleteContact": "Smazat kontakt",
   "DeleteContactConfirmTitle": "Smazat {name}?",
   "DeleteFailed": "Kontakt se nepodařilo smazat.",
@@ -13,6 +14,7 @@
   "GroupsEdit": "Upravit",
   "GroupsEditAccessibility": "Upravit skupiny pro {name}",
   "GroupsLoadError": "Skupiny se nepodařilo načíst",
+  "LastInteractionLabel": "Poslední interakce",
   "NoGroups": "Není v žádných skupinách",
   "ShareContact": "Sdílet vCard...",
   "ShareContactViaEmail": "Poslat e-mailem...",

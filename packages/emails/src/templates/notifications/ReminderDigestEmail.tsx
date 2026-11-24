@@ -1,11 +1,25 @@
 import { BRAND_PRIMARY_COLOR } from "@bondery/branding";
 import { IMPORTANT_DATE_TYPE_META, WEBAPP_ROUTES } from "@bondery/helpers";
+import type { JSX } from "react";
 import { Column, Img, Link, Row, Section, Text } from "react-email";
 import { defaultReminderDigestCopy, previewReminderDigestItems } from "#fixtures/default-copy.js";
 import { clipEmailPreview, DEFAULT_APP_URL, type EmailDocumentProps } from "#shared/chrome.js";
 import { EmailBody } from "#shared/EmailBody.js";
 import { EmailWrapper } from "#shared/EmailWrapper.js";
 import { EMAIL_MUTED, EMAIL_TEXT } from "#shared/email-styles.js";
+
+const PATTERN_5C732B_RE = /\s+/;
+const PATTERN_5C2F2B24_RE = /\/+$/;
+
+function getInitials(name: string) {
+  return name
+    .trim()
+    .split(PATTERN_5C732B_RE)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join("");
+}
 
 export interface ReminderDigestEmailItem {
   date: string;
@@ -44,16 +58,6 @@ export interface ReminderDigestEmailProps extends EmailDocumentProps {
   userId: string;
 }
 
-function getInitials(name: string) {
-  return name
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part.charAt(0).toUpperCase())
-    .join("");
-}
-
 export default function ReminderDigestEmail({
   appOrigin = DEFAULT_APP_URL,
   chrome,
@@ -66,9 +70,9 @@ export default function ReminderDigestEmail({
   targetDate: _targetDate = "2026-01-01",
   title,
   websiteUrl,
-}: ReminderDigestEmailProps) {
+}: ReminderDigestEmailProps): JSX.Element {
   const count = reminders.length;
-  const first = reminders[0];
+  const [first] = reminders;
   const heading =
     count === 1 ? copy.headingOne : copy.headingMany.replace("{{count}}", String(count));
   const description = copy.description.replace("{{headingDate}}", formattedHeadingDate);
@@ -81,7 +85,7 @@ export default function ReminderDigestEmail({
           .replace("{{remainingCount}}", String(count - 1))
       : description,
   );
-  const homeUrl = `${appOrigin.replace(/\/+$/, "")}${WEBAPP_ROUTES.HOME}`;
+  const homeUrl = `${appOrigin.replace(PATTERN_5C2F2B24_RE, "")}${WEBAPP_ROUTES.HOME}`;
 
   return (
     <EmailWrapper
@@ -100,7 +104,7 @@ export default function ReminderDigestEmail({
         notes={copy.whyReceiving}
       >
         {reminders.map((reminder) => {
-          const personUrl = `${appOrigin.replace(/\/+$/, "")}${WEBAPP_ROUTES.PERSON}/${encodeURIComponent(reminder.personId)}`;
+          const personUrl = `${appOrigin.replace(PATTERN_5C2F2B24_RE, "")}${WEBAPP_ROUTES.PERSON}/${encodeURIComponent(reminder.personId)}`;
           const dateMeta = IMPORTANT_DATE_TYPE_META[reminder.type];
           const personInitials = getInitials(reminder.personName) || "?";
           const reminderLine = copy.reminderLine

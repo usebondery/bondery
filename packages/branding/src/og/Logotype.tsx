@@ -1,4 +1,8 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactElement } from "react";
+
+/** Size of the logotype artwork's own coordinate space. */
+const LOGOTYPE_VIEWBOX_WIDTH = 866;
+const LOGOTYPE_VIEWBOX_HEIGHT = 256;
 
 type LogotypeProps = {
   /** Display width in px (height scales from 866×256 viewBox). */
@@ -11,15 +15,15 @@ type LogotypeProps = {
  * Uses a fixed gradient ID — React.useId() is not available in image renderers.
  * Keep in sync with packages/branding/src/react/BonderyLogotypeBlack.tsx.
  */
-export function Logotype({ width = 700, style }: LogotypeProps) {
-  const height = Math.round((width * 256) / 866);
+export function Logotype({ width = 700, style }: LogotypeProps): ReactElement {
+  const height = Math.round((width * LOGOTYPE_VIEWBOX_HEIGHT) / LOGOTYPE_VIEWBOX_WIDTH);
 
   return (
     <svg
       fill="none"
       height={height}
       style={style}
-      viewBox="0 0 866 256"
+      viewBox={`0 0 ${LOGOTYPE_VIEWBOX_WIDTH} ${LOGOTYPE_VIEWBOX_HEIGHT}`}
       width={width}
       xmlns="http://www.w3.org/2000/svg"
     >

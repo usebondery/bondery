@@ -1,11 +1,18 @@
 "use client";
 
 import { AnchorLink, hrefAssert } from "@bondery/mantine-next";
+import docs from "@bondery/translations/locales/en/platform/website/WebsiteDocs.json" with {
+  type: "json",
+};
 import { Alert, Code, Text } from "@mantine/core";
 import { useOperation } from "fumadocs-openapi/operation";
+import { formatMessage } from "@/lib/i18n/message";
 
 const API_KEY_SCHEME = "apiKeyAuth";
 const SESSION_SCHEME = "bearerAuth";
+
+/** The header as a client writes it. It is a code sample, so it is not translated. */
+const AUTH_HEADER_EXAMPLE = "Authorization: Bearer <token>";
 
 /** Title names the credential in plain language. Raw scheme ids never reach the page. */
 function noticeTitle(keys: ReadonlySet<string>): string {
@@ -13,18 +20,18 @@ function noticeTitle(keys: ReadonlySet<string>): string {
   const hasSession = keys.has(SESSION_SCHEME);
 
   if (hasApiKey && hasSession) {
-    return "Requires an API key or a session token.";
+    return docs.Api.AuthTitle.ApiKeyOrSession;
   }
 
   if (hasApiKey) {
-    return "Requires an API key.";
+    return docs.Api.AuthTitle.ApiKey;
   }
 
   if (hasSession) {
-    return "Requires a session token.";
+    return docs.Api.AuthTitle.Session;
   }
 
-  return "Requires authentication.";
+  return docs.Api.AuthTitle.Generic;
 }
 
 export function DocsApiAuthNotice() {
@@ -44,11 +51,9 @@ export function DocsApiAuthNotice() {
   return (
     <Alert title={noticeTitle(keys)}>
       <Text size="sm">
-        Send <Code>Authorization: Bearer &lt;token&gt;</Code>.
+        {formatMessage(docs.Api.SendHeader, { header: <Code>{AUTH_HEADER_EXAMPLE}</Code> })}
       </Text>
-      <AnchorLink href={hrefAssert("/docs/api/authentication")}>
-        Read the authentication guide
-      </AnchorLink>
+      <AnchorLink href={hrefAssert("/docs/api/authentication")}>{docs.Api.AuthGuide}</AnchorLink>
     </Alert>
   );
 }

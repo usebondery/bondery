@@ -3,6 +3,9 @@
  * Propagate root package.json version to workspace packages and mobile native fields.
  * Derives MIN_EXTENSION_VERSION from the previous production git tag.
  * Regenerates env examples via env:sync (deploy pin stays last production CalVer).
+ * In write mode, run the LLM plugin builder so both generated manifests match.
+ * --check does not write.
+ * --check does not run the builder.
  *
  *   pnpm run sync-version
  *   pnpm run sync-version -- --check   # dry-run; exit 1 on drift
@@ -13,6 +16,9 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseCalver, previousProductionCalver, readGitTags, toCoreCalver } from "./calver.mjs";
 import { formatWrittenFiles, writeFormattedJson } from "./write-formatted-json.mjs";
+
+const VERSION_RE = /version:\s*"[^"]*"/;
+const VERSIONNAME_RE = /versionName\s+"[^"]*"/;
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const checkOnly = process.argv.includes("--check");
@@ -43,14 +49,16 @@ function readRootVersion() {
   const version = pkg.version?.trim();
   if (!version) {
     console.error("Invalid root package.json version: (missing)");
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
   try {
     parseCalver(version);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(message);
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
   return version;
 }
@@ -72,7 +80,7 @@ function updateMobileAppConfig(nativeVersion) {
   const rel = "apps/mobile/app.config.ts";
   const abs = join(root, rel);
   const content = readFileSync(abs, "utf8");
-  const pattern = /version:\s*"[^"]*"/;
+  const pattern = VERSION_RE;
   const next = `version: "${nativeVersion}"`;
   if (!pattern.test(content)) {
     throw new Error(`Could not find expo version in ${rel}`);
@@ -91,7 +99,7 @@ function updateAndroidVersionName(nativeVersion) {
   const rel = "apps/mobile/android/app/build.gradle";
   const abs = join(root, rel);
   const content = readFileSync(abs, "utf8");
-  const pattern = /versionName\s+"[^"]*"/;
+  const pattern = VERSIONNAME_RE;
   const next = `versionName "${nativeVersion}"`;
   if (!pattern.test(content)) {
     throw new Error(`Could not find versionName in ${rel}`);
@@ -119,6 +127,15 @@ function updateServerJsonVersion(version) {
   }
   return true;
 }
+
+/** Write mode only. Plugin version checks live in check:llm-plugins. */
+function buildLlmPlugins() {
+  execSync("node scripts/pkg/build-llm-plugins.mjs", {
+    cwd: root,
+    stdio: "inherit",
+  });
+}
+
 function updateMinExtensionVersion(minVersion) {
   const rel = "packages/helpers/src/globals/paths.ts";
   const abs = join(root, rel);
@@ -167,7 +184,8 @@ function main() {
       for (const path of changes) {
         console.error(`  - ${path}`);
       }
-      process.exit(1);
+      process.exitCode = 1;
+      return;
     }
     console.log(
       `All version targets match root ${version} (MIN ${minVersion}, native ${nativeVersion})`,
@@ -192,6 +210,8 @@ function main() {
   } else {
     console.log(`Version ${version} already synced across targets (MIN ${minVersion})`);
   }
+
+  buildLlmPlugins();
 }
 
 main();

@@ -1,5 +1,8 @@
 import type { ImportantDateType } from "@bondery/schemas";
 
+/** Years are zero-padded to four digits in an ISO calendar date. */
+const ISO_YEAR_DIGITS = 4;
+
 export const IMPORTANT_DATE_SELECT = `
   id,
   user_id,
@@ -81,7 +84,7 @@ export function toIsoDateKey(value: string): string | null {
     return null;
   }
 
-  return `${year.toString().padStart(4, "0")}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
+  return `${year.toString().padStart(ISO_YEAR_DIGITS, "0")}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
 }
 
 export function deriveReminderDateKey(entry: {

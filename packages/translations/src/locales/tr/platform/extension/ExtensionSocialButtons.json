@@ -1,0 +1,14 @@
+{
+  "Instagram": {
+    "ExtensionError": "Uzantı hatası — yeniden dene",
+    "OpenInBondery": "Bondery’de aç",
+    "SignInRequired": "Oturum aç — Bondery simgesine tıkla",
+    "SomethingWrong": "Bir şeyler ters gitti"
+  },
+  "LinkedIn": {
+    "ExtensionError": "Uzantı hatası — yeniden dene",
+    "OpenInBondery": "Bondery’de aç",
+    "SignInRequired": "Oturum aç — Bondery simgesine tıkla",
+    "SomethingWrong": "Bir şeyler ters gitti"
+  }
+}

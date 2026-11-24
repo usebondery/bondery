@@ -1,14 +1,17 @@
 import type { PaginationMeta } from "@bondery/schemas";
 
-export type { PaginationMeta };
+type PaginatedListPayload = {
+  pagination?: PaginationMeta;
+  totalCount?: unknown;
+} & Record<string, unknown>;
 
-export function normalizePaginatedList<T, K extends string>(
-  raw: Record<string, unknown>,
+function normalizePaginatedList<T, K extends string>(
+  raw: PaginatedListPayload,
   key: K,
   fallbackLimit = 50,
 ): { items: T[]; pagination: PaginationMeta } {
   const items = (raw[key] as T[] | undefined) ?? [];
-  const pagination = raw.pagination as PaginationMeta | undefined;
+  const { pagination } = raw;
 
   if (pagination) {
     return { items, pagination };
@@ -32,3 +35,6 @@ export function normalizePaginatedList<T, K extends string>(
     },
   };
 }
+
+export type { PaginationMeta };
+export { normalizePaginatedList };

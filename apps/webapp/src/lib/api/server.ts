@@ -8,6 +8,21 @@ import { resolveServerSession } from "@/lib/auth/resolveServerSession";
 import { isUnauthorizedResponseStatus } from "@/lib/auth/unauthorized";
 import { parseApiJsonResponse, parseApiJsonResponseOrNull } from "./parseResponse";
 
+function resolveServerUrl(path: string): string {
+  return joinApiUrl(resolveServerApiBaseUrl(), path);
+}
+
+async function buildServerHeaders(init: RequestInit | undefined): Promise<Headers> {
+  const headers = new Headers(init?.headers);
+  const session = await resolveServerSession();
+
+  if (session.status === "ok") {
+    headers.set("Authorization", `Bearer ${session.accessToken}`);
+  }
+
+  return headers;
+}
+
 export { ApiError } from "@bondery/helpers/api";
 export {
   applyServerTransportErrorPolicy,
@@ -24,21 +39,6 @@ export type ServerApiFetchOptions = {
    */
   transportPolicy?: boolean;
 };
-
-function resolveServerUrl(path: string): string {
-  return joinApiUrl(resolveServerApiBaseUrl(), path);
-}
-
-async function buildServerHeaders(init: RequestInit | undefined): Promise<Headers> {
-  const headers = new Headers(init?.headers);
-  const session = await resolveServerSession();
-
-  if (session.status === "ok") {
-    headers.set("Authorization", `Bearer ${session.accessToken}`);
-  }
-
-  return headers;
-}
 
 export async function serverApiFetch(
   path: string,

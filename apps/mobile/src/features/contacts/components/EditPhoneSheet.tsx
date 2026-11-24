@@ -17,6 +17,7 @@ import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { createDraftPhone } from "../contactChannelConstants";
 import { TelephonePrefixFlag } from "./TelephonePrefixFlag";
 
+const TRAILING_DASH_DIGITS_RE = /-\d+$/;
 type SheetMode = "add" | "edit";
 
 type PhoneFormValues = {
@@ -36,7 +37,7 @@ interface EditPhoneSheetProps {
   open: boolean;
 }
 
-export function EditPhoneSheet({
+function EditPhoneSheet({
   open,
   mode,
   initialEntry,
@@ -68,7 +69,10 @@ export function EditPhoneSheet({
   });
 
   const namesByDialCode = new Map(
-    countryCodes.map((country) => [country.dialCode.replace(/-\d+$/, ""), country.name]),
+    countryCodes.map((country) => [
+      country.dialCode.replace(TRAILING_DASH_DIGITS_RE, ""),
+      country.name,
+    ]),
   );
   const prefixOptions = TELEPHONE_PREFIX_OPTIONS.map((option) => ({
     label: option.value,
@@ -203,3 +207,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
+
+export { EditPhoneSheet };

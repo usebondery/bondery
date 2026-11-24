@@ -30,8 +30,8 @@ export default function WelcomeApp() {
       } else {
         setError(result.payload.error ?? "Connection failed");
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Connection failed");
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : "Connection failed");
     } finally {
       setLoading(false);
     }
@@ -47,15 +47,14 @@ export default function WelcomeApp() {
             </ThemeIcon>
             <Stack align="center" gap="xs">
               <Text fw={700} size="xl">
-                You're all set!
+                {t("SuccessTitle")}
               </Text>
               <Text c="dimmed" size="md" ta="center">
-                Your Bondery account is now connected. Visit any Instagram or LinkedIn profile to
-                start saving contacts.
+                {t("SuccessDescription")}
               </Text>
             </Stack>
             <Text c="dimmed" size="sm" ta="center">
-              You can close this tab now.
+              {t("SuccessClose")}
             </Text>
           </Stack>
         </Card>
@@ -71,10 +70,10 @@ export default function WelcomeApp() {
 
           <Stack align="center" gap="xs">
             <Text fw={700} size="xl">
-              Welcome to Bondery
+              {t("Title")}
             </Text>
             <Text c="dimmed" size="md" ta="center">
-              Connect your Bondery account to save contacts directly from social media profiles.
+              {t("Description")}
             </Text>
           </Stack>
 
@@ -82,14 +81,14 @@ export default function WelcomeApp() {
             {t("ConnectButton")}
           </Button>
 
-          {error && (
+          {error ? (
             <Text c="red" size="sm" ta="center">
               {error}
             </Text>
-          )}
+          ) : null}
 
           <Text c="dimmed" size="xs" ta="center">
-            You will be prompted to sign in to your Bondery account and authorize the extension.
+            {t("SignInHint")}
           </Text>
         </Stack>
       </Card>

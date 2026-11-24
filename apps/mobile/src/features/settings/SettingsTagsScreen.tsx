@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import type { TagWithCount } from "@bondery/schemas";
 import { IconPlus } from "@tabler/icons-react-native";
 import { useRouter } from "expo-router";
@@ -10,7 +11,6 @@ import { Select } from "../../components/ui/Select";
 import { Stack } from "../../components/ui/Stack";
 import { updateSettings } from "../../lib/api/client";
 import {
-  useCommonTranslations,
   useMobileSettingsTranslations,
   useTagsSettingsTranslations,
 } from "../../lib/i18n/generated/hooks";
@@ -32,12 +32,11 @@ import { SettingsPreviewSection } from "./components/SettingsPreviewSection";
 export function SettingsTagsScreen() {
   const tMobileSettings = useMobileSettingsTranslations();
   const tTagsSettings = useTagsSettingsTranslations();
-  const _t = useCommonTranslations();
   const router = useRouter();
   const colors = useMobileThemeColors();
 
   const { data: syncedTags, isInitialSync, refresh: refreshTags } = useTags();
-  const [loadError, _setLoadError] = useState<string | null>(null);
+  const [loadError] = useState<string | null>(null);
   const [isCreateOpen, setCreateOpen] = useState(false);
   const [editingTag, setEditingTag] = useState<TagWithCount | null>(null);
 
@@ -63,7 +62,7 @@ export function SettingsTagsScreen() {
     }
 
     setTagSortOrder(nextOrder);
-    void updateSettings({ tagSortOrder: nextOrder });
+    detachPromise(updateSettings({ tagSortOrder: nextOrder }));
   };
 
   const isLoading = isInitialSync && syncedTags.length === 0;
@@ -130,7 +129,7 @@ export function SettingsTagsScreen() {
               errorTitle={tMobileSettings("TagsLoadErrorTitle")}
               isLoading={isLoading}
               onRetry={() => {
-                void reloadTags();
+                reloadTags();
               }}
             >
               <ContactsTagsHeader

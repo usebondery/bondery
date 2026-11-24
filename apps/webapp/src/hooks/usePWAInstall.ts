@@ -3,8 +3,10 @@
 
 import { useEffect, useRef, useState } from "react";
 
+const MOBI_ANDROID_IPHONE_IPAD_I = /Mobi|Android|iPhone|iPad/i;
+
 interface BeforeInstallPromptEvent extends Event {
-  prompt(): Promise<void>;
+  prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
@@ -48,7 +50,7 @@ export function usePWAInstall(): UsePWAInstallResult {
   useEffect(() => {
     const nav = navigator as Navigator & { userAgentData?: { mobile: boolean } };
     const isMobile =
-      nav.userAgentData?.mobile ?? /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+      nav.userAgentData?.mobile ?? MOBI_ANDROID_IPHONE_IPAD_I.test(navigator.userAgent);
     const isChromium = typeof (window as Window & { chrome?: unknown }).chrome !== "undefined";
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
     const hadPreviousInstall = localStorage.getItem(PWA_INSTALLED_KEY) === "true";
@@ -94,13 +96,12 @@ export function usePWAInstall(): UsePWAInstallResult {
       return false;
     }
 
+    deferredPrompt.current = null;
     try {
       await promptEvent.prompt();
-      deferredPrompt.current = null;
       await promptEvent.userChoice;
       return true;
     } catch {
-      deferredPrompt.current = null;
       return false;
     }
   };

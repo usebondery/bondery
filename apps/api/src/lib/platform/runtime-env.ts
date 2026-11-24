@@ -1,6 +1,6 @@
 /** True when running API unit tests or CI (`NODE_ENV=test`). */
 export function isTestEnvironment(): boolean {
-  return process.env.NODE_ENV === "test";
+  return process.env["NODE_ENV"] === "test";
 }
 
 /**

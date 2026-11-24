@@ -54,6 +54,11 @@ yarn-error.log*
 .env.production
 .env.local
 
+# deploy/bondery release smoke (scripts/smoke-release.mjs): env, override, and scratch files
+deploy/bondery/.env.smoke
+deploy/bondery/docker-compose.override.yml
+deploy/bondery/.smoke-*
+
 # vercel
 .vercel
 **/.vercel/output
@@ -90,8 +95,10 @@ ngrok.yml
 ngrok1.yml
 ngrok2.yml
 ngrok3.yml
-.cursor/mcp.json
 .supabase-export/
 
 # MCP Inspector writable catalog (seeded from scripts/dev/mcp-inspector.json)
 scripts/dev/mcp-inspector.local.json
+
+# Plane MCP PAT (IDE only) — template is plane.env.local.example
+.agents/mcp/plane.env.local

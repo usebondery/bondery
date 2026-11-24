@@ -8,19 +8,10 @@ import { fileURLToPath } from "node:url";
 import { API_ROUTES } from "../../packages/helpers/src/globals/paths.ts";
 import { DEV_URLS } from "../../packages/schemas/src/constants/dev-ports.ts";
 
+const STRIPE_LOGIN_RE = /stripe login/i;
+const ACCOUNT_RE = /Account:/i;
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
-
-export const STRIPE_CLI_INSTALL_URL = "https://docs.stripe.com/stripe-cli";
-
-export const STRIPE_LISTEN_EVENTS = [
-  "checkout.session.completed",
-  "customer.subscription.created",
-  "customer.subscription.updated",
-  "customer.subscription.deleted",
-  "invoice.paid",
-  "invoice.payment_failed",
-  "customer.subscription.trial_will_end",
-] as const;
 
 const WEBHOOK_SECRET_RE = /\bwhsec_[A-Za-z0-9_]+/;
 
@@ -37,23 +28,6 @@ function resolveStripeCommand(): StripeCommand {
   // pnpm's Windows shim is extensionless (`.../bin/stripe`); spawn without a shell
   // is ENOENT, and `stripe.cmd` is EINVAL. `cmd /c stripe` uses PATHEXT like a terminal.
   return { command: "cmd.exe", prefixArgs: ["/d", "/s", "/c", "stripe"] };
-}
-
-/** Stripe CLI `--forward-to` target. Uses Portless HTTPS when the API runs via `pnpm run dev`. */
-export function stripeListenForwardUrl(): string {
-  return `${DEV_URLS.api}${API_ROUTES.WEBHOOKS_STRIPE}`;
-}
-
-export function repoRootFromScripts(): string {
-  return resolve(__dirname, "../..");
-}
-
-export function commandExists(name: string): boolean {
-  const result =
-    process.platform === "win32"
-      ? spawnSync("where.exe", [name], { encoding: "utf-8" })
-      : spawnSync("which", [name], { encoding: "utf-8" });
-  return result.status === 0;
 }
 
 function combinedOutput(result: { stderr?: string | null; stdout?: string | null }): string {
@@ -73,8 +47,37 @@ function runStripe(args: string[], options?: { cwd?: string }): ReturnType<typeo
   });
 }
 
+export const STRIPE_CLI_INSTALL_URL = "https://docs.stripe.com/stripe-cli";
+
+export const STRIPE_LISTEN_EVENTS = [
+  "checkout.session.completed",
+  "customer.subscription.created",
+  "customer.subscription.updated",
+  "customer.subscription.deleted",
+  "invoice.paid",
+  "invoice.payment_failed",
+  "customer.subscription.trial_will_end",
+] as const;
+
+/** Stripe CLI `--forward-to` target. Uses Portless HTTPS when the API runs via `pnpm run dev`. */
+export function stripeListenForwardUrl(): string {
+  return `${DEV_URLS.api}${API_ROUTES.WEBHOOKS_STRIPE}`;
+}
+
+export function repoRootFromScripts(): string {
+  return resolve(__dirname, "../..");
+}
+
+export function commandExists(name: string): boolean {
+  const result =
+    process.platform === "win32"
+      ? spawnSync("where.exe", [name], { encoding: "utf-8" })
+      : spawnSync("which", [name], { encoding: "utf-8" });
+  return result.status === 0;
+}
+
 export function mentionsStripeLogin(output: string): boolean {
-  return /stripe login/i.test(output);
+  return STRIPE_LOGIN_RE.test(output);
 }
 
 export type StripeCliProbe =
@@ -94,7 +97,7 @@ export function probeStripeCli(): StripeCliProbe {
   }
 
   const output = combinedOutput(result);
-  if (result.status !== 0 || mentionsStripeLogin(output) || !/Account:/i.test(output)) {
+  if (result.status !== 0 || mentionsStripeLogin(output) || !ACCOUNT_RE.test(output)) {
     return { status: "logged-out" };
   }
 
@@ -194,7 +197,7 @@ export function spawnStripeListen(): void {
 
   child.on("error", (error) => {
     process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
-    process.exit(1);
+    process.exitCode = 1;
   });
 
   child.on("exit", (code, signal) => {
@@ -202,6 +205,6 @@ export function spawnStripeListen(): void {
       process.kill(process.pid, signal);
       return;
     }
-    process.exit(code ?? 0);
+    process.exitCode = code ?? 0;
   });
 }

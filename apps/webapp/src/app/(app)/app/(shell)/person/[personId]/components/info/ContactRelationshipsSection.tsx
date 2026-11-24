@@ -1,6 +1,7 @@
 // biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { ActionIconButton, type PeoplePickerOnSearch, PersonChip } from "@bondery/mantine-next";
 import type {
   ContactPreview,
@@ -13,6 +14,7 @@ import { useEffect, useRef, useState } from "react";
 import { searchContactsPage } from "@/lib/contacts/searchContacts";
 import { usePersonRelationshipsTranslations } from "@/lib/i18n/generated/hooks";
 import { DEBOUNCE_MS, RELATIONSHIP_TYPE_OPTIONS } from "@/lib/platform/config";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 
 interface ContactRelationshipsSectionProps {
   contactsHasMore?: boolean;
@@ -53,6 +55,261 @@ function getPerspectiveType(
   return relationshipType;
 }
 
+type RelationshipOption = { value: string; label: string };
+
+type RelationshipCardRowBaseProps = {
+  addActionLabel?: string;
+  contactsHasMore?: boolean;
+  currentPerson: ContactPreview;
+  initialRelatedPerson?: ContactPreview;
+  initialRelationshipType?: RelationshipType;
+  isLabel: string;
+  isSubmitting: boolean;
+  loadingMoreLabel: string;
+  loadMoreErrorLabel: string;
+  loadMoreRetryLabel: string;
+  mode: "create" | "edit";
+  noPeopleFound: string;
+  ofLabel: string;
+  onCreate?: (relationshipType: RelationshipType, relatedPersonId: string) => Promise<void>;
+  onDelete?: () => void;
+  onUpdate?: (relationshipType: RelationshipType, relatedPersonId: string) => Promise<void>;
+  relatedPersonPlaceholder: string;
+  relationshipTypeOptions: RelationshipOption[];
+  relationshipTypePlaceholder: string;
+  removeActionLabel?: string;
+  searchingLabel: string;
+  searchPlaceholder: string;
+  selectablePeople: ContactPreview[];
+  showRightAction?: boolean;
+};
+
+type RelationshipCardRowProps = RelationshipCardRowBaseProps &
+  (
+    | {
+        onSearch: PeoplePickerOnSearch<ContactPreview>;
+        searchDebounceMs: number;
+      }
+    | {
+        onSearch?: never;
+        searchDebounceMs?: never;
+      }
+  );
+
+function RelationshipCardRow({
+  mode,
+  contactsHasMore = false,
+  currentPerson,
+  selectablePeople,
+  relationshipTypeOptions,
+  isSubmitting,
+  relationshipTypePlaceholder,
+  relatedPersonPlaceholder,
+  searchPlaceholder,
+  searchingLabel,
+  loadingMoreLabel,
+  loadMoreErrorLabel,
+  loadMoreRetryLabel,
+  noPeopleFound,
+  isLabel,
+  ofLabel,
+  initialRelationshipType,
+  initialRelatedPerson,
+  showRightAction = false,
+  removeActionLabel = "Remove",
+  addActionLabel = "Add",
+  onCreate,
+  onUpdate,
+  onDelete,
+  onSearch,
+  searchDebounceMs,
+}: RelationshipCardRowProps) {
+  const [relationshipType, setRelationshipType] = useState<RelationshipType | null>(
+    nonEmpty(initialRelationshipType) ?? null,
+  );
+  const [relatedPersonId, setRelatedPersonId] = useState<string | null>(
+    nonEmpty(initialRelatedPerson?.id) ?? null,
+  );
+  const [isAutoCreating, setIsAutoCreating] = useState(false);
+  const knownRelatedPeopleRef = useRef<Map<string, ContactPreview>>(new Map());
+
+  const selectableRelatedPeople = selectablePeople.filter(
+    (candidate) => candidate.id !== currentPerson.id,
+  );
+
+  useEffect(() => {
+    for (const p of selectableRelatedPeople) {
+      knownRelatedPeopleRef.current.set(p.id, p);
+    }
+  }, [selectableRelatedPeople]);
+
+  useEffect(() => {
+    if (initialRelatedPerson) {
+      knownRelatedPeopleRef.current.set(initialRelatedPerson.id, initialRelatedPerson);
+    }
+  }, [initialRelatedPerson]);
+
+  const localHandleSearch: PeoplePickerOnSearch<ContactPreview> = async (query, paging) => {
+    if (!onSearch) {
+      return { contacts: [], hasMore: false };
+    }
+    const search: PeoplePickerOnSearch<ContactPreview> = onSearch;
+    const page = await search(query, paging);
+    for (const r of page.contacts) {
+      knownRelatedPeopleRef.current.set(r.id, r);
+    }
+    return page;
+  };
+
+  const relatedPerson = relatedPersonId
+    ? (selectableRelatedPeople.find((candidate) => candidate.id === relatedPersonId) ??
+      knownRelatedPeopleRef.current.get(relatedPersonId) ??
+      null)
+    : null;
+
+  const maybeCreate = async (nextType: RelationshipType | null, nextPersonId: string | null) => {
+    if (
+      mode !== "create" ||
+      !onCreate ||
+      !nextType ||
+      !nextPersonId ||
+      isAutoCreating ||
+      isSubmitting
+    ) {
+      return;
+    }
+
+    setIsAutoCreating(true);
+    try {
+      await onCreate(nextType, nextPersonId);
+      setRelationshipType(null);
+      setRelatedPersonId(null);
+    } finally {
+      setIsAutoCreating(false);
+    }
+  };
+
+  const handleSelectRelatedPerson = (nextPersonId: string) => {
+    if (!nextPersonId) {
+      return;
+    }
+
+    setRelatedPersonId(nextPersonId);
+
+    if (
+      mode === "edit" &&
+      onUpdate &&
+      relationshipType &&
+      nextPersonId !== initialRelatedPerson?.id
+    ) {
+      detachPromise(onUpdate(relationshipType, nextPersonId));
+    }
+
+    detachPromise(maybeCreate(relationshipType, nextPersonId));
+  };
+
+  const relatedPersonChip =
+    onSearch !== null &&
+    onSearch !== undefined &&
+    searchDebounceMs !== null &&
+    searchDebounceMs !== undefined ? (
+      <PersonChip
+        contactsHasMore={contactsHasMore}
+        disabled={isSubmitting || isAutoCreating}
+        isSelectable
+        loadingMoreLabel={loadingMoreLabel}
+        loadMoreErrorLabel={loadMoreErrorLabel}
+        loadMoreRetryLabel={loadMoreRetryLabel}
+        noResultsLabel={noPeopleFound}
+        onSearch={localHandleSearch}
+        onSelectPerson={handleSelectRelatedPerson}
+        people={selectableRelatedPeople}
+        person={relatedPerson}
+        placeholder={relatedPersonPlaceholder}
+        searchDebounceMs={searchDebounceMs}
+        searchingLabel={searchingLabel}
+        searchPlaceholder={searchPlaceholder}
+        showChevronWhenEmpty
+      />
+    ) : (
+      <PersonChip
+        disabled={isSubmitting || isAutoCreating}
+        isSelectable
+        loadingMoreLabel={loadingMoreLabel}
+        loadMoreErrorLabel={loadMoreErrorLabel}
+        loadMoreRetryLabel={loadMoreRetryLabel}
+        noResultsLabel={noPeopleFound}
+        onSelectPerson={handleSelectRelatedPerson}
+        people={selectableRelatedPeople}
+        person={relatedPerson}
+        placeholder={relatedPersonPlaceholder}
+        searchingLabel={searchingLabel}
+        searchPlaceholder={searchPlaceholder}
+        showChevronWhenEmpty
+      />
+    );
+
+  return (
+    <Card p="md" radius="md" shadow="none" withBorder>
+      <Group align="center" gap="sm" wrap="wrap">
+        {mode === "create" ? (
+          <Tooltip label={addActionLabel}>
+            <ActionIconButton
+              aria-label={addActionLabel}
+              color="green"
+              icon={<IconPlus />}
+              variant="light"
+            />
+          </Tooltip>
+        ) : null}
+
+        <PersonChip disabled person={currentPerson} />
+
+        <Text c="dimmed" size="sm">
+          {isLabel}
+        </Text>
+
+        <Select
+          clearable={mode === "create"}
+          data={relationshipTypeOptions}
+          disabled={isSubmitting || isAutoCreating}
+          onChange={(value) => {
+            const nextType = value as RelationshipType | null;
+            setRelationshipType(nextType);
+
+            if (mode === "edit" && onUpdate && nextType && relatedPersonId) {
+              detachPromise(onUpdate(nextType, relatedPersonId));
+            }
+
+            detachPromise(maybeCreate(nextType, relatedPersonId));
+          }}
+          placeholder={relationshipTypePlaceholder}
+          searchable
+          value={relationshipType}
+        />
+
+        <Text c="dimmed" size="sm">
+          {ofLabel}
+        </Text>
+
+        {relatedPersonChip}
+
+        {showRightAction ? (
+          <ActionIconButton
+            aria-label={removeActionLabel}
+            color="red"
+            disabled={isSubmitting}
+            icon={<IconTrash />}
+            ml="auto"
+            onClick={onDelete}
+            variant="subtle"
+          />
+        ) : null}
+      </Group>
+    </Card>
+  );
+}
+
 export function ContactRelationshipsSection({
   contactsHasMore = false,
   currentPerson,
@@ -66,7 +323,7 @@ export function ContactRelationshipsSection({
   const t = usePersonRelationshipsTranslations();
 
   const relationshipTypeOptions = RELATIONSHIP_TYPE_OPTIONS.map((typeOption) => ({
-    label: `${typeOption.emoji} ${t(`Types.${typeOption.value}`)}`,
+    label: [typeOption.emoji, t(`Types.${typeOption.value}`)].join(" "),
     value: typeOption.value,
   }));
 
@@ -154,256 +411,5 @@ export function ContactRelationshipsSection({
         selectablePeople={selectablePeople}
       />
     </Stack>
-  );
-}
-
-type RelationshipOption = { value: string; label: string };
-
-type RelationshipCardRowBaseProps = {
-  addActionLabel?: string;
-  contactsHasMore?: boolean;
-  currentPerson: ContactPreview;
-  initialRelatedPerson?: ContactPreview;
-  initialRelationshipType?: RelationshipType;
-  isLabel: string;
-  isSubmitting: boolean;
-  loadingMoreLabel: string;
-  loadMoreErrorLabel: string;
-  loadMoreRetryLabel: string;
-  mode: "create" | "edit";
-  noPeopleFound: string;
-  ofLabel: string;
-  onCreate?: (relationshipType: RelationshipType, relatedPersonId: string) => Promise<void>;
-  onDelete?: () => void;
-  onUpdate?: (relationshipType: RelationshipType, relatedPersonId: string) => Promise<void>;
-  relatedPersonPlaceholder: string;
-  relationshipTypeOptions: RelationshipOption[];
-  relationshipTypePlaceholder: string;
-  removeActionLabel?: string;
-  searchingLabel: string;
-  searchPlaceholder: string;
-  selectablePeople: ContactPreview[];
-  showRightAction?: boolean;
-};
-
-type RelationshipCardRowProps = RelationshipCardRowBaseProps &
-  (
-    | {
-        onSearch: PeoplePickerOnSearch<ContactPreview>;
-        searchDebounceMs: number;
-      }
-    | {
-        onSearch?: never;
-        searchDebounceMs?: never;
-      }
-  );
-
-function RelationshipCardRow({
-  mode,
-  contactsHasMore = false,
-  currentPerson,
-  selectablePeople,
-  relationshipTypeOptions,
-  isSubmitting,
-  relationshipTypePlaceholder,
-  relatedPersonPlaceholder,
-  searchPlaceholder,
-  searchingLabel,
-  loadingMoreLabel,
-  loadMoreErrorLabel,
-  loadMoreRetryLabel,
-  noPeopleFound,
-  isLabel,
-  ofLabel,
-  initialRelationshipType,
-  initialRelatedPerson,
-  showRightAction = false,
-  removeActionLabel = "Remove",
-  addActionLabel = "Add",
-  onCreate,
-  onUpdate,
-  onDelete,
-  onSearch,
-  searchDebounceMs,
-}: RelationshipCardRowProps) {
-  const [relationshipType, setRelationshipType] = useState<RelationshipType | null>(
-    initialRelationshipType || null,
-  );
-  const [relatedPersonId, setRelatedPersonId] = useState<string | null>(
-    initialRelatedPerson?.id || null,
-  );
-  const [isAutoCreating, setIsAutoCreating] = useState(false);
-  const knownRelatedPeopleRef = useRef<Map<string, ContactPreview>>(new Map());
-
-  const selectableRelatedPeople = selectablePeople.filter(
-    (candidate) => candidate.id !== currentPerson.id,
-  );
-
-  useEffect(() => {
-    for (const p of selectableRelatedPeople) {
-      knownRelatedPeopleRef.current.set(p.id, p);
-    }
-  }, [selectableRelatedPeople]);
-
-  useEffect(() => {
-    if (initialRelatedPerson) {
-      knownRelatedPeopleRef.current.set(initialRelatedPerson.id, initialRelatedPerson);
-    }
-  }, [initialRelatedPerson]);
-
-  const localHandleSearch: PeoplePickerOnSearch<ContactPreview> = async (query, paging) => {
-    if (!onSearch) {
-      return { contacts: [], hasMore: false };
-    }
-    const page = await onSearch(query, paging);
-    for (const r of page.contacts) {
-      knownRelatedPeopleRef.current.set(r.id, r);
-    }
-    return page;
-  };
-
-  const relatedPerson = relatedPersonId
-    ? (selectableRelatedPeople.find((candidate) => candidate.id === relatedPersonId) ??
-      knownRelatedPeopleRef.current.get(relatedPersonId) ??
-      null)
-    : null;
-
-  const maybeCreate = async (nextType: RelationshipType | null, nextPersonId: string | null) => {
-    if (
-      mode !== "create" ||
-      !onCreate ||
-      !nextType ||
-      !nextPersonId ||
-      isAutoCreating ||
-      isSubmitting
-    ) {
-      return;
-    }
-
-    setIsAutoCreating(true);
-    try {
-      await onCreate(nextType, nextPersonId);
-      setRelationshipType(null);
-      setRelatedPersonId(null);
-    } finally {
-      setIsAutoCreating(false);
-    }
-  };
-
-  const handleSelectRelatedPerson = (nextPersonId: string) => {
-    if (!nextPersonId) {
-      return;
-    }
-
-    setRelatedPersonId(nextPersonId);
-
-    if (
-      mode === "edit" &&
-      onUpdate &&
-      relationshipType &&
-      nextPersonId !== initialRelatedPerson?.id
-    ) {
-      onUpdate(relationshipType, nextPersonId);
-    }
-
-    void maybeCreate(relationshipType, nextPersonId);
-  };
-
-  const relatedPersonChip =
-    onSearch != null && searchDebounceMs != null ? (
-      <PersonChip
-        contactsHasMore={contactsHasMore}
-        disabled={isSubmitting || isAutoCreating}
-        isSelectable
-        loadingMoreLabel={loadingMoreLabel}
-        loadMoreErrorLabel={loadMoreErrorLabel}
-        loadMoreRetryLabel={loadMoreRetryLabel}
-        noResultsLabel={noPeopleFound}
-        onSearch={localHandleSearch}
-        onSelectPerson={handleSelectRelatedPerson}
-        people={selectableRelatedPeople}
-        person={relatedPerson}
-        placeholder={relatedPersonPlaceholder}
-        searchDebounceMs={searchDebounceMs}
-        searchingLabel={searchingLabel}
-        searchPlaceholder={searchPlaceholder}
-        showChevronWhenEmpty
-      />
-    ) : (
-      <PersonChip
-        disabled={isSubmitting || isAutoCreating}
-        isSelectable
-        loadingMoreLabel={loadingMoreLabel}
-        loadMoreErrorLabel={loadMoreErrorLabel}
-        loadMoreRetryLabel={loadMoreRetryLabel}
-        noResultsLabel={noPeopleFound}
-        onSelectPerson={handleSelectRelatedPerson}
-        people={selectableRelatedPeople}
-        person={relatedPerson}
-        placeholder={relatedPersonPlaceholder}
-        searchingLabel={searchingLabel}
-        searchPlaceholder={searchPlaceholder}
-        showChevronWhenEmpty
-      />
-    );
-
-  return (
-    <Card p="md" radius="md" shadow="none" withBorder>
-      <Group align="center" gap="sm" wrap="wrap">
-        {mode === "create" ? (
-          <Tooltip label={addActionLabel}>
-            <ActionIconButton
-              aria-label={addActionLabel}
-              color="green"
-              icon={<IconPlus />}
-              variant="light"
-            />
-          </Tooltip>
-        ) : null}
-
-        <PersonChip disabled person={currentPerson} />
-
-        <Text c="dimmed" size="sm">
-          {isLabel}
-        </Text>
-
-        <Select
-          clearable={mode === "create"}
-          data={relationshipTypeOptions}
-          disabled={isSubmitting || isAutoCreating}
-          onChange={(value) => {
-            const nextType = value as RelationshipType | null;
-            setRelationshipType(nextType);
-
-            if (mode === "edit" && onUpdate && nextType && relatedPersonId) {
-              onUpdate(nextType, relatedPersonId);
-            }
-
-            void maybeCreate(nextType, relatedPersonId);
-          }}
-          placeholder={relationshipTypePlaceholder}
-          searchable
-          value={relationshipType}
-        />
-
-        <Text c="dimmed" size="sm">
-          {ofLabel}
-        </Text>
-
-        {relatedPersonChip}
-
-        {showRightAction ? (
-          <ActionIconButton
-            aria-label={removeActionLabel}
-            color="red"
-            disabled={isSubmitting}
-            icon={<IconTrash />}
-            ml="auto"
-            onClick={onDelete}
-            variant="subtle"
-          />
-        ) : null}
-      </Group>
-    </Card>
   );
 }

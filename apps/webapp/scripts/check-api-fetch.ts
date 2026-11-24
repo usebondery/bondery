@@ -8,6 +8,17 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "../../../scripts/check/check-report.mjs";
 
+const JS_TS_EXTENSION = /\.(tsx?|jsx?)$/;
+const USE_CLIENT_DIRECTIVE = /^["']use client["'];?\s*$/m;
+const SERVERAPIFETCH = /\bserverApiFetch\b/;
+const BFFPROXYFETCH = /\bbffProxyFetch\b/;
+const TRANSPORTPOLICY_FALSE = /transportPolicy:\s*false/;
+const IMPORT_API_URL_FROM_LIB_PLATFORM_CONFIG =
+  /import\s*\{[^}]*\bAPI_URL\b[^}]*\}\s*from\s*["']@\/lib\/platform\/config["']/;
+const FETCH_API_URL = /\bfetch\s*\(\s*[`'"]\s*\$\{\s*API_URL/;
+const FETCH_API_ROUTES = /\bfetch\s*\(\s*[`'"]\s*\$\{\s*API_ROUTES/;
+const FETCH_API_ROUTES_2 = /\bfetch\s*\(\s*API_ROUTES\./;
+
 const check = createCheck("check-api-fetch");
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -23,7 +34,7 @@ function walk(dir: string, acc: string[] = []): string[] {
         continue;
       }
       walk(full, acc);
-    } else if (/\.(tsx?|jsx?)$/.test(entry)) {
+    } else if (JS_TS_EXTENSION.test(entry)) {
       acc.push(full);
     }
   }
@@ -31,7 +42,7 @@ function walk(dir: string, acc: string[] = []): string[] {
 }
 
 function isClientFile(content: string): boolean {
-  return /^["']use client["'];?\s*$/m.test(content);
+  return USE_CLIENT_DIRECTIVE.test(content);
 }
 
 function isAllowedClientFetchFile(rel: string): boolean {
@@ -53,15 +64,15 @@ function checkApiRouteFile(absPath: string): Violation[] {
     return violations;
   }
 
-  if (!/\bserverApiFetch\b/.test(content)) {
+  if (!SERVERAPIFETCH.test(content)) {
     return violations;
   }
 
-  if (/\bbffProxyFetch\b/.test(content)) {
+  if (BFFPROXYFETCH.test(content)) {
     return violations;
   }
 
-  if (/transportPolicy:\s*false/.test(content)) {
+  if (TRANSPORTPOLICY_FALSE.test(content)) {
     return violations;
   }
 
@@ -87,9 +98,7 @@ function checkFile(absPath: string): Violation[] {
     return violations;
   }
 
-  if (
-    /import\s*\{[^}]*\bAPI_URL\b[^}]*\}\s*from\s*["']@\/lib\/platform\/config["']/.test(content)
-  ) {
+  if (IMPORT_API_URL_FROM_LIB_PLATFORM_CONFIG.test(content)) {
     violations.push({
       detail: 'Client file imports API_URL from "@/lib/platform/config"',
       file: rel,
@@ -97,7 +106,7 @@ function checkFile(absPath: string): Violation[] {
     });
   }
 
-  if (/\bfetch\s*\(\s*[`'"]\s*\$\{\s*API_URL/.test(content)) {
+  if (FETCH_API_URL.test(content)) {
     violations.push({
       detail: "Client file fetches API_URL directly",
       file: rel,
@@ -105,7 +114,7 @@ function checkFile(absPath: string): Violation[] {
     });
   }
 
-  if (/\bfetch\s*\(\s*[`'"]\s*\$\{\s*API_ROUTES/.test(content)) {
+  if (FETCH_API_ROUTES.test(content)) {
     violations.push({
       detail: "Use clientApiFetch/clientApiJson instead of raw fetch(API_ROUTES...)",
       file: rel,
@@ -113,7 +122,7 @@ function checkFile(absPath: string): Violation[] {
     });
   }
 
-  if (/\bfetch\s*\(\s*API_ROUTES\./.test(content)) {
+  if (FETCH_API_ROUTES_2.test(content)) {
     violations.push({
       detail: "Use clientApiFetch/clientApiJson instead of raw fetch(API_ROUTES...)",
       file: rel,
@@ -126,7 +135,7 @@ function checkFile(absPath: string): Violation[] {
 
 function main(): void {
   const files = walk(WEBAPP_SRC);
-  const violations = files.flatMap((file) => [...checkFile(file), ...checkApiRouteFile(file)]);
+  const violations = files.flatMap((file) => checkFile(file).concat(checkApiRouteFile(file)));
 
   for (const violation of violations) {
     check.add(`[${violation.rule}] ${violation.file}: ${violation.detail}`);

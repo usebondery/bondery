@@ -17,19 +17,21 @@ import type {
   UpcomingRemindersResponse,
 } from "./types.js";
 
-type _UpcomingReminder = Assert<IsEqual<UpcomingReminder, z.infer<typeof upcomingReminderSchema>>>;
-type _ReminderDigestItem = Assert<
+export type _UpcomingReminder = Assert<
+  IsEqual<UpcomingReminder, z.infer<typeof upcomingReminderSchema>>
+>;
+export type _ReminderDigestItem = Assert<
   IsEqual<ReminderDigestItem, z.infer<typeof reminderDigestItemSchema>>
 >;
-type _ReminderDigestUser = Assert<
+export type _ReminderDigestUser = Assert<
   IsEqual<ReminderDigestUser, z.infer<typeof reminderDigestUserSchema>>
 >;
-type _ReminderDigestRequest = Assert<
+export type _ReminderDigestRequest = Assert<
   IsEqual<ReminderDigestRequest, z.infer<typeof reminderDigestRequestSchema>>
 >;
-type _ReminderDigestResponse = Assert<
+export type _ReminderDigestResponse = Assert<
   IsEqual<ReminderDigestResponse, z.infer<typeof reminderDigestResponseSchema>>
 >;
-type _UpcomingRemindersResponse = Assert<
+export type _UpcomingRemindersResponse = Assert<
   IsEqual<UpcomingRemindersResponse, z.infer<typeof upcomingRemindersResponseSchema>>
 >;

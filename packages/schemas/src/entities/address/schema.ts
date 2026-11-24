@@ -10,15 +10,13 @@ import type {
 
 const optionalTrimmedString = nullableTrimmedStringSchema();
 
-export const contactAddressTypeSchema = z
-  .enum(["home", "work", "other"])
-  .describe("Address category");
+const contactAddressTypeSchema = z.enum(["home", "work", "other"]).describe("Address category");
 
-export const contactAddressGranularitySchema = z.enum(["address", "city", "state", "country"]);
+const contactAddressGranularitySchema = z.enum(["address", "city", "state", "country"]);
 
-export const contactAddressGeocodeSourceSchema = z.enum(["mapy.com", "manual"]);
+const contactAddressGeocodeSourceSchema = z.enum(["mapy.com", "manual"]);
 
-export const contactAddressConfidenceSchema = z.enum(["verified", "unverifiable"]);
+const contactAddressConfidenceSchema = z.enum(["verified", "unverifiable"]);
 
 const addressCoreInputSchema = z.object({
   label: z
@@ -37,11 +35,11 @@ const addressCoreInputSchema = z.object({
     .describe("Display value of the address"),
 });
 
-export const contactAddressSheetSchema =
+const contactAddressSheetSchema =
   addressCoreInputSchema satisfies z.ZodType<ContactAddressSheetOutput>;
 
 /** Read-model address shape (no input transforms — safe for Fastify response serialization). */
-export const contactAddressReadSchema: z.ZodType<ContactAddressRead> = z.object({
+const contactAddressReadSchema: z.ZodType<ContactAddressRead> = z.object({
   addressCity: z.string().nullable().describe("City name"),
   addressCountry: z.string().nullable().describe("Country name"),
   addressCountryCode: z.string().nullable().describe("ISO 3166-1 alpha-2 country code"),
@@ -68,7 +66,7 @@ export const contactAddressReadSchema: z.ZodType<ContactAddressRead> = z.object(
   value: z.string().describe("Display value of the address"),
 });
 
-export const contactAddressEntrySchema = addressCoreInputSchema.extend({
+const contactAddressEntrySchema = addressCoreInputSchema.extend({
   addressCity: optionalTrimmedString.describe("City name"),
   addressCountry: optionalTrimmedString.describe("Country name"),
   addressCountryCode: optionalTrimmedString.describe("ISO 3166-1 alpha-2 country code"),
@@ -93,10 +91,20 @@ export const contactAddressEntrySchema = addressCoreInputSchema.extend({
   timezone: optionalTrimmedString.describe("IANA timezone name for this address"),
 }) satisfies z.ZodType<ContactAddressEntryOutput>;
 
-export const geocodeSuggestAddressSchema = contactAddressEntrySchema;
+const geocodeSuggestAddressSchema = contactAddressEntrySchema;
 
-export const replaceAddressesSchema = z
-  .array(contactAddressEntrySchema)
-  .max(CONTACT_LIMITS.maxAddresses, {
-    error: `Maximum of ${CONTACT_LIMITS.maxAddresses} addresses allowed`,
-  }) satisfies z.ZodType<ReplaceAddressesInput>;
+const replaceAddressesSchema = z.array(contactAddressEntrySchema).max(CONTACT_LIMITS.maxAddresses, {
+  error: `Maximum of ${CONTACT_LIMITS.maxAddresses} addresses allowed`,
+}) satisfies z.ZodType<ReplaceAddressesInput>;
+
+export {
+  contactAddressConfidenceSchema,
+  contactAddressEntrySchema,
+  contactAddressGeocodeSourceSchema,
+  contactAddressGranularitySchema,
+  contactAddressReadSchema,
+  contactAddressSheetSchema,
+  contactAddressTypeSchema,
+  geocodeSuggestAddressSchema,
+  replaceAddressesSchema,
+};

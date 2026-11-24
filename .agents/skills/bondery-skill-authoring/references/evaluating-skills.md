@@ -18,13 +18,13 @@ Source: https://agentskills.io/skill-creation/evaluating-skills
 
 ## What to look for
 
-| Symptom | Fix |
-|---------|-----|
-| Skill never activates | Improve `description` trigger keywords |
+| Symptom                   | Fix                                                 |
+| ------------------------- | --------------------------------------------------- |
+| Skill never activates     | Improve `description` trigger keywords              |
 | Skill activates too often | Narrow `description`; move edge cases to references |
-| Agent ignores checklist | Move critical items to Non-negotiables |
-| Agent invents paths | Add gotchas with real file paths |
-| SKILL.md too long | Split to `references/` with decision tree |
+| Agent ignores checklist   | Move critical items to Non-negotiables              |
+| Agent invents paths       | Add gotchas with real file paths                    |
+| SKILL.md too long         | Split to `references/` with decision tree           |
 
 ## False positive tests
 

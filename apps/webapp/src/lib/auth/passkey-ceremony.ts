@@ -1,10 +1,5 @@
-export type PasskeyCeremonyKind =
-  | "cancel"
-  | "fail"
-  | "not_found"
-  | "session_stale"
-  | "timeout"
-  | "unsupported";
+const TIMED_OUT_I = /\btimed?\s*out\b/i;
+const NOT_ALLOWED_I = /not allowed/i;
 
 const CANCEL_CODES = new Set([
   "AbortError",
@@ -19,6 +14,50 @@ const NOT_FOUND_CODES = new Set(["PASSKEY_NOT_FOUND"]);
 const SESSION_STALE_CODES = new Set(["SESSION_NOT_FRESH", "SESSION_REQUIRED"]);
 
 const TIMEOUT_CODES = new Set(["TimeoutError"]);
+
+function isTimeout(code: string | null, message: string): boolean {
+  if (code && TIMEOUT_CODES.has(code)) {
+    return true;
+  }
+
+  return TIMED_OUT_I.test(message) && !NOT_ALLOWED_I.test(message);
+}
+
+function getErrorCode(error: unknown): string | null {
+  if (typeof error !== "object" || error === null) {
+    return null;
+  }
+
+  if ("code" in error && typeof error.code === "string" && error.code.length > 0) {
+    return error.code;
+  }
+
+  if ("name" in error && typeof error.name === "string" && error.name.length > 0) {
+    return error.name;
+  }
+
+  return null;
+}
+
+function getErrorMessage(error: unknown): string {
+  if (typeof error !== "object" || error === null) {
+    return "";
+  }
+
+  if ("message" in error && typeof error.message === "string") {
+    return error.message;
+  }
+
+  return "";
+}
+
+export type PasskeyCeremonyKind =
+  | "cancel"
+  | "fail"
+  | "not_found"
+  | "session_stale"
+  | "timeout"
+  | "unsupported";
 
 /**
  * Classifies WebAuthn / Better Auth passkey client errors for toast vs silent cancel.
@@ -74,40 +113,4 @@ export function getPasskeyLoginCopyKey(kind: PasskeyCeremonyKind): PasskeyLoginC
     default:
       return "PasskeySignInFailed";
   }
-}
-
-function isTimeout(code: string | null, message: string): boolean {
-  if (code && TIMEOUT_CODES.has(code)) {
-    return true;
-  }
-
-  return /\btimed?\s*out\b/i.test(message) && !/not allowed/i.test(message);
-}
-
-function getErrorCode(error: unknown): string | null {
-  if (typeof error !== "object" || error === null) {
-    return null;
-  }
-
-  if ("code" in error && typeof error.code === "string" && error.code.length > 0) {
-    return error.code;
-  }
-
-  if ("name" in error && typeof error.name === "string" && error.name.length > 0) {
-    return error.name;
-  }
-
-  return null;
-}
-
-function getErrorMessage(error: unknown): string {
-  if (typeof error !== "object" || error === null) {
-    return "";
-  }
-
-  if ("message" in error && typeof error.message === "string") {
-    return error.message;
-  }
-
-  return "";
 }

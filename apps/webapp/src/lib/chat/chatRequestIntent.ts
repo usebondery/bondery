@@ -17,7 +17,7 @@ export function resolveRequestIntent(
     return "retry";
   }
 
-  const lastMessage = messages[messages.length - 1];
+  const lastMessage = messages.at(-1);
   const hasApprovalResponse =
     lastMessage?.role === "assistant" &&
     lastMessage.parts.some(

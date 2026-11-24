@@ -61,7 +61,6 @@ export interface ContactsTableV2Props {
   bulkSelectionActions?: BulkSelectionAction[];
   columnsForMenu?: ColumnConfig[];
   contacts: Contact[];
-  dateLocale?: string;
   disableNameLink?: boolean;
   excludedIds?: Set<string>;
   hasMore?: boolean;

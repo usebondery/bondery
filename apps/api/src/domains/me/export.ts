@@ -25,16 +25,12 @@ import { addExportedAvatarFiles } from "./export-photos.js";
 const require = createRequire(import.meta.url);
 const apiPackage = require("../../../package.json") as { version: string };
 
-export function getBonderyApiVersion(): string {
-  return readRuntimeProductVersion(apiPackage.version);
-}
-
-export type GenerateExportZipOptions = {
+type GenerateExportZipOptions = {
   bonderyVersion?: string;
   now?: Date;
 };
 
-export type GenerateExportZipResult = {
+type GenerateExportZipResult = {
   buffer: Buffer;
   counts: ExportCounts;
   filename: string;
@@ -69,6 +65,12 @@ function membersByParentId(
     membersByParent.set(row.parentId, members);
   }
   return membersByParent;
+}
+
+export type { GenerateExportZipOptions, GenerateExportZipResult };
+
+export function getBonderyApiVersion(): string {
+  return readRuntimeProductVersion(apiPackage.version);
 }
 
 export async function getExportSummary(

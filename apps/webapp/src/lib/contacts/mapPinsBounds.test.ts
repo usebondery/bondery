@@ -10,16 +10,16 @@ import {
 describe("normalizeMapPinsBounds", () => {
   it("rounds coordinates so near-equal floats share a key", () => {
     const a = normalizeMapPinsBounds({
-      maxLat: 50.123456789,
-      maxLon: 14.987654321,
-      minLat: 50.100001111,
-      minLon: 14.900009999,
+      maxLat: 50.123_456_789,
+      maxLon: 14.987_654_321,
+      minLat: 50.100_001_111,
+      minLon: 14.900_009_999,
     });
     const b = normalizeMapPinsBounds({
-      maxLat: 50.123451111,
-      maxLon: 14.987659999,
-      minLat: 50.100008888,
-      minLon: 14.900001111,
+      maxLat: 50.123_451_111,
+      maxLon: 14.987_659_999,
+      minLat: 50.100_008_888,
+      minLon: 14.900_001_111,
     });
     assert.deepEqual(a, b);
     assert.deepEqual(a, {

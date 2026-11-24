@@ -28,17 +28,19 @@ MCP tool failures and in-app chat tool failures use the same nested envelope. MC
 
 `apps/api/src/lib/platform/errors/http-errors.ts`:
 
-| Helper | Status |
-|--------|--------|
-| `badRequest()` | 400 |
-| `unauthorized()` | 401 |
-| `forbidden()` | 403 |
-| `notFound()` | 404 |
-| `conflict()` | 409 |
-| `internal()` | 500 |
-| `serviceUnavailable()` | 503 |
+| Helper                 | Status |
+| ---------------------- | ------ |
+| `badRequest()`         | 400    |
+| `unauthorized()`       | 401    |
+| `forbidden()`          | 403    |
+| `notFound()`           | 404    |
+| `conflict()`           | 409    |
+| `internal()`           | 500    |
+| `serviceUnavailable()` | 503    |
 
 Throw via helpers or `new DomainError(...)` with catalog codes. Never put internal details in `message` for 5xx — log server-side only.
+
+**Always pass the cause to `internal(code, cause)`.** The error handler logs the cause and reports every 5xx to PostHog (logs and error tracking), grouped by the innermost cause's stack. An `internal(code)` with no cause arrives there with nothing to debug. See [`bondery-analytics` → API logs and error tracking](../../bondery-analytics/references/posthog-flags-replay-logs.md#api-logs-and-error-tracking-enabled).
 
 **Special cases:**
 

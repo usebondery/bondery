@@ -6,13 +6,15 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+const ZA_ZA_Z0_RE = /^[A-Za-z_][A-Za-z0-9_]*$/;
+
 const packageRoot = dirname(fileURLToPath(import.meta.url));
 const localesEnRoot = join(packageRoot, "../src/locales/en");
 const manifest = JSON.parse(readFileSync(join(packageRoot, "../manifest.json"), "utf8"));
 const outDir = join(packageRoot, "../src/generated/i18n");
 
 /** @type {Record<string, string[]>} */
-export const branchPrefixesByNamespace = {};
+const branchPrefixesByNamespace = {};
 
 function catalogTypeName(namespace) {
   if (namespace === "common") {
@@ -27,7 +29,7 @@ function catalogTypeName(namespace) {
   return `${namespace}Catalog`;
 }
 
-export function prefixTypeName(namespace) {
+function prefixTypeName(namespace) {
   if (namespace === "common") {
     return "CommonPrefix";
   }
@@ -41,7 +43,7 @@ export function prefixTypeName(namespace) {
 }
 
 function tsPropertyKey(key) {
-  return /^[A-Za-z_][A-Za-z0-9_]*$/.test(key) ? key : JSON.stringify(key);
+  return ZA_ZA_Z0_RE.test(key) ? key : JSON.stringify(key);
 }
 
 function jsonValueToTsType(value, indent) {
@@ -75,7 +77,7 @@ function collectBranchPrefixes(value, prefix = "", acc = []) {
   return acc;
 }
 
-export function generateI18nCatalog() {
+function generateI18nCatalog() {
   mkdirSync(outDir, { recursive: true });
 
   const catalogTypeLines = [];
@@ -109,7 +111,7 @@ export function generateI18nCatalog() {
   }
 
   const catalogEntries = Object.keys(manifest.namespaces)
-    .sort()
+    .sort((left, right) => left.localeCompare(right))
     .map((namespace) => `  ${JSON.stringify(namespace)}: ${catalogTypeName(namespace)};`)
     .join("\n");
 
@@ -141,7 +143,7 @@ export function generateI18nCatalog() {
 }
 
 /** Align i18next-cli module augmentation with manifest Catalog keys (not file paths). */
-export function patchI18nextCatalogTypes() {
+function patchI18nextCatalogTypes() {
   const i18nextDts = join(packageRoot, "../src/generated/i18next-cli/i18next.d.ts");
   const content = `// Patched by packages/translations/scripts/generate-i18n-catalog.mjs — do not edit.
 import type { Catalog } from "../i18n/catalog-types";
@@ -160,3 +162,5 @@ declare module "i18next" {
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   generateI18nCatalog();
 }
+
+export { branchPrefixesByNamespace, generateI18nCatalog, patchI18nextCatalogTypes, prefixTypeName };

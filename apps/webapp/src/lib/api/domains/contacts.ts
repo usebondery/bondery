@@ -56,6 +56,14 @@ import {
 } from "@/lib/api/resources/contacts";
 import type { AvatarPreset } from "@/lib/contacts/avatarParams";
 
+async function postMergeContacts(body: Record<string, unknown>): Promise<MergeContactsResponse> {
+  return clientApiJson<MergeContactsResponse>(API_ROUTES.CONTACTS_MERGE, {
+    body: JSON.stringify(body),
+    headers: { "Content-Type": "application/json" },
+    method: "POST",
+  });
+}
+
 export type {
   ContactsDataResult,
   ContactsListParams,
@@ -195,14 +203,6 @@ export async function deleteContactsFiltered(payload: {
     body: JSON.stringify(payload),
     headers: { "Content-Type": "application/json" },
     method: "DELETE",
-  });
-}
-
-async function postMergeContacts(body: Record<string, unknown>): Promise<MergeContactsResponse> {
-  return clientApiJson<MergeContactsResponse>(API_ROUTES.CONTACTS_MERGE, {
-    body: JSON.stringify(body),
-    headers: { "Content-Type": "application/json" },
-    method: "POST",
   });
 }
 

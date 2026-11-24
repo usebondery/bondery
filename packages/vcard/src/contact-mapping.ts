@@ -8,6 +8,11 @@ import type {
   VCardProperty,
   VCardTextValue,
 } from "#model.js";
+import { GEO_URI_PREFIX, TEL_URI_PREFIX } from "#uri-schemes.js";
+
+const PATTERN_5E5C2B_RE = /^\+/;
+const PATTERN_5C732B_RE = /\s+/;
+const GEO_RE = /^geo:([^,]+),(.+)$/;
 
 function normalizePreferred(pref?: number): boolean {
   return pref === 1;
@@ -21,7 +26,7 @@ function splitPhoneUri(
   uri: string,
   defaultCountry: string | null,
 ): { prefix: string; value: string } {
-  const normalized = uri.startsWith("tel:") ? uri.slice(4) : uri;
+  const normalized = uri.startsWith(TEL_URI_PREFIX) ? uri.slice(TEL_URI_PREFIX.length) : uri;
   const parsed = normalizePhoneParts("", normalized, { defaultCountry });
   if ("error" in parsed) {
     return { prefix: "", value: normalized.replace(/\D/g, "") };
@@ -98,7 +103,7 @@ function mapSocialImpp(contact: Contact): VCardTextValue[] {
     entries.push({ types: ["home"], value: `whatsapp:${contact.whatsapp}` });
     entries.push({
       types: ["home"],
-      value: `https://wa.me/${contact.whatsapp.replace(/^\+/, "")}`,
+      value: `https://wa.me/${contact.whatsapp.replace(PATTERN_5E5C2B_RE, "")}`,
     });
   }
 
@@ -106,7 +111,7 @@ function mapSocialImpp(contact: Contact): VCardTextValue[] {
     entries.push({ types: ["home"], value: `signal:${contact.signal}` });
     entries.push({
       types: ["home"],
-      value: `https://signal.me/#p/${contact.signal.replace(/^\+/, "")}`,
+      value: `https://signal.me/#p/${contact.signal.replace(PATTERN_5E5C2B_RE, "")}`,
     });
   }
 
@@ -133,63 +138,6 @@ function mapSocialImpp(contact: Contact): VCardTextValue[] {
   return entries;
 }
 
-/**
- * Maps a Bondery contact into a normalized vCard model.
- *
- * @param contact Contact entity from the shared domain model.
- * @returns Normalized vCard ready for serialization or enrichment.
- */
-export function contactToVCard(contact: Contact): VCard {
-  const fullName = [contact.firstName, contact.middleName, contact.lastName]
-    .filter(Boolean)
-    .join(" ")
-    .trim();
-  const phoneEntries = Array.isArray(contact.phones) ? (contact.phones as PhoneEntry[]) : null;
-  const emailEntries = Array.isArray(contact.emails) ? (contact.emails as EmailEntry[]) : null;
-  const addressEntries = Array.isArray(contact.addresses)
-    ? (contact.addresses as ContactAddressEntry[])
-    : null;
-
-  return {
-    addresses: mapAddresses(addressEntries),
-    categories: [],
-    customProperties: contact.myself ? [{ name: "X-MYSELF", parameters: [], value: "TRUE" }] : [],
-    emails: mapEmails(emailEntries),
-    fullName,
-    geo:
-      contact.latitude !== null && contact.longitude !== null
-        ? `geo:${contact.latitude},${contact.longitude}`
-        : undefined,
-    instantMessaging: mapSocialImpp(contact),
-    keys: [],
-    kind: "individual",
-    languages: contact.language ? [{ pref: 1, types: [], value: contact.language }] : [],
-    logos: [],
-    name: buildStructuredName(contact),
-    nicknames: [],
-    notes: contact.notes ? [{ types: [], value: contact.notes }] : [],
-    organizations: [],
-    phones: mapPhones(phoneEntries),
-    photos: [],
-    productId: "-//BONDERY//NONSGML Bondery v1.0//EN",
-    raw: {
-      properties: [],
-      version: "4.0",
-      warnings: [],
-    },
-    related: contact.myself
-      ? [{ types: ["me"], value: `urn:uuid:${contact.id}`, valueType: "uri" }]
-      : [],
-    revision: contact.updatedAt ?? contact.createdAt ?? undefined,
-    roles: [],
-    sounds: [],
-    timezone: contact.timezone ? { value: contact.timezone, valueType: "text" } : undefined,
-    titles: contact.headline ? [{ types: [], value: contact.headline }] : [],
-    uid: `urn:uuid:${contact.id}`,
-    urls: contact.website ? [{ types: ["home"], value: contact.website }] : [],
-  };
-}
-
 function deriveName(card: VCard): {
   firstName: string;
   middleName: string | null;
@@ -204,17 +152,18 @@ function deriveName(card: VCard): {
   }
 
   const cleaned = cleanPersonName(card.fullName);
-  const parts = cleaned.split(/\s+/).filter(Boolean);
-  if (parts.length === 0) {
+  const parts = cleaned.split(PATTERN_5C732B_RE).filter(Boolean);
+  const [firstName] = parts;
+  if (firstName === undefined) {
     return { firstName: "", lastName: null, middleName: null };
   }
   if (parts.length === 1) {
-    return { firstName: parts[0], lastName: null, middleName: null };
+    return { firstName, lastName: null, middleName: null };
   }
 
   const extracted = extractNameParts(parts.slice(1).join(" "));
   return {
-    firstName: parts[0],
+    firstName,
     lastName: extracted.lastName || null,
     middleName: extracted.middleName,
   };
@@ -224,6 +173,15 @@ function pickBestUrl(values: VCardTextValue[]): string | null {
   return values.sort((left, right) => (left.pref ?? 100) - (right.pref ?? 100))[0]?.value ?? null;
 }
 
+/** Android `ContactsContract.CommonDataKinds.Event` type codes. */
+const ANDROID_EVENT_TYPE_CUSTOM = 0;
+const ANDROID_EVENT_TYPE_ANNIVERSARY = 1;
+const ANDROID_EVENT_TYPE_OTHER = 2;
+const ANDROID_EVENT_TYPE_BIRTHDAY = 3;
+
+/** Fields an Android event value needs: the mime type, the date and the type code. */
+const ANDROID_EVENT_MIN_PARTS = 3;
+
 /**
  * Maps Android contact event type codes to Bondery important date types.
  * Android type codes: 0=custom (with label), 1=anniversary, 2=other, 3=birthday
@@ -232,18 +190,16 @@ function pickBestUrl(values: VCardTextValue[]): string | null {
  * @param typeCode Numeric type from X-ANDROID-CUSTOM field
  * @returns Bondery date type
  */
-function mapAndroidEventType(
-  typeCode: number,
-): "birthday" | "anniversary" | "nameday" | "graduation" | "other" {
+function mapAndroidEventType(typeCode: number): "birthday" | "anniversary" | "other" {
   switch (typeCode) {
-    case 0:
-      return "other"; // TYPE_CUSTOM - use label field
-    case 1:
-      return "anniversary"; // TYPE_ANNIVERSARY
-    case 2:
-      return "other"; // TYPE_OTHER
-    case 3:
-      return "birthday"; // TYPE_BIRTHDAY
+    case ANDROID_EVENT_TYPE_CUSTOM:
+      return "other"; // use label field
+    case ANDROID_EVENT_TYPE_ANNIVERSARY:
+      return "anniversary";
+    case ANDROID_EVENT_TYPE_OTHER:
+      return "other";
+    case ANDROID_EVENT_TYPE_BIRTHDAY:
+      return "birthday";
     default:
       return "other";
   }
@@ -283,7 +239,7 @@ function parseAndroidCustomDate(property: VCardProperty): {
   }
 
   const parts = value.split(";");
-  if (parts.length < 3) {
+  if (parts.length < ANDROID_EVENT_MIN_PARTS) {
     return null;
   }
 
@@ -294,7 +250,7 @@ function parseAndroidCustomDate(property: VCardProperty): {
 
   const typeCode = Number.parseInt(parts[2] ?? "1", 10);
   // More explicit handling of empty label field
-  const labelValue = parts[3];
+  const [, , , labelValue] = parts;
   const label = labelValue && labelValue.trim() !== "" ? labelValue.trim() : null;
 
   try {
@@ -315,100 +271,6 @@ function parseAndroidCustomDate(property: VCardProperty): {
   } catch {
     return null;
   }
-}
-
-/**
- * Maps a normalized vCard into a contact-shaped draft suitable for import flows.
- *
- * @param card Parsed and normalized vCard.
- * @returns Contact-shaped draft without repository-specific identifiers.
- */
-export function vCardToContactDraft(
-  card: VCard,
-  options?: { defaultCountry?: string | null },
-): VCardContactDraft {
-  const defaultCountry = options?.defaultCountry ?? null;
-  const name = deriveName(card);
-  const bestWebsite = pickBestUrl(card.urls);
-  const bestPhoto =
-    card.photos.sort((left, right) => (left.pref ?? 100) - (right.pref ?? 100))[0]?.uri ?? null;
-  const bestNote =
-    card.notes.sort((left, right) => (left.pref ?? 100) - (right.pref ?? 100))[0]?.value ?? null;
-  const bestTitle =
-    card.titles.sort((left, right) => (left.pref ?? 100) - (right.pref ?? 100))[0]?.value ?? null;
-  const bestOrg =
-    card.organizations.sort((left, right) => (left.pref ?? 100) - (right.pref ?? 100))[0]
-      ?.values[0] ?? null;
-  const headline = [bestTitle, bestOrg ? `@${bestOrg}` : null].filter(Boolean).join(" ") || null;
-  const bestLanguage =
-    card.languages.sort((left, right) => (left.pref ?? 100) - (right.pref ?? 100))[0]?.value ??
-    null;
-  const geoMatch = card.geo?.match(/^geo:([^,]+),(.+)$/);
-  const imppValues = card.instantMessaging.map((entry) => entry.value);
-
-  return {
-    addresses: card.addresses.map((address) => ({
-      addressCity: address.locality[0] ?? null,
-      addressCountry: address.country[0] ?? null,
-      addressLine1: address.street[0] ?? null,
-      addressLine2: address.extended[0] ?? null,
-      addressPostalCode: address.postalCode[0] ?? null,
-      addressState: address.region[0] ?? null,
-      latitude: address.geo?.startsWith("geo:")
-        ? Number.parseFloat(address.geo.slice(4).split(",")[0] ?? "")
-        : null,
-      longitude: address.geo?.startsWith("geo:")
-        ? Number.parseFloat(address.geo.slice(4).split(",")[1] ?? "")
-        : null,
-      preferred: normalizePreferred(address.pref),
-      type: address.types.includes("work")
-        ? "work"
-        : address.types.includes("home")
-          ? "home"
-          : "other",
-      value: [address.street[0], address.locality[0], address.region[0], address.country[0]]
-        .filter(Boolean)
-        .join(", "),
-    })),
-    avatarUri: bestPhoto,
-    emails: card.emails.map((email) => ({
-      preferred: normalizePreferred(email.pref),
-      type: mapTextTypeToContactType(email.types),
-      value: email.value,
-    })),
-    facebook:
-      imppValues.find((value) => value.startsWith("messenger:"))?.slice("messenger:".length) ??
-      null,
-    firstName: name.firstName,
-    headline: headline,
-    importantDates: extractImportantDates(card),
-    instagram:
-      imppValues.find((value) => value.startsWith("instagram:"))?.slice("instagram:".length) ??
-      null,
-    language: bestLanguage,
-    lastName: name.lastName,
-    latitude: geoMatch ? Number.parseFloat(geoMatch[1]) : null,
-    linkedin: imppValues.find((value) => value.includes("linkedin.com/")) ?? null,
-    longitude: geoMatch ? Number.parseFloat(geoMatch[2]) : null,
-    middleName: name.middleName,
-    notes: bestNote,
-    phones: card.phones.map((phone) => {
-      const split = splitPhoneUri(phone.uri, defaultCountry);
-      return {
-        preferred: normalizePreferred(phone.pref),
-        prefix: split.prefix,
-        type: mapTextTypeToContactType(phone.types),
-        value: split.value || phone.value,
-      };
-    }),
-    raw: card.raw,
-    signal:
-      imppValues.find((value) => value.startsWith("signal:"))?.slice("signal:".length) ?? null,
-    timezone: card.timezone?.value ?? null,
-    website: bestWebsite,
-    whatsapp:
-      imppValues.find((value) => value.startsWith("whatsapp:"))?.slice("whatsapp:".length) ?? null,
-  };
 }
 
 /**
@@ -472,4 +334,155 @@ function extractImportantDates(card: VCard): Array<{
   dates.push(...androidDates);
 
   return dates.length > 0 ? dates : null;
+}
+
+/**
+ * Maps a Bondery contact into a normalized vCard model.
+ *
+ * @param contact Contact entity from the shared domain model.
+ * @returns Normalized vCard ready for serialization or enrichment.
+ */
+export function contactToVCard(contact: Contact): VCard {
+  const fullName = [contact.firstName, contact.middleName, contact.lastName]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+  const phoneEntries = Array.isArray(contact.phones) ? (contact.phones as PhoneEntry[]) : null;
+  const emailEntries = Array.isArray(contact.emails) ? (contact.emails as EmailEntry[]) : null;
+  const addressEntries = Array.isArray(contact.addresses)
+    ? (contact.addresses as ContactAddressEntry[])
+    : null;
+
+  return {
+    addresses: mapAddresses(addressEntries),
+    categories: [],
+    customProperties: contact.myself ? [{ name: "X-MYSELF", parameters: [], value: "TRUE" }] : [],
+    emails: mapEmails(emailEntries),
+    fullName,
+    geo:
+      contact.latitude !== null && contact.longitude !== null
+        ? `geo:${contact.latitude},${contact.longitude}`
+        : undefined,
+    instantMessaging: mapSocialImpp(contact),
+    keys: [],
+    kind: "individual",
+    languages: contact.language ? [{ pref: 1, types: [], value: contact.language }] : [],
+    logos: [],
+    name: buildStructuredName(contact),
+    nicknames: [],
+    notes: contact.notes ? [{ types: [], value: contact.notes }] : [],
+    organizations: [],
+    phones: mapPhones(phoneEntries),
+    photos: [],
+    productId: "-//BONDERY//NONSGML Bondery v1.0//EN",
+    raw: {
+      properties: [],
+      version: "4.0",
+      warnings: [],
+    },
+    related: contact.myself
+      ? [{ types: ["me"], value: `urn:uuid:${contact.id}`, valueType: "uri" }]
+      : [],
+    revision: contact.updatedAt,
+    roles: [],
+    sounds: [],
+    timezone: contact.timezone ? { value: contact.timezone, valueType: "text" } : undefined,
+    titles: contact.headline ? [{ types: [], value: contact.headline }] : [],
+    uid: `urn:uuid:${contact.id}`,
+    urls: contact.website ? [{ types: ["home"], value: contact.website }] : [],
+  };
+}
+
+/**
+ * Maps a normalized vCard into a contact-shaped draft suitable for import flows.
+ *
+ * @param card Parsed and normalized vCard.
+ * @returns Contact-shaped draft without repository-specific identifiers.
+ */
+export function vCardToContactDraft(
+  card: VCard,
+  options?: { defaultCountry?: string | null },
+): VCardContactDraft {
+  const defaultCountry = options?.defaultCountry ?? null;
+  const name = deriveName(card);
+  const bestWebsite = pickBestUrl(card.urls);
+  const bestPhoto =
+    card.photos.sort((left, right) => (left.pref ?? 100) - (right.pref ?? 100))[0]?.uri ?? null;
+  const bestNote =
+    card.notes.sort((left, right) => (left.pref ?? 100) - (right.pref ?? 100))[0]?.value ?? null;
+  const bestTitle =
+    card.titles.sort((left, right) => (left.pref ?? 100) - (right.pref ?? 100))[0]?.value ?? null;
+  const bestOrg =
+    card.organizations.sort((left, right) => (left.pref ?? 100) - (right.pref ?? 100))[0]
+      ?.values[0] ?? null;
+  const headline = [bestTitle, bestOrg ? `@${bestOrg}` : null].filter(Boolean).join(" ") || null;
+  const bestLanguage =
+    card.languages.sort((left, right) => (left.pref ?? 100) - (right.pref ?? 100))[0]?.value ??
+    null;
+  const geoMatch = card.geo?.match(GEO_RE);
+  const imppValues = card.instantMessaging.map((entry) => entry.value);
+
+  return {
+    addresses: card.addresses.map((address) => ({
+      addressCity: address.locality[0] ?? null,
+      addressCountry: address.country[0] ?? null,
+      addressLine1: address.street[0] ?? null,
+      addressLine2: address.extended[0] ?? null,
+      addressPostalCode: address.postalCode[0] ?? null,
+      addressState: address.region[0] ?? null,
+      latitude: address.geo?.startsWith(GEO_URI_PREFIX)
+        ? Number.parseFloat(address.geo.slice(GEO_URI_PREFIX.length).split(",")[0] ?? "")
+        : null,
+      longitude: address.geo?.startsWith(GEO_URI_PREFIX)
+        ? Number.parseFloat(address.geo.slice(GEO_URI_PREFIX.length).split(",")[1] ?? "")
+        : null,
+      preferred: normalizePreferred(address.pref),
+      type: address.types.includes("work")
+        ? "work"
+        : address.types.includes("home")
+          ? "home"
+          : "other",
+      value: [address.street[0], address.locality[0], address.region[0], address.country[0]]
+        .filter(Boolean)
+        .join(", "),
+    })),
+    avatarUri: bestPhoto,
+    emails: card.emails.map((email) => ({
+      preferred: normalizePreferred(email.pref),
+      type: mapTextTypeToContactType(email.types),
+      value: email.value,
+    })),
+    facebook:
+      imppValues.find((value) => value.startsWith("messenger:"))?.slice("messenger:".length) ??
+      null,
+    firstName: name.firstName,
+    headline,
+    importantDates: extractImportantDates(card),
+    instagram:
+      imppValues.find((value) => value.startsWith("instagram:"))?.slice("instagram:".length) ??
+      null,
+    language: bestLanguage,
+    lastName: name.lastName,
+    latitude: geoMatch ? Number.parseFloat(geoMatch[1] ?? "") : null,
+    linkedin: imppValues.find((value) => value.includes("linkedin.com/")) ?? null,
+    longitude: geoMatch ? Number.parseFloat(geoMatch[2] ?? "") : null,
+    middleName: name.middleName,
+    notes: bestNote,
+    phones: card.phones.map((phone) => {
+      const split = splitPhoneUri(phone.uri, defaultCountry);
+      return {
+        preferred: normalizePreferred(phone.pref),
+        prefix: split.prefix,
+        type: mapTextTypeToContactType(phone.types),
+        value: split.value || phone.value,
+      };
+    }),
+    raw: card.raw,
+    signal:
+      imppValues.find((value) => value.startsWith("signal:"))?.slice("signal:".length) ?? null,
+    timezone: card.timezone?.value ?? null,
+    website: bestWebsite,
+    whatsapp:
+      imppValues.find((value) => value.startsWith("whatsapp:"))?.slice("whatsapp:".length) ?? null,
+  };
 }

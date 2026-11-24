@@ -1,32 +1,30 @@
 {
   "mcpServers": {
+    "bondery": {
+      "url": "https://api.usebondery.test/mcp"
+    },
     "chrome-devtools": {
       "command": "pnx -y chrome-devtools-mcp@latest"
     },
+    "dashboard-icons": {
+      "url": "https://dashboardicons.com/api/mcp"
+    },
     "expo": {
-      "type": "http",
       "url": "https://mcp.expo.dev/mcp"
     },
     "plane": {
-      "args": ["mcp-remote@latest", "https://mcp.plane.so/http/mcp"],
-      "command": "pnx",
+      "args": [
+        "${workspaceFolder}/scripts/dev/plane-mcp-stdio.mjs"
+      ],
+      "command": "node",
       "type": "stdio"
     },
     "uniwind": {
-      "type": "http",
       "url": "https://docs.uniwind.dev/mcp"
     },
     "vercel": {
       "note": "Official Vercel MCP server. Uses OAuth — on first connection the agent will be prompted to authorize via Vercel. Read-only in initial release: search docs, list projects/deployments, inspect logs.",
-      "type": "http",
       "url": "https://mcp.vercel.com"
-    },
-    "bondery": {
-      "type": "http",
-      "url": "http://localhost:26631/mcp"
-    },
-    "dashboard-icons": {
-      "url": "https://dashboardicons.com/api/mcp"
     }
   }
 }

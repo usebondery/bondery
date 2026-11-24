@@ -31,11 +31,11 @@ Monorepo shared packages follow a one-way dependency graph:
 - `@bondery/helpers` — behavior layer (parsing, formatting, geocoding, routes). May depend on schemas.
 - `@bondery/helpers/forms` — Zod pipelines that validate with schemas then normalize with helpers. Use on form submit/save.
 
-| Need | Import from |
-|------|-------------|
-| Type or validation schema | `@bondery/schemas` |
-| Utility / formatter | `@bondery/helpers` (subpath) |
-| Form submit (validate + normalize) | `@bondery/helpers/forms` |
+| Need                               | Import from                  |
+| ---------------------------------- | ---------------------------- |
+| Type or validation schema          | `@bondery/schemas`           |
+| Utility / formatter                | `@bondery/helpers` (subpath) |
+| Form submit (validate + normalize) | `@bondery/helpers/forms`     |
 
 See `packages/schemas/README.md` and `packages/helpers/README.md`.
 
@@ -43,12 +43,12 @@ See `packages/schemas/README.md` and `packages/helpers/README.md`.
 
 Shared packages follow the [Turborepo compiled-package model](https://turborepo.dev/docs/guides/tools/typescript#compiled-packages):
 
-- **TypeScript:** extend `@bondery/typescript-config` (`base.json` or `react-library.json`); `module` / `moduleResolution` = NodeNext.
+- **TypeScript:** extend `@bondery/typescript-config` (`base.json` or `react-library.json`); `module` / `moduleResolution` = NodeNext. Compiled packages enable `isolatedDeclarations` except `@bondery/schemas` (Zod composition).
 - **Exports:** `types` → `src/`, `default` → `dist/`; run `pnpm run sync-exports` after adding public subpaths.
 - **Internal imports:** `#*` hash paths with `.js` suffix (not `tsconfig` paths).
 - **Build:** `rimraf dist && tsc` (+ rewrite hash imports); **compile:** incremental `tsc` then rewrite `#` imports in `dist`; **dev:** `tsc --watch` plus rewrite after each emit (`scripts/pkg/tsc-watch-and-rewrite.mjs`). Next.js cannot resolve `#` specifiers in compiled files. pnpm `injectWorkspacePackages` copies packages into app `node_modules`; rewrite also copies `dist` into those copies. `syncInjectedDepsAfterScripts` covers `build` and `compile` only.
 - **Generated files:** Write them outside `packages/*`. `injectWorkspacePackages` hardlinks each package into the pnpm store so `pnpm deploy` can copy it into the API image. pnpm re-syncs only `dist/` after `build` and `compile`. Another generated path inside a package breaks that hardlink (`ERR_PNPM_INJECTED_DEPS_SYNC_LINK`). `pnpm run check:injected-packages` fails when a package ignores or contains another generated path.
-- **Persistent app `#dev`:** orchestrate with `turbo run`, not `turbo watch`. Watch re-executes the task and kills `next dev` / `tsx watch` on any tracked write. Package incremental rebuilds come from `with` `tsc --watch` plus rewrite.
+- **Persistent app `#dev`:** orchestrate with `turbo run`, not `turbo watch`. Watch re-executes the task and kills `next dev` / the API's `node --watch` on any tracked write. Package incremental rebuilds come from `with` `tsc --watch` plus rewrite.
 - **Apps:** consume `dist/` via exports — no `transpilePackages`, no `packages/*/src` aliases (mobile Metro resolves workspace packages from `src/` separately).
 
 ## Mobile local-first data

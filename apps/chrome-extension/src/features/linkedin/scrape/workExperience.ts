@@ -1,8 +1,13 @@
 /**
- * LinkedIn Work Experience types, date parsing, and SDUI DOM scraper re-export.
+ * LinkedIn Work Experience types and date parsing.
  */
 
-export interface WorkEntry {
+const MONTH_YEAR_RE = /([A-Za-zÀ-ž]+)\.?\s+((19|20)\d{2})/;
+const TRAILING_DOT_RE = /\.$/;
+const YEAR_WORD_RE = /\b((19|20)\d{2})\b/;
+const EN_DASH_SPLIT_RE = /\s*[–—\u2013-]\s*/;
+
+interface WorkEntry {
   /** LinkedIn company handle or numeric ID — used to build the canonical URL server-side */
   companyLinkedinId?: string;
   companyLogoUrl?: string;
@@ -104,41 +109,31 @@ const MONTH_ABBR: Record<string, string> = {
 function parseMonthYear(text: string): string | undefined {
   // Match a word (month name in any supported language) followed by a 4-digit year.
   // [A-Za-zÀ-ž] covers English and most European scripts (Czech, German, French…).
-  const wordYearMatch = text.match(/([A-Za-zÀ-ž]+)\.?\s+((19|20)\d{2})/);
+  const wordYearMatch = text.match(MONTH_YEAR_RE);
   if (wordYearMatch) {
-    const monthToken = wordYearMatch[1];
-    const year = wordYearMatch[2];
+    const [, monthToken, year] = wordYearMatch;
     if (!monthToken || !year) {
       return undefined;
     }
-    const monthKey = monthToken.toLowerCase().replace(/\.$/, "");
+    const monthKey = monthToken.toLowerCase().replace(TRAILING_DOT_RE, "");
     const month = MONTH_ABBR[monthKey];
     // Return YYYY-MM when month is known, YYYY-only otherwise (still useful).
     return month ? `${year}-${month}` : year;
   }
   // Year-only date (e.g. "2022" or embedded in "2022 · 3 mos").
-  const yearOnly = text.match(/\b((19|20)\d{2})\b/);
+  const yearOnly = text.match(YEAR_WORD_RE);
   return yearOnly ? yearOnly[1] : undefined;
-}
-
-function _isDateText(text: string): boolean {
-  // Language-agnostic: a date span always contains a 4-digit year (1970–2039)
-  // combined with either a range separator (–/—) or a bullet (·), or is a bare year.
-  if (!/\b(19[7-9]\d|20[0-3]\d)\b/.test(text)) {
-    return false;
-  }
-  return /[–—·]/.test(text) || /^\s*(19|20)\d{2}\s*$/.test(text);
 }
 
 // "Present" / "current" in the languages LinkedIn is available in.
 const PRESENT_RE =
   /\b(present|current|today|heute|vandaag|idag|hoy|hoje|adesso|attualmente|ahora|actuellement|teraz|tällä hetkellä|şimdi|současnost|dnes|nyní|nüüd|nyt|nå|nú|сейчас|現在|现在|현재|الآن)\b/i;
 
-export function parseDateRange(text: string): { startDate?: string; endDate?: string } {
+function parseDateRange(text: string): { startDate?: string; endDate?: string } {
   // Strip the duration suffix "· X years Y months" so it doesn't confuse the parser.
   const mainPart = (text.split("·")[0] ?? "").trim();
   // Split on en-dash (–), em-dash (—), or a plain hyphen.
-  const parts = mainPart.split(/\s*[–—\u2013-]\s*/);
+  const parts = mainPart.split(EN_DASH_SPLIT_RE);
   const startRaw = parts[0]?.trim();
   const endRaw = parts[1]?.trim();
   const startDate = startRaw ? parseMonthYear(startRaw) : undefined;
@@ -150,9 +145,10 @@ export function parseDateRange(text: string): { startDate?: string; endDate?: st
   };
 }
 
-export { extractSduiWorkHistory as extractWorkExperience } from "./sduiProfile";
-
 /** Drops Voyager-only fields (e.g. `companyUrn`) before POST to Fastify. */
-export function toApiWorkHistory(entries: WorkEntry[]): Omit<WorkEntry, "companyUrn">[] {
+function toApiWorkHistory(entries: WorkEntry[]): Omit<WorkEntry, "companyUrn">[] {
   return entries.map(({ companyUrn: _companyUrn, ...rest }) => rest);
 }
+
+export type { WorkEntry };
+export { parseDateRange, toApiWorkHistory };

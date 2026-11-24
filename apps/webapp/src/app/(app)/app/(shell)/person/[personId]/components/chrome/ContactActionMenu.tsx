@@ -11,6 +11,7 @@ import {
   IconShare,
   IconTrash,
 } from "@tabler/icons-react";
+import { cn } from "cn";
 import { useState } from "react";
 import { useBatchEnrichFromLinkedIn } from "@/components/extension/useBatchEnrichFromLinkedIn";
 import { downloadContactVcard } from "@/lib/api/domains/contacts";
@@ -56,7 +57,7 @@ export function ContactActionMenu({
       const a = document.createElement("a");
       a.href = url;
       const firstName = contact.firstName || "contact";
-      const lastName = contact.lastName || "";
+      const lastName = contact.lastName ?? "";
       a.download = lastName ? `${firstName}_${lastName}.vcf` : `${firstName}.vcf`;
       document.body.appendChild(a);
       a.click();
@@ -90,7 +91,7 @@ export function ContactActionMenu({
     >
       <Menu.Target>
         <Button
-          className={`button-scale-effect ${opened ? "button-scale-effect-active" : ""}`}
+          className={cn("button-scale-effect", opened && "button-scale-effect-active")}
           leftSection={<IconDotsVertical size={18} />}
         >
           {tActions("ActionsButton")}

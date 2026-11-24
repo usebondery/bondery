@@ -276,8 +276,8 @@ export function ContactDetailScreen({ id, isMyselfMode = false }: ContactDetailS
     isInitialSync: isGroupsInitialSync,
   } = useContactGroups(isMyselfMode ? undefined : id);
   const loading = isMyselfMode ? isMyselfInitialSync && !contact : isContactInitialSync && !contact;
-  const tagsLoading = isTagsInitialSync && tagsPersonId != null;
-  const groupsLoading = !isMyselfMode && isGroupsInitialSync && id != null;
+  const tagsLoading = isTagsInitialSync && tagsPersonId !== null && tagsPersonId !== undefined;
+  const groupsLoading = !isMyselfMode && isGroupsInitialSync && id !== null && id !== undefined;
   const myselfContactId = isMyselfMode ? contact?.id : myselfContactIdFromDb;
 
   function reloadContact() {

@@ -20,25 +20,25 @@ import type {
   ReplaceImportantDatesInput,
 } from "./types.js";
 
-type _ImportantDateType = Assert<
+export type _ImportantDateType = Assert<
   IsEqual<ImportantDateType, z.infer<typeof importantDateTypeSchema>>
 >;
-type _ImportantDateNotifyDaysBefore = Assert<
+export type _ImportantDateNotifyDaysBefore = Assert<
   IsEqual<ImportantDateNotifyDaysBefore, z.infer<typeof importantDateNotifyDaysSchema>>
 >;
-type _ImportantDate = Assert<IsEqual<ImportantDate, z.infer<typeof importantDateSchema>>>;
-type _ImportantDateInputValidated = Assert<
+export type _ImportantDate = Assert<IsEqual<ImportantDate, z.infer<typeof importantDateSchema>>>;
+export type _ImportantDateInputValidated = Assert<
   IsEqual<ImportantDateInputValidated, z.infer<typeof importantDateInputSchema>>
 >;
-type _ImportantDateSheetInput = Assert<
+export type _ImportantDateSheetInput = Assert<
   IsEqual<ImportantDateSheetInput, z.input<typeof importantDateSheetSchema>>
 >;
-type _ImportantDateSheetOutput = Assert<
+export type _ImportantDateSheetOutput = Assert<
   IsEqual<ImportantDateSheetOutput, z.output<typeof importantDateSheetSchema>>
 >;
-type _ReplaceImportantDatesInput = Assert<
+export type _ReplaceImportantDatesInput = Assert<
   IsEqual<ReplaceImportantDatesInput, z.infer<typeof replaceImportantDatesSchema>>
 >;
-type _ImportantDatesListResponse = Assert<
+export type _ImportantDatesListResponse = Assert<
   IsEqual<ImportantDatesListResponse, z.infer<typeof importantDatesListResponseSchema>>
 >;

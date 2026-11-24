@@ -5,6 +5,7 @@
  */
 
 import { SOCIAL_PLATFORM_URL_DETAILS } from "@bondery/helpers";
+import { detachPromise } from "@bondery/helpers/async";
 import { browser } from "wxt/browser";
 import { defineContentScript } from "#imports";
 import { extLog } from "../../lib/log";
@@ -38,7 +39,7 @@ export default defineContentScript({
     // LinkedIn renders dynamically — wait 1.5 s before first injection attempt
     // so the profile action buttons are likely present in the DOM.
     ctx.setTimeout(() => {
-      injectBonderyButton(ctx);
+      detachPromise(injectBonderyButton(ctx));
     }, 1500);
 
     // Setup observer for SPA navigation (debounced, only fires when Message button appears)
@@ -46,7 +47,7 @@ export default defineContentScript({
 
     // Retry button injection after 3 s in case the profile rendered slowly
     ctx.setTimeout(() => {
-      injectBonderyButton(ctx);
+      detachPromise(injectBonderyButton(ctx));
     }, 3000);
 
     // Listen for URL changes (SPA navigation)
@@ -60,7 +61,7 @@ export default defineContentScript({
         clearStaleButtonIfNeeded(getLinkedInUsername());
 
         ctx.setTimeout(() => {
-          injectBonderyButton(ctx);
+          detachPromise(injectBonderyButton(ctx));
         }, 1000);
       }
     }, 500);
@@ -68,7 +69,12 @@ export default defineContentScript({
     // Listen for profile scrape requests from background
     browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       if (message?.type === "GET_SCRAPED_PROFILE") {
-        getLinkedInSnapshot().then(sendResponse);
+        getLinkedInSnapshot()
+          .then(sendResponse)
+          .catch((error) => {
+            extLog.error("[linkedin] Snapshot failed", error);
+            sendResponse(null);
+          });
         return true; // keep the message channel open for the async response
       }
 
@@ -80,10 +86,12 @@ export default defineContentScript({
           .catch((error) => sendResponse({ error: String(error), ok: false }));
         return true;
       }
+
+      return false;
     });
 
     // Fallback if background push arrives before the listener is registered
-    void runPendingEnrich();
+    detachPromise(runPendingEnrich());
   },
   matches: ["https://www.linkedin.com/*", "https://linkedin.com/*", "https://*.linkedin.com/*"],
   runAt: "document_start",

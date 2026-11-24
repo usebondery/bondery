@@ -9,28 +9,32 @@ import "@mantine/nprogress/styles.css";
 import "@mantine/code-highlight/styles.css";
 import "flag-icons/css/flag-icons.min.css";
 import "@bondery/mantine-next/styles";
+import { dirForLocale } from "@bondery/schemas/locale";
 import { ColorSchemeScript, mantineHtmlProps } from "@mantine/core";
 import type { Viewport } from "next";
 import { Lexend } from "next/font/google";
 import { headers } from "next/headers";
 import { WebappMantineProvider } from "@/components/shell/WebappMantineProvider";
 import { WebappRuntimeConfigShell } from "@/components/shell/WebappRuntimeConfigShell";
+import { localeBodyFontStyle } from "@/lib/i18n/localeFont";
 import { resolveLocaleSettings } from "@/lib/i18n/resolveLocaleSettings";
 import { rootMetadata } from "@/lib/metadata/rootMetadata";
 import { buildWebappRuntimeConfigFromEnv } from "@/lib/platform/runtimeConfig.server";
 import { computeColorScheme } from "@/lib/theme/computeColorScheme";
 import { resolveSsrColorScheme } from "@/lib/theme/resolveSsrColorScheme";
 
+const lexend = Lexend({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-lexend",
+});
+
+const BONDERY_RUNTIME_CONFIG_SCRIPT_ID = "bondery-runtime-config";
+
 export const metadata = rootMetadata;
 
 export const viewport: Viewport = {
   viewportFit: "cover",
 };
-
-const lexend = Lexend({
-  subsets: ["latin"],
-  variable: "--font-lexend",
-});
 
 export default async function RootLayout({
   children,
@@ -43,6 +47,8 @@ export default async function RootLayout({
     resolveLocaleSettings(),
     resolveSsrColorScheme(),
   ]);
+  const documentDirection = dirForLocale(locale);
+  const localeFontStyle = localeBodyFontStyle(locale);
   const prefersDark = headersList.get("sec-ch-prefers-color-scheme") === "dark";
   const computedColorScheme = computeColorScheme(colorScheme, prefersDark);
   const runtimeConfig = buildWebappRuntimeConfigFromEnv();
@@ -54,6 +60,7 @@ export default async function RootLayout({
       {...mantineHtmlProps}
       className={lexend.variable}
       data-mantine-color-scheme={computedColorScheme}
+      dir={documentDirection}
     >
       <head>
         <ColorSchemeScript
@@ -61,13 +68,15 @@ export default async function RootLayout({
           forceColorScheme={colorScheme !== "auto" ? computedColorScheme : undefined}
           nonce={nonce}
         />
-        <script id="bondery-runtime-config" nonce={nonce}>
+        <script id={BONDERY_RUNTIME_CONFIG_SCRIPT_ID} nonce={nonce}>
           {`window.__BONDERY_RUNTIME_CONFIG__=${runtimeConfigJson};`}
         </script>
       </head>
-      <body>
+      <body style={localeFontStyle}>
         <WebappRuntimeConfigShell config={runtimeConfig}>
-          <WebappMantineProvider defaultColorScheme={colorScheme}>{children}</WebappMantineProvider>
+          <WebappMantineProvider defaultColorScheme={colorScheme} direction={documentDirection}>
+            {children}
+          </WebappMantineProvider>
         </WebappRuntimeConfigShell>
       </body>
     </html>

@@ -70,7 +70,7 @@ export async function revokeReviewerGrant(
  * Nightly sweep: revoke every grant that expired or was revoked but whose user
  * is still able to sign in. Returns the number of accounts banned.
  */
-export async function revokeEndedReviewerGrants(log?: FastifyBaseLogger): Promise<number> {
+export async function revokeEndedReviewerGrants(log?: FastifyBaseLogger) {
   const now = new Date();
   const ended = await prisma.reviewerAccess.findMany({
     select: { id: true, label: true, user: { select: { banned: true } }, userId: true },
@@ -79,14 +79,11 @@ export async function revokeEndedReviewerGrants(log?: FastifyBaseLogger): Promis
     },
   });
 
-  let banned = 0;
-  for (const grant of ended) {
-    if (grant.user.banned) {
-      continue;
-    }
+  const toRevoke = ended.filter((grant) => !grant.user.banned);
+  for (const grant of toRevoke) {
     await revokeReviewerGrant(grant.id, log);
-    banned += 1;
   }
+  const banned = toRevoke.length;
 
   log?.info({ banned, scanned: ended.length }, "reviewer access sweep complete");
   return banned;

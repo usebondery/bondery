@@ -84,8 +84,8 @@ export function useContactsDragSelection({
   const baselineRef = useRef<DragBaseline | null>(null);
   const lastLocalYRef = useRef(0);
   const dragFrameRef = useRef<number | null>(null);
-  const dragFrameLastTimestampRef = useRef(0);
-  const isDraggingRef = useRef(false);
+  const dragFrameLastTimestampRef = useRef<number>(0);
+  const isDraggingRef = useRef<boolean>(false);
   const lastSyncedRangeKeyRef = useRef("");
 
   const syncDragSelectionRange = useContactsSelection((state) => state.syncDragSelectionRange);
@@ -93,11 +93,12 @@ export function useContactsDragSelection({
   const layoutIndex = useMemo(() => buildFlatRowOffsetIndex(flatRows), [flatRows]);
 
   const maxScrollOffset = useMemo(() => {
-    if (layoutIndex.length === 0) {
+    const lastEntry = layoutIndex.at(-1);
+
+    if (!lastEntry) {
       return 0;
     }
 
-    const lastEntry = layoutIndex[layoutIndex.length - 1];
     const contentHeight = listHeaderHeight + lastEntry.offsetY + lastEntry.height;
 
     return Math.max(0, contentHeight - listViewportHeight);
@@ -276,11 +277,12 @@ export function useContactsDragSelection({
     setIsDragging(false);
   }, [stopDragFrameLoop]);
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       stopDragFrameLoop();
-    };
-  }, [stopDragFrameLoop]);
+    },
+    [stopDragFrameLoop],
+  );
 
   const gesture = useMemo(
     () =>

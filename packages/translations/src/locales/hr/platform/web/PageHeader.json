@@ -1,0 +1,15 @@
+{
+  "Concepts": {
+    "FixAndMerge": "popraviti i spojiti",
+    "GroupDetail": "ova grupa",
+    "Groups": "Grupe",
+    "Home": "Početna",
+    "KeepInTouch": "Ostani u kontaktu",
+    "Map": "karta",
+    "People": "Osobe",
+    "PersonDetails": "podaci o osobi",
+    "Timeline": "Interakcije"
+  },
+  "HelpLabel": "Više informacija",
+  "LearnMoreAbout": "Više o {concept}"
+}

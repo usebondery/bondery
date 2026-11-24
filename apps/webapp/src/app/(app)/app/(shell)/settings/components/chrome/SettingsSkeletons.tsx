@@ -1,4 +1,4 @@
-﻿import { Group, Paper, Skeleton, Stack } from "@mantine/core";
+import { Group, Paper, Skeleton, Stack } from "@mantine/core";
 
 /**
  * Skeleton for a settings section card (Paper withBorder).
@@ -8,7 +8,7 @@ function SettingsCardSkeleton({ rows = 2, title = true }: { rows?: number; title
   return (
     <Paper p="md" radius="md" shadow="sm" withBorder>
       <Stack gap="md">
-        {title && <Skeleton height={20} radius="sm" width={160} />}
+        {title ? <Skeleton height={20} radius="sm" width={160} /> : null}
         {Array.from({ length: rows }, (_, row) => row).map((row) => (
           <Group gap="sm" justify="space-between" key={row}>
             <Stack gap={4}>

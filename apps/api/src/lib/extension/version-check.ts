@@ -21,8 +21,10 @@ import { URLS } from "../platform/config.js";
 import { unauthorized } from "../platform/errors/http-errors.js";
 import type { AppFastifyInstance } from "../platform/fastify-types.js";
 
+const TRAILING_SLASH_PATTERN = /\/$/;
+
 function websiteBaseUrl(): string {
-  return (URLS.website ?? "https://usebondery.com").replace(/\/$/, "");
+  return (URLS.website ?? "https://usebondery.com").replace(TRAILING_SLASH_PATTERN, "");
 }
 
 function isPublicInfraPath(url: string): boolean {
@@ -92,7 +94,7 @@ export function registerExtensionVersionCheck(fastify: AppFastifyInstance): void
     }
 
     // Mobile, webapp server, and extension OAuth flows authenticate with Bearer.
-    const authorization = request.headers.authorization;
+    const { authorization } = request.headers;
     if (typeof authorization === "string" && authorization.startsWith("Bearer ")) {
       return;
     }
@@ -128,7 +130,6 @@ export function registerExtensionVersionCheck(fastify: AppFastifyInstance): void
             type: "invalid_request_error",
           },
         });
-      return;
     }
   });
 }

@@ -1,6 +1,6 @@
 import type { FastifySchema, RouteOptions } from "fastify";
 
-export type OpenApiRouteArea = "integration" | "session" | "internal";
+type OpenApiRouteArea = "integration" | "session" | "internal";
 
 declare module "fastify" {
   interface FastifyContextConfig {
@@ -19,6 +19,8 @@ const INTEGRATION_SECURITY: NonNullable<FastifySchema["security"]> = [
   { apiKeyAuth: [] },
 ];
 const SESSION_SECURITY: NonNullable<FastifySchema["security"]> = [{ bearerAuth: [] }];
+
+export type { OpenApiRouteArea };
 
 /**
  * Applies OpenAPI security, visibility metadata, and route config for API key policy.

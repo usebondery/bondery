@@ -1,0 +1,35 @@
+{
+  "email": {
+    "invalid": "Unesi valjanu adresu e-pošte",
+    "invalidTitle": "Nevaljana e-pošta"
+  },
+  "fields": {
+    "firstName": {
+      "maxLength": "Ime smije imati najviše {max} znakova",
+      "required": "Ime je obavezno"
+    },
+    "generic": {
+      "maxLength": "Vrijednost smije imati najviše {max} znakova"
+    },
+    "headline": {
+      "maxLength": "Naslov smije imati najviše {max} znakova"
+    },
+    "label": {
+      "maxLength": "{field} smije imati najviše {max} znakova",
+      "required": "{field} je obavezno"
+    },
+    "lastName": {
+      "maxLength": "Prezime smije imati najviše {max} znakova"
+    },
+    "location": {
+      "maxLength": "Lokacija smije imati najviše {max} znakova"
+    },
+    "middleName": {
+      "maxLength": "Srednje ime smije imati najviše {max} znakova"
+    }
+  },
+  "interaction": {
+    "titleRequired": "Naslov je obavezan"
+  },
+  "title": "Greška validacije"
+}

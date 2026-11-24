@@ -22,7 +22,7 @@ metadata:
 - Adding or changing a data-collecting feature (new PII field, tracking event, AI tool call, webhook)
 - Touching account deletion, backup, retention, or log-anonymization code
 - Touching analytics opt-out, cookie behavior, or `DO_NOT_TRACK`
-- Editing `apps/website/src/components/legal/Privacy.tsx` or `Terms.tsx`
+- Editing `apps/website/content/legal/en/privacy.mdx` or `terms.mdx`
 - Looking up or changing Sveetech / Bondery legal identity (VAT, EUID, DUNS, address)
 - Classifying product email as transactional vs marketing (unsubscribe, postal address in the footer)
 - Reviewing a PR that touches any of the above
@@ -35,10 +35,10 @@ Do **not** restyle Privacy, Terms, or policy claims with `bondery-writing`. Lega
 
 1. **Classify the change** — does it add/remove a vendor, add/remove a data category, or change retention/consent behavior? If none, skip this skill.
 2. **Check the subprocessor registry** — [references/subprocessor-registry.md](references/subprocessor-registry.md). New vendor not listed → blocking flag.
-3. **Check the policy claims inventory** — [references/policy-claims-inventory.md](references/policy-claims-inventory.md). Does the change satisfy, contradict, or leave orphaned a claim in `Privacy.tsx` / `Terms.tsx`?
+3. **Check the policy claims inventory** — [references/policy-claims-inventory.md](references/policy-claims-inventory.md). Does the change satisfy, contradict, or leave orphaned a claim in `privacy.mdx` / `terms.mdx`?
 4. **Classify the fix:**
-   - *Factual correction* (wrong vendor name, feature now exists) → agent may propose copy diff, labeled **reality-sync**
-   - *Substantive legal claim* (retention window, rights language, liability, jurisdiction) → draft suggestion only; tag for human/counsel sign-off
+   - _Factual correction_ (wrong vendor name, feature now exists) → agent may propose copy diff, labeled **reality-sync**
+   - _Substantive legal claim_ (retention window, rights language, liability, jurisdiction) → draft suggestion only; tag for human/counsel sign-off
 5. **Update the registry** in the same PR as the vendor/data-flow change.
 6. Complete the legal checklist before merge.
 
@@ -60,28 +60,30 @@ Escalation rules: [references/escalation-boundaries.md](references/escalation-bo
 
 ## Legal document locations
 
-| Document | Path | Status |
-|----------|------|--------|
-| Privacy Policy | `apps/website/src/components/legal/Privacy.tsx` | Published (last updated August 18, 2026) |
-| Terms of Service | `apps/website/src/components/legal/Terms.tsx` | **Draft placeholder** — not final contractual terms |
-| Layout helper | `apps/website/src/components/legal/shared/LegalDocumentLayout.tsx` | — |
-| Routes | `apps/website/src/app/(marketing)/(legal)/{privacy,terms}/page.tsx` | — |
-| App links | Webapp login, mobile settings/legal | External links to website URLs |
+| Document          | Path                                                                | Status                                                                                      |
+| ----------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Privacy Policy    | `apps/website/content/legal/en/privacy.mdx`                         | Published (last updated August 18, 2026)                                                    |
+| Terms of Service  | `apps/website/content/legal/en/terms.mdx`                           | **Draft placeholder** — not final contractual terms                                         |
+| Metadata          | `apps/website/content/legal/documents.ts`                           | Title, description, and the "Last Updated" date. Change the date when you change a document |
+| MDX component map | `apps/website/src/components/legal/legal-mdx.tsx`                   | Mantine mapping for headings, lists, tables, and links                                      |
+| Layout helper     | `apps/website/src/components/legal/shared/LegalDocumentLayout.tsx`  | —                                                                                           |
+| Routes            | `apps/website/src/app/(marketing)/(legal)/{privacy,terms}/page.tsx` | —                                                                                           |
+| App links         | Webapp login, mobile settings/legal                                 | External links to website URLs                                                              |
 
-No `docs/legal/` folder. Legal copy is English-only React components on the website.
+No `docs/legal/` folder. Legal copy is English-only MDX on the website. To localize a document, add `apps/website/content/legal/<locale>/<slug>.mdx` and select it by locale in `documents.ts`. Never split legal prose into `packages/translations` keys.
 
 ## Decision tree
 
-| Task | Read |
-|------|------|
-| Company identity (name, address, VAT, EUID, DUNS) | [references/legal-entity.md](references/legal-entity.md) |
+| Task                                                                    | Read                                                                                          |
+| ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Company identity (name, address, VAT, EUID, DUNS)                       | [references/legal-entity.md](references/legal-entity.md)                                      |
 | Product email (transactional vs marketing, unsubscribe, postal address) | [references/emails.md](references/emails.md) and [bondery-emails](../bondery-emails/SKILL.md) |
-| Vendor / subprocessor list (code-grounded) | [references/subprocessor-registry.md](references/subprocessor-registry.md) |
-| Policy claim vs. code status | [references/policy-claims-inventory.md](references/policy-claims-inventory.md) |
-| Trigger → action workflow | [references/data-flow-workflow.md](references/data-flow-workflow.md) |
-| Self-host vs. cloud obligations | [references/self-host-vs-cloud.md](references/self-host-vs-cloud.md) |
-| What agent may draft vs. must escalate | [references/escalation-boundaries.md](references/escalation-boundaries.md) |
-| Future: manifest, CI, roadmap | [references/long-term-roadmap.md](references/long-term-roadmap.md) |
+| Vendor / subprocessor list (code-grounded)                              | [references/subprocessor-registry.md](references/subprocessor-registry.md)                    |
+| Policy claim vs. code status                                            | [references/policy-claims-inventory.md](references/policy-claims-inventory.md)                |
+| Trigger → action workflow                                               | [references/data-flow-workflow.md](references/data-flow-workflow.md)                          |
+| Self-host vs. cloud obligations                                         | [references/self-host-vs-cloud.md](references/self-host-vs-cloud.md)                          |
+| What agent may draft vs. must escalate                                  | [references/escalation-boundaries.md](references/escalation-boundaries.md)                    |
+| Future: manifest, CI, roadmap                                           | [references/long-term-roadmap.md](references/long-term-roadmap.md)                            |
 
 Full index: [references/README.md](references/README.md).
 
@@ -92,7 +94,7 @@ Cross-skill owners: technical enforcement → `bondery-security`; API contracts 
 - [ ] New product email classified transactional vs marketing ([emails.md](references/emails.md)) — legal HQ only on marketing; “Manage these notifications” only on configurable product mail (digest)
 - [ ] Change classified: vendor / data category / retention / consent / policy copy
 - [ ] Subprocessor registry checked — new vendor added or `policy-sync` status updated in same PR
-- [ ] Policy claims inventory checked — no silent contradiction with `Privacy.tsx` / `Terms.tsx`
+- [ ] Policy claims inventory checked — no silent contradiction with `privacy.mdx` / `terms.mdx`
 - [ ] Fix classified: **reality-sync** (factual) vs. **escalate** (substantive legal wording)
 - [ ] No regulatory compliance assertions in code, commits, or PR text
 - [ ] Self-host vs. cloud context considered if deploy/docs touched

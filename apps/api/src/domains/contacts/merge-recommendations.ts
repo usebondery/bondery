@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import type {
   MergeRecommendationReason,
   MergeRecommendationsCountResponse,
@@ -85,7 +86,7 @@ export async function refreshMergeRecommendations(
 
 /** Fire-and-forget recompute after mutations that affect merge matching. */
 export function scheduleMergeRecommendationsRefresh(ctx: DomainContext): void {
-  void refreshMergeRecommendations(ctx).catch((error) => {
+  detachPromise(refreshMergeRecommendations(ctx), (error) => {
     ctx.log?.error({ error }, "Failed to refresh merge recommendations after mutation");
   });
 }
@@ -184,7 +185,7 @@ export async function recomputeMergeRecommendations(ctx: DomainContext): Promise
       continue;
     }
 
-    const bucket = emailsByPerson.get(row.personId) || new Set<string>();
+    const bucket = emailsByPerson.get(row.personId) ?? new Set<string>();
     bucket.add(normalized);
     emailsByPerson.set(row.personId, bucket);
   }
@@ -196,7 +197,7 @@ export async function recomputeMergeRecommendations(ctx: DomainContext): Promise
       continue;
     }
 
-    const bucket = phonesByPerson.get(row.personId) || new Set<string>();
+    const bucket = phonesByPerson.get(row.personId) ?? new Set<string>();
     bucket.add(normalized);
     phonesByPerson.set(row.personId, bucket);
   }
@@ -208,7 +209,7 @@ export async function recomputeMergeRecommendations(ctx: DomainContext): Promise
       continue;
     }
 
-    const existing = socialByPerson.get(row.personId) || { facebook: "", linkedin: "" };
+    const existing = socialByPerson.get(row.personId) ?? { facebook: "", linkedin: "" };
     if (row.platform === "linkedin") {
       existing.linkedin = normalized;
     }
@@ -219,25 +220,23 @@ export async function recomputeMergeRecommendations(ctx: DomainContext): Promise
   }
 
   const candidates: MergeRecommendationCandidate[] = [];
-  for (let leftIndex = 0; leftIndex < people.length; leftIndex += 1) {
-    const leftPerson = people[leftIndex];
+  for (const [leftIndex, leftPerson] of people.entries()) {
     const leftName = toFullNameKey({
       first_name: leftPerson.firstName,
       last_name: leftPerson.lastName,
     });
-    const leftEmails = emailsByPerson.get(leftPerson.id) || new Set<string>();
-    const leftPhones = phonesByPerson.get(leftPerson.id) || new Set<string>();
-    const leftSocial = socialByPerson.get(leftPerson.id) || { facebook: "", linkedin: "" };
+    const leftEmails = emailsByPerson.get(leftPerson.id) ?? new Set<string>();
+    const leftPhones = phonesByPerson.get(leftPerson.id) ?? new Set<string>();
+    const leftSocial = socialByPerson.get(leftPerson.id) ?? { facebook: "", linkedin: "" };
 
-    for (let rightIndex = leftIndex + 1; rightIndex < people.length; rightIndex += 1) {
-      const rightPerson = people[rightIndex];
+    for (const rightPerson of people.slice(leftIndex + 1)) {
       const rightName = toFullNameKey({
         first_name: rightPerson.firstName,
         last_name: rightPerson.lastName,
       });
-      const rightEmails = emailsByPerson.get(rightPerson.id) || new Set<string>();
-      const rightPhones = phonesByPerson.get(rightPerson.id) || new Set<string>();
-      const rightSocial = socialByPerson.get(rightPerson.id) || { facebook: "", linkedin: "" };
+      const rightEmails = emailsByPerson.get(rightPerson.id) ?? new Set<string>();
+      const rightPhones = phonesByPerson.get(rightPerson.id) ?? new Set<string>();
+      const rightSocial = socialByPerson.get(rightPerson.id) ?? { facebook: "", linkedin: "" };
 
       const hasLinkedinConflict =
         Boolean(leftSocial.linkedin) &&
@@ -271,8 +270,10 @@ export async function recomputeMergeRecommendations(ctx: DomainContext): Promise
         continue;
       }
 
-      const leftPersonId = leftPerson.id < rightPerson.id ? leftPerson.id : rightPerson.id;
-      const rightPersonId = leftPerson.id < rightPerson.id ? rightPerson.id : leftPerson.id;
+      // The ids are strings, so order the pair with `<`. `Math.min` would give NaN.
+      const leftSortsFirst = leftPerson.id < rightPerson.id;
+      const leftPersonId = leftSortsFirst ? leftPerson.id : rightPerson.id;
+      const rightPersonId = leftSortsFirst ? rightPerson.id : leftPerson.id;
 
       const score = Math.min(
         1,
@@ -300,36 +301,34 @@ export async function recomputeMergeRecommendations(ctx: DomainContext): Promise
     (candidate) => !existingByPair.has(`${candidate.leftPersonId}|${candidate.rightPersonId}`),
   ).length;
 
-  if (candidates.length > 0) {
-    for (const candidate of candidates) {
-      const key = `${candidate.leftPersonId}|${candidate.rightPersonId}`;
-      const existing = existingByPair.get(key);
+  for (const candidate of candidates) {
+    const key = `${candidate.leftPersonId}|${candidate.rightPersonId}`;
+    const existing = existingByPair.get(key);
 
-      if (existing) {
-        await db.peopleMergeRecommendation.update({
-          data: {
-            algorithmVersion: MERGE_RECOMMENDATION_ALGORITHM_VERSION,
-            reasons: candidate.reasons,
-            score: candidate.score,
-            updatedAt: new Date(),
-          },
-          where: { id: existing.id },
-        });
-        continue;
-      }
-
-      await db.peopleMergeRecommendation.create({
+    if (existing) {
+      await db.peopleMergeRecommendation.update({
         data: {
           algorithmVersion: MERGE_RECOMMENDATION_ALGORITHM_VERSION,
-          isDeclined: false,
-          leftPersonId: candidate.leftPersonId,
           reasons: candidate.reasons,
-          rightPersonId: candidate.rightPersonId,
           score: candidate.score,
-          userId,
+          updatedAt: new Date(),
         },
+        where: { id: existing.id },
       });
+      continue;
     }
+
+    await db.peopleMergeRecommendation.create({
+      data: {
+        algorithmVersion: MERGE_RECOMMENDATION_ALGORITHM_VERSION,
+        isDeclined: false,
+        leftPersonId: candidate.leftPersonId,
+        reasons: candidate.reasons,
+        rightPersonId: candidate.rightPersonId,
+        score: candidate.score,
+        userId,
+      },
+    });
   }
 
   const staleActiveIds = existingRows

@@ -7,6 +7,8 @@ import {
   searchWithoutTransientAuthErrors,
 } from "./magic-link-urls.js";
 
+const AUTH_START = /\/auth\/start/;
+
 const ORIGIN = "https://app.usebondery.com";
 
 describe("buildLoginMagicLinkUrls", () => {
@@ -40,7 +42,7 @@ describe("buildOAuthLoginMagicLinkUrls", () => {
     const urls = buildOAuthLoginMagicLinkUrls(ORIGIN, "?client_id=abc&state=1");
     assert.equal(urls.callbackURL, `${ORIGIN}/oauth/consent?client_id=abc&state=1`);
     assert.equal(urls.errorCallbackURL, `${ORIGIN}/oauth/login?client_id=abc&state=1`);
-    assert.doesNotMatch(urls.callbackURL, /\/auth\/start/);
+    assert.doesNotMatch(urls.callbackURL, AUTH_START);
   });
 
   it("strips verify error params so they are not copied onto consent", () => {

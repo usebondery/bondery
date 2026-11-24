@@ -79,14 +79,6 @@ function resolveActivityLabel(
   return key ? translate(key) : fallback;
 }
 
-export interface ChatToolStepsProps {
-  activities: { displayName?: string; kind: ChatToolKind; tool: string }[];
-  /** Collapse reads under one line once the answer has text. */
-  collapseReads?: boolean;
-  /** A tool is still running, so the last line keeps its spinner. */
-  running?: boolean;
-}
-
 /** Stable key per activity: the tool name plus how many times it appeared. */
 function activityKeys(activities: readonly { tool: string }[]): string[] {
   const seen = new Map<string, number>();
@@ -96,6 +88,14 @@ function activityKeys(activities: readonly { tool: string }[]): string[] {
     seen.set(activity.tool, count + 1);
     return `${activity.tool}-${count}`;
   });
+}
+
+export interface ChatToolStepsProps {
+  activities: { displayName?: string; kind: ChatToolKind; tool: string }[];
+  /** Collapse reads under one line once the answer has text. */
+  collapseReads?: boolean;
+  /** A tool is still running, so the last line keeps its spinner. */
+  running?: boolean;
 }
 
 export function ChatToolSteps({

@@ -1,0 +1,23 @@
+{
+  "entities": {
+    "contact": "kontakt",
+    "contactPlural": "kontakty",
+    "group": "skupina",
+    "interaction": "interakcia",
+    "interactionPlural": "interakcie",
+    "network": "sieť",
+    "person": "osoba",
+    "person_few": "{count} osoby",
+    "person_one": "{count} osoba",
+    "person_other": "{count} osôb",
+    "tag": "štítok"
+  },
+  "features": {
+    "aiAssistant": "AI asistent",
+    "fixAndMerge": "Opraviť a zlúčiť",
+    "keepInTouch": "Udržiavať kontakt"
+  },
+  "product": {
+    "name": "Bondery"
+  }
+}

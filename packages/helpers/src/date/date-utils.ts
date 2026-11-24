@@ -1,3 +1,9 @@
+import { type DateTimeFormatContext, formatUserDate } from "#date/format-user.js";
+
+const PATTERN_5E285C647B34_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+const MONTHS_PER_YEAR = 12;
+
 /**
  * Date formatting utilities for work history and education display.
  *
@@ -23,46 +29,63 @@ function parseDateComponents(d: string): { year: number; month: number; yearOnly
 /**
  * Formats a single stored date string for display.
  * Year-only dates (day=02 sentinel) are shown as just the year.
- * Month-precise dates are rendered in local time (no UTC shift).
+ * Month-precise dates use local numeric components so UTC does not shift the month.
  */
-function formatDate(d: string): string {
+function formatWorkHistoryDate(d: string, ctx: DateTimeFormatContext): string {
   const { year, month, yearOnly } = parseDateComponents(d);
   if (yearOnly) {
     return String(year);
   }
-  // Construct in local time using numeric components to avoid UTC-to-local shift
-  return new Date(year, month - 1, 1).toLocaleDateString(undefined, {
-    month: "short",
-    year: "numeric",
-  });
+  const date = new Date(year, month - 1, 1);
+  return formatUserDate(date, { ...ctx, timeZone: undefined }, "monthYear");
+}
+
+/** Parse a `YYYY-MM-DD` calendar date as UTC midnight, so no timezone shifts the day. */
+function parseCalendarDate(value: string): Date | undefined {
+  const match = PATTERN_5E285C647B34_RE.exec(value);
+  if (!match) {
+    return undefined;
+  }
+
+  const date = new Date(`${match[1]}-${match[2]}-${match[3]}T00:00:00.000Z`);
+
+  // `new Date` rolls impossible days forward (2026-02-30 becomes 2026-03-02),
+  // so compare the round trip to reject a date that does not exist.
+  if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== value) {
+    return undefined;
+  }
+
+  return date;
 }
 
 /**
  * Formats a date range string from start/end stored date values.
  * Year-only dates (day=02 sentinel) are shown without a month.
- * Shows a present label (default "Present") for null end dates.
+ * Pass a translated `presentLabel` for ongoing entries.
  *
  * @param startDate Stored date string (e.g. "2025-01-01" or "2025-07-02") or null.
  * @param endDate Stored date string or null.
- * @param presentLabel Label to use for ongoing entries (default: "Present").
+ * @param ctx User date format preferences.
+ * @param presentLabel Translated label for a missing end date.
  * @returns Formatted date range like "Jan 2025 – Present", "2025 – Present", or empty string.
  */
 export function formatDateRange(
   startDate: string | null,
   endDate: string | null,
-  presentLabel = "Present",
+  ctx: DateTimeFormatContext,
+  presentLabel: string,
 ): string {
   if (!startDate && !endDate) {
     return "";
   }
   if (startDate && !endDate) {
-    return `${formatDate(startDate)} – ${presentLabel}`;
+    return `${formatWorkHistoryDate(startDate, ctx)} – ${presentLabel}`;
   }
   if (!startDate && endDate) {
-    return `– ${formatDate(endDate)}`;
+    return `– ${formatWorkHistoryDate(endDate, ctx)}`;
   }
   if (startDate && endDate) {
-    return `${formatDate(startDate)} – ${formatDate(endDate)}`;
+    return `${formatWorkHistoryDate(startDate, ctx)} – ${formatWorkHistoryDate(endDate, ctx)}`;
   }
   return "";
 }
@@ -74,9 +97,14 @@ export function formatDateRange(
  *
  * @param startDate Stored date string (e.g. "2025-01-01" or "2025-07-02") or null.
  * @param endDate Stored date string or null (treated as today).
+ * @param _ctx User date format preferences. Duration unit copy stays English.
  * @returns Formatted duration like "1 year, 2 months", "3 months", or null if startDate is missing.
  */
-export function formatDuration(startDate: string | null, endDate: string | null): string | null {
+export function formatDuration(
+  startDate: string | null,
+  endDate: string | null,
+  _ctx: DateTimeFormatContext,
+): string | null {
   if (!startDate) {
     return null;
   }
@@ -108,13 +136,13 @@ export function formatDuration(startDate: string | null, endDate: string | null)
     return `${years} year${years > 1 ? "s" : ""}`;
   }
 
-  let months = (endYear - s.year) * 12 + (endMonth - s.month);
+  let months = (endYear - s.year) * MONTHS_PER_YEAR + (endMonth - s.month);
   if (months < 0) {
     months = 0;
   }
 
-  const years = Math.floor(months / 12);
-  const remainingMonths = months % 12;
+  const years = Math.floor(months / MONTHS_PER_YEAR);
+  const remainingMonths = months % MONTHS_PER_YEAR;
 
   if (years === 0 && remainingMonths === 0) {
     return null;
@@ -129,24 +157,6 @@ export function formatDuration(startDate: string | null, endDate: string | null)
   }
 
   return parts.join(", ");
-}
-
-/** Parse a `YYYY-MM-DD` calendar date as UTC midnight, so no timezone shifts the day. */
-function parseCalendarDate(value: string): Date | undefined {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
-  if (!match) {
-    return undefined;
-  }
-
-  const date = new Date(`${match[1]}-${match[2]}-${match[3]}T00:00:00.000Z`);
-
-  // `new Date` rolls impossible days forward (2026-02-30 becomes 2026-03-02),
-  // so compare the round trip to reject a date that does not exist.
-  if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== value) {
-    return undefined;
-  }
-
-  return date;
 }
 
 /**

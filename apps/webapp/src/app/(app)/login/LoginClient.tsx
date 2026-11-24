@@ -1,6 +1,7 @@
 "use client";
 
 import { getAuthUserFacingError } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import { errorNotificationTemplate } from "@bondery/mantine-next";
 import type { OAuthProvidersBitmap } from "@bondery/schemas/oauth-providers";
 import { notifications } from "@mantine/notifications";
@@ -64,10 +65,10 @@ export function LoginClient({ lastUsedLoginMethod, oauthProviders }: LoginClient
           }),
         );
       }
-    } catch (err) {
+    } catch (error) {
       notifications.show(
         errorNotificationTemplate({
-          description: getAuthUserFacingError(err, tCommon),
+          description: getAuthUserFacingError(error, tCommon),
           title: t("UnexpectedError"),
         }),
       );
@@ -89,8 +90,8 @@ export function LoginClient({ lastUsedLoginMethod, oauthProviders }: LoginClient
       }
 
       window.location.assign(postLoginCallbackUrl);
-    } catch (err) {
-      notifyPasskeyLoginError(err, t);
+    } catch (error) {
+      notifyPasskeyLoginError(error, t);
     } finally {
       setBusyAction(null);
     }
@@ -117,15 +118,11 @@ export function LoginClient({ lastUsedLoginMethod, oauthProviders }: LoginClient
         return false;
       }
 
-      if (magicLinkResultNavigates(data)) {
-        return false;
-      }
-
-      return true;
-    } catch (err) {
+      return !magicLinkResultNavigates(data);
+    } catch (error) {
       notifications.show(
         errorNotificationTemplate({
-          description: getAuthUserFacingError(err, tCommon),
+          description: getAuthUserFacingError(error, tCommon),
           title: t("UnexpectedError"),
         }),
       );
@@ -147,7 +144,7 @@ export function LoginClient({ lastUsedLoginMethod, oauthProviders }: LoginClient
       lastUsedLoginMethod={lastUsedLoginMethod}
       oauthProviders={oauthProviders}
       onEmailSubmit={handleEmailSubmit}
-      onPasskeyClick={() => void handlePasskeyLogin()}
+      onPasskeyClick={() => detachPromise(handlePasskeyLogin())}
       onProviderClick={handleOAuthLogin}
       surface="webapp"
       websiteUrl={websiteUrl}

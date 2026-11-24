@@ -45,13 +45,13 @@ export function useInteractionsInfiniteQuery(
   const infiniteParams = interactionsInfiniteParams(filter, INTERACTIONS_PAGE_SIZE);
 
   return useInfiniteQuery<InteractionsListResult>({
-    getNextPageParam: nextPaginatedOffset,
-    initialPageParam: 0,
     queryFn: async ({ pageParam }) =>
       getInteractionsList({
         ...infiniteParams,
         offset: pageParam as number,
       }),
+    initialPageParam: 0,
+    getNextPageParam: nextPaginatedOffset,
     queryKey: interactionKeys.infinite(infiniteParams),
     throwOnError: throwIfPageCannotRender,
   });

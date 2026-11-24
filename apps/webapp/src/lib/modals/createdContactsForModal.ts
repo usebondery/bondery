@@ -3,14 +3,6 @@
 import type { ContactSelectable } from "@bondery/schemas";
 import { useSyncExternalStore } from "react";
 
-export interface ActivityFormDraft {
-  date: string;
-  description: string;
-  participantIds: string[];
-  title: string;
-  type: string;
-}
-
 const EMPTY_CREATED_CONTACTS: ContactSelectable[] = [];
 const createdContactsByParentModalId = new Map<string, ContactSelectable[]>();
 const activityFormDraftByModalId = new Map<string, ActivityFormDraft>();
@@ -28,6 +20,28 @@ function subscribeCreatedContacts(onStoreChange: () => void): () => void {
   return () => {
     listeners.delete(onStoreChange);
   };
+}
+
+function copyActivityFormDraft(draft: ActivityFormDraft): ActivityFormDraft {
+  return {
+    date: draft.date,
+    description: draft.description,
+    participantIds: [...draft.participantIds],
+    title: draft.title,
+    type: draft.type,
+  };
+}
+
+function isActivityDraftBodyEmpty(draft: ActivityFormDraft): boolean {
+  return draft.title === "" && draft.description === "";
+}
+
+export interface ActivityFormDraft {
+  date: string;
+  description: string;
+  participantIds: string[];
+  title: string;
+  type: string;
 }
 
 /**
@@ -50,20 +64,6 @@ export function rememberCreatedContactForModal(
 
 export function getCreatedContactsForModal(parentModalId: string): ContactSelectable[] {
   return createdContactsByParentModalId.get(parentModalId) ?? EMPTY_CREATED_CONTACTS;
-}
-
-function copyActivityFormDraft(draft: ActivityFormDraft): ActivityFormDraft {
-  return {
-    date: draft.date,
-    description: draft.description,
-    participantIds: [...draft.participantIds],
-    title: draft.title,
-    type: draft.type,
-  };
-}
-
-function isActivityDraftBodyEmpty(draft: ActivityFormDraft): boolean {
-  return draft.title === "" && draft.description === "";
 }
 
 export function lockActivityFormDraft(parentModalId: string): void {

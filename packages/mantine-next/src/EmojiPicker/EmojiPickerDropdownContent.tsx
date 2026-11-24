@@ -4,7 +4,7 @@ import { filterEmojiCategories } from "@bondery/helpers/emoji";
 import { Button, ScrollArea, SimpleGrid, Stack, Text, TextInput } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import { IconSearch } from "@tabler/icons-react";
-import { useState } from "react";
+import { type ReactElement, useState } from "react";
 
 interface EmojiPickerDropdownContentProps {
   emptyLabel?: string;
@@ -28,7 +28,7 @@ export function EmojiPickerDropdownContent({
   onSelect,
   searchDebounceMs = 200,
   searchPlaceholder = "Search emojis…",
-}: EmojiPickerDropdownContentProps) {
+}: EmojiPickerDropdownContentProps): ReactElement {
   const [search, setSearch] = useState("");
   const [debouncedSearch] = useDebouncedValue(search, searchDebounceMs);
 

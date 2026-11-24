@@ -11,7 +11,7 @@ export function datePickerValueToIsoDateTime(value: Date | string | null): strin
     return new Date(value.getFullYear(), value.getMonth(), value.getDate()).toISOString();
   }
 
-  const datePart = value.split("T")[0];
+  const [datePart = ""] = value.split("T");
   const [year, month, day] = datePart.split("-").map(Number);
   if (!year || !month || !day) {
     return null;

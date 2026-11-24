@@ -107,7 +107,7 @@ export async function listUpcomingReminders(
 
   const reminders: UpcomingReminder[] = reminderRows
     .map((row) => {
-      const person = row.person;
+      const { person } = row;
       if (!person) {
         return null;
       }
@@ -135,7 +135,7 @@ export async function listUpcomingReminders(
         ),
       };
     })
-    .filter((value): value is NonNullable<typeof value> => value != null)
+    .filter((value): value is NonNullable<typeof value> => value !== null)
     .sort((a, b) => {
       const aReminderDate = deriveReminderDateKey({
         date: a.importantDate.date,

@@ -37,7 +37,7 @@ function ToolbarButton({
   );
 }
 
-export function NotesFormattingToolbar({ editorRef, styleState }: NotesFormattingToolbarProps) {
+function NotesFormattingToolbar({ editorRef, styleState }: NotesFormattingToolbarProps) {
   const colors = useMobileThemeColors();
 
   const iconColor = (active?: boolean) => (active ? colors.primary : colors.iconPrimary);
@@ -113,3 +113,5 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
 });
+
+export { NotesFormattingToolbar };

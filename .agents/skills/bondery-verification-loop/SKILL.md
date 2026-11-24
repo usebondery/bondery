@@ -53,16 +53,17 @@ Use event-driven checkpoints (after a coherent unit of work, before handoff) —
 
 ## Decision tree
 
-| Task | Read |
-|------|------|
-| Success criteria, risk tiers, report format | [references/risk-and-reporting.md](references/risk-and-reporting.md) |
-| Path → workspace → commands | [references/change-to-checks.md](references/change-to-checks.md) |
-| CI parity, tiers, prerequisites, gaps | [references/ci-parity.md](references/ci-parity.md) |
-| API contract checklist | [../../bondery-api/SKILL.md](../../bondery-api/SKILL.md) |
-| Security commands | [../../bondery-security/SKILL.md](../../bondery-security/SKILL.md) § Verification commands |
-| E2E / Playwright | [../../bondery-e2e-tests/SKILL.md](../../bondery-e2e-tests/SKILL.md) |
-| Monorepo boundaries | [../../bondery-core/SKILL.md](../../bondery-core/SKILL.md) |
-| UX / i18n display | [../../bondery-ux/SKILL.md](../../bondery-ux/SKILL.md) |
+| Task                                          | Read                                                                                       |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Success criteria, risk tiers, report format   | [references/risk-and-reporting.md](references/risk-and-reporting.md)                       |
+| Path → workspace → commands                   | [references/change-to-checks.md](references/change-to-checks.md)                           |
+| Adding a Biome rule, script, hook, or CI gate | [references/adding-a-check.md](references/adding-a-check.md)                               |
+| CI parity, tiers, prerequisites, gaps         | [references/ci-parity.md](references/ci-parity.md)                                         |
+| API contract checklist                        | [../../bondery-api/SKILL.md](../../bondery-api/SKILL.md)                                   |
+| Security commands                             | [../../bondery-security/SKILL.md](../../bondery-security/SKILL.md) § Verification commands |
+| E2E / Playwright                              | [../../bondery-e2e-tests/SKILL.md](../../bondery-e2e-tests/SKILL.md)                       |
+| Monorepo boundaries                           | [../../bondery-core/SKILL.md](../../bondery-core/SKILL.md)                                 |
+| UX / i18n display                             | [../../bondery-ux/SKILL.md](../../bondery-ux/SKILL.md)                                     |
 
 Full index: [references/README.md](references/README.md).
 

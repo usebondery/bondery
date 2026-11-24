@@ -26,7 +26,7 @@ function refinePhoneEntryDigits(
   }
 }
 
-export const phoneEntryEntitySchema = z.object({
+const phoneEntryEntitySchema = z.object({
   preferred: z.boolean().describe("True when this is the contact's primary phone number"),
   prefix: z
     .string()
@@ -49,7 +49,7 @@ const phoneEntryOptionalPreferredSchema = phoneEntryBaseSchema.extend({
     .describe("True when this is the contact's primary phone number"),
 });
 
-export const emailEntryEntitySchema = z.object({
+const emailEntryEntitySchema = z.object({
   preferred: z.boolean().describe("True when this is the contact's primary email address"),
   type: channelTypeSchema.describe("Email category, such as home or work"),
   value: z.string().trim().min(1, { error: "Email is required" }).describe("Email address"),
@@ -62,6 +62,8 @@ const emailEntryOptionalPreferredSchema = emailEntryBaseSchema.extend({
     .optional()
     .describe("True when this is the contact's primary email address"),
 });
+
+export { emailEntryEntitySchema, phoneEntryEntitySchema };
 
 /** Mobile phone sheet — subset of phone fields; pick must run before refinements. */
 export const phoneEntrySheetSchema = phoneEntryOptionalPreferredSchema

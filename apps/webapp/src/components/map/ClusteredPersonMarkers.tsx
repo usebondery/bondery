@@ -4,10 +4,13 @@ import { PersonAvatarTooltip } from "@bondery/mantine-next";
 import { Marker, type MarkerEvent, useMap } from "@vis.gl/react-maplibre";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import Supercluster from "supercluster";
+import Supercluster, { type ClusterFeature, type PointFeature } from "supercluster";
 import { routeAssert } from "@/lib/navigation/route/assert";
+import { firstNonEmpty } from "@/lib/shared/nonEmpty";
 import { ClusterMapBubble, PersonMapAvatarMarker } from "./mapMarkerIcons";
 import type { PeopleMapMarker } from "./PeopleMap";
+
+const PATTERN = /\s+/;
 
 const CLUSTER_RADIUS_PX = 50;
 
@@ -15,9 +18,7 @@ type ClusterPointProperties = {
   markerId: string;
 };
 
-type ClusterFeature = Supercluster.ClusterFeature<ClusterPointProperties>;
-type PointFeature = Supercluster.PointFeature<ClusterPointProperties>;
-type MapClusterItem = ClusterFeature | PointFeature;
+type MapClusterItem = ClusterFeature<ClusterPointProperties> | PointFeature<ClusterPointProperties>;
 
 function isFiniteCoordinate(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value);
@@ -29,12 +30,11 @@ function readPointCoordinates(
   if (!Array.isArray(coordinates) || coordinates.length < 2) {
     return null;
   }
-  const longitude = coordinates[0];
-  const latitude = coordinates[1];
+  const [longitude, latitude] = coordinates;
   if (!isFiniteCoordinate(longitude) || !isFiniteCoordinate(latitude)) {
     return null;
   }
-  if (latitude < -90 || latitude > 90) {
+  if (Math.abs(latitude) > 90) {
     return null;
   }
   return { latitude, longitude };
@@ -73,7 +73,8 @@ export function ClusteredPersonMarkers({
       radius: CLUSTER_RADIUS_PX,
     });
 
-    const points: PointFeature[] = validMarkers.map((marker) => ({
+    // MultiPoint input is accepted since 9.0, but a person is one coordinate.
+    const points: PointFeature<ClusterPointProperties>[] = validMarkers.map((marker) => ({
       geometry: {
         coordinates: [marker.longitude, marker.latitude],
         type: "Point",
@@ -130,7 +131,7 @@ export function ClusteredPersonMarkers({
     };
   }, [map, clusterIndex]);
 
-  const handleClusterClick = (feature: ClusterFeature) => {
+  const handleClusterClick = (feature: ClusterFeature<ClusterPointProperties>) => {
     if (!map) {
       return;
     }
@@ -161,7 +162,7 @@ export function ClusteredPersonMarkers({
         }
 
         if ("cluster" in feature.properties && feature.properties.cluster) {
-          const clusterFeature = feature as ClusterFeature;
+          const clusterFeature = feature as ClusterFeature<ClusterPointProperties>;
           const count = clusterFeature.properties.point_count;
 
           return (
@@ -181,14 +182,14 @@ export function ClusteredPersonMarkers({
           );
         }
 
-        const pointFeature = feature as PointFeature;
+        const pointFeature = feature as PointFeature<ClusterPointProperties>;
         const marker = markersById.get(pointFeature.properties.markerId);
         if (!marker) {
           return null;
         }
 
-        const nameParts = marker.name.trim().split(/\s+/).filter(Boolean);
-        const firstName = marker.firstName || nameParts[0] || marker.name;
+        const nameParts = marker.name.trim().split(PATTERN).filter(Boolean);
+        const firstName = firstNonEmpty(marker.firstName, nameParts[0]) ?? marker.name;
         const lastName =
           marker.lastName ?? (nameParts.length > 1 ? nameParts.slice(1).join(" ") : null);
 

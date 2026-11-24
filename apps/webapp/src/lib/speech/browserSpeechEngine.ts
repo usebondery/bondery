@@ -176,7 +176,7 @@ function createBrowserSpeechEngine(): SpeechEngine {
 
       generation += 1;
       stopTracking();
-      lang = input.lang;
+      ({ lang } = input);
       chunks = splitSpeechText(input.text);
 
       synth.cancel();
@@ -200,8 +200,6 @@ let engine: SpeechEngine | null = null;
  * the only place that touches `window.speechSynthesis`.
  */
 export function getBrowserSpeechEngine(): SpeechEngine {
-  if (!engine) {
-    engine = createBrowserSpeechEngine();
-  }
+  engine ??= createBrowserSpeechEngine();
   return engine;
 }

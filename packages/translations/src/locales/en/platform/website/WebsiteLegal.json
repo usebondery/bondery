@@ -1,0 +1,17 @@
+{
+  "Documents": {
+    "Privacy": {
+      "Description": "Learn how Bondery collects, uses, and protects your data.",
+      "Title": "Privacy Policy"
+    },
+    "Security": {
+      "Description": "How to report a security issue to Bondery.",
+      "Title": "Security"
+    },
+    "Terms": {
+      "Description": "The agreement that covers your use of Bondery: your account, your contacts, plans and billing, acceptable use, and how disputes are handled.",
+      "Title": "Terms of Service"
+    }
+  },
+  "LastUpdated": "Last Updated: {date}"
+}

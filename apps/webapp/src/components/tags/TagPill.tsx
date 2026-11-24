@@ -1,5 +1,7 @@
 import { Group, Text, Tooltip, UnstyledButton } from "@mantine/core";
 import { IconPencil, IconPlus, IconX } from "@tabler/icons-react";
+import { cn } from "cn";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 
 interface TagPillProps {
   className?: string;
@@ -45,7 +47,7 @@ export function TagPill({
 
   return (
     <Group
-      className={`button-scale-effect ${className ?? ""}`}
+      className={cn("button-scale-effect", className)}
       gap={0}
       style={{
         backgroundColor,
@@ -66,7 +68,7 @@ export function TagPill({
             }}
             style={{
               alignItems: "center",
-              color: color || undefined,
+              color: nonEmpty(color),
               display: "flex",
               gap: 6,
               padding: `${resolved.py}px ${resolved.px}px`,
@@ -83,7 +85,7 @@ export function TagPill({
         <span
           style={{
             alignItems: "center",
-            color: color || undefined,
+            color: nonEmpty(color),
             display: "inline-flex",
             gap: 6,
             padding: `${resolved.py}px ${resolved.px}px`,
@@ -111,7 +113,7 @@ export function TagPill({
             style={{
               alignItems: "center",
               borderLeft: `1px solid ${borderColor}`,
-              color: color || "var(--mantine-color-gray-7)",
+              color: nonEmpty(color) ?? "var(--mantine-color-gray-7)",
               display: "flex",
               justifyContent: "center",
               padding: `${resolved.py}px ${Math.max(8, resolved.py + 4)}px`,

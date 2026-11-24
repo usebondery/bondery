@@ -17,6 +17,8 @@ import {
   stripeIdempotencyKey,
 } from "../lib/platform/idempotency-policy.js";
 
+const A_F_PATTERN = /^[0-9a-f]{64}$/;
+
 describe("idempotency policy", () => {
   it("accepts printable ASCII keys and rejects everything else", () => {
     assert.equal(isValidIdempotencyKey("a"), true);
@@ -67,7 +69,7 @@ describe("idempotency policy", () => {
     const first = stripeIdempotencyKey("user-a", "client-key");
     const second = stripeIdempotencyKey("user-b", "client-key");
     assert.equal(first.length, 64);
-    assert.match(first, /^[0-9a-f]{64}$/);
+    assert.match(first, A_F_PATTERN);
     assert.notEqual(first, second);
     assert.equal(first, sha256Hex("user-a:client-key"));
   });

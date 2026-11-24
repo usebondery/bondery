@@ -9,6 +9,10 @@ import {
 import { interactionKeys } from "@/lib/query/keys";
 import { INTERACTIONS_TIMELINE } from "@/lib/query/sharedListParams";
 
+function infiniteListParams(filter: InteractionsTimelineFilter) {
+  return interactionsInfiniteParams(filter, INTERACTIONS_TIMELINE.limit);
+}
+
 export async function prefetchInteractionsList(
   queryClient: QueryClient,
   params: InteractionsListParams = {},
@@ -17,10 +21,6 @@ export async function prefetchInteractionsList(
     queryFn: () => getInteractionsListServer(params),
     queryKey: interactionKeys.list(params),
   });
-}
-
-function infiniteListParams(filter: InteractionsTimelineFilter) {
-  return interactionsInfiniteParams(filter, INTERACTIONS_TIMELINE.limit);
 }
 
 export async function prefetchInteractionsInfinite(

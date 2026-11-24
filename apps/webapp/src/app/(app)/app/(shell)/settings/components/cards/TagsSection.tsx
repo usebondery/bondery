@@ -8,14 +8,23 @@ import { TagPill } from "@/components/tags/TagPill";
 import { useTagsSettingsTranslations } from "@/lib/i18n/generated/hooks";
 import { useTagsListQuery } from "@/lib/query/hooks/useTags";
 import { SETTINGS_TAGS_PREVIEW } from "@/lib/query/settingsPageQueryParams";
+import { SETTINGS_TAGS_SECTION_ID } from "../../settingsSectionIds";
 import { SettingsSection } from "./SettingsSection";
+
+function ignoreTagEditorCallback() {
+  // no-op: settings tags refresh from the tags list query, not modal callbacks
+}
 
 export function TagsSection() {
   const t = useTagsSettingsTranslations();
   const { data: tags = [] } = useTagsListQuery(SETTINGS_TAGS_PREVIEW);
 
   return (
-    <SettingsSection icon={<IconTag size={20} stroke={1.5} />} id="tags" title={t("Title")}>
+    <SettingsSection
+      icon={<IconTag size={20} stroke={1.5} />}
+      id={SETTINGS_TAGS_SECTION_ID}
+      title={t("Title")}
+    >
       <CardSection inheritPadding py="md">
         <Group align="center" gap="sm">
           {tags.map((tag) => (
@@ -26,9 +35,9 @@ export function TagsSection() {
               onClick={() => {
                 openTagEditorModal({
                   mode: "edit",
-                  onCreated: () => {},
-                  onDeleted: () => {},
-                  onUpdated: () => {},
+                  onCreated: ignoreTagEditorCallback,
+                  onDeleted: ignoreTagEditorCallback,
+                  onUpdated: ignoreTagEditorCallback,
                   tag,
                 });
               }}
@@ -42,9 +51,9 @@ export function TagsSection() {
             onClick={() => {
               openTagEditorModal({
                 mode: "create",
-                onCreated: () => {},
-                onDeleted: () => {},
-                onUpdated: () => {},
+                onCreated: ignoreTagEditorCallback,
+                onDeleted: ignoreTagEditorCallback,
+                onUpdated: ignoreTagEditorCallback,
               });
             }}
           />

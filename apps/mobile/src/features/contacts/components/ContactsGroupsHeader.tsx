@@ -17,7 +17,7 @@ import { GroupChip } from "./GroupChip";
  *   vertical padding so spacing matches sibling sections.
  * - `wrap` — Wrapping chip row; all groups visible without scrolling (settings manage list).
  */
-export type ContactsGroupsHeaderLayout = "section" | "chipRow" | "wrap";
+type ContactsGroupsHeaderLayout = "section" | "chipRow" | "wrap";
 
 interface ContactsGroupsHeaderProps {
   groups: GroupWithCount[];
@@ -73,7 +73,7 @@ function GroupChipList({
   );
 }
 
-export function ContactsGroupsHeader({
+function ContactsGroupsHeader({
   groups,
   layout = "section",
   title,
@@ -167,3 +167,6 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
 });
+
+export type { ContactsGroupsHeaderLayout };
+export { ContactsGroupsHeader };

@@ -1,7 +1,7 @@
 "use client";
 
 import { Avatar, Badge, type BadgeProps, type MantineColor } from "@mantine/core";
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 import { getAvatarColorFromName } from "#utils/avatarColor.js";
 import {
   type PersonChipSize,
@@ -25,6 +25,12 @@ export interface PersonChipProps {
   onClick?: () => void;
   rightSection?: ReactNode;
   size?: PersonChipSize;
+  /**
+   * Lets the chip shrink and ellipsize the name instead of holding its full
+   * content width. Use it in a row that must not overflow, such as a merge
+   * suggestion card on a narrow screen.
+   */
+  truncate?: boolean;
 }
 
 /**
@@ -46,8 +52,10 @@ export function PersonChip({
   interactive,
   label,
   rightSection,
-}: PersonChipProps) {
-  const fullName = (label ?? `${firstName}${lastName ? ` ${lastName}` : ""}`).trim();
+  truncate = false,
+}: PersonChipProps): ReactElement {
+  const lastNameSuffix = lastName ? ` ${lastName}` : "";
+  const fullName = (label ?? `${firstName}${lastNameSuffix}`).trim();
   const sizes = personChipSizes(size);
   const personAvatarColor = color === "gray" ? "gray" : getAvatarColorFromName(firstName, lastName);
   const isInteractive = interactive ?? Boolean(onClick);
@@ -90,6 +98,7 @@ export function PersonChip({
         hasPerson,
         interactive: isInteractive,
         size,
+        truncate,
       })}
       variant={badgeVariant}
       vars={personChipBadgeVars(size)}

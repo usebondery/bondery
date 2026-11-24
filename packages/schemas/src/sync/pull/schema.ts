@@ -10,6 +10,15 @@ import type {
   SyncPullResponse,
 } from "./types.js";
 
+const syncTableRowsSchema = z
+  .array(z.record(z.string(), z.unknown()))
+  .describe("Snapshot rows for this table");
+
+/** Explicit object shape — z.record(z.enum(...)) breaks fast-json-stringify (invalid JSON). */
+const bootstrapTablesShape = Object.fromEntries(
+  SYNC_TABLE_KEYS.map((key) => [key, syncTableRowsSchema]),
+) as Record<SyncTableKey, typeof syncTableRowsSchema>;
+
 export const syncChangeOperationSchema: z.ZodType<SyncChangeOperation> = z.enum([
   "insert",
   "update",
@@ -40,15 +49,6 @@ export const syncPullResponseSchema: z.ZodType<SyncPullResponse> = z.object({
     .optional()
     .describe("True when the client must run bootstrap before pull"),
 });
-
-const syncTableRowsSchema = z
-  .array(z.record(z.string(), z.unknown()))
-  .describe("Snapshot rows for this table");
-
-/** Explicit object shape — z.record(z.enum(...)) breaks fast-json-stringify (invalid JSON). */
-const bootstrapTablesShape = Object.fromEntries(
-  SYNC_TABLE_KEYS.map((key) => [key, syncTableRowsSchema]),
-) as Record<SyncTableKey, typeof syncTableRowsSchema>;
 
 export const syncBootstrapTablesSchema: z.ZodType<SyncBootstrapTables> =
   z.object(bootstrapTablesShape);

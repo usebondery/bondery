@@ -147,7 +147,11 @@ export function ChatDictateButton({
 
   let icon = <IconMicrophone />;
   if (isSpinning) {
-    icon = <IconLoader className="animate-spin" />;
+    icon = (
+      <span className="animate-spin">
+        <IconLoader style={{ display: "block", height: "100%", width: "100%" }} />
+      </span>
+    );
   } else if (isListening) {
     icon = <IconMicrophoneFilled />;
   } else if (isInsecure || isUnsupported || OFF_STATUSES.has(status)) {

@@ -1,10 +1,11 @@
+import { detachPromise } from "@bondery/helpers/async";
 import * as Network from "expo-network";
 import { useFocusEffect } from "expo-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { API_URL } from "../../../lib/config";
 import { isDeviceOffline, STATUS_PROBE_TIMEOUT_MS } from "./probeNetwork";
 
-export type ApiServerStatus = "checking" | "connected" | "offline" | "unreachable";
+type ApiServerStatus = "checking" | "connected" | "offline" | "unreachable";
 
 async function probeApiServer(): Promise<boolean> {
   if (!API_URL) {
@@ -32,36 +33,41 @@ async function probeApiServer(): Promise<boolean> {
   }
 }
 
-export function useApiServerStatus() {
+function useApiServerStatus() {
   const [status, setStatus] = useState<ApiServerStatus>("checking");
 
-  async function refresh() {
-    setStatus("checking");
-
+  /** Probes the server and returns the result. It sets no state. */
+  const probe = useCallback(async (): Promise<ApiServerStatus> => {
     if (await isDeviceOffline()) {
-      setStatus("offline");
-      return;
+      return "offline";
     }
 
-    const isReachable = await probeApiServer();
-    setStatus(isReachable ? "connected" : "unreachable");
-  }
+    return (await probeApiServer()) ? "connected" : "unreachable";
+  }, []);
+
+  const refresh = useCallback(async () => {
+    setStatus("checking");
+    setStatus(await probe());
+  }, [probe]);
 
   useEffect(() => {
-    void refresh();
+    // The state starts as "checking", so the first probe needs no reset.
+    detachPromise(probe().then(setStatus));
 
     const subscription = Network.addNetworkStateListener(() => {
-      void refresh();
+      detachPromise(refresh());
     });
 
     return () => {
       subscription.remove();
     };
-  }, [refresh]);
+  }, [probe, refresh]);
 
-  useFocusEffect(() => {
-    void refresh();
-  });
+  useFocusEffect(
+    useCallback(() => {
+      detachPromise(refresh());
+    }, [refresh]),
+  );
 
   return {
     isChecking: status === "checking",
@@ -69,3 +75,6 @@ export function useApiServerStatus() {
     status,
   };
 }
+
+export type { ApiServerStatus };
+export { useApiServerStatus };

@@ -26,6 +26,22 @@ function toChatSessionDto(row: {
   };
 }
 
+async function touchOwnedChatSession(ctx: DomainContext, sessionId: string): Promise<boolean> {
+  const { user } = ctx;
+  const db = domainDb(ctx);
+  const { count } = await db.chatSession.updateMany({
+    data: { updatedAt: new Date() },
+    where: { id: sessionId, userId: user.id },
+  });
+
+  if (count === 0) {
+    ctx.log?.error({ sessionId }, "Failed to update chat session timestamp — session not found");
+    return false;
+  }
+
+  return true;
+}
+
 export async function createChatSession(ctx: DomainContext) {
   const { user } = ctx;
   const db = domainDb(ctx);
@@ -81,22 +97,6 @@ export function userMessageText(userMessage: UIMessage): string {
       .map((p) => p.text)
       .join(" ") ?? ""
   );
-}
-
-async function touchOwnedChatSession(ctx: DomainContext, sessionId: string): Promise<boolean> {
-  const { user } = ctx;
-  const db = domainDb(ctx);
-  const { count } = await db.chatSession.updateMany({
-    data: { updatedAt: new Date() },
-    where: { id: sessionId, userId: user.id },
-  });
-
-  if (count === 0) {
-    ctx.log?.error({ sessionId }, "Failed to update chat session timestamp — session not found");
-    return false;
-  }
-
-  return true;
 }
 
 /** Persist the user turn when the request is accepted, before the model stream. */

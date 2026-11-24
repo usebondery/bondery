@@ -7,6 +7,13 @@ interface ImportProcessingStepProps {
   message: string;
 }
 
+interface ImportProgressStepProps {
+  current: number;
+  importingProgressLabel: string;
+  importingTitle: string;
+  total: number;
+}
+
 export function ImportProcessingStep({ description, message }: ImportProcessingStepProps) {
   return (
     <Stack gap="lg" py="md">
@@ -23,13 +30,6 @@ export function ImportProcessingStep({ description, message }: ImportProcessingS
       </Center>
     </Stack>
   );
-}
-
-interface ImportProgressStepProps {
-  current: number;
-  importingProgressLabel: string;
-  importingTitle: string;
-  total: number;
 }
 
 export function ImportProgressStep({

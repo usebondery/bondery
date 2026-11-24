@@ -1,0 +1,34 @@
+{
+  "Import": {
+    "ChoosePlatform": "Kurioje platformoje prašei eksporto?",
+    "Description": "Atkelk esamą tinklą į Bondery iš LinkedIn, Instagram arba pridėk rankiniu būdu.",
+    "Finish": "Pradėti",
+    "Instagram": "Importuoti iš Instagram",
+    "InstagramDescription": "Įkelk Instagram sekėjų/sekamų duomenis.",
+    "LinkedIn": "Importuoti iš LinkedIn",
+    "LinkedInDescription": "Įkelk LinkedIn ryšių eksporto failą.",
+    "ManualAdd": "Kurti rankiniu būdu",
+    "SkipImport": "Praleisti importą",
+    "SuccessDescription": "{imported} importuota, {updated} atnaujinta, {skipped} praleista.",
+    "SuccessTitle": "Importas baigtas!",
+    "Title": "Importuok kontaktus",
+    "WaitingForExport": "Laukiu savo eksporto"
+  },
+  "Intent": {
+    "both": "Abu",
+    "Description": "Naudosime tai, kad pritaikytume Bondery tau.",
+    "personal": "Draugai ir šeima",
+    "professional": "Profesinis",
+    "Title": "Kaip naudosi Bondery?"
+  },
+  "Loading": {
+    "Message": "Viską paruošiame tau…"
+  },
+  "MetadataTitle": "Įvadinis nustatymas",
+  "Welcome": {
+    "LetsGo": "Eime",
+    "Subtitle": "Malonu susipažinti. Nustatykime tavo asmeninį PRM.",
+    "TitleGeneric": "Sveiki atvykę į Bondery! 😊",
+    "TitleWithName": "Sveiki, {name}! 😊"
+  }
+}

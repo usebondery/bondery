@@ -1,15 +1,6 @@
 import { INTERACTION_TYPES } from "@bondery/helpers";
 import type { ActivityType } from "@bondery/schemas";
 
-export type ActivityTypeConfig = {
-  emoji: string;
-  color: string;
-};
-
-export const ACTIVITY_TYPE_OPTIONS: ActivityType[] = INTERACTION_TYPES.filter(
-  (t) => t !== "Custom",
-);
-
 const LEGACY_ACTIVITY_TYPE_ALIASES: Record<string, ActivityType> = {
   Networking: "Networking event",
   "Networking interaction": "Networking event",
@@ -29,6 +20,15 @@ const ACTIVITY_TYPE_CONFIG: Record<ActivityType, ActivityTypeConfig> = {
   "Party/Social": { color: "pink", emoji: "🎉" },
   "Text/Messaging": { color: "cyan", emoji: "💬" },
 };
+
+export type ActivityTypeConfig = {
+  emoji: string;
+  color: string;
+};
+
+export const ACTIVITY_TYPE_OPTIONS: ActivityType[] = INTERACTION_TYPES.filter(
+  (t) => t !== "Custom",
+);
 
 /**
  * Returns emoji/color configuration for an activity type.

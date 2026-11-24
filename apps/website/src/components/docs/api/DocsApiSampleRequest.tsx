@@ -1,13 +1,20 @@
 "use client";
 
 import { BrandMark, CodeBlock, type CodeBlockSnippet } from "@bondery/mantine-next";
+import docs from "@bondery/translations/locales/en/platform/website/WebsiteDocs.json" with {
+  type: "json",
+};
 import { Code, Stack, Text, Title } from "@mantine/core";
 import { useOpenAPI } from "fumadocs-openapi";
 import { useOperation } from "fumadocs-openapi/operation";
+import { formatMessage } from "@/lib/i18n/message";
 import { buildSampleRequest, isMultipartSample } from "./api-sample-request";
 
 /** One stored choice drives this block on every operation page. */
 const SAMPLE_PREFERENCE_KEY = "api-sample";
+
+/** Form field the avatar upload reads. It is a code sample, so it is not translated. */
+const MULTIPART_FILE_FIELD = "file";
 
 const SNIPPET_LABELS = {
   curl: "cURL",
@@ -58,7 +65,7 @@ export function DocsApiSampleRequest() {
 
   return (
     <Stack gap="sm">
-      <Title order={3}>Sample request</Title>
+      <Title order={3}>{docs.Api.SampleRequest}</Title>
       <CodeBlock
         defaultSnippetId="curl"
         preferenceKey={SAMPLE_PREFERENCE_KEY}
@@ -66,7 +73,7 @@ export function DocsApiSampleRequest() {
       />
       {isMultipartSample(method, path) ? (
         <Text c="dimmed" size="sm">
-          Send the image as a multipart/form-data field named <Code>file</Code>.
+          {formatMessage(docs.Api.MultipartNote, { field: <Code>{MULTIPART_FILE_FIELD}</Code> })}
         </Text>
       ) : null}
     </Stack>

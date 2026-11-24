@@ -1,8 +1,14 @@
+import { useId } from "react";
 import Svg, { Defs, LinearGradient, Path, Rect, Stop } from "react-native-svg";
 import { loginScreenStyles as styles } from "./loginScreenStyles";
 
 const LOGOTYPE_HEIGHT = 36;
-const LOGOTYPE_WIDTH = Math.round((LOGOTYPE_HEIGHT * 866) / 256);
+/** Size of the SVG's own coordinate space (its `viewBox`). */
+const LOGOTYPE_VIEWBOX_WIDTH = 866;
+const LOGOTYPE_VIEWBOX_HEIGHT = 256;
+const LOGOTYPE_WIDTH = Math.round(
+  (LOGOTYPE_HEIGHT * LOGOTYPE_VIEWBOX_WIDTH) / LOGOTYPE_VIEWBOX_HEIGHT,
+);
 const NODE_STROKE = {
   fill: "white",
   stroke: "white",
@@ -22,31 +28,26 @@ const EDGE_STROKE = {
  * Rendered as `react-native-svg` primitives so Android does not parse a raw XML string.
  */
 export function BonderyLoginLogotype({ accessibilityLabel }: { accessibilityLabel: string }) {
+  const fillId = useId();
+
   return (
     <Svg
       accessibilityLabel={accessibilityLabel}
       accessibilityRole="image"
       height={LOGOTYPE_HEIGHT}
       style={styles.logotype}
-      viewBox="0 0 866 256"
+      viewBox={`0 0 ${LOGOTYPE_VIEWBOX_WIDTH} ${LOGOTYPE_VIEWBOX_HEIGHT}`}
       width={LOGOTYPE_WIDTH}
     >
       <Defs>
-        <LinearGradient
-          gradientUnits="userSpaceOnUse"
-          id="bonderyLoginLogotypeFill"
-          x1="0"
-          x2="256"
-          y1="0"
-          y2="256"
-        >
+        <LinearGradient gradientUnits="userSpaceOnUse" id={fillId} x1="0" x2="256" y1="0" y2="256">
           <Stop offset="0" stopColor="#7C3AED" />
           <Stop offset="1" stopColor="#C026D3" />
         </LinearGradient>
       </Defs>
       <Path
         d="M0 20C0 8.95431 8.9543 0 20 0H176C220.183 0 256 35.8172 256 80V176C256 220.183 220.183 256 176 256H20C8.95431 256 0 247.046 0 236V20Z"
-        fill="url(#bonderyLoginLogotypeFill)"
+        fill={`url(#${fillId})`}
       />
       <Path
         d="M115.5 171.75C115.5 168.435 114.183 165.255 111.839 162.911C109.495 160.567 106.315 159.25 103 159.25C99.6848 159.25 96.5054 160.567 94.1612 162.911C91.817 165.255 90.5 168.435 90.5 171.75C90.5 175.065 91.817 178.245 94.1612 180.589C96.5054 182.933 99.6848 184.25 103 184.25C106.315 184.25 109.495 182.933 111.839 180.589C114.183 178.245 115.5 175.065 115.5 171.75Z"

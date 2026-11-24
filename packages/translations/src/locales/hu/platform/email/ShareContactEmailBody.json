@@ -1,0 +1,22 @@
+{
+  "description": "{{senderName}} megosztott veled egy kapcsolatot",
+  "footerNotes": "A Bondery küldte. Válaszolj erre az e-mailre, ha eléred: {{senderName}}.",
+  "importantDateLine": "{{label}}: {{date}} ({{type}})",
+  "labels": {
+    "address": "Cím",
+    "email": "E-mail",
+    "facebook": "Facebook",
+    "importantDates": "Fontos dátumok",
+    "instagram": "Instagram",
+    "linkedin": "LinkedIn",
+    "location": "Hely",
+    "notes": "Jegyzetek",
+    "phone": "Telefon",
+    "signal": "Signal",
+    "website": "Weboldal",
+    "whatsapp": "WhatsApp"
+  },
+  "previewFallback": "Telefon, e-mail és egyéb adatok a levélben",
+  "replyCta": "Válasz neki: {{senderName}}",
+  "subject": "{{senderName}} megosztott egy kapcsolatot veled • {{contactName}}"
+}

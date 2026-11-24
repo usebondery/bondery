@@ -48,7 +48,7 @@ type TagEditSheetProps =
       onDeleted: () => void;
     };
 
-export function TagEditSheet(props: TagEditSheetProps) {
+function TagEditSheet(props: TagEditSheetProps) {
   const tMobileTags = useMobileTagsTranslations();
   const tTagsSettings = useTagsSettingsTranslations();
   const t = useCommonTranslations();
@@ -258,3 +258,5 @@ const styles = StyleSheet.create({
     width: "100%",
   },
 });
+
+export { TagEditSheet };

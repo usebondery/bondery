@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { afterEach, describe, it } from "node:test";
 
+import { detachPromise } from "@bondery/helpers/async";
+
 import { probeSmtp } from "../lib/health/probe-smtp.js";
 import {
   classifySmtpError,
@@ -13,6 +15,10 @@ import {
   shutdownEmailTransporter,
   verifyEmailTransport,
 } from "../lib/notifications/transporter.js";
+
+const BONDERY_PRIVATE_EMAIL_MUST_BE_SET_PATTERN = /BONDERY_PRIVATE_EMAIL_\* must be set/;
+const SMTP_VERIFY_FAILED_PATTERN = /SMTP verify failed/;
+const PNPM_RUN_START_MAILPIT_PATTERN = /pnpm run start:mailpit/;
 
 const baseConfig = {
   fromAddress: "robot@usebondery.com",
@@ -34,45 +40,45 @@ type EmailEnvSnapshot = {
 
 function snapshotEmailEnv(): EmailEnvSnapshot {
   return {
-    address: process.env.BONDERY_PRIVATE_EMAIL_ADDRESS,
-    host: process.env.BONDERY_PRIVATE_EMAIL_HOST,
-    nodeEnv: process.env.NODE_ENV,
-    pass: process.env.BONDERY_PRIVATE_EMAIL_PASS,
-    port: process.env.BONDERY_PRIVATE_EMAIL_PORT,
-    replyTo: process.env.BONDERY_PRIVATE_EMAIL_REPLY_TO,
-    user: process.env.BONDERY_PRIVATE_EMAIL_USER,
+    address: process.env["BONDERY_PRIVATE_EMAIL_ADDRESS"],
+    host: process.env["BONDERY_PRIVATE_EMAIL_HOST"],
+    nodeEnv: process.env["NODE_ENV"],
+    pass: process.env["BONDERY_PRIVATE_EMAIL_PASS"],
+    port: process.env["BONDERY_PRIVATE_EMAIL_PORT"],
+    replyTo: process.env["BONDERY_PRIVATE_EMAIL_REPLY_TO"],
+    user: process.env["BONDERY_PRIVATE_EMAIL_USER"],
   };
 }
 
 function setConfiguredEmailEnv(): void {
-  process.env.BONDERY_PRIVATE_EMAIL_HOST = baseConfig.host;
-  process.env.BONDERY_PRIVATE_EMAIL_PORT = "587";
-  process.env.BONDERY_PRIVATE_EMAIL_USER = baseConfig.user;
-  process.env.BONDERY_PRIVATE_EMAIL_PASS = baseConfig.pass;
-  process.env.BONDERY_PRIVATE_EMAIL_ADDRESS = baseConfig.fromAddress;
-  process.env.BONDERY_PRIVATE_EMAIL_REPLY_TO = baseConfig.replyToAddress;
+  process.env["BONDERY_PRIVATE_EMAIL_HOST"] = baseConfig.host;
+  process.env["BONDERY_PRIVATE_EMAIL_PORT"] = "587";
+  process.env["BONDERY_PRIVATE_EMAIL_USER"] = baseConfig.user;
+  process.env["BONDERY_PRIVATE_EMAIL_PASS"] = baseConfig.pass;
+  process.env["BONDERY_PRIVATE_EMAIL_ADDRESS"] = baseConfig.fromAddress;
+  process.env["BONDERY_PRIVATE_EMAIL_REPLY_TO"] = baseConfig.replyToAddress;
 }
 
 function setLoopbackEmailEnv(): void {
   setConfiguredEmailEnv();
-  process.env.BONDERY_PRIVATE_EMAIL_HOST = "127.0.0.1";
-  process.env.BONDERY_PRIVATE_EMAIL_PORT = "26640";
+  process.env["BONDERY_PRIVATE_EMAIL_HOST"] = "127.0.0.1";
+  process.env["BONDERY_PRIVATE_EMAIL_PORT"] = "26640";
 }
 
 function clearEmailEnv(): void {
-  delete process.env.BONDERY_PRIVATE_EMAIL_HOST;
-  delete process.env.BONDERY_PRIVATE_EMAIL_USER;
-  delete process.env.BONDERY_PRIVATE_EMAIL_PASS;
-  delete process.env.BONDERY_PRIVATE_EMAIL_ADDRESS;
-  delete process.env.BONDERY_PRIVATE_EMAIL_REPLY_TO;
-  delete process.env.BONDERY_PRIVATE_EMAIL_PORT;
+  delete process.env["BONDERY_PRIVATE_EMAIL_HOST"];
+  delete process.env["BONDERY_PRIVATE_EMAIL_USER"];
+  delete process.env["BONDERY_PRIVATE_EMAIL_PASS"];
+  delete process.env["BONDERY_PRIVATE_EMAIL_ADDRESS"];
+  delete process.env["BONDERY_PRIVATE_EMAIL_REPLY_TO"];
+  delete process.env["BONDERY_PRIVATE_EMAIL_PORT"];
 }
 
 function restoreEmailEnv(snapshot: EmailEnvSnapshot): void {
   const restore = (key: keyof EmailEnvSnapshot, envKey: string) => {
     const value = snapshot[key];
     if (value === undefined) {
-      delete process.env[envKey];
+      Reflect.deleteProperty(process.env, envKey);
     } else {
       process.env[envKey] = value;
     }
@@ -109,18 +115,18 @@ describe("emailTransportOptions", () => {
     const options = emailTransportOptions({
       ...baseConfig,
       host: "127.0.0.1",
-      port: 26640,
+      port: 26_640,
     });
 
     assert.equal(options.secure, false);
     assert.equal(options.requireTLS, false);
     assert.equal(options.ignoreTLS, true);
-    assert.equal(options.port, 26640);
+    assert.equal(options.port, 26_640);
   });
 
   it("keeps STARTTLS for loopback host in production", () => {
     const snapshot = snapshotEmailEnv();
-    process.env.NODE_ENV = "production";
+    process.env["NODE_ENV"] = "production";
     try {
       const options = emailTransportOptions({
         ...baseConfig,
@@ -149,7 +155,7 @@ describe("email transporter singleton", () => {
   const snapshot = snapshotEmailEnv();
 
   afterEach(() => {
-    void shutdownEmailTransporter();
+    detachPromise(shutdownEmailTransporter());
     resetEmailReadinessForTests();
     restoreEmailEnv(snapshot);
   });
@@ -169,13 +175,13 @@ describe("email transport readiness", () => {
   const snapshot = snapshotEmailEnv();
 
   afterEach(() => {
-    void shutdownEmailTransporter();
+    detachPromise(shutdownEmailTransporter());
     resetEmailReadinessForTests();
     restoreEmailEnv(snapshot);
   });
 
   it("initEmailTransport skips verify when SMTP is unconfigured in test", async () => {
-    process.env.NODE_ENV = "test";
+    process.env["NODE_ENV"] = "test";
     clearEmailEnv();
     resetEmailTransporterForTests();
 
@@ -187,15 +193,15 @@ describe("email transport readiness", () => {
   });
 
   it("initEmailTransport throws when SMTP is unconfigured in development", async () => {
-    process.env.NODE_ENV = "development";
+    process.env["NODE_ENV"] = "development";
     clearEmailEnv();
     resetEmailTransporterForTests();
 
-    await assert.rejects(() => initEmailTransport(), /BONDERY_PRIVATE_EMAIL_\* must be set/);
+    await assert.rejects(() => initEmailTransport(), BONDERY_PRIVATE_EMAIL_MUST_BE_SET_PATTERN);
   });
 
   it("initEmailTransport skips live verify in test environment", async () => {
-    process.env.NODE_ENV = "test";
+    process.env["NODE_ENV"] = "test";
     setConfiguredEmailEnv();
     resetEmailTransporterForTests();
 
@@ -206,7 +212,7 @@ describe("email transport readiness", () => {
   });
 
   it("verifyEmailTransport classifies auth failures", async () => {
-    process.env.NODE_ENV = "development";
+    process.env["NODE_ENV"] = "development";
     setConfiguredEmailEnv();
     resetEmailTransporterForTests();
 
@@ -237,7 +243,7 @@ describe("email transport readiness", () => {
   });
 
   it("verifyEmailTransport reuses recent boot verification for readiness probes", async () => {
-    process.env.NODE_ENV = "development";
+    process.env["NODE_ENV"] = "development";
     setLoopbackEmailEnv();
     resetEmailTransporterForTests();
 
@@ -255,7 +261,7 @@ describe("email transport readiness", () => {
   });
 
   it("initEmailTransport throws when verify fails outside test", async () => {
-    process.env.NODE_ENV = "development";
+    process.env["NODE_ENV"] = "development";
     setLoopbackEmailEnv();
     resetEmailTransporterForTests();
 
@@ -264,19 +270,19 @@ describe("email transport readiness", () => {
       throw new Error("connection refused");
     };
 
-    await assert.rejects(() => initEmailTransport(), /SMTP verify failed/);
+    await assert.rejects(() => initEmailTransport(), SMTP_VERIFY_FAILED_PATTERN);
   });
 
   it("initEmailTransport throws in development when SMTP host is not loopback", async () => {
-    process.env.NODE_ENV = "development";
+    process.env["NODE_ENV"] = "development";
     setConfiguredEmailEnv();
     resetEmailTransporterForTests();
 
-    await assert.rejects(() => initEmailTransport(), /pnpm run start:mailpit/);
+    await assert.rejects(() => initEmailTransport(), PNPM_RUN_START_MAILPIT_PATTERN);
   });
 
   it("initEmailTransport does not require loopback in production", async () => {
-    process.env.NODE_ENV = "production";
+    process.env["NODE_ENV"] = "production";
     setConfiguredEmailEnv();
     resetEmailTransporterForTests();
 
@@ -294,13 +300,13 @@ describe("probeSmtp", () => {
   const snapshot = snapshotEmailEnv();
 
   afterEach(() => {
-    void shutdownEmailTransporter();
+    detachPromise(shutdownEmailTransporter());
     resetEmailReadinessForTests();
     restoreEmailEnv(snapshot);
   });
 
   it("returns unconfigured ok in test when SMTP env is missing", async () => {
-    process.env.NODE_ENV = "test";
+    process.env["NODE_ENV"] = "test";
     clearEmailEnv();
     resetEmailTransporterForTests();
 
@@ -310,7 +316,7 @@ describe("probeSmtp", () => {
   });
 
   it("returns unhealthy when SMTP env is missing outside test", async () => {
-    process.env.NODE_ENV = "development";
+    process.env["NODE_ENV"] = "development";
     clearEmailEnv();
     resetEmailTransporterForTests();
 
@@ -324,7 +330,7 @@ describe("probeSmtp", () => {
   });
 
   it("returns ok when configured in test environment", async () => {
-    process.env.NODE_ENV = "test";
+    process.env["NODE_ENV"] = "test";
     setConfiguredEmailEnv();
     resetEmailTransporterForTests();
 

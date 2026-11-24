@@ -25,7 +25,7 @@ interface ResponsiveBreakpoint {
 }
 
 const DEFAULT_BREAKPOINTS: ResponsiveBreakpoint[] = [
-  { maxOptionalColumns: Infinity, minWidth: 736 },
+  { maxOptionalColumns: Number.POSITIVE_INFINITY, minWidth: 736 },
   { maxOptionalColumns: 3, minWidth: 640 },
   { maxOptionalColumns: 2, minWidth: 544 },
   { maxOptionalColumns: 1, minWidth: 448 },
@@ -78,7 +78,7 @@ export function useResponsiveColumns(
 
   // Start with Infinity so the first render (before ResizeObserver fires) shows all columns,
   // matching the server-rendered HTML and preventing a flash of missing columns.
-  const [containerWidth, setContainerWidth] = useState<number>(Infinity);
+  const [containerWidth, setContainerWidth] = useState<number>(Number.POSITIVE_INFINITY);
 
   // Load pinned keys from localStorage on mount. Keys not in RESPONSIVE_HIDE_ORDER
   // are discarded to guard against stale/corrupted storage data.
@@ -119,7 +119,7 @@ export function useResponsiveColumns(
     }
 
     const observer = new ResizeObserver((entries) => {
-      const entry = entries[0];
+      const [entry] = entries;
       if (!entry) {
         return;
       }
@@ -191,7 +191,7 @@ export function useResponsiveColumns(
         if (!(RESPONSIVE_HIDE_ORDER as string[]).includes(col.key)) {
           continue;
         }
-        const key = col.key;
+        const { key } = col;
         const before = effectiveColumns.find((c) => c.key === key);
         const wasVisible = before?.visible ?? false;
         const isNowVisible = col.visible;

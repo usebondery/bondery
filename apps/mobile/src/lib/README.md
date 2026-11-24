@@ -4,14 +4,14 @@ Mobile tier-1 CRM data is **local-first** (SQLite + sync outbox). Tier-2/3 use H
 
 ## Layer map (webapp ↔ mobile)
 
-| Webapp | Mobile | Responsibility |
-|--------|--------|----------------|
-| `lib/api/resources/*` | `lib/resources/*` | List params, row mappers, SQL fragments — **no React, no I/O** |
-| `lib/api/domains/*` | `lib/domains/*` | Public CRUD API (web: `async` + HTTP; mobile: **sync** + `submitSyncMutation`) |
-| `lib/query/hooks/*` | `lib/sync/hooks/*` | Named UI hooks backed by the SQLite Query view cache |
-| `clientApiJson` / `serverApiJson` | `lib/api/client.ts`, `online-only.ts` | Tier-2/3 REST only |
-| — | `lib/sync/*` | Pull, outbox, materializers (mobile-only) |
-| — | `lib/sync/repositories/*` | Thin SQLite execution (imports `lib/resources`) |
+| Webapp                            | Mobile                                | Responsibility                                                                 |
+| --------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------ |
+| `lib/api/resources/*`             | `lib/resources/*`                     | List params, row mappers, SQL fragments — **no React, no I/O**                 |
+| `lib/api/domains/*`               | `lib/domains/*`                       | Public CRUD API (web: `async` + HTTP; mobile: **sync** + `submitSyncMutation`) |
+| `lib/query/hooks/*`               | `lib/sync/hooks/*`                    | Named UI hooks backed by the SQLite Query view cache                           |
+| `clientApiJson` / `serverApiJson` | `lib/api/client.ts`, `online-only.ts` | Tier-2/3 REST only                                                             |
+| —                                 | `lib/sync/*`                          | Pull, outbox, materializers (mobile-only)                                      |
+| —                                 | `lib/sync/repositories/*`             | Thin SQLite execution (imports `lib/resources`)                                |
 
 ```mermaid
 flowchart TB
@@ -44,12 +44,12 @@ use named sync hooks and never access QueryClient.
 
 ## Import policy
 
-| From `features/**` | Allowed |
-|--------------------|---------|
-| `lib/sync/hooks/*` | Tier-1 **reads** (including imperative `readContactsList` for paginated lists) |
-| `lib/domains/*` | Tier-1 **writes** (`createContact`, `updateContact`, …) |
-| `lib/api/*` | Tier-2/3 only (settings, photos, geocode, share) |
-| `lib/sync/repositories/*` | **Never** — use domains or hooks |
+| From `features/**`        | Allowed                                                                        |
+| ------------------------- | ------------------------------------------------------------------------------ |
+| `lib/sync/hooks/*`        | Tier-1 **reads** (including imperative `readContactsList` for paginated lists) |
+| `lib/domains/*`           | Tier-1 **writes** (`createContact`, `updateContact`, …)                        |
+| `lib/api/*`               | Tier-2/3 only (settings, photos, geocode, share)                               |
+| `lib/sync/repositories/*` | **Never** — use domains or hooks                                               |
 
 ## Adding a tier-1 entity
 
@@ -64,11 +64,11 @@ use named sync hooks and never access QueryClient.
 
 Bottom sheets must not `await` sync push/pull. Domain handlers stay **synchronous** (`lib/domains/*` → `submitSyncMutation`).
 
-| Hook | Use when |
-|------|----------|
-| `useSheetLocalSubmit` | RHF form; `perform(values)` writes locally |
-| `useSheetLocalAction` | Confirm/delete or non-RHF actions |
-| `useSheetNetworkSubmit` | Tier-2 HTTP (share email, settings) |
+| Hook                    | Use when                                   |
+| ----------------------- | ------------------------------------------ |
+| `useSheetLocalSubmit`   | RHF form; `perform(values)` writes locally |
+| `useSheetLocalAction`   | Confirm/delete or non-RHF actions          |
+| `useSheetNetworkSubmit` | Tier-2 HTTP (share email, settings)        |
 
 Contract: `perform` → `onClose` → `onSuccess`. Expose `{ isSubmitting, submit }` to `Sheet` actions. Parent sections pass `onPersist` / sync callbacks only — no parent `isSubmitting` for channel edit sheets.
 

@@ -35,7 +35,7 @@ export function TabBarPropsProvider({ children }: { children: ReactNode }) {
 
     if (!previous || focusChanged || routeCountChanged) {
       setTabBarProps(props);
-      setTabBarRevision((value) => value + 1);
+      setTabBarRevision((revision) => revision + 1);
     }
   }
 
@@ -66,8 +66,6 @@ export function useTabBarProps() {
     throw new Error("useTabBarProps must be used within TabBarPropsProvider");
   }
 
-  // Re-render chrome when the focused tab changes.
-  void context.tabBarRevision;
-
+  // Context includes tabBarRevision so chrome re-renders when the focused tab changes.
   return context.tabBarProps;
 }

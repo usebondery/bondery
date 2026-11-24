@@ -1,3 +1,2 @@
-export { Privacy } from "./Privacy";
-export { Security } from "./Security";
-export { Terms } from "./Terms";
+export { legalDocuments } from "../../../content/legal/documents";
+export { LegalDocument, legalMetadata } from "./LegalDocument";

@@ -9,6 +9,7 @@ import {
 } from "@/lib/i18n/generated/hooks";
 import { CHECKBOX_ROW_MIN_HEIGHT, Checkbox } from "../../../components/ui/Checkbox";
 import { Sheet } from "../../../components/ui/Sheet";
+import { useMobileDateTimeFormatContext } from "../../../lib/preferences/useMobilePreferences";
 import { syncEffectState } from "../../../lib/react/syncEffectState";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
@@ -26,6 +27,8 @@ import {
 } from "../importantDateUtils";
 import { RotatingWheelColumn } from "./RotatingWheelColumn";
 
+const MONTHS_PER_YEAR = 12;
+
 interface ImportantDateWheelPickerSheetProps {
   defaultWithoutYear?: boolean;
   initialIso: string | null;
@@ -35,7 +38,7 @@ interface ImportantDateWheelPickerSheetProps {
   opened: boolean;
 }
 
-export function ImportantDateWheelPickerSheet({
+function ImportantDateWheelPickerSheet({
   opened: open,
   initialIso,
   defaultWithoutYear = false,
@@ -47,6 +50,7 @@ export function ImportantDateWheelPickerSheet({
   const t = useCommonTranslations();
   const { i18n } = useTranslation();
   const colors = useMobileThemeColors();
+  const formatCtx = useMobileDateTimeFormatContext();
   const locale = resolveDateLocale(i18n.language);
 
   const [wheelValue, setWheelValue] = useState<ImportantDateWheelValue>(() =>
@@ -79,7 +83,7 @@ export function ImportantDateWheelPickerSheet({
   const yearItems = years.map(String);
 
   const dayIndex = Math.min(Math.max(wheelValue.day - 1, 0), dayItems.length - 1);
-  const monthIndex = Math.min(Math.max(wheelValue.month - 1, 0), 11);
+  const monthIndex = Math.min(Math.max(wheelValue.month - 1, 0), MONTHS_PER_YEAR - 1);
   const yearIndex = Math.max(0, years.indexOf(wheelValue.year));
 
   function updateWheelValue(patch: Partial<ImportantDateWheelValue>) {
@@ -94,10 +98,10 @@ export function ImportantDateWheelPickerSheet({
   function handleDone() {
     const iso = toImportantDateIso(wheelValue);
     onConfirm(iso);
-    void AccessibilityInfo.announceForAccessibility(
+    AccessibilityInfo.announceForAccessibility(
       tMobileContactIdentity("DateSetAnnouncement").replace(
         "{date}",
-        formatImportantDate(iso, locale),
+        formatImportantDate(iso, formatCtx),
       ),
     );
     onCancel();
@@ -105,7 +109,7 @@ export function ImportantDateWheelPickerSheet({
 
   function handleWithoutYearToggle(checked: boolean) {
     updateWheelValue({ withoutYear: checked });
-    void AccessibilityInfo.announceForAccessibility(
+    AccessibilityInfo.announceForAccessibility(
       checked
         ? tMobileContactIdentity("YearHiddenAnnouncement")
         : tMobileContactIdentity("YearShownAnnouncement"),
@@ -144,7 +148,9 @@ export function ImportantDateWheelPickerSheet({
             accessibilityLabel={tMobileContactIdentity("WithoutYearLabel")}
             checked={wheelValue.withoutYear}
             disabled
-            onCheckedChange={() => {}}
+            onCheckedChange={() => {
+              // Visual only. The parent Pressable toggles withoutYear.
+            }}
           />
         </View>
       </Pressable>
@@ -174,7 +180,7 @@ export function ImportantDateWheelPickerSheet({
               accessibilityLabel={tMobileContactIdentity("YearColumnLabel")}
               items={yearItems}
               onIndexChange={(index) => updateWheelValue({ year: years[index] ?? wheelValue.year })}
-              selectedIndex={yearIndex >= 0 ? yearIndex : 0}
+              selectedIndex={yearIndex}
             />
           </View>
         ) : null}
@@ -210,3 +216,5 @@ const styles = StyleSheet.create({
     minHeight: CHECKBOX_ROW_MIN_HEIGHT,
   },
 });
+
+export { ImportantDateWheelPickerSheet };

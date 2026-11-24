@@ -23,7 +23,7 @@ describe("route security audit", () => {
       assert.equal(
         missingArea.length,
         0,
-        `routes missing openApiArea: ${missingArea.map((r) => `${r.method} ${r.url}`).join(", ")}`,
+        `routes missing openApiArea: ${missingArea.map((r) => [r.method, r.url].join(" ")).join(", ")}`,
       );
 
       const integrationRoutes = audited.filter((route) => route.openApiArea === "integration");

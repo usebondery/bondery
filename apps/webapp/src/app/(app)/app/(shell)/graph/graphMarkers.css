@@ -1,7 +1,13 @@
 .graph-marker-button,
 .graph-marker-button * {
   -webkit-user-drag: none;
-  user-select: none;
+}
+
+@supports (user-select: none) {
+  .graph-marker-button,
+  .graph-marker-button * {
+    user-select: none;
+  }
 }
 
 .graph-marker-button img {

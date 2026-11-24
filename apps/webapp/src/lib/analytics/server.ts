@@ -2,9 +2,6 @@ import { after } from "next/server";
 import { PostHog } from "posthog-node";
 import { WEBAPP_RUNTIME_ENV } from "../platform/runtimeConfig.env";
 
-/** PostHog event names must use `category:object_action`. */
-export const PRODUCT_EVENT_NAME_PATTERN = /^[a-z][a-z0-9_]*:[a-z][a-z0-9_]*$/;
-
 /**
  * Singleton PostHog Node client for server-side event capture.
  * `flushAt: 1` and `flushInterval: 0` ensure events are queued immediately;
@@ -22,6 +19,9 @@ const posthogClient = posthogKey
   : null;
 
 let serverProductAnalyticsEnabled = true;
+
+/** PostHog event names must use `category:object_action`. */
+export const PRODUCT_EVENT_NAME_PATTERN = /^[a-z][a-z0-9_]*:[a-z][a-z0-9_]*$/;
 
 /** Sync server capture guard from client-loaded settings (best-effort). */
 export function setServerProductAnalyticsEnabled(enabled: boolean): void {

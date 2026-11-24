@@ -1,6 +1,7 @@
 // biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { getTelephoneReactMaskExpression, parsePhoneNumber } from "@bondery/helpers/phone";
 import {
   ActionIconButton,
@@ -100,24 +101,23 @@ export function ContactPhonesSection({
   };
 
   const handleRemovePhone = (index: number) => {
-    const newPhones = localPhones.filter((_, i) => i !== index);
-    if (localPhones[index].preferred && newPhones.length > 0) {
-      newPhones[0].preferred = true;
-    }
+    const removedWasPreferred = localPhones[index]?.preferred;
+    const remaining = localPhones.filter((_, i) => i !== index);
+    const newPhones =
+      removedWasPreferred && remaining.length > 0
+        ? remaining.map((phone, i) => (i === 0 ? { ...phone, preferred: true } : phone))
+        : remaining;
     persistPhones(newPhones);
   };
 
   const handlePhoneChange = (index: number, value: string) => {
     const rawValue = value.replace(/\D/g, "");
     const parsed = parsePhoneNumber(value);
-    const newPhones = [...localPhones];
-
-    if (parsed && value.includes("+")) {
-      newPhones[index] = { ...newPhones[index], prefix: parsed.dialCode, value: parsed.number };
-    } else {
-      newPhones[index] = { ...newPhones[index], value: rawValue };
-    }
-    setLocalPhones(newPhones);
+    const changes =
+      parsed && value.includes("+")
+        ? { prefix: parsed.dialCode, value: parsed.number }
+        : { value: rawValue };
+    setLocalPhones(localPhones.map((phone, i) => (i === index ? { ...phone, ...changes } : phone)));
   };
 
   const handleDraftPhoneChange = (value: string) => {
@@ -140,15 +140,11 @@ export function ContactPhonesSection({
   };
 
   const handlePhonePrefixChange = (index: number, prefix: string) => {
-    const newPhones = [...localPhones];
-    newPhones[index] = { ...newPhones[index], prefix };
-    persistPhones(newPhones);
+    persistPhones(localPhones.map((phone, i) => (i === index ? { ...phone, prefix } : phone)));
   };
 
   const handlePhoneTypeChange = (index: number, type: ContactType) => {
-    const newPhones = [...localPhones];
-    newPhones[index] = { ...newPhones[index], type };
-    persistPhones(newPhones);
+    persistPhones(localPhones.map((phone, i) => (i === index ? { ...phone, type } : phone)));
   };
 
   const handlePhonePreferredChange = (index: number) => {
@@ -163,7 +159,7 @@ export function ContactPhonesSection({
     <Stack gap="sm" style={{ flex: "1 1 0", minWidth: 0 }}>
       {localPhones.map((phone, index) => (
         <Card
-          key={`${phone.prefix ?? ""}-${phone.value}`}
+          key={`${phone.prefix}-${phone.value}`}
           p="sm"
           radius="md"
           style={{
@@ -193,6 +189,7 @@ export function ContactPhonesSection({
             <Input
               aria-label={text.phonePlaceholder}
               component={IMaskInput}
+              dir="ltr"
               disabled={savingField === "phones"}
               mask={getTelephoneReactMaskExpression(phone.prefix || "+1")}
               onAccept={(value: string) => handlePhoneChange(index, value)}
@@ -262,7 +259,9 @@ export function ContactPhonesSection({
                   disabled={!phone.value}
                   leftSection={<IconCopy size={14} />}
                   onClick={() => {
-                    void navigator.clipboard.writeText(`${phone.prefix || ""}${phone.value || ""}`);
+                    detachPromise(
+                      navigator.clipboard.writeText(`${phone.prefix || ""}${phone.value || ""}`),
+                    );
                     notifications.show(
                       successNotificationTemplate({
                         description: text.phoneCopiedMessage,
@@ -317,6 +316,7 @@ export function ContactPhonesSection({
             <Input
               aria-label={text.phonePlaceholder}
               component={IMaskInput}
+              dir="ltr"
               disabled={savingField === "phones"}
               mask={getTelephoneReactMaskExpression(draftPhone.prefix || "+1")}
               onAccept={(value: string) => handleDraftPhoneChange(value)}

@@ -7,9 +7,16 @@ import {
   resolveContactSocialFieldCommit,
 } from "#socials/socials-helpers.js";
 
-export type SocialInputRerouteReason = "wrong_platform" | "looks_like_phone" | "looks_like_website";
+const INSTAGRAM_COM_INSTAGR_AM_RE = /instagram\.com|instagr\.am/i;
+const FACEBOOK_COM_FB_COM_FACEBOOK_COM_RE = /facebook\.com|fb\.com|m\.facebook\.com/i;
+const LINKEDIN_COM_RE = /linkedin\.com/i;
+const WA_ME_API_WHATSAPP_COM_RE = /wa\.me|api\.whatsapp\.com/i;
+const SIGNAL_ME_RE = /signal\.me/i;
+const HTTPS_RE = /^https?:\/\//i;
 
-export type AnalyzeSocialFieldInputResult =
+type SocialInputRerouteReason = "wrong_platform" | "looks_like_phone" | "looks_like_website";
+
+type AnalyzeSocialFieldInputResult =
   | { outcome: "commit"; action: ContactSocialFieldCommitAction }
   | {
       outcome: "suggest_reroute";
@@ -19,7 +26,7 @@ export type AnalyzeSocialFieldInputResult =
       targetHasValue: boolean;
     };
 
-export interface AnalyzeSocialFieldInputOptions {
+interface AnalyzeSocialFieldInputOptions {
   defaultCountry?: string | null;
   dialCode?: string;
   persistedByField?: Partial<Record<ContactSocialFieldKey, string>>;
@@ -28,34 +35,39 @@ export interface AnalyzeSocialFieldInputOptions {
 
 const HANDLE_FIELDS = new Set<ContactSocialFieldKey>(["linkedin", "instagram", "facebook"]);
 
-function detectPlatformFromUrl(input: string): ContactSocialFieldKey | null {
+function detectPlatformFromUrl(
+  input: string,
+): "facebook" | "instagram" | "linkedin" | "signal" | "whatsapp" | null {
   const trimmed = input.trim();
   if (!trimmed) {
     return null;
   }
 
-  if (/instagram\.com|instagr\.am/i.test(trimmed)) {
+  if (INSTAGRAM_COM_INSTAGR_AM_RE.test(trimmed)) {
     return "instagram";
   }
 
-  if (/facebook\.com|fb\.com|m\.facebook\.com/i.test(trimmed)) {
+  if (FACEBOOK_COM_FB_COM_FACEBOOK_COM_RE.test(trimmed)) {
     return "facebook";
   }
 
-  if (/linkedin\.com/i.test(trimmed)) {
+  if (LINKEDIN_COM_RE.test(trimmed)) {
     return "linkedin";
   }
 
-  if (/wa\.me|api\.whatsapp\.com/i.test(trimmed)) {
+  if (WA_ME_API_WHATSAPP_COM_RE.test(trimmed)) {
     return "whatsapp";
   }
 
-  if (/signal\.me/i.test(trimmed)) {
+  if (SIGNAL_ME_RE.test(trimmed)) {
     return "signal";
   }
 
   return null;
 }
+
+/** Fewest digits a string needs before it can read as a phone number. */
+const MIN_PHONE_DIGITS = 7;
 
 function looksLikePhone(input: string): boolean {
   const trimmed = input.trim();
@@ -64,7 +76,7 @@ function looksLikePhone(input: string): boolean {
   }
 
   const digits = trimmed.replace(/\D/g, "");
-  if (digits.length < 7) {
+  if (digits.length < MIN_PHONE_DIGITS) {
     return false;
   }
 
@@ -87,7 +99,7 @@ function looksLikeGenericWebsite(input: string): boolean {
     return false;
   }
 
-  if (/^https?:\/\//i.test(trimmed) || trimmed.includes(".")) {
+  if (HTTPS_RE.test(trimmed) || trimmed.includes(".")) {
     return normalizeWebsiteUrl(trimmed) !== null;
   }
 
@@ -135,6 +147,12 @@ function suggestReroute(
     value: processed.value,
   };
 }
+
+export type {
+  AnalyzeSocialFieldInputOptions,
+  AnalyzeSocialFieldInputResult,
+  SocialInputRerouteReason,
+};
 
 /**
  * Analyzes social field input for commit vs. cross-field reroute suggestions.

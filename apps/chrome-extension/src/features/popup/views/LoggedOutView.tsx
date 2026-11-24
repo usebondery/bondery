@@ -25,11 +25,11 @@ export function LoggedOutView({ loginLoading, error, onLogin }: LoggedOutViewPro
       <Button fullWidth loading={loginLoading} onClick={onLogin} size="md">
         {t("SignIn")}
       </Button>
-      {error && (
+      {error ? (
         <Text c="red" size="xs" ta="center">
           {error}
         </Text>
-      )}
+      ) : null}
     </Stack>
   );
 }

@@ -1,54 +1,54 @@
 .list {
-  border-left: 2px solid transparent;
   position: relative;
+  border-inline-start: 2px solid transparent;
 }
 
 .list::before {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: -2px;
+  inline-size: 2px;
+  content: "";
   background: var(--mantine-color-default-border);
   border-radius: 999px;
-  content: "";
-  inset-block: 0;
-  left: -2px;
-  position: absolute;
-  width: 2px;
 }
 
 .link {
-  border-end-end-radius: var(--mantine-radius-xl);
-  border-end-start-radius: 0;
-  border-start-end-radius: var(--mantine-radius-xl);
-  border-start-start-radius: 0;
-  color: var(--mantine-color-dimmed);
   display: block;
-  font-size: var(--mantine-font-size-sm);
-  line-height: 1.35;
   padding-block: 6px;
   padding-inline-end: 8px;
+  font-size: var(--mantine-font-size-sm);
+  line-height: 1.35;
+  color: var(--mantine-color-dimmed);
   text-decoration: none;
+  border-start-start-radius: 0;
+  border-start-end-radius: var(--mantine-radius-xl);
+  border-end-start-radius: 0;
+  border-end-end-radius: var(--mantine-radius-xl);
   transition: background-color 120ms ease;
 }
 
 .link:hover {
-  background: var(--mantine-color-default-hover);
   color: var(--mantine-color-text);
+  background: var(--mantine-color-default-hover);
 }
 
 .linkActive,
 .linkActive:hover {
-  background: var(--mantine-primary-color-light);
-  color: var(--mantine-color-text);
   font-weight: 500;
+  color: var(--mantine-color-text);
+  background: var(--mantine-primary-color-light);
 }
 
 .indicator {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: -2px;
+  z-index: 1;
+  inline-size: 2px;
   background: var(--mantine-primary-color-filled);
   border-radius: 999px;
-  left: -2px;
-  position: absolute;
-  top: 0;
   transition:
     height 150ms ease,
     transform 150ms ease;
-  width: 2px;
-  z-index: 1;
 }
