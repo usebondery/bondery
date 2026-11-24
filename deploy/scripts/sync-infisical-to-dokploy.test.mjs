@@ -16,6 +16,34 @@ import {
 const INFRA_VERSION_LINE_RE = /BONDERY_INFRA_VERSION=1\.8\.2/;
 const WEBAPP_DOMAIN_LINE_RE = /BONDERY_INFRA_WEBAPP_DOMAIN=app\.usebondery\.com/;
 
+/**
+ * Unwraps a successful result. A failed result throws with its problems attached, which is the
+ * failure signal the test runner reports; helpers return `{ ok, value | problems }` so a test
+ * never touches `process.exitCode`.
+ *
+ * @template T
+ * @param {{ ok: true; value: T } | { ok: false; problems: string[] }} result
+ * @param {string} label
+ * @returns {T}
+ */
+function expectOk(result, label) {
+  if (!result.ok) {
+    throw new Error(`${label} failed unexpectedly: ${result.problems.join(" ")}`);
+  }
+  return result.value;
+}
+
+/** @returns {string[]} */
+function uploadKeysOf(env, target) {
+  const { uploadKeys } = expectOk(buildUploadPayload(env, target), `buildUploadPayload(${target})`);
+  return uploadKeys;
+}
+
+/** @returns {ReturnType<typeof readDokployConfig> extends { ok: true; value: infer T } ? T : never} */
+function configOf(env, target) {
+  return expectOk(readDokployConfig(env, target), `readDokployConfig(${target})`);
+}
+
 describe("sync-infisical-to-dokploy", () => {
   const websiteEnv = {
     BONDERY_INFRA_API_DOMAIN: "api.usebondery.com",
@@ -90,7 +118,7 @@ describe("sync-infisical-to-dokploy", () => {
       BONDERY_PRIVATE_PLAUSIBLE_SECRET_KEY_BASE: "should-not-upload",
     };
 
-    const { uploadKeys } = buildUploadPayload(env, "website");
+    const uploadKeys = uploadKeysOf(env, "website");
 
     assert.deepEqual(uploadKeys, [
       "BONDERY_INFRA_API_DOMAIN",
@@ -109,7 +137,7 @@ describe("sync-infisical-to-dokploy", () => {
       BONDERY_INFRA_TRAEFIK_PREFIX: "bondery-beta",
     };
 
-    const { uploadKeys } = buildUploadPayload(env, "website");
+    const uploadKeys = uploadKeysOf(env, "website");
 
     assert.deepEqual(uploadKeys, [
       "BONDERY_INFRA_API_DOMAIN",
@@ -126,7 +154,7 @@ describe("sync-infisical-to-dokploy", () => {
       BONDERY_INFRA_WEBSITE_IMAGE_TAG: "production",
     };
 
-    const { uploadKeys } = buildUploadPayload(env, "website");
+    const uploadKeys = uploadKeysOf(env, "website");
 
     assert.deepEqual(uploadKeys, [
       "BONDERY_INFRA_API_DOMAIN",
@@ -138,7 +166,7 @@ describe("sync-infisical-to-dokploy", () => {
   });
 
   it("plausible payload includes plausible secrets only", () => {
-    const { uploadKeys } = buildUploadPayload(plausibleEnv, "plausible");
+    const uploadKeys = uploadKeysOf(plausibleEnv, "plausible");
 
     assert.deepEqual(uploadKeys, [
       "BONDERY_INFRA_PLAUSIBLE_DISABLE_REGISTRATION",
@@ -152,7 +180,7 @@ describe("sync-infisical-to-dokploy", () => {
   });
 
   it("services payload includes deployExample keys and excludes derived or ops config", () => {
-    const { uploadKeys } = buildUploadPayload(servicesEnv, "services");
+    const uploadKeys = uploadKeysOf(servicesEnv, "services");
 
     assert.equal(uploadKeys.includes("BONDERY_OPS_DOKPLOY_API_KEY"), false);
     assert.equal(uploadKeys.includes("BONDERY_OPS_DOKPLOY_SERVICES_COMPOSE_ID"), false);
@@ -173,27 +201,17 @@ describe("sync-infisical-to-dokploy", () => {
     const env = { ...servicesEnv };
     delete env.BONDERY_PRIVATE_POSTGRES_PASSWORD;
 
-    let exited = false;
-    const originalExit = process.exit;
-    process.exit = (code) => {
-      exited = true;
-      assert.equal(code, 1);
-      throw new Error("exit");
-    };
+    const result = buildUploadPayload(env, "services");
 
-    try {
-      buildUploadPayload(env, "services");
-      assert.fail("expected process.exit(1)");
-    } catch {
-      // expected
-    }
-
-    process.exit = originalExit;
-    assert.equal(exited, true);
+    assert.equal(result.ok, false);
+    assert.ok(
+      result.problems.some((line) => line.includes("BONDERY_PRIVATE_POSTGRES_PASSWORD")),
+      "the failure names the missing key",
+    );
   });
 
   it("readDokployConfig resolves services compose id", () => {
-    const config = readDokployConfig(servicesEnv, "services");
+    const config = configOf(servicesEnv, "services");
     assert.equal(config.composeId, "services-compose-id");
     assert.equal(config.webhookKey, "BONDERY_OPS_DOKPLOY_SERVICES_DEPLOY_WEBHOOK");
     assert.equal(config.target, "services");
@@ -207,15 +225,15 @@ describe("sync-infisical-to-dokploy", () => {
     };
     delete env.BONDERY_OPS_DOKPLOY_SERVICES_COMPOSE_ID;
 
-    const config = readDokployConfig(env, "services-beta");
+    const config = configOf(env, "services-beta");
     assert.equal(config.composeId, "beta-services-compose-id");
     assert.equal(config.webhookKey, "BONDERY_OPS_DOKPLOY_STAGING_SERVICES_DEPLOY_WEBHOOK");
     assert.equal(config.target, "services-beta");
   });
 
   it("services-beta upload payload matches services keys", () => {
-    const { uploadKeys: servicesKeys } = buildUploadPayload(servicesEnv, "services");
-    const { uploadKeys: betaKeys } = buildUploadPayload(servicesEnv, "services-beta");
+    const servicesKeys = uploadKeysOf(servicesEnv, "services");
+    const betaKeys = uploadKeysOf(servicesEnv, "services-beta");
     assert.deepEqual(betaKeys, servicesKeys);
   });
 
@@ -233,7 +251,7 @@ describe("sync-infisical-to-dokploy", () => {
     };
     delete env.BONDERY_OPS_DOKPLOY_OPS_COMPOSE_ID;
 
-    const config = readDokployConfig(env, "website-beta");
+    const config = configOf(env, "website-beta");
     assert.equal(config.composeId, "beta-website-compose-id");
     assert.equal(config.webhookKey, "BONDERY_OPS_DOKPLOY_STAGING_WEBSITE_DEPLOY_WEBHOOK");
     assert.equal(config.target, "website-beta");
@@ -245,8 +263,8 @@ describe("sync-infisical-to-dokploy", () => {
       BONDERY_INFRA_TRAEFIK_PREFIX: "bondery-beta",
       BONDERY_INFRA_WEBSITE_IMAGE_TAG: "beta",
     };
-    const { uploadKeys: betaKeys } = buildUploadPayload(betaEnv, "website-beta");
-    const { uploadKeys: websiteKeys } = buildUploadPayload(betaEnv, "website");
+    const betaKeys = uploadKeysOf(betaEnv, "website-beta");
+    const websiteKeys = uploadKeysOf(betaEnv, "website");
 
     assert.deepEqual(betaKeys, websiteKeys);
     assert.ok(betaKeys.includes("BONDERY_INFRA_WEBSITE_IMAGE_TAG"));
@@ -257,7 +275,7 @@ describe("sync-infisical-to-dokploy", () => {
   });
 
   it("buildOpsUploadPayload remains an alias for website target", () => {
-    const { uploadKeys } = buildOpsUploadPayload(websiteEnv);
+    const { uploadKeys } = expectOk(buildOpsUploadPayload(websiteEnv), "buildOpsUploadPayload");
     assert.deepEqual(uploadKeys, [
       "BONDERY_INFRA_API_DOMAIN",
       "BONDERY_INFRA_PLAUSIBLE_DOMAIN",
@@ -275,23 +293,13 @@ describe("sync-infisical-to-dokploy", () => {
     it(`website sync fails when required key ${missingKey} is missing`, () => {
       const { [missingKey]: _missing, ...env } = websiteEnv;
 
-      let exited = false;
-      const originalExit = process.exit;
-      process.exit = (code) => {
-        exited = true;
-        assert.equal(code, 1);
-        throw new Error("exit");
-      };
+      const result = buildUploadPayload(env, "website");
 
-      try {
-        buildUploadPayload(env, "website");
-        assert.fail("expected process.exit(1)");
-      } catch {
-        // expected from mocked process.exit
-      }
-
-      process.exit = originalExit;
-      assert.equal(exited, true);
+      assert.equal(result.ok, false);
+      assert.ok(
+        result.problems.some((line) => line.includes(missingKey)),
+        "the failure names the missing key",
+      );
     });
   }
 
@@ -299,33 +307,23 @@ describe("sync-infisical-to-dokploy", () => {
     const env = { ...plausibleEnv };
     delete env.BONDERY_PRIVATE_PLAUSIBLE_SECRET_KEY_BASE;
 
-    let exited = false;
-    const originalExit = process.exit;
-    process.exit = (code) => {
-      exited = true;
-      assert.equal(code, 1);
-      throw new Error("exit");
-    };
+    const result = buildUploadPayload(env, "plausible");
 
-    try {
-      buildUploadPayload(env, "plausible");
-      assert.fail("expected process.exit(1)");
-    } catch {
-      // expected
-    }
-
-    process.exit = originalExit;
-    assert.equal(exited, true);
+    assert.equal(result.ok, false);
+    assert.ok(
+      result.problems.some((line) => line.includes("BONDERY_PRIVATE_PLAUSIBLE_SECRET_KEY_BASE")),
+      "the failure names the missing secret",
+    );
   });
 
   it("readDokployConfig resolves website compose id", () => {
-    const config = readDokployConfig(websiteEnv, "website");
+    const config = configOf(websiteEnv, "website");
     assert.equal(config.composeId, "website-compose-id");
     assert.equal(config.target, "website");
   });
 
   it("readDokployConfig resolves plausible compose id", () => {
-    const config = readDokployConfig(plausibleEnv, "plausible");
+    const config = configOf(plausibleEnv, "plausible");
     assert.equal(config.composeId, "plausible-compose-id");
     assert.equal(config.webhookKey, "BONDERY_OPS_DOKPLOY_PLAUSIBLE_DEPLOY_WEBHOOK");
   });
@@ -334,22 +332,13 @@ describe("sync-infisical-to-dokploy", () => {
     const env = { ...websiteEnv };
     delete env.BONDERY_OPS_DOKPLOY_API_KEY;
 
-    let exited = false;
-    const originalExit = process.exit;
-    process.exit = (code) => {
-      exited = true;
-      assert.equal(code, 1);
-      throw new Error("exit");
-    };
+    const result = readDokployConfig(env, "website");
 
-    try {
-      readDokployConfig(env, "website");
-    } catch {
-      // expected
-    }
-
-    process.exit = originalExit;
-    assert.equal(exited, true);
+    assert.equal(result.ok, false);
+    assert.ok(
+      result.problems.some((line) => line.includes("BONDERY_OPS_DOKPLOY_API_KEY")),
+      "the failure names the missing key",
+    );
   });
 
   it("mergeComposeEnv preserves unsynced keys", () => {

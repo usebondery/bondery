@@ -166,7 +166,7 @@
     "test:api": "pnpm --filter api run test:api",
     "test:api:sync": "pnpm --filter api run test:sync",
     "test:auth": "pnpm --filter api run test:auth",
-    "test:check-scripts": "node --test scripts/check/*.test.mjs scripts/dev/*.test.mjs apps/webapp/e2e/*.test.mjs deploy/bondery/scripts/publish-transports.test.mjs",
+    "test:check-scripts": "node --test scripts/check/*.test.mjs scripts/dev/*.test.mjs apps/webapp/e2e/*.test.mjs deploy/bondery/scripts/publish-transports.test.mjs deploy/scripts/*.test.mjs",
     "test:sample-data": "node --test \"packages/tests/sample-data/*.test.mjs\"",
     "test:mobile:sync": "pnpm --filter mobile run test:sync",
     "test:webapp:runtime-config": "pnpm --filter webapp run test:runtime-config",
