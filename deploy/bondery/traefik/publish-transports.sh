@@ -7,14 +7,16 @@
 # private CA. The storage gateway also requires a client certificate, so the storage transport
 # carries one too. Docker labels can only reference a serversTransport, so this one-shot job
 # writes them into the folder that Traefik's file provider watches: one file per service,
-# <prefix>-<service>-transport.yml, with the CA and the client certificate inline. It reads
-# nothing else in that folder.
+# <prefix>-<service>-transport.yml.
 #
 # The files go into the folder itself, not a subfolder: Traefik reads subfolders but only
 # watches the top folder, so a file in a subfolder would not be picked up on the first deploy.
 #
-# The key and certificate are written as data bytes, not file paths: Traefik runs as its own user
-# and never mounts the Bondery volumes, so a path would not resolve for it.
+# Certificates are referenced by PATH, never inlined. A serversTransport accepts `certFile` and
+# `keyFile`; it has no `cert` field, and inlining one makes Traefik reject the whole file with
+# "field not found, node: cert". That drops the router and the public domain answers with
+# Traefik's own 404. The job therefore copies the storage client certificate and key into the
+# dynamic folder (which Traefik does mount) and points the transport at them.
 #
 # Usage: publish-transports.sh [folder] [service=ca-file ...]
 #   Defaults: /traefik-dynamic, with api=/bondery-api/client/ca.crt and
@@ -47,10 +49,22 @@ if [ ! -d "$DYNAMIC_DIR" ]; then
   fail "$DYNAMIC_DIR does not exist. Mount Traefik's dynamic folder (BONDERY_INFRA_TRAEFIK_DYNAMIC_DIR, default /etc/dokploy/traefik/dynamic); on a host without Traefik, use docker-compose.override.yml.example."
 fi
 
-# Prints one PEM block of `kind` (CERTIFICATE or PRIVATE KEY) as YAML block scalar body, indented
-# for its position in the transport file.
-inline_pem() { # file kind indent
-  sed -n "/-----BEGIN $2-----/,/-----END $2-----/p" "$1" | sed "s/^/$3/"
+# Copies one PEM block of `kind` (CERTIFICATE or PRIVATE KEY) out of `file` into the dynamic
+# folder as `target`, so Traefik can reference it by path. Traefik rejects a file that holds
+# extra bytes around the PEM, so only the block is written. An unchanged target is left alone,
+# so a no-op deploy does not make Traefik reload.
+copy_pem() { # file kind target
+  tmp="$3.tmp"
+  sed -n "/-----BEGIN $2-----/,/-----END $2-----/p" "$1" > "$tmp"
+  if [ ! -s "$tmp" ]; then
+    rm -f "$tmp"
+    fail "could not read a $2 block from $1. The stack-secrets job creates it."
+  fi
+  if [ -f "$3" ] && cmp -s "$tmp" "$3"; then
+    rm -f "$tmp"
+    return
+  fi
+  mv -f "$tmp" "$3"
 }
 
 publish() { # service ca-file
@@ -85,9 +99,22 @@ publish() { # service ca-file
   target="$DYNAMIC_DIR/$name-transport.yml"
   # Traefik skips files with an unknown extension, so it never reads a half-written file.
   staging="$DYNAMIC_DIR/.$name-transport.tmp"
+  ca_copy="$DYNAMIC_DIR/$name-ca.crt"
+  # Copy the certificate material first: the transport references these paths, so a missing file
+  # must stop the deploy before the transport is published.
+  copy_pem "$ca_file" CERTIFICATE "$ca_copy"
+  chmod 0644 "$ca_copy"
+  if [ -n "$cert_file" ]; then
+    copy_pem "$cert_file" CERTIFICATE "$DYNAMIC_DIR/$name-client.crt"
+    copy_pem "$key_file" "PRIVATE KEY" "$DYNAMIC_DIR/$name-client.key"
+    chmod 0644 "$DYNAMIC_DIR/$name-client.crt"
+    chmod 0600 "$DYNAMIC_DIR/$name-client.key"
+  fi
   {
     echo "# Written by the Bondery stack \"$PREFIX\" (traefik-transport job) on every deploy. Do not edit."
     echo "# Traefik forwards to $name over HTTPS and verifies its certificate against this CA."
+    echo "# Certificates are referenced by path: a serversTransport has no inline \`cert\` field,"
+    echo "# and inlining one makes Traefik reject this file and drop the router."
     echo "http:"
     echo "  serversTransports:"
     echo "    $name:"
@@ -95,17 +122,14 @@ publish() { # service ca-file
     if [ -n "$cert_file" ]; then
       echo "      # The gateway requires a client certificate (mutual TLS)."
       echo "      certificates:"
-      echo "        - cert: |"
-      inline_pem "$cert_file" CERTIFICATE "            "
-      echo "          key: |"
-      inline_pem "$key_file" "PRIVATE KEY" "            "
+      echo "        - certFile: $DYNAMIC_DIR/$name-client.crt"
+      echo "          keyFile: $DYNAMIC_DIR/$name-client.key"
     fi
     echo "      rootCAs:"
-    echo "        - |"
-    inline_pem "$ca_file" CERTIFICATE "          "
+    echo "        - $ca_copy"
   } > "$staging"
 
-  # The file holds a private key now, so it must not be world-readable.
+  # The transport file must not be world-readable.
   chmod 0600 "$staging"
 
   if [ -f "$target" ] && cmp -s "$staging" "$target"; then

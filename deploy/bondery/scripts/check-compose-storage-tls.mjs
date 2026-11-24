@@ -65,11 +65,22 @@ const DEV_S3_LOOPBACK_PORT_RE = /- "127\.0\.0\.1:8443:8443"/;
 const PUBLIC_S3_PORT_RE = /- "(?:0\.0\.0\.0:)?\d+:8443"/;
 const DEV_TLS_RESET_RE = /security\.toml:[^\n]*!reset|tls-entrypoint\.sh[^\n]*!reset/;
 
-/** The transport job must publish the storage client certificate, inlined rather than by path. */
-const TRANSPORT_STORAGE_CLIENT_CERT_RE = /dirname "\$ca_file"\)\/tls\.crt/;
+/**
+ * The transport job must publish the storage client certificate as a PATH Traefik can read.
+ *
+ * A `serversTransport` accepts `certFile` and `keyFile`. It has no inline `cert` field: inlining
+ * makes Traefik reject the whole file with "field not found, node: cert", which drops the router,
+ * and the public domain then answers with Traefik's own 404. The job copies the material into
+ * Traefik's dynamic folder, which it does mount, and references it from there.
+ */
+const TRANSPORT_STORAGE_CLIENT_CERT_SOURCE_RE = /dirname "\$ca_file"\)\/tls\.crt/;
 const TRANSPORT_CLIENT_CERT_BLOCK_RE = /echo " +certificates:"/;
-const TRANSPORT_INLINE_CERT_RE = /inline_pem "\$cert_file" CERTIFICATE/;
-const TRANSPORT_INLINE_KEY_RE = /inline_pem "\$key_file" "PRIVATE KEY"/;
+const TRANSPORT_CERT_FILE_RE = /echo " +- certFile: \$DYNAMIC_DIR\/\$name-client\.crt"/;
+const TRANSPORT_KEY_FILE_RE = /echo " +keyFile: \$DYNAMIC_DIR\/\$name-client\.key"/;
+const TRANSPORT_COPY_CERT_RE = /copy_pem "\$cert_file" CERTIFICATE/;
+const TRANSPORT_COPY_KEY_RE = /copy_pem "\$key_file" "PRIVATE KEY"/;
+/** An inline PEM block in the transport body is the regression this check exists to catch. */
+const TRANSPORT_INLINE_PEM_FORBIDDEN_RE = /echo "[^"]*-( cert|key): \|"/;
 const TRANSPORT_FILE_MODE_RE = /chmod 0600 "\$staging"/;
 
 /** The example proxy configurations must reach the gateway, which requires a client certificate. */
@@ -349,31 +360,39 @@ export function checkStorageTls({ root, serviceBlock }) {
 
   /**
    * The transport job writes Traefik's configuration for the storage route. The gateway requires a
-   * client certificate, so the published transport must carry one, and it must read it from the
-   * Traefik-only volume rather than the API's.
+   * client certificate, so the published transport must carry one, referenced by a path Traefik
+   * can read: an inline `cert`/`key` pair is not in the serversTransport schema and makes Traefik
+   * discard the file, which drops the router.
    */
   function checkTransportJobClientCertificate() {
     const label = "traefik/publish-transports.sh";
     const script = readFileSync(resolve(root, label), "utf8");
     for (const [pattern, message] of [
       [
-        TRANSPORT_STORAGE_CLIENT_CERT_RE,
+        TRANSPORT_STORAGE_CLIENT_CERT_SOURCE_RE,
         "must read the storage client certificate from the Traefik-only volume path",
       ],
       [TRANSPORT_CLIENT_CERT_BLOCK_RE, "must set a client certificate on the storage transport"],
+      [TRANSPORT_CERT_FILE_RE, "must reference the client certificate as certFile"],
+      [TRANSPORT_KEY_FILE_RE, "must reference the client key as keyFile"],
       [
-        TRANSPORT_INLINE_CERT_RE,
-        "must inline the client certificate, not a path Traefik cannot read",
+        TRANSPORT_COPY_CERT_RE,
+        "must copy the client certificate into Traefik's dynamic folder, the only place Traefik reads",
       ],
       [
-        TRANSPORT_INLINE_KEY_RE,
-        "must inline the client private key, not a path Traefik cannot read",
+        TRANSPORT_COPY_KEY_RE,
+        "must copy the client key into Traefik's dynamic folder, the only place Traefik reads",
       ],
       [TRANSPORT_FILE_MODE_RE, "must write the transport file with mode 0600 (it holds a key)"],
     ]) {
       if (!pattern.test(script)) {
         errors.push(`${label}: ${message}`);
       }
+    }
+    if (TRANSPORT_INLINE_PEM_FORBIDDEN_RE.test(script)) {
+      errors.push(
+        `${label}: must not inline a cert or key. A serversTransport has no inline \`cert\` field, so Traefik rejects the file with "field not found, node: cert" and drops the router.`,
+      );
     }
   }
 
