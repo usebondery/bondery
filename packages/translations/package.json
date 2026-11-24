@@ -33,9 +33,6 @@
       "node": "./dist/*.js",
       "types": "./src/*.ts"
     },
-    "./*.json": {
-      "default": "./dist/*.json"
-    },
     "./config": {
       "default": "./dist/config.js",
       "import": "./dist/config.js",
@@ -119,6 +116,9 @@
       "import": "./dist/manifest.js",
       "node": "./dist/manifest.js",
       "types": "./src/manifest.ts"
+    },
+    "./*.json": {
+      "default": "./dist/*.json"
     }
   },
   "files": [

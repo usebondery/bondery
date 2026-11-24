@@ -11,12 +11,11 @@ import { ChatMessage } from "../message/ChatMessage";
 function ChatThreadFooter({ children }: { children: ReactNode }) {
   return (
     <Box
-      px="xl"
+      px={{ base: 0, sm: "calc(var(--mantine-spacing-md) + var(--mantine-spacing-xl))" }}
       py="md"
       style={{
         backgroundColor: "var(--mantine-color-body)",
         paddingBottom: "calc(var(--mantine-spacing-md) + env(safe-area-inset-bottom, 0px))",
-        paddingInline: "calc(var(--mantine-spacing-md) + var(--mantine-spacing-xl))",
       }}
     >
       <Box style={{ margin: "0 auto", maxWidth: 800, width: "100%" }}>{children}</Box>
@@ -102,7 +101,7 @@ export function ChatThreadView({
           align="stretch"
           gap="lg"
           justify="center"
-          px="xl"
+          px={{ base: 0, sm: "xl" }}
           py="xl"
           style={{ flex: 1, margin: "0 auto", maxWidth: 800, width: "100%" }}
         >
@@ -140,7 +139,7 @@ export function ChatThreadView({
 
   return (
     <>
-      <Box p="xl" pb="md">
+      <Box pb="md" pt="xl" px={{ base: 0, sm: "xl" }}>
         <Stack gap="xl">
           {header}
           <Box style={{ margin: "0 auto", maxWidth: 800, width: "100%" }}>

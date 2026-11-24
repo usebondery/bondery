@@ -1,74 +1,57 @@
 "use client";
 
 import { ModalFooter, ModalScrollLayout } from "@bondery/mantine-next";
-import type { Contact } from "@bondery/schemas";
-import { Badge, Group, Stack, Text } from "@mantine/core";
+import { Text } from "@mantine/core";
+import { IconArrowLeft, IconBrandLinkedin } from "@tabler/icons-react";
 import {
-  IconAlertTriangle,
-  IconArrowLeft,
-  IconBrandLinkedin,
-  IconCircleCheck,
-} from "@tabler/icons-react";
-import ContactsTable from "@/components/contacts/ContactsTableV2";
+  ImportPreviewBody,
+  type ImportPreviewCount,
+  type ImportPreviewPerson,
+} from "./ImportPreviewBody";
 
 interface LinkedInImportPreviewStepProps {
-  allSelected: boolean;
-  alreadyExistsCount: number;
   backLabel: string;
   cancelLabel: string;
-  chooseContactsHint: string;
-  existingHandleTooltip: string;
-  importSelectedLabel: string;
-  invalidContactsCount: number;
+  /** The counts to show, already translated. */
+  counts: ImportPreviewCount[];
+  /** One line above the counts, such as what the import will do. */
+  description: string;
+  emptyLabel: string;
+  importLabel: string;
   isImporting: boolean;
-  labels: {
-    alreadyExists: string;
-    invalid: string;
-    total: string;
-    valid: string;
-  };
-  noContactsFound: string;
-  noContactsMatchSearch: string;
-  nonSelectableIds: Set<string>;
   onBack: () => void;
   onCancel: () => void;
   onImport: () => void;
-  onSelectAll: () => void;
-  onSelectOne: (id: string, options?: { shiftKey?: boolean; index?: number }) => void;
-  previewContacts: Contact[];
-  selectedIds: Set<string>;
-  someSelected: boolean;
+  people: ImportPreviewPerson[];
+  /** Heading above the chips. */
+  peopleLabel: string;
+  /** Shown after the chips when more contacts exist than the preview shows. */
+  remainderLabel?: string;
 }
 
+/** Preview for a LinkedIn export. Every valid contact is imported; nothing is selectable. */
 export function LinkedInImportPreviewStep({
-  labels,
-  invalidContactsCount,
-  alreadyExistsCount,
-  chooseContactsHint,
-  previewContacts,
-  nonSelectableIds,
-  allSelected,
-  someSelected,
-  selectedIds,
-  onSelectAll,
-  onSelectOne,
-  noContactsFound,
-  noContactsMatchSearch,
-  existingHandleTooltip,
-  isImporting,
-  importSelectedLabel,
   backLabel,
   cancelLabel,
-  onImport,
+  counts,
+  description,
+  emptyLabel,
+  remainderLabel,
+  importLabel,
+  isImporting,
   onBack,
   onCancel,
+  onImport,
+  people,
+  peopleLabel,
 }: LinkedInImportPreviewStepProps) {
   return (
     <ModalScrollLayout
+      fitContent
       footer={
         <ModalFooter
           actionDisabled={isImporting}
-          actionLabel={importSelectedLabel}
+          actionLabel={importLabel}
           actionLeftSection={!isImporting ? <IconBrandLinkedin size={16} /> : undefined}
           actionLoading={isImporting}
           backDisabled={isImporting}
@@ -83,48 +66,17 @@ export function LinkedInImportPreviewStep({
         />
       }
       header={
-        <Stack gap="md">
-          <Group justify="space-between">
-            <Group gap="xs">
-              <Badge color="blue" variant="light">
-                {labels.total}
-              </Badge>
-              <Badge color="green" leftSection={<IconCircleCheck size={12} />} variant="light">
-                {labels.valid}
-              </Badge>
-              {invalidContactsCount > 0 ? (
-                <Badge color="orange" leftSection={<IconAlertTriangle size={12} />} variant="light">
-                  {labels.invalid}
-                </Badge>
-              ) : null}
-              {alreadyExistsCount > 0 ? (
-                <Badge color="gray" variant="light">
-                  {labels.alreadyExists}
-                </Badge>
-              ) : null}
-            </Group>
-          </Group>
-
-          <Text c="dimmed" size="sm">
-            {chooseContactsHint}
-          </Text>
-        </Stack>
+        <Text c="dimmed" size="sm">
+          {description}
+        </Text>
       }
     >
-      <ContactsTable
-        allSelected={allSelected}
-        contacts={previewContacts}
-        disableNameLink
-        noContactsFound={noContactsFound}
-        noContactsMatchSearch={noContactsMatchSearch}
-        nonSelectableIds={nonSelectableIds}
-        nonSelectableTooltip={existingHandleTooltip}
-        onSelectAll={onSelectAll}
-        onSelectOne={onSelectOne}
-        selectedIds={selectedIds}
-        showSelection
-        someSelected={someSelected}
-        visibleColumns={["name", "headline", "social"]}
+      <ImportPreviewBody
+        counts={counts}
+        emptyLabel={emptyLabel}
+        people={people}
+        peopleLabel={peopleLabel}
+        remainderLabel={remainderLabel}
       />
     </ModalScrollLayout>
   );

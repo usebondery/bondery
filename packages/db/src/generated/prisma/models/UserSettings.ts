@@ -1152,6 +1152,10 @@ export type $UserSettingsPayload<ExtArgs extends runtime.Types.Extensions.Intern
     importFollowupStatus: string | null
     aiMessagesUsed: number
     aiMessagesThisMonth: number
+    /**
+     * Exclusive end of the current AI usage period. The Stripe mirror writes it from
+     * `subscriptions.current_period_end`, so the window follows the billing cycle.
+     */
     aiMessagesMonthResetAt: Date
     productAnalyticsEnabled: boolean
     createdAt: Date

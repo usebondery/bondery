@@ -1,0 +1,105 @@
+/*
+  Phone: the badge sits on its own line, the two people stack and centre, and
+  the actions share a full-width row. From `sm` up, one row holds the badge,
+  the pair, and the actions. The pair shrinks and ellipsizes, and the card
+  clips the rest, so a long name never pushes the buttons out of the card.
+  Use a literal breakpoint because custom properties are not valid in @media
+  queries.
+*/
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-sm);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.badge {
+  align-self: flex-start;
+}
+
+.pair {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-xs);
+  align-items: center;
+  min-width: 0;
+}
+
+/* Wrapper that turns the chip link into a shrinkable box. */
+.person {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/*
+  The chip link is inline by default and keeps the whole name. A block box
+  honours `max-width`, so the chip inside can shrink to the row width.
+*/
+.person > * {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* "merge with" is the shortest item, so keep it whole on one line. */
+.label {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mantine-spacing-sm);
+}
+
+/*
+  Each button grows to share the row but keeps its label width, because Mantine
+  clips a label it cannot fit. When the two labels do not fit side by side, the
+  second wraps to its own row instead of being clipped.
+*/
+.actions > * {
+  flex: 1 1 auto;
+  min-width: max-content;
+}
+
+@media (min-width: 48em) {
+  .card {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--mantine-spacing-md);
+    align-items: center;
+  }
+
+  .badge {
+    flex: 0 0 auto;
+    align-self: center;
+  }
+
+  /*
+    The pair takes the width left over from the badge and the actions, so it
+    starts at basis `0` instead of at its full name width. Otherwise two long
+    names would claim the whole line and push the actions down. Its `min-width`
+    stops the shrink, and below that the actions wrap to a second row instead of
+    being clipped by the card.
+  */
+  .pair {
+    flex: 1 1 0;
+    flex-direction: row;
+    justify-content: flex-start;
+    min-width: 8rem;
+  }
+
+  /* Buttons keep their label width and never shrink into a clipped label. */
+  .actions {
+    flex: 0 0 auto;
+    margin-inline-start: auto;
+  }
+
+  .actions > * {
+    flex: 0 0 auto;
+  }
+}

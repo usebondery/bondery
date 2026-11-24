@@ -47,7 +47,9 @@ export const billingIntervalSchema: z.ZodType<BillingInterval> = z.enum(["month"
 export const subscriptionStatusSchema: z.ZodType<SubscriptionStatus> = z.object({
   aiMessageLimit: z.number().describe("Chat message quota for the current period"),
   aiMessagesUsed: z.number().describe("Chat messages used in the current period"),
-  aiMonthlyResetAt: nullableDateTimeSchema.describe("When the chat quota resets"),
+  aiMonthlyResetAt: nullableDateTimeSchema.describe(
+    "When the chat quota resets, or null before the first message of the period",
+  ),
   amount: z.number().nullable().describe("Plan price in the smallest currency unit"),
   billingStatus: billingSubscriptionStatusSchema.nullable().describe("Stripe subscription status"),
   cancelAtPeriodEnd: z.boolean().describe("True when the plan cancels at period end"),

@@ -4,7 +4,11 @@ import type { DomainContext } from "../../domains/_shared/context.js";
 import { mapStripeStatus } from "./map-status.js";
 import { getStripeClient } from "./stripe.js";
 import { getSubscriptionPeriod, isScheduledToCancel } from "./stripe-helpers.js";
-import { deletePendingSubscription, upsertSubscription } from "./subscription.js";
+import {
+  deletePendingSubscription,
+  syncAiQuotaPeriod,
+  upsertSubscription,
+} from "./subscription.js";
 
 type SubscriptionSyncResult =
   | { synced: true; source: "pending" | "stripe_api" }
@@ -53,6 +57,10 @@ export async function syncSubscriptionFromStripe(
         pending.currentPeriodEnd,
         pending.cancelAtPeriodEnd,
       );
+
+      if (pending.currentPeriodEnd) {
+        await syncAiQuotaPeriod(user.id, pending.currentPeriodEnd, log ?? undefined);
+      }
 
       await deletePendingSubscription(email);
 
@@ -131,6 +139,10 @@ export async function syncSubscriptionFromStripe(
     cancelAtPeriodEnd,
     mirror,
   );
+
+  if (currentPeriodEnd) {
+    await syncAiQuotaPeriod(user.id, currentPeriodEnd, log ?? undefined);
+  }
 
   log?.info({ status, userId: user.id }, "subscription-sync: synced from Stripe API");
   return { source: "stripe_api", synced: true };

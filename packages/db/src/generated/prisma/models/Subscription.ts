@@ -1011,6 +1011,9 @@ export type $SubscriptionPayload<ExtArgs extends runtime.Types.Extensions.Intern
     status: string
     stripeStatus: string | null
     currentPeriodStart: Date | null
+    /**
+     * Exclusive end of the paid period. `user_settings.ai_messages_month_reset_at` mirrors it.
+     */
     currentPeriodEnd: Date | null
     trialEndsAt: Date | null
     billingInterval: string | null

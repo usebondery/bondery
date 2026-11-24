@@ -43,6 +43,15 @@ describe("stripe webhook", () => {
         name: "Stripe Webhook Test",
       },
     });
+    // Signup creates settings before checkout, and the webhook writes the usage period there.
+    await prisma.userSettings.create({
+      data: {
+        aiMessagesMonthResetAt: new Date(),
+        id: generateId(),
+        nextReminderAtUtc: new Date(),
+        userId,
+      },
+    });
     createdUserIds.push(userId);
     return userId;
   }
@@ -194,6 +203,56 @@ describe("stripe webhook", () => {
         ?.paymentFailureCount,
       0,
     );
+  });
+
+  it("points the AI usage period at the paid period end", async () => {
+    const userId = await seedUser();
+    const subscriptionId = uniqueId("sub");
+    const subscription = subscriptionObject(subscriptionId, userId);
+    const periodEnd = new Date((subscription.items.data[0]?.current_period_end ?? 0) * 1000);
+
+    await deliver("customer.subscription.created", subscription);
+
+    const settings = await prisma.userSettings.findUnique({
+      select: { aiMessagesMonthResetAt: true },
+      where: { userId },
+    });
+    // The usage screen and the renewal line now name one date.
+    assert.equal(settings?.aiMessagesMonthResetAt.toISOString(), periodEnd.toISOString());
+  });
+
+  it("starts a new usage window when Stripe renews the period", async () => {
+    const userId = await seedUser();
+    const subscriptionId = uniqueId("sub");
+    await deliver("customer.subscription.created", subscriptionObject(subscriptionId, userId));
+
+    // Stripe renews after the previous period ended, with usage still on the counter.
+    await prisma.userSettings.update({
+      data: {
+        aiMessagesMonthResetAt: new Date(Date.now() - 60 * 60 * 1000),
+        aiMessagesThisMonth: 120,
+      },
+      where: { userId },
+    });
+
+    const renewalEnd = Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60;
+    const renewal = subscriptionObject(subscriptionId, userId);
+    await deliver("customer.subscription.updated", {
+      ...renewal,
+      items: {
+        data: [{ ...renewal.items.data[0], current_period_end: renewalEnd }],
+      },
+    });
+
+    const settings = await prisma.userSettings.findUnique({
+      select: { aiMessagesMonthResetAt: true, aiMessagesThisMonth: true },
+      where: { userId },
+    });
+    assert.equal(
+      settings?.aiMessagesMonthResetAt.toISOString(),
+      new Date(renewalEnd * 1000).toISOString(),
+    );
+    assert.equal(settings?.aiMessagesThisMonth, 0, "the renewed period starts empty");
   });
 
   it("rejects a payload with a bad signature", async () => {

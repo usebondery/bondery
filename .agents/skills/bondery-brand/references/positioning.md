@@ -28,7 +28,7 @@ Bondery is not primarily a database, analytics dashboard, or sales workflow. It 
 
 - **Say the brand verb.** Copy about the product's purpose uses _bond_: "Everything you need to build stronger bonds".
 - **The relationship graph is the product's shape**, not a feature: people are nodes, bonds are edges. That is why the graph, relationships, and keep-in-touch cadence exist.
-- **"Met" versus "know".** _Know_ is the present (hero: "Everyone you know, in one place your AI can use"). _Met_ is the history: contacts arrive from every source across your life (LinkedIn, Instagram, WhatsApp soon, files), and Bondery **unifies** them. The tile says "Everyone you **met** in one place" because consolidation is about where people came from.
+- **"Met" versus "know".** _Know_ is the present. _Met_ is the history: contacts arrive from every source across your life (LinkedIn, Instagram, WhatsApp soon, files), and Bondery **unifies** them. The tile says "Everyone you **met** in one place" because consolidation is about where people came from.
 - **Sources belong inside that tile.** LinkedIn, Instagram, WhatsApp, and files are not a separate "integrations" strip. They are the _sources_, shown flowing into one list, so the page explains consolidation instead of listing logos.
 
 ---
@@ -37,7 +37,8 @@ Bondery is not primarily a database, analytics dashboard, or sales workflow. It 
 
 > Bondery is the open-source address book for your network and your AI. Every contact in one place, merged, searchable, in sync, and ready for Claude and other AI apps.
 
-**One-line claim (hero):** Everyone you know, in one place your AI can use.
+**Hero claim:** Build stronger bonds.
+**Supporting claim (SEO titles, long form):** Everyone you know, in one place your AI can use.
 
 The wedge: other contact tools store people. Bondery stores people **and makes that context usable** — by you (search, reminders) and by your AI (MCP, API).
 

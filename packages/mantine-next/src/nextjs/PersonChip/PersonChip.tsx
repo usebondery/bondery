@@ -71,6 +71,11 @@ type PersonChipBaseProps = {
   showChevronWhenEmpty?: boolean;
   showHoverCard?: boolean;
   size?: "sm" | "md";
+  /**
+   * Lets the chip shrink and ellipsize the name instead of holding its full
+   * content width. See `PersonChipProps.truncate`.
+   */
+  truncate?: boolean;
 };
 
 type PersonChipProps = PersonChipBaseProps &
@@ -118,6 +123,7 @@ function PersonChip({
   rightSection,
   onSearch,
   searchDebounceMs,
+  truncate = false,
 }: PersonChipProps): ReactElement {
   const { chevronSize, clearSize } = personChipSizes(size);
 
@@ -238,6 +244,7 @@ function PersonChip({
       lastName={person?.lastName}
       rightSection={endSection}
       size={size}
+      truncate={truncate}
     />
   );
 

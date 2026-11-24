@@ -1,5 +1,7 @@
 import { prisma } from "@bondery/db";
+import type { FastifyBaseLogger } from "fastify";
 import { isForeignKeyViolation, isUniqueViolation } from "../../domains/_shared/prisma-helpers.js";
+import { rpcSyncAiQuotaPeriod } from "../../lib/data/rpc.js";
 import { internal } from "../../lib/platform/errors/http-errors.js";
 
 export type SubscriptionMirrorFields = {
@@ -123,6 +125,30 @@ export async function storePendingSubscription(
 
 export async function deletePendingSubscription(email: string): Promise<void> {
   await prisma.pendingSubscription.deleteMany({ where: { email } });
+}
+
+/**
+ * Point the AI usage period at the paid period end, so the usage screen and the
+ * chat gate name the same reset date as the renewal line above them.
+ *
+ * A new period end opens a new usage window. Stripe redelivers events, so the
+ * same end passes more than once and changes nothing after the first time.
+ */
+export async function syncAiQuotaPeriod(
+  userId: string,
+  periodEnd: Date,
+  log?: FastifyBaseLogger,
+): Promise<void> {
+  try {
+    await rpcSyncAiQuotaPeriod(prisma, userId, periodEnd);
+  } catch (error) {
+    throw internal("billing_subscription_upsert_failed", error);
+  }
+
+  log?.info(
+    { periodEnd: periodEnd.toISOString(), userId },
+    "stripe-webhook: ai usage period synced",
+  );
 }
 
 /*

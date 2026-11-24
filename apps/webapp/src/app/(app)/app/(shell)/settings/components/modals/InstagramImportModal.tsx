@@ -11,7 +11,6 @@ import { IconBrandInstagram } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import type { JSX } from "react";
 import { useEffect } from "react";
-import ContactsTable from "@/components/contacts/ContactsTableV2";
 import { useCommonTranslations } from "@/lib/i18n/generated/hooks";
 import { routeAssert } from "@/lib/navigation/route/assert";
 import { useInstagramImportModal } from "../../hooks/useInstagramImportModal";
@@ -43,36 +42,27 @@ export function InstagramImportModal({
   onAwaitingExport?: () => void | Promise<void>;
 }) {
   const {
-    allSelected,
     alreadyExistsCount,
     closeModal,
     finishedStats,
     handleImport,
     handleRequestedExport,
-    handleToggleAll,
-    handleToggleOne,
     handleZipDrop,
     importProgress,
     importStrategyOptions,
-    importedContacts,
-    invalidContactsCount,
+    importableCount,
     isImporting,
     isOnboardingFlow,
     isParsing,
-    likelyInfluencersCount,
-    nonSelectableIds,
     openRef,
     parseUpload,
     parsedContacts,
-    previewContacts,
-    selectedIds,
+    previewPeople,
     setStep,
     setStrategy,
-    someSelected,
     step,
     strategy,
     t,
-    validContactsCount,
   } = useInstagramImportModal({ initialStep, modalId, onAwaitingExport, onSuccess });
 
   const tCommon = useCommonTranslations();
@@ -246,17 +236,6 @@ export function InstagramImportModal({
           closeModal();
           router.push(routeAssert(WEBAPP_ROUTES.PEOPLE));
         }}
-        overview={
-          importedContacts.length > 0 ? (
-            <ContactsTable
-              contacts={importedContacts}
-              disableNameLink
-              noContactsFound={t("NoContactsFound")}
-              noContactsMatchSearch={t("NoContactsMatchSearch")}
-              visibleColumns={["name", "social"]}
-            />
-          ) : undefined
-        }
         title={t("SuccessTitle")}
         viewContactsLabel={tCommon("actions.viewContacts")}
       />,
@@ -265,38 +244,27 @@ export function InstagramImportModal({
 
   return renderWithNavigationProgress(
     <InstagramImportPreviewStep
-      allSelected={allSelected}
-      alreadyExistsCount={alreadyExistsCount}
       backLabel={t("Back")}
       cancelLabel={t("Cancel")}
-      chooseContactsHint={t("ChooseContactsHint")}
-      existingHandleTooltip={t("ExistingHandleTooltip")}
-      importSelectedLabel={t("ImportSelected", { count: selectedIds.size })}
-      invalidContactsCount={invalidContactsCount}
+      counts={[
+        { label: t("TotalLabel"), value: parsedContacts.length },
+        { isPrimary: true, label: t("WillAddLabel"), value: importableCount },
+        ...(alreadyExistsCount > 0 ? [{ label: t("SkipLabel"), value: alreadyExistsCount }] : []),
+      ]}
+      description={t("PreviewDescription")}
+      emptyLabel={t("NoContactsFound")}
+      importLabel={t("ImportAction")}
       isImporting={isImporting}
-      labels={{
-        alreadyExists: t("AlreadyExists", { count: alreadyExistsCount }),
-        invalid: t("Invalid", { count: invalidContactsCount }),
-        likelyBusiness: t("LikelyBusinessAndInfluencers", {
-          count: likelyInfluencersCount,
-        }),
-        total: t("Total", { count: parsedContacts.length }),
-        valid: t("Valid", { count: validContactsCount }),
-      }}
-      likelyInfluencersCount={likelyInfluencersCount}
-      noContactsFound={t("NoContactsFound")}
-      noContactsMatchSearch={t("NoContactsMatchSearch")}
-      nonSelectableIds={nonSelectableIds}
       onBack={() => setStep("strategy")}
       onCancel={closeModal}
       onImport={() => {
         detachPromise(handleImport());
       }}
-      onSelectAll={handleToggleAll}
-      onSelectOne={handleToggleOne}
-      previewContacts={previewContacts}
-      selectedIds={selectedIds}
-      someSelected={someSelected}
+      people={previewPeople}
+      peopleLabel={t("PeopleToAdd")}
+      remainderLabel={
+        importableCount > 10 ? t("AndMore", { count: importableCount - 10 }) : undefined
+      }
     />,
   );
 }

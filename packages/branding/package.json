@@ -34,6 +34,24 @@
       "node": "./dist/*.js",
       "types": "./src/*.ts"
     },
+    "./og": {
+      "default": "./dist/og/index.js",
+      "import": "./dist/og/index.js",
+      "node": "./dist/og/index.js",
+      "types": "./src/og/index.ts"
+    },
+    "./react": {
+      "default": "./dist/react/index.js",
+      "import": "./dist/react/index.js",
+      "node": "./dist/react/index.js",
+      "types": "./src/react/index.ts"
+    },
+    "./brandIcons.generated": {
+      "default": "./dist/brandIcons.generated.js",
+      "import": "./dist/brandIcons.generated.js",
+      "node": "./dist/brandIcons.generated.js",
+      "types": "./src/brandIcons.generated.ts"
+    },
     "./brandMarks.generated": {
       "default": "./dist/brandMarks.generated.js",
       "import": "./dist/brandMarks.generated.js",
@@ -51,28 +69,6 @@
       "import": "./dist/colors.test.js",
       "node": "./dist/colors.test.js",
       "types": "./src/colors.test.ts"
-    },
-    "./icon-generator": {
-      "default": "./scripts/generate-icons.ts",
-      "types": "./scripts/icon-generator.d.ts"
-    },
-    "./og": {
-      "default": "./dist/og/index.js",
-      "import": "./dist/og/index.js",
-      "node": "./dist/og/index.js",
-      "types": "./src/og/index.ts"
-    },
-    "./og/constants": {
-      "default": "./dist/og/constants.js",
-      "import": "./dist/og/constants.js",
-      "node": "./dist/og/constants.js",
-      "types": "./src/og/constants.ts"
-    },
-    "./og/fonts": {
-      "default": "./dist/og/fonts.js",
-      "import": "./dist/og/fonts.js",
-      "node": "./dist/og/fonts.js",
-      "types": "./src/og/fonts.ts"
     },
     "./og/Logotype": {
       "default": "./dist/og/Logotype.js",
@@ -92,17 +88,23 @@
       "node": "./dist/og/OgTitled.js",
       "types": "./src/og/OgTitled.tsx"
     },
+    "./og/constants": {
+      "default": "./dist/og/constants.js",
+      "import": "./dist/og/constants.js",
+      "node": "./dist/og/constants.js",
+      "types": "./src/og/constants.ts"
+    },
+    "./og/fonts": {
+      "default": "./dist/og/fonts.js",
+      "import": "./dist/og/fonts.js",
+      "node": "./dist/og/fonts.js",
+      "types": "./src/og/fonts.ts"
+    },
     "./og/truncate": {
       "default": "./dist/og/truncate.js",
       "import": "./dist/og/truncate.js",
       "node": "./dist/og/truncate.js",
       "types": "./src/og/truncate.ts"
-    },
-    "./react": {
-      "default": "./dist/react/index.js",
-      "import": "./dist/react/index.js",
-      "node": "./dist/react/index.js",
-      "types": "./src/react/index.ts"
     },
     "./react/AnthropicIcon": {
       "default": "./dist/react/AnthropicIcon.js",
@@ -140,6 +142,12 @@
       "node": "./dist/react/BonderyLogotypeWhite.js",
       "types": "./src/react/BonderyLogotypeWhite.tsx"
     },
+    "./react/BrandIcon": {
+      "default": "./dist/react/BrandIcon.js",
+      "import": "./dist/react/BrandIcon.js",
+      "node": "./dist/react/BrandIcon.js",
+      "types": "./src/react/BrandIcon.tsx"
+    },
     "./react/index.d": {
       "default": "./dist/react/index.d.js",
       "import": "./dist/react/index.d.js",
@@ -163,6 +171,10 @@
       "import": "./dist/typography.js",
       "node": "./dist/typography.js",
       "types": "./src/typography.ts"
+    },
+    "./icon-generator": {
+      "default": "./scripts/generate-icons.ts",
+      "types": "./scripts/icon-generator.d.ts"
     }
   },
   "files": [
@@ -194,6 +206,7 @@
     "compile": "tsc && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs branding && node scripts/copy-brand-assets.mjs",
     "dev": "node ../../scripts/pkg/tsc-watch-and-rewrite.mjs branding",
     "generate:brand-marks": "tsx scripts/generate-brand-marks.ts",
+    "generate:brand-icons": "tsx scripts/generate-brand-icons.ts",
     "test": "tsx --test src/**/*.test.ts"
   },
   "type": "module",

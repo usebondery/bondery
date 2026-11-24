@@ -84,8 +84,9 @@ model Subscription {
   stripeSubscriptionId    String    @unique @map("stripe_subscription_id")
   status                  String
   stripeStatus            String?   @map("stripe_status")
-  currentPeriodStart      DateTime? @map("current_period_start")
-  currentPeriodEnd        DateTime? @map("current_period_end")
+  currentPeriodStart      DateTime? @map("current_period_start") @db.Timestamptz(3)
+  /// Exclusive end of the paid period. `user_settings.ai_messages_month_reset_at` mirrors it.
+  currentPeriodEnd        DateTime? @map("current_period_end") @db.Timestamptz(3)
   trialEndsAt             DateTime? @map("trial_ends_at")
   billingInterval         String?   @map("billing_interval")
   priceId                 String?   @map("price_id")
@@ -106,7 +107,7 @@ model PendingSubscription {
   stripeCustomerId     String    @map("stripe_customer_id")
   stripeSubscriptionId String    @map("stripe_subscription_id")
   status               String
-  currentPeriodEnd     DateTime? @map("current_period_end")
+  currentPeriodEnd     DateTime? @map("current_period_end") @db.Timestamptz(3)
   cancelAtPeriodEnd    Boolean   @default(false) @map("cancel_at_period_end")
   createdAt            DateTime  @default(now()) @map("created_at")
   updatedAt            DateTime  @updatedAt @map("updated_at")

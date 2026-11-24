@@ -1,6 +1,7 @@
-import { Box, Paper, SimpleGrid, Skeleton } from "@mantine/core";
+import { Paper, SimpleGrid, Skeleton } from "@mantine/core";
 import { PeopleTableSkeleton } from "@/app/(app)/app/(shell)/people/components/chrome/PeopleSkeletons";
 import { PageHeaderSkeleton } from "@/components/shell/PageHeaderSkeleton";
+import { PageWrapper } from "@/components/shell/PageWrapper";
 
 /**
  * Full-page skeleton for the Map page.
@@ -9,7 +10,7 @@ import { PageHeaderSkeleton } from "@/components/shell/PageHeaderSkeleton";
  */
 export function MapPageSkeleton() {
   return (
-    <Box p="xl">
+    <PageWrapper>
       {/* Header: Locations/Addresses SegmentedControl (~190px), no primary action */}
       <PageHeaderSkeleton secondaryActionWidth={190} />
 
@@ -22,6 +23,6 @@ export function MapPageSkeleton() {
           <Skeleton height="100%" radius="md" style={{ minHeight: 400 }} />
         </Paper>
       </SimpleGrid>
-    </Box>
+    </PageWrapper>
   );
 }

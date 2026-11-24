@@ -1,16 +1,13 @@
 "use client";
 
-import { AnthropicIcon } from "@bondery/branding/react";
 import { docHref } from "@bondery/helpers";
 import { getUserFacingError } from "@bondery/helpers/api";
 import { detachPromise } from "@bondery/helpers/async";
 import {
-  ButtonLink,
   CodeBlock,
   type CodeBlockSnippet,
   DescribedSelect,
   faviconUrlForHost,
-  hrefAssert,
   linkHostname,
   ModalFooter,
   ModalScrollLayout,
@@ -191,17 +188,6 @@ export function McpModal({ apiBaseUrl, modalId }: McpModalProps) {
         <Text c="dimmed" size="sm">
           {t("Description")}
         </Text>
-
-        <ButtonLink
-          href={hrefAssert(docHref("bondery.mcp"))}
-          leftSection={<AnthropicIcon color="white" size={16} />}
-          rel="noopener noreferrer"
-          size="sm"
-          target="_blank"
-          w="fit-content"
-        >
-          {t("AddToClaudeButton")}
-        </ButtonLink>
 
         <Stack gap={4}>
           <CodeBlock

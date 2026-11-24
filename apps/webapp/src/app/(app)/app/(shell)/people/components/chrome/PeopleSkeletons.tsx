@@ -1,5 +1,6 @@
-import { Box, Group, Paper, Skeleton, Stack } from "@mantine/core";
+import { Group, Paper, Skeleton, Stack } from "@mantine/core";
 import { PageHeaderSkeleton } from "@/components/shell/PageHeaderSkeleton";
+import { PageWrapper } from "@/components/shell/PageWrapper";
 import type { ColumnKey } from "@/lib/contacts/table-types";
 
 const DEFAULT_VISIBLE_COLUMNS: ColumnKey[] = [
@@ -164,9 +165,9 @@ export function PeopleTableSkeleton({
  */
 export function PeoplePageSkeleton() {
   return (
-    <Box p="xl">
+    <PageWrapper>
       <PeoplePageHeaderSkeleton />
       <PeopleTableSkeleton />
-    </Box>
+    </PageWrapper>
   );
 }

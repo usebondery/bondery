@@ -34,7 +34,8 @@ const TIMEZONES_DATA: TimezoneData[] = [
     continent: "UTC",
     country: "Coordinated Universal Time",
     countryCode: "",
-    flag: "",
+    /** A neutral flag, because UTC belongs to no country. The option row and the target share it. */
+    flag: "un",
     group: ["UTC"],
     offset: 0,
     value: "UTC",
@@ -220,7 +221,7 @@ export function getTimezoneSelectOptions(
   return [
     {
       city: canonicalCurrent,
-      flag: "",
+      flag: "un",
       label: canonicalCurrent,
       offset: 0,
       offsetLabel: formatOffset(0),

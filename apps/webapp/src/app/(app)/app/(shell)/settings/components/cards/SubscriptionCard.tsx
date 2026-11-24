@@ -5,6 +5,7 @@ import type { SubscriptionStatus } from "@bondery/schemas";
 import { Badge, Button, CardSection, Group, Progress, Stack, Text } from "@mantine/core";
 import { IconCreditCard, IconExternalLink } from "@tabler/icons-react";
 import { UpgradeButton } from "@/components/shared/UpgradeButton";
+import { canShowUsageReset } from "@/lib/api/resources/subscription";
 import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 import { useSubscriptionQuery } from "@/lib/query/hooks/useSubscription";
@@ -61,6 +62,7 @@ function SubscriptionCardContent({
   const periodEndsAt = formatDate(subscriptionStatus.currentPeriodEnd);
   const renewalAmount = formatAmount(subscriptionStatus.amount, subscriptionStatus.currency);
   const monthlyResetAt = formatDate(subscriptionStatus.aiMonthlyResetAt);
+  const showUsageReset = canShowUsageReset(subscriptionStatus);
 
   const getSubscriptionDescription = (): { text: string; color: string } => {
     const { billingStatus } = subscriptionStatus;
@@ -212,7 +214,7 @@ function SubscriptionCardContent({
               <UpgradeButton />
             )}
           </Group>
-          {isPremium && subscriptionStatus.aiMessageLimit > 0 && (
+          {subscriptionStatus.aiMessageLimit > 0 && (
             <div>
               <Group justify="space-between" mb={6}>
                 <Text c="dimmed" size="xs">
@@ -221,11 +223,11 @@ function SubscriptionCardContent({
                     used: subscriptionStatus.aiMessagesUsed,
                   })}
                 </Text>
-                {monthlyResetAt && (
+                {showUsageReset && monthlyResetAt ? (
                   <Text c="dimmed" size="xs">
                     {t("MonthlyUsageReset", { date: monthlyResetAt })}
                   </Text>
-                )}
+                ) : null}
               </Group>
               <Progress
                 color={

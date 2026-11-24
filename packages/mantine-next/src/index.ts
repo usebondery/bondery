@@ -164,6 +164,13 @@ export {
 export { usePeoplePickerPagedList } from "#peoplePicker/usePeoplePickerPagedList.js";
 export { SearchTrigger, type SearchTriggerProps } from "#SearchTrigger/index.js";
 export { ThemePicker, type ThemePickerProps, type ThemePreference } from "#ThemePicker/index.js";
+export {
+  SUCCESS_TONE_STYLE,
+  TileCard,
+  TileCardGrid,
+  type TileCardGridProps,
+  type TileCardProps,
+} from "#TileCard/index.js";
 export { ToolbarMenuButton, type ToolbarMenuButtonProps } from "#ToolbarMenuButton/index.js";
 export { bonderyTheme, primaryColor } from "#theme.js";
 export { UserCard, type UserCardProps } from "#UserCard/index.js";

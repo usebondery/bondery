@@ -116,7 +116,7 @@ export function TimezonePicker({
       targetItem={
         selectedTimezone
           ? {
-              flag: selectedTimezone.flag || "aq",
+              flag: selectedTimezone.flag,
               main: formatTimezoneLabel(selectedTimezone, intlTag),
               supporting: formatOffset(selectedTimezone.offset),
               trailing: currentTimezoneTime,

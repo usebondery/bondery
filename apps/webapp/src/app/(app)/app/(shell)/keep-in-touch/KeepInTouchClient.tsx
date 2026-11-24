@@ -210,7 +210,7 @@ export function KeepInTouchClient({ endDate }: KeepInTouchClientProps) {
   // Empty state
   if (contacts.length === 0) {
     return (
-      <Stack gap="xl" p="md">
+      <Stack gap="xl" px={{ base: 0, sm: "md" }} py="md">
         <PageHeader
           helpDoc="concepts.reminders"
           helpLabel={t("Description")}
@@ -233,7 +233,7 @@ export function KeepInTouchClient({ endDate }: KeepInTouchClientProps) {
   }
 
   return (
-    <Stack gap="xl" p="md">
+    <Stack gap="xl" px={{ base: 0, sm: "md" }} py="md">
       <PageHeader
         helpDoc="concepts.reminders"
         helpLabel={t("Description")}

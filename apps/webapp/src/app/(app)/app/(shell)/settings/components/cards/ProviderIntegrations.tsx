@@ -1,47 +1,13 @@
 "use client";
 
-import { getAuthUserFacingError } from "@bondery/helpers/api";
-import { detachPromise } from "@bondery/helpers/async";
-import { isOAuthProviderEnabled } from "@bondery/helpers/auth/oauth-providers";
-import {
-  errorNotificationTemplate,
-  loadingNotificationTemplate,
-  successNotificationTemplate,
-} from "@bondery/mantine-next";
+import { TileCardGrid } from "@bondery/mantine-next";
 import type { OAuthProvidersBitmap } from "@bondery/schemas/oauth-providers";
-import { Box, Group, Stack, Text } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
-import {
-  IconBrandGithub,
-  IconBrandLinkedin,
-  IconBrowser,
-  IconDeviceDesktop,
-  IconSparkles,
-} from "@tabler/icons-react";
-import { useEffect, useState } from "react";
-import { usePWAInstall } from "@/hooks/usePWAInstall";
-import { ensureFreshIdentity } from "@/lib/auth/reconfirm";
-import { detectBonderyChromeExtension } from "@/lib/extension/detectBonderyChromeExtension";
-import { useCommonTranslations, useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
-import { INTEGRATION_PROVIDERS } from "@/lib/platform/config";
-import { useMcpConsentsQuery } from "@/lib/query/hooks/useMcpConsents";
+import { Stack, Text } from "@mantine/core";
+import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { nonEmpty } from "@/lib/shared/nonEmpty";
-import {
-  openUnlinkProviderConfirm,
-  providerKeyFor,
-  runLinkSocialProvider,
-} from "../../settingsAuthActions";
-import { openChromeExtensionModal } from "../modals/openChromeExtensionModal";
-import { openMcpModal } from "../modals/openMcpModal";
-import { openPwaInstallModal } from "../modals/openPwaInstallModal";
-import { IntegrationCard } from "./IntegrationCard";
-
-interface UserIdentity {
-  id: string;
-  identity_id: string;
-  provider: string;
-  user_id: string;
-}
+import { BrowserExtensionTile, DesktopAppTile, McpTile } from "./AppTiles";
+import { ConnectedAccountTiles } from "./ConnectedAccountTiles";
+import type { UserIdentity } from "./socialSignInActions";
 
 interface ProviderIntegrationsProps {
   apiBaseUrl?: string;
@@ -57,8 +23,14 @@ interface ProviderIntegrationsProps {
   userIdentities: UserIdentity[];
 }
 
+/**
+ * Every way to connect an account or an app.
+ *
+ * Both groups are tiles, so the whole surface of each is the hit target. The sign-in providers
+ * turn success green once linked, and the installable apps carry their own install state.
+ */
 export function ProviderIntegrations({
-  providers: initialProviders,
+  providers,
   userIdentities,
   oauthProviders = null,
   showOAuthProviders = true,
@@ -70,253 +42,34 @@ export function ProviderIntegrations({
   description,
   apiBaseUrl,
 }: ProviderIntegrationsProps) {
-  const [providers, setProviders] = useState<string[]>(initialProviders);
-  const [isExtensionInstalled, setIsExtensionInstalled] = useState(false);
-  const [suppressMcpTooltip, setSuppressMcpTooltip] = useState(false);
-
-  const { isChromiumDesktop, isPWAInstalled, isInstalledFromBrowser, install } = usePWAInstall();
-
   const t = useSettingsPageTranslations("Profile");
-  const tIntegration = useSettingsPageTranslations("Integration");
-  const tAiAssistants = useSettingsPageTranslations("AiAssistants");
-  const tCommon = useCommonTranslations();
-  const mcpConsentsQuery = useMcpConsentsQuery(showMcpProvider);
-  const mcpConsents = mcpConsentsQuery.data;
-  const mcpBadgeLabel =
-    mcpConsents === undefined
-      ? undefined
-      : mcpConsents.length > 0
-        ? tIntegration("Connected")
-        : tIntegration("NotConnected");
-
-  useEffect(() => {
-    let isMounted = true;
-
-    detachPromise(
-      detectBonderyChromeExtension().then((result) => {
-        if (!isMounted) {
-          return;
-        }
-
-        setIsExtensionInstalled(result.state === "installed");
-      }),
-    );
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  const linkProvider = async (provider: "github" | "linkedin") => {
-    const purpose = provider === "github" ? "link_github" : "link_linkedin";
-    const stepped = await ensureFreshIdentity({ purpose });
-    if (stepped !== "fresh") {
-      return;
-    }
-
-    const loadingNotification = notifications.show({
-      ...loadingNotificationTemplate({
-        description: tIntegration("Connecting", {
-          provider: provider === "github" ? "GitHub" : "LinkedIn",
-        }),
-        title: tIntegration("LinkingAccount"),
-      }),
-    });
-
-    try {
-      await runLinkSocialProvider(provider);
-    } catch (error) {
-      notifications.hide(loadingNotification);
-      notifications.show(
-        errorNotificationTemplate({
-          description: getAuthUserFacingError(error, tCommon),
-          title: tCommon("feedback.errorTitle"),
-        }),
-      );
-    }
-  };
-
-  const handleUnlinkClick = async (provider: "github" | "linkedin") => {
-    if (providers.length <= 1) {
-      notifications.show(
-        errorNotificationTemplate({
-          description: tIntegration("MustHaveOneMethod"),
-          title: tIntegration("CannotUnlink"),
-        }),
-      );
-      return;
-    }
-
-    const purpose = provider === "github" ? "unlink_github" : "unlink_linkedin";
-    const stepped = await ensureFreshIdentity({ purpose });
-    if (stepped !== "fresh") {
-      return;
-    }
-
-    openUnlinkProviderConfirm({
-      displayName: provider === "github" ? tIntegration("GitHub") : tIntegration("LinkedIn"),
-      identities: userIdentities,
-      onUnlinked: (unlinked) => {
-        setProviders((prev) =>
-          prev.filter((p) => {
-            if (p === unlinked || p === providerKeyFor(unlinked)) {
-              return false;
-            }
-            return !(unlinked === "linkedin" && p === "linkedin_oidc");
-          }),
-        );
-        notifications.show(
-          successNotificationTemplate({
-            description: tIntegration("UnlinkSuccess", { provider: unlinked }),
-            title: t("UpdateSuccess"),
-          }),
-        );
-      },
-      provider,
-      t,
-      tCommon,
-    });
-  };
 
   return (
     <Stack gap="md">
-      <div>
-        {hideTitle ? null : (
+      {hideTitle ? null : (
+        <div>
           <Text fw={500} mb={4} size="sm">
             {nonEmpty(title) ?? t("ConnectedAccounts")}
           </Text>
-        )}
-        <Text c="dimmed" mb={hideTitle ? 0 : undefined} size="xs">
-          {nonEmpty(description) ?? t("ConnectedAccountsDescription")}
-        </Text>
-      </div>
-      <Group gap="md">
-        {showOAuthProviders
-          ? INTEGRATION_PROVIDERS.map(({ provider, providerKey, iconColor }) => {
-              const icon = provider === "github" ? IconBrandGithub : IconBrandLinkedin;
-              const displayName =
-                provider === "github" ? tIntegration("GitHub") : tIntegration("LinkedIn");
-              const isConnected =
-                providers.includes(provider) ||
-                providers.includes(providerKey) ||
-                (provider === "linkedin" && providers.includes("linkedin_oidc"));
-              const lastProviderCannotUnlink = isConnected && providers.length === 1;
-              const canLink = isOAuthProviderEnabled(oauthProviders, provider);
-              const cannotLink = !isConnected && !canLink;
-              const isDisabled = lastProviderCannotUnlink || cannotLink;
-              const disabledDescription = lastProviderCannotUnlink
-                ? tIntegration("LinkedButCannotUnlink")
-                : cannotLink
-                  ? tIntegration("ProviderUnavailable", { provider: displayName })
-                  : undefined;
-
-              return (
-                <IntegrationCard
-                  badgeLabel={
-                    isConnected ? tIntegration("Connected") : tIntegration("NotConnected")
-                  }
-                  displayName={displayName}
-                  icon={icon}
-                  iconColor={iconColor}
-                  isConnected={isConnected}
-                  isDisabled={isDisabled}
-                  key={provider}
-                  onClick={() => {
-                    if (isDisabled) {
-                      return;
-                    }
-                    if (isConnected) {
-                      detachPromise(handleUnlinkClick(provider));
-                    } else {
-                      detachPromise(linkProvider(provider));
-                    }
-                  }}
-                  provider={provider}
-                  tooltip={
-                    disabledDescription ??
-                    (isConnected
-                      ? tIntegration("ClickToUnlink", { provider: displayName })
-                      : tIntegration("ClickToLink", { provider: displayName }))
-                  }
-                />
-              );
-            })
-          : null}
-        {showExtensionProvider ? (
-          <IntegrationCard
-            badgeLabel={
-              isExtensionInstalled ? tIntegration("Installed") : tIntegration("NotInstalled")
-            }
-            displayName={tIntegration("BrowserExtension")}
-            icon={IconBrowser}
-            iconColor="grape"
-            isConnected={isExtensionInstalled}
-            isDisabled={isExtensionInstalled}
-            isLinkable={false}
-            onClick={() => {
-              if (isExtensionInstalled) {
-                return;
-              }
-
-              openChromeExtensionModal();
-            }}
-            provider="bondery_chrome_extension"
-          />
-        ) : null}
-        {showPWAProvider
-          ? (() => {
-              const isInstalled = isPWAInstalled || isInstalledFromBrowser;
-
-              return (
-                <IntegrationCard
-                  badgeLabel={
-                    isInstalled ? tIntegration("Installed") : tIntegration("NotInstalled")
-                  }
-                  displayName={tIntegration("DesktopApp")}
-                  icon={IconDeviceDesktop}
-                  iconColor="grape"
-                  isConnected={isInstalled}
-                  isDisabled={isInstalled}
-                  isLinkable={false}
-                  onClick={() => {
-                    if (isInstalled) {
-                      return;
-                    }
-
-                    openPwaInstallModal({ install, isChromiumDesktop });
-                  }}
-                  provider="pwa"
-                />
-              );
-            })()
-          : null}
-        {showMcpProvider ? (
-          <Box
-            onMouseLeave={() => {
-              setSuppressMcpTooltip(false);
-            }}
-          >
-            <IntegrationCard
-              badgeLabel={mcpBadgeLabel}
-              displayName={tAiAssistants("Title")}
-              icon={IconSparkles}
-              iconColor="grape"
-              isConnected={mcpConsents !== undefined && mcpConsents.length > 0}
-              isDisabled={false}
-              isLinkable={false}
-              onClick={() => {
-                if (!apiBaseUrl) {
-                  return;
-                }
-                setSuppressMcpTooltip(true);
-                openMcpModal({ apiBaseUrl });
-              }}
-              provider="mcp"
-              tooltip={suppressMcpTooltip ? undefined : tAiAssistants("TileTooltip")}
-            />
-          </Box>
-        ) : null}
-      </Group>
+          <Text c="dimmed" size="xs">
+            {nonEmpty(description) ?? t("ConnectedAccountsDescription")}
+          </Text>
+        </div>
+      )}
+      {showOAuthProviders ? (
+        <ConnectedAccountTiles
+          oauthProviders={oauthProviders}
+          providers={providers}
+          userIdentities={userIdentities}
+        />
+      ) : null}
+      {showExtensionProvider || showPWAProvider || showMcpProvider ? (
+        <TileCardGrid minCardWidth="17rem">
+          {showExtensionProvider ? <BrowserExtensionTile /> : null}
+          {showPWAProvider ? <DesktopAppTile /> : null}
+          {showMcpProvider ? <McpTile apiBaseUrl={apiBaseUrl} /> : null}
+        </TileCardGrid>
+      ) : null}
     </Stack>
   );
 }

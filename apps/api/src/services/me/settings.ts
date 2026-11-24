@@ -4,6 +4,7 @@ import type { UpdateSettingsBody } from "@bondery/schemas";
 import { DEFAULT_LOCALE } from "@bondery/schemas/locale/supported-locale";
 import { type DomainContext, DomainError } from "../../domains/_shared/context.js";
 import { domainDb } from "../../domains/_shared/domain-db.js";
+import { firstAiUsagePeriodEnd } from "../../lib/chat/ai-usage-period.js";
 import { internal } from "../../lib/platform/errors/http-errors.js";
 import { invalidateProductAnalyticsCache } from "../analytics/posthog-capture.js";
 
@@ -67,7 +68,7 @@ export async function ensureDefaultSettings(ctx: DomainContext) {
   try {
     return await db.userSettings.create({
       data: {
-        aiMessagesMonthResetAt: new Date(),
+        aiMessagesMonthResetAt: firstAiUsagePeriodEnd(),
         colorScheme: "auto",
         dateFormat: "locale",
         language: DEFAULT_LOCALE as SupportedLocale,
@@ -193,7 +194,7 @@ export async function updateUserSettings(ctx: DomainContext, input: UpdateSettin
       })
     : await db.userSettings.create({
         data: {
-          aiMessagesMonthResetAt: new Date(),
+          aiMessagesMonthResetAt: firstAiUsagePeriodEnd(),
           nextReminderAtUtc: new Date(),
           userId: user.id,
           ...updatePayload,

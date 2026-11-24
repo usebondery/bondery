@@ -31,7 +31,7 @@ function KeepInTouchRowSkeleton({ opacity = 1 }: { opacity?: number }) {
  */
 export function KeepInTouchPageSkeleton() {
   return (
-    <Box p="md">
+    <Box px={{ base: 0, sm: "md" }} py="md">
       {/* Header: date window picker (~160px secondary, no primary action) */}
       <PageHeaderSkeleton secondaryActionWidth={160} />
 

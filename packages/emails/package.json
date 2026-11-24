@@ -37,18 +37,6 @@
       "node": "./dist/fixtures/default-copy.js",
       "types": "./src/fixtures/default-copy.ts"
     },
-    "./shared/chrome": {
-      "default": "./dist/shared/chrome.js",
-      "import": "./dist/shared/chrome.js",
-      "node": "./dist/shared/chrome.js",
-      "types": "./src/shared/chrome.ts"
-    },
-    "./shared/chrome.test": {
-      "default": "./dist/shared/chrome.test.js",
-      "import": "./dist/shared/chrome.test.js",
-      "node": "./dist/shared/chrome.test.js",
-      "types": "./src/shared/chrome.test.ts"
-    },
     "./shared/EmailBody": {
       "default": "./dist/shared/EmailBody.js",
       "import": "./dist/shared/EmailBody.js",
@@ -66,6 +54,18 @@
       "import": "./dist/shared/EmailWrapper.js",
       "node": "./dist/shared/EmailWrapper.js",
       "types": "./src/shared/EmailWrapper.tsx"
+    },
+    "./shared/chrome": {
+      "default": "./dist/shared/chrome.js",
+      "import": "./dist/shared/chrome.js",
+      "node": "./dist/shared/chrome.js",
+      "types": "./src/shared/chrome.ts"
+    },
+    "./shared/chrome.test": {
+      "default": "./dist/shared/chrome.test.js",
+      "import": "./dist/shared/chrome.test.js",
+      "node": "./dist/shared/chrome.test.js",
+      "types": "./src/shared/chrome.test.ts"
     },
     "./shared/email-styles": {
       "default": "./dist/shared/email-styles.js",

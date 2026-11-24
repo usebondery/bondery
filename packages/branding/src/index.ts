@@ -5,6 +5,11 @@
  */
 
 export {
+  BRAND_ICON_BACKGROUND,
+  BRAND_ICON_SRC,
+  type BrandIconName,
+} from "#brandIcons.generated.js";
+export {
   BRAND_MARKS,
   type BrandMarkName,
   THEMED_BRAND_MARKS,
@@ -26,6 +31,8 @@ export {
   BonderyIconWhite,
   BonderyLogotypeBlack,
   BonderyLogotypeWhite,
+  BrandIcon,
+  type BrandIconProps,
 } from "#react/index.js";
 
 export {

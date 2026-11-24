@@ -1,6 +1,7 @@
-import { Box, Group, Paper, SimpleGrid, Skeleton, Stack } from "@mantine/core";
+import { Group, Paper, SimpleGrid, Skeleton, Stack } from "@mantine/core";
 import { GettingStartedRailSkeleton } from "@/components/home/GettingStartedRailSkeleton";
 import { PageHeaderSkeleton } from "@/components/shell/PageHeaderSkeleton";
+import { PageWrapper } from "@/components/shell/PageWrapper";
 
 /**
  * Skeleton for a single StatsCard (icon + label + value, Paper withBorder).
@@ -62,7 +63,7 @@ function PersonRowSkeleton({ opacity = 1 }: { opacity?: number }) {
  */
 export function HomePageSkeleton() {
   return (
-    <Box p="xl">
+    <PageWrapper>
       {/* Header: Add Person (outline, ~110px) + Log Interaction (~140px) */}
       <PageHeaderSkeleton primaryActionWidth={140} secondaryActionWidth={110} />
 
@@ -120,6 +121,6 @@ export function HomePageSkeleton() {
           </Stack>
         </SimpleGrid>
       </Stack>
-    </Box>
+    </PageWrapper>
   );
 }

@@ -2,16 +2,25 @@
 
 import { getUserFacingError } from "@bondery/helpers/api";
 import { detachPromise } from "@bondery/helpers/async";
-import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
+import {
+  errorNotificationTemplate,
+  PersonChip,
+  successNotificationTemplate,
+} from "@bondery/mantine-next";
 import { Button, Group, Paper, SegmentedControl, Stack, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconArrowMerge, IconEye, IconEyeOff, IconRefresh } from "@tabler/icons-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { MergeRecommendationCard } from "@/components/contacts/MergeRecommendationCard";
+import classes from "@/components/contacts/MergeRecommendationCard.module.css";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { PageWrapper } from "@/components/shell/PageWrapper";
-import { useCommonTranslations, useFixContactsPageTranslations } from "@/lib/i18n/generated/hooks";
+import {
+  useCommonTranslations,
+  useFixContactsPageTranslations,
+  useMergeWithModalTranslations,
+} from "@/lib/i18n/generated/hooks";
 import { syncMergeRecommendationsAfterChange } from "@/lib/merge/syncMergeRecommendations";
 import {
   useEnrichQueueCountQuery,
@@ -20,15 +29,17 @@ import {
 import {
   useMergeRecommendationsQuery,
   useRefreshMergeRecommendationsMutation,
+  useRestoreMergeRecommendationMutation,
 } from "@/lib/query/hooks/useMergeRecommendations";
 import { EnrichRecommendationCard } from "./components/EnrichRecommendationCard";
-import { HiddenRecommendationCard } from "./components/HiddenRecommendationCard";
 
 export function FixClient() {
   const tCommon = useCommonTranslations();
 
   const t = useFixContactsPageTranslations();
+  const tMerge = useMergeWithModalTranslations();
   const [showDeclined, setShowDeclined] = useState(false);
+  const [restoringIds, setRestoringIds] = useState<Set<string>>(new Set());
   const queryClient = useQueryClient();
   const didBootstrapRefresh = useRef<boolean>(false);
 
@@ -37,6 +48,7 @@ export function FixClient() {
   const { data: eligibleCount = 0 } = useEnrichQueueCountQuery();
   const { data: queueStatus = null } = useEnrichQueueStatusQuery();
   const refreshMutation = useRefreshMergeRecommendationsMutation();
+  const restoreMutation = useRestoreMergeRecommendationMutation();
 
   useEffect(() => {
     if (
@@ -85,10 +97,37 @@ export function FixClient() {
     setShowDeclined(nextView === "hidden");
   };
 
+  const handleRestore = async (recommendationId: string) => {
+    setRestoringIds((prev) => new Set(prev).add(recommendationId));
+
+    try {
+      await restoreMutation.mutateAsync(recommendationId);
+      notifications.show(
+        successNotificationTemplate({
+          description: t("RestoreSuccess"),
+          title: t("SuccessTitle"),
+        }),
+      );
+    } catch (error) {
+      notifications.show(
+        errorNotificationTemplate({
+          description: getUserFacingError(error, tCommon),
+          title: t("ErrorTitle"),
+        }),
+      );
+    } finally {
+      setRestoringIds((prev) => {
+        const next = new Set(prev);
+        next.delete(recommendationId);
+        return next;
+      });
+    }
+  };
+
   const isRefreshing = isListFetching || refreshMutation.isPending;
 
   return (
-    <PageWrapper p={{ base: 0, sm: "xl" }}>
+    <PageWrapper>
       <Stack gap="xl">
         <PageHeader
           helpDoc="concepts.merge"
@@ -149,7 +188,45 @@ export function FixClient() {
           <Stack gap="sm">
             {recommendations.map((recommendation) =>
               showDeclined ? (
-                <HiddenRecommendationCard key={recommendation.id} recommendation={recommendation} />
+                <Paper
+                  className={classes["card"]}
+                  key={recommendation.id}
+                  p="md"
+                  radius="md"
+                  withBorder
+                >
+                  <div className={classes["pair"]}>
+                    <div className={classes["person"]}>
+                      <PersonChip
+                        isClickable
+                        person={recommendation.leftPerson}
+                        prefetch={false}
+                        truncate
+                      />
+                    </div>
+                    <Text c="dimmed" className={classes["label"]} fw={500} size="sm">
+                      {tMerge("MergeWithLabel")}
+                    </Text>
+                    <div className={classes["person"]}>
+                      <PersonChip
+                        isClickable
+                        person={recommendation.rightPerson}
+                        prefetch={false}
+                        truncate
+                      />
+                    </div>
+                  </div>
+                  <div className={classes["actions"]}>
+                    <Button
+                      leftSection={<IconRefresh size={16} />}
+                      loading={restoringIds.has(recommendation.id)}
+                      onClick={() => detachPromise(handleRestore(recommendation.id))}
+                      variant="default"
+                    >
+                      {t("RestoreSuggestion")}
+                    </Button>
+                  </div>
+                </Paper>
               ) : (
                 <MergeRecommendationCard
                   contacts={[recommendation.leftPerson, recommendation.rightPerson]}

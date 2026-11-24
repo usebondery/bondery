@@ -1,5 +1,6 @@
-import { Box, Group, Paper, SimpleGrid, Skeleton, Stack } from "@mantine/core";
+import { Group, Paper, SimpleGrid, Skeleton, Stack } from "@mantine/core";
 import { PageHeaderSkeleton } from "@/components/shell/PageHeaderSkeleton";
+import { PageWrapper } from "@/components/shell/PageWrapper";
 
 /**
  * Skeleton for a single GroupCard.
@@ -33,7 +34,7 @@ export function GroupsPageSkeleton() {
   const opacities = [1, 1, 0.9, 0.85, 0.75, 0.65];
 
   return (
-    <Box p="xl">
+    <PageWrapper>
       {/* Header: Create New Group button (~155px) */}
       <PageHeaderSkeleton primaryActionWidth={155} />
 
@@ -59,6 +60,6 @@ export function GroupsPageSkeleton() {
           </SimpleGrid>
         </Stack>
       </Paper>
-    </Box>
+    </PageWrapper>
   );
 }

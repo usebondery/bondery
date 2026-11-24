@@ -1,5 +1,6 @@
-import { Box, Group, Paper, Skeleton, Stack } from "@mantine/core";
+import { Group, Paper, Skeleton, Stack } from "@mantine/core";
 import { PageHeaderSkeleton } from "@/components/shell/PageHeaderSkeleton";
+import { PageWrapper } from "@/components/shell/PageWrapper";
 
 /**
  * Skeleton for a single interaction row in the timeline view.
@@ -32,7 +33,7 @@ function InteractionRowSkeleton({ opacity = 1 }: { opacity?: number }) {
  */
 export function InteractionsPageSkeleton() {
   return (
-    <Box p="xl">
+    <PageWrapper>
       {/* Header: SegmentedControl (~180px) + Log Interaction button (~145px) */}
       <PageHeaderSkeleton primaryActionWidth={145} secondaryActionWidth={180} />
 
@@ -47,6 +48,6 @@ export function InteractionsPageSkeleton() {
           <InteractionRowSkeleton key={slot} opacity={[1, 1, 0.85, 0.65, 0.45, 0.25][slot] ?? 1} />
         ))}
       </Stack>
-    </Box>
+    </PageWrapper>
   );
 }

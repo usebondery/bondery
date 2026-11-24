@@ -7,14 +7,12 @@ import {
   DropzoneContent,
   errorNotificationTemplate,
   ModalFooter,
-  ModalScrollLayout,
   ModalTitle,
   warningNotificationTemplate,
 } from "@bondery/mantine-next";
-import type { Contact, VCardPreparedContact } from "@bondery/schemas";
+import type { VCardPreparedContact } from "@bondery/schemas";
 import { VCARD_IMPORT_COMMIT_BATCH_SIZE } from "@bondery/schemas/constants";
 import {
-  Badge,
   Center,
   Divider,
   Group,
@@ -31,16 +29,13 @@ import { notifications } from "@mantine/notifications";
 import { NavigationProgress } from "@mantine/nprogress";
 import {
   IconAddressBook,
-  IconAlertTriangle,
   IconArrowLeft,
   IconArrowRight,
-  IconCircleCheck,
   IconDeviceMobile,
 } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import type { JSX } from "react";
 import { useEffect, useRef, useState } from "react";
-import ContactsTable from "@/components/contacts/ContactsTableV2";
 import { captureImportComplete } from "@/lib/analytics/imports";
 import { useCommonTranslations, useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useModalDismiss } from "@/lib/modals";
@@ -53,6 +48,7 @@ import { useSettingsQuery } from "@/lib/query/hooks/useSettings";
 import { useImporterNavigationProgress } from "../../hooks/useImporterNavigationProgress";
 import { ImportFinishedStep } from "../import/ImportFinishedStep";
 import { ImportIntroStep } from "../import/ImportIntroStep";
+import { VCardImportPreviewStep } from "../import/VCardImportPreviewStep";
 
 type Step = "intro" | "instructions" | "upload" | "processing" | "preview" | "finished";
 
@@ -64,40 +60,6 @@ const STEP_PROGRESS: Record<Step, number> = {
   processing: 68,
   upload: 50,
 };
-
-function toPreviewContact(contact: VCardPreparedContact): Contact {
-  return {
-    avatar: contact.avatarUri,
-    createdAt: new Date().toISOString(),
-    emails: contact.emails,
-    facebook: contact.facebook,
-    firstName: contact.firstName,
-    gisPoint: null,
-    headline: contact.headline,
-    id: contact.tempId,
-    importantDates: null,
-    instagram: contact.instagram,
-    keepFrequencyDays: null,
-    language: null,
-    lastInteraction: null,
-    lastInteractionActivityId: null,
-    lastName: contact.lastName,
-    latitude: null,
-    linkedin: contact.linkedin,
-    location: null,
-    longitude: null,
-    middleName: contact.middleName,
-    myself: false,
-    notes: null,
-    phones: contact.phones,
-    signal: contact.signal,
-    timezone: null,
-    updatedAt: new Date().toISOString(),
-    userId: "",
-    website: contact.website,
-    whatsapp: contact.whatsapp,
-  };
-}
 
 function sortVCardContactsForPreview(contacts: VCardPreparedContact[]): VCardPreparedContact[] {
   return contacts
@@ -134,26 +96,24 @@ export function VCardImportModal({
     total: number;
   } | null>(null);
   const [parsedContacts, setParsedContacts] = useState<VCardPreparedContact[]>([]);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [finishedStats, setFinishedStats] = useState<{
     imported: number;
     skipped: number;
   } | null>(null);
   const openRef = useRef<(() => void) | null>(null);
-  const lastSelectedIndexRef = useRef<number | null>(null);
 
-  const previewContacts = parsedContacts.filter((contact) => contact.isValid).map(toPreviewContact);
+  /**
+   * Every valid contact. Nothing is selectable in the preview, so this is also what the import
+   * commits.
+   */
+  const importableContacts = parsedContacts.filter((contact) => contact.isValid);
 
-  const importedContacts = previewContacts.filter((contact) => selectedIds.has(contact.id));
-
-  const validContactsCount = parsedContacts.filter((contact) => contact.isValid).length;
-
-  const invalidContactsCount = parsedContacts.length - validContactsCount;
-
-  const selectableIds = previewContacts.map((contact) => contact.id);
-
-  const allSelected = selectableIds.length > 0 && selectableIds.every((id) => selectedIds.has(id));
-  const someSelected = selectedIds.size > 0 && !allSelected;
+  const previewPeople = importableContacts.map((contact) => ({
+    avatar: contact.avatarUri,
+    firstName: contact.firstName,
+    id: contact.tempId,
+    lastName: contact.lastName,
+  }));
 
   useImporterNavigationProgress({
     importProgress,
@@ -174,66 +134,13 @@ export function VCardImportModal({
   useEffect(() => {
     modals.updateModal({
       modalId,
-      size:
-        (step === "preview" || step === "finished") && !isImporting
-          ? "80rem"
-          : step === "intro" ||
-              step === "instructions" ||
-              step === "upload" ||
-              step === "processing" ||
-              isImporting
-            ? "lg"
-            : "xl",
+      // Every import step fits the same width, so the flow does not resize between steps.
+      size: "lg",
       title: (
         <ModalTitle icon={<IconAddressBook size={20} stroke={1.5} />} text={t("ModalTitle")} />
       ),
     });
   }, [isImporting, modalId, step, t]);
-
-  const handleToggleAll = () => {
-    setSelectedIds((prev) => {
-      const isAllSelected = selectableIds.length > 0 && selectableIds.every((id) => prev.has(id));
-      if (isAllSelected) {
-        return new Set<string>();
-      }
-      return new Set(selectableIds);
-    });
-  };
-
-  const handleToggleOne = (id: string, options?: { shiftKey?: boolean; index?: number }) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-
-      const rowIndex = options?.index;
-      const hasRangeSelection =
-        options?.shiftKey && typeof rowIndex === "number" && lastSelectedIndexRef.current !== null;
-
-      if (hasRangeSelection && typeof rowIndex === "number") {
-        const anchorIndex = lastSelectedIndexRef.current;
-        if (anchorIndex === null) {
-          return prev;
-        }
-        const start = Math.min(anchorIndex, rowIndex);
-        const end = Math.max(anchorIndex, rowIndex);
-        for (let index = start; index <= end; index += 1) {
-          const row = previewContacts[index];
-          if (row) {
-            next.add(row.id);
-          }
-        }
-      } else if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-
-      return next;
-    });
-
-    if (typeof options?.index === "number") {
-      lastSelectedIndexRef.current = options.index;
-    }
-  };
 
   const parseUpload = async (files: File[]) => {
     if (files.length === 0) {
@@ -252,13 +159,7 @@ export function VCardImportModal({
       const result = await parseImport.mutateAsync(formData);
 
       const contacts = (result.contacts || []) as VCardPreparedContact[];
-      const sortedContacts = sortVCardContactsForPreview(contacts);
-
-      setParsedContacts(sortedContacts);
-      lastSelectedIndexRef.current = null;
-      setSelectedIds(
-        new Set(sortedContacts.filter((item) => item.isValid).map((item) => item.tempId)),
-      );
+      setParsedContacts(sortVCardContactsForPreview(contacts));
       setStep("preview");
     } catch (error) {
       notifications.show(
@@ -274,9 +175,7 @@ export function VCardImportModal({
   };
 
   const handleImport = async () => {
-    const selectedContacts = parsedContacts.filter((contact) => selectedIds.has(contact.tempId));
-
-    if (selectedContacts.length === 0) {
+    if (importableContacts.length === 0) {
       notifications.show(
         warningNotificationTemplate({
           description: t("NoContactsSelected"),
@@ -287,7 +186,7 @@ export function VCardImportModal({
     }
 
     setIsImporting(true);
-    setImportProgress({ current: 0, total: selectedContacts.length });
+    setImportProgress({ current: 0, total: importableContacts.length });
     const isFirstImport =
       settingsResult?.data?.importCompletedAt === null ||
       settingsResult?.data?.importCompletedAt === undefined;
@@ -297,9 +196,9 @@ export function VCardImportModal({
 
     try {
       const batchSize = VCARD_IMPORT_COMMIT_BATCH_SIZE;
-      for (let i = 0; i < selectedContacts.length; i += batchSize) {
-        const batch = selectedContacts.slice(i, i + batchSize);
-        const isLastBatch = i + batchSize >= selectedContacts.length;
+      for (let i = 0; i < importableContacts.length; i += batchSize) {
+        const batch = importableContacts.slice(i, i + batchSize);
+        const isLastBatch = i + batchSize >= importableContacts.length;
 
         const result = await commitImport.mutateAsync({
           body: { contacts: batch },
@@ -310,8 +209,8 @@ export function VCardImportModal({
         totalSkipped += result.skippedCount ?? 0;
 
         setImportProgress({
-          current: Math.min(i + batchSize, selectedContacts.length),
-          total: selectedContacts.length,
+          current: Math.min(i + batchSize, importableContacts.length),
+          total: importableContacts.length,
         });
       }
 
@@ -330,6 +229,11 @@ export function VCardImportModal({
       setIsImporting(false);
       setImportProgress(null);
     }
+  };
+
+  const handleViewContacts = () => {
+    closeModal();
+    router.push(routeAssert(WEBAPP_ROUTES.PEOPLE));
   };
 
   if (step === "intro") {
@@ -476,21 +380,7 @@ export function VCardImportModal({
         closeLabel={tCommon("a11y.close")}
         description={finishedStats ? t("ImportSuccess", finishedStats) : undefined}
         onClose={closeModal}
-        onViewContacts={() => {
-          closeModal();
-          router.push(routeAssert(WEBAPP_ROUTES.PEOPLE));
-        }}
-        overview={
-          importedContacts.length > 0 ? (
-            <ContactsTable
-              contacts={importedContacts}
-              disableNameLink
-              noContactsFound={t("NoContactsFound")}
-              noContactsMatchSearch={t("NoContactsMatchSearch")}
-              visibleColumns={["name", "headline", "phone", "email"]}
-            />
-          ) : undefined
-        }
+        onViewContacts={handleViewContacts}
         title={t("SuccessTitle")}
         viewContactsLabel={tCommon("actions.viewContacts")}
       />,
@@ -498,63 +388,29 @@ export function VCardImportModal({
   }
 
   return renderWithNavigationProgress(
-    <ModalScrollLayout
-      footer={
-        <ModalFooter
-          actionDisabled={isImporting}
-          actionLabel={t("ImportSelected", { count: selectedIds.size })}
-          actionLeftSection={!isImporting ? <IconAddressBook size={16} /> : undefined}
-          actionLoading={isImporting}
-          backDisabled={isImporting}
-          backLabel={t("Back")}
-          backLeftSection={<IconArrowLeft size={16} />}
-          cancelDisabled={isImporting}
-          cancelLabel={t("Cancel")}
-          mt={0}
-          onAction={() => {
-            detachPromise(handleImport());
-          }}
-          onBack={() => setStep("upload")}
-          onCancel={closeModal}
-        />
+    <VCardImportPreviewStep
+      backLabel={t("Back")}
+      cancelLabel={t("Cancel")}
+      counts={[
+        { label: t("TotalLabel"), value: parsedContacts.length },
+        { isPrimary: true, label: t("WillAddLabel"), value: importableContacts.length },
+      ]}
+      description={t("PreviewDescription")}
+      emptyLabel={t("NoContactsFound")}
+      importLabel={t("ImportAction")}
+      isImporting={isImporting}
+      onBack={() => setStep("upload")}
+      onCancel={closeModal}
+      onImport={() => {
+        detachPromise(handleImport());
+      }}
+      people={previewPeople}
+      peopleLabel={t("PeopleToAdd")}
+      remainderLabel={
+        importableContacts.length > 10
+          ? t("AndMore", { count: importableContacts.length - 10 })
+          : undefined
       }
-      header={
-        <Stack gap="md">
-          <Group justify="space-between">
-            <Group gap="xs">
-              <Badge color="blue" variant="light">
-                {t("Total", { count: parsedContacts.length })}
-              </Badge>
-              <Badge color="green" leftSection={<IconCircleCheck size={12} />} variant="light">
-                {t("Valid", { count: validContactsCount })}
-              </Badge>
-              {invalidContactsCount > 0 ? (
-                <Badge color="orange" leftSection={<IconAlertTriangle size={12} />} variant="light">
-                  {t("Invalid", { count: invalidContactsCount })}
-                </Badge>
-              ) : null}
-            </Group>
-          </Group>
-
-          <Text c="dimmed" size="sm">
-            {t("ChooseContactsHint")}
-          </Text>
-        </Stack>
-      }
-    >
-      <ContactsTable
-        allSelected={allSelected}
-        contacts={previewContacts}
-        disableNameLink
-        noContactsFound={t("NoContactsFound")}
-        noContactsMatchSearch={t("NoContactsMatchSearch")}
-        onSelectAll={handleToggleAll}
-        onSelectOne={handleToggleOne}
-        selectedIds={selectedIds}
-        showSelection
-        someSelected={someSelected}
-        visibleColumns={["name", "headline", "phone", "email"]}
-      />
-    </ModalScrollLayout>,
+    />,
   );
 }

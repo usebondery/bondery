@@ -1,23 +1,25 @@
-import { Box, type MantineSpacing, type StyleProp } from "@mantine/core";
+import { Box } from "@mantine/core";
 
 interface PageWrapperProps {
   children: React.ReactNode;
   /** Fill the shell viewport. Use on a page whose body is a locked canvas. */
   fill?: boolean;
-  /**
-   * Page gutter. The shell already insets content by `md`, so a phone page that
-   * packs cards in a row passes a smaller `base` value.
-   * @defaultValue "xl"
-   */
-  p?: StyleProp<MantineSpacing>;
 }
 
-export function PageWrapper({ children, fill = false, p = "xl" }: PageWrapperProps) {
+/**
+ * Page body inside `AppShellMainScrollArea`.
+ *
+ * The scroller owns the base `md` inset, which matches the phone header gutter.
+ * This wrapper adds the wider desktop gutter from `sm` up only. A phone keeps
+ * one 16px inset, and a desktop keeps its 48px column.
+ */
+export function PageWrapper({ children, fill = false }: PageWrapperProps) {
   return (
     <Box
       h={fill ? "100%" : undefined}
       mih={fill ? 0 : undefined}
-      p={p}
+      px={{ base: 0, sm: "xl" }}
+      py="xl"
       style={
         fill ? { boxSizing: "border-box", display: "flex", flexDirection: "column" } : undefined
       }

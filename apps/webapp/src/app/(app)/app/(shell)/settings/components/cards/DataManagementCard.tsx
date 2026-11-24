@@ -1,6 +1,7 @@
 "use client";
 
-import { CardSection, Divider, Group, Text } from "@mantine/core";
+import { TileCardGrid } from "@bondery/mantine-next";
+import { CardSection, Divider, Stack, Text } from "@mantine/core";
 import { IconDatabase } from "@tabler/icons-react";
 import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import {
@@ -38,15 +39,19 @@ export function DataManagementCard() {
         py="md"
         style={SECTION_SCROLL_MARGIN}
       >
-        <Text fw={500} mb={4} size="sm">
-          {t("Export.SectionTitle")}
-        </Text>
-        <Text c="dimmed" mb="md" size="xs">
-          {t("Export.Description")}
-        </Text>
-        <Group align="flex-start" gap="md" wrap="wrap">
-          <BonderyExportSection />
-        </Group>
+        <Stack gap="sm">
+          <div>
+            <Text fw={500} size="sm">
+              {t("Export.SectionTitle")}
+            </Text>
+            <Text c="dimmed" size="xs">
+              {t("Export.Description")}
+            </Text>
+          </div>
+          <TileCardGrid>
+            <BonderyExportSection />
+          </TileCardGrid>
+        </Stack>
       </CardSection>
 
       <Divider />
@@ -57,18 +62,22 @@ export function DataManagementCard() {
         py="md"
         style={SECTION_SCROLL_MARGIN}
       >
-        <Text fw={500} mb={4} size="sm">
-          {t("ImportSectionTitle")}
-        </Text>
-        <Text c="dimmed" mb="md" size="xs">
-          {t("ImportContactsDescription")}
-        </Text>
-        <Group align="flex-start" gap="md" wrap="wrap">
-          <LinkedInImportSection />
-          <InstagramImportSection />
-          <VCardImportSection />
-          <BonderyImportSection />
-        </Group>
+        <Stack gap="sm">
+          <div>
+            <Text fw={500} size="sm">
+              {t("ImportSectionTitle")}
+            </Text>
+            <Text c="dimmed" size="xs">
+              {t("ImportContactsDescription")}
+            </Text>
+          </div>
+          <TileCardGrid>
+            <LinkedInImportSection />
+            <InstagramImportSection />
+            <VCardImportSection />
+            <BonderyImportSection />
+          </TileCardGrid>
+        </Stack>
       </CardSection>
 
       <Divider />

@@ -8,36 +8,41 @@ How Bondery says what it does. Strategy lives in [positioning.md](./positioning.
 
 | Layer                                                  | Copy                                                                                                  |
 | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
-| **Headline**                                           | Everyone you know, in one place your AI can use                                                       |
+| **Headline**                                           | Build stronger bonds                                                                                  |
 | **Subhead**                                            | Bondery merges your contacts, keeps them in sync, and reminds you to stay in touch.                   |
 | **Long form** (meta description, about, store listing) | Bondery brings together everyone you know. Merged, searchable, always in sync, and ready for your AI. |
 | **Features title**                                     | Everything you need to build stronger bonds                                                           |
 | **Voice tagline**                                      | A buddy for the relationships that matter                                                             |
 
-The headline is the **UVP**. The voice tagline stays as the warm-friend brand line for tone and secondary placements (about page, emails). Do not stack both in the hero.
+The headline is the **brand promise**. The voice tagline stays as the warm-friend brand line for tone and secondary placements (about page, emails). Do not stack both in the hero.
+
+> **Note:** the hero now reads "Build stronger bonds". The earlier UVP headline, "Everyone you know, in one place your AI can use", stays the reference for SEO titles and long-form copy, where the concrete offer still beats the brand promise.
 
 ### Naming logic
 
 | Copy                                            | Reasoning                                                                                                                                               |
 | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Build stronger bonds**                        | The brand promise, and the shortest form of the name logic. The hero uses it because it names the outcome, and the subhead supplies the concrete offer. |
 | **Everything you need to build stronger bonds** | We are Bondery. We build the _bonds_, the edges between you and your network. Say the brand verb, not "stay close".                                     |
-| **All the people you met in one place**         | Contacts come from every source you met people through across your life. We unify them. _Met_ is history and sources; the hero's _know_ is the present. |
+| **All the people you met in one place**         | Contacts come from every source you met people through across your life. We unify them. _Met_ is history and sources.                                   |
 
 Full reasoning: [positioning.md](./positioning.md#name-logic-why-bondery-says-bonds).
 
 ### Why this claim
 
-- Says **what it is** (one place for everyone you know) and **what is new** (your AI can use it).
-- Plain words, no category jargon. A founder gets it in one read.
-- Same shape as the best claims in the category: what it collects, how it behaves, what you get.
+- Says **the outcome** (stronger bonds) in four plain words.
+- Reads as an invitation, not a feature list, which suits the warm-friend voice.
+- The subhead under it carries **what it is** and **what is new**, so the pair still answers both questions.
+- It repeats the features title on purpose: the hero states the promise, the features section delivers it.
 
 ### Alternates considered
 
-| Option                                                    | Why not (yet)                                                                            |
-| --------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Build stronger bonds that grow your network               | Vague. Could describe any networking tool. Previous hero.                                |
-| The open-source address book for your network and your AI | Accurate, but "address book" undersells search and reminders. Good for the UVP sentence. |
-| Your network, ready for your AI                           | Shorter, but drops "everyone you know", the concrete part.                               |
+| Option                                                    | Why not (yet)                                                                             |
+| --------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Everyone you know, in one place your AI can use           | The previous hero. Best for SEO titles and long-form copy, where the concrete offer wins. |
+| Build stronger bonds that grow your network               | Vague tail. "Grow your network" pulls toward networking-tool positioning.                 |
+| The open-source address book for your network and your AI | Accurate, but "address book" undersells search and reminders. Good for the UVP sentence.  |
+| Your network, ready for your AI                           | Shorter, but drops "everyone you know", the concrete part.                                |
 
 Test any new headline against: _Does it say what we collect? Does it say who uses it? Could a competitor say it?_
 

@@ -111,7 +111,7 @@
     "start": "next start",
     "store-shots": "pnpm dlx --package @playwright/test@1.62.1 playwright test -c e2e/store-shots.playwright.config.mjs",
     "test:auth": "tsx --test src/lib/auth/*.test.ts src/lib/auth/reconfirm/*.test.ts",
-    "test:availability": "tsx --test src/lib/api/availabilityStore.test.ts src/lib/api/applyTransportErrorPolicy.test.ts src/lib/api/health.test.ts src/lib/api/resolveServerApiUrl.test.ts src/lib/api/isMissingContactError.test.ts",
+    "test:availability": "tsx --test src/lib/api/availabilityStore.test.ts src/lib/api/applyTransportErrorPolicy.test.ts src/lib/api/health.test.ts src/lib/api/resolveServerApiUrl.test.ts src/lib/api/isMissingContactError.test.ts src/lib/api/resources/subscription.test.ts",
     "test:e2e": "node scripts/run-playwright.mjs",
     "test:e2e:auth-setup": "node scripts/run-playwright.mjs --project=setup",
     "test:e2e:debug": "node scripts/run-playwright.mjs --debug",

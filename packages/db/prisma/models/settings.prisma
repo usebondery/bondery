@@ -62,7 +62,9 @@ model UserSettings {
   importFollowupStatus      String?         @map("import_followup_status")
   aiMessagesUsed            Int             @default(0) @map("ai_messages_used")
   aiMessagesThisMonth       Int             @default(0) @map("ai_messages_this_month")
-  aiMessagesMonthResetAt    DateTime        @map("ai_messages_month_reset_at")
+  /// Exclusive end of the current AI usage period. The Stripe mirror writes it from
+  /// `subscriptions.current_period_end`, so the window follows the billing cycle.
+  aiMessagesMonthResetAt    DateTime        @map("ai_messages_month_reset_at") @db.Timestamptz(3)
   productAnalyticsEnabled   Boolean         @default(true) @map("product_analytics_enabled")
   createdAt                 DateTime        @default(now()) @map("created_at")
   updatedAt                 DateTime        @updatedAt @map("updated_at")

@@ -11,6 +11,7 @@ import {
   findUserIdByEmail,
   type SubscriptionMirrorFields,
   storePendingSubscription,
+  syncAiQuotaPeriod,
   upsertSubscription,
 } from "../subscription.js";
 
@@ -124,6 +125,12 @@ export async function upsertSubscriptionFromStripe(
       "stripe-webhook: user no longer exists — skipping subscription upsert",
     );
     return;
+  }
+
+  // The chat allowance follows the paid period, so its window ends when this one does.
+  // A new period end starts a new window; Stripe redelivery passes the same end twice.
+  if (currentPeriodEnd) {
+    await syncAiQuotaPeriod(userId, currentPeriodEnd, log);
   }
 
   if (options?.eventType === "customer.subscription.created") {

@@ -14,11 +14,15 @@ type PersonChipBadgeStyles = {
   label: {
     color: string | undefined;
     fontWeight: 400;
-    overflow: "visible";
+    minWidth: number | undefined;
+    overflow: "hidden" | "visible";
+    textOverflow: "ellipsis" | undefined;
     textTransform: "none";
   };
   root: {
     cursor: "pointer" | "default";
+    maxWidth: string | undefined;
+    minWidth: number | undefined;
     opacity: number;
     paddingInlineEnd: number | undefined;
     paddingInlineStart: number | undefined;
@@ -74,6 +78,11 @@ export function personChipBadgeStyles(args: {
   hasPerson: boolean;
   interactive: boolean;
   size: PersonChipSize;
+  /**
+   * Lets the chip shrink below its name width and ellipsize the name. Use it in
+   * a row that must not overflow, such as a merge suggestion on a narrow card.
+   */
+  truncate: boolean;
 }): PersonChipBadgeStyles {
   const sizes = personChipSizes(args.size);
 
@@ -81,11 +90,17 @@ export function personChipBadgeStyles(args: {
     label: {
       color: args.hasPerson ? undefined : "var(--mantine-color-dimmed)",
       fontWeight: 400,
-      overflow: "visible",
+      // A grid item keeps its content width until `min-width` allows a shrink.
+      minWidth: args.truncate ? 0 : undefined,
+      overflow: args.truncate ? "hidden" : "visible",
+      textOverflow: args.truncate ? "ellipsis" : undefined,
       textTransform: "none",
     },
     root: {
       cursor: args.interactive && !args.disabled ? "pointer" : "default",
+      maxWidth: args.truncate ? "100%" : undefined,
+      // A flex item keeps its content width until `min-width` allows a shrink.
+      minWidth: args.truncate ? 0 : undefined,
       opacity: args.disabled ? 0.6 : 1,
       paddingInlineEnd: args.hasPerson && args.hasEndSection ? sizes.endPadding : undefined,
       paddingInlineStart: args.hasPerson && args.avatarEdge ? 0 : undefined,

@@ -54,7 +54,8 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
       >
         <Box
           hiddenFrom="sm"
-          p="sm"
+          px={0}
+          py="sm"
           style={{
             borderBottom: "1px solid var(--mantine-color-default-border)",
             display: "flex",

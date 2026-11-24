@@ -12,6 +12,7 @@ import {
   DEFAULT_LOCALE,
   type SupportedLocale,
 } from "@bondery/schemas/locale/supported-locale";
+import { firstAiUsagePeriodEnd } from "../chat/ai-usage-period.js";
 import { resolveNewUserDisplayName, splitDisplayName } from "./new-user-name.js";
 
 export async function provisionNewUser(params: {
@@ -41,7 +42,7 @@ export async function provisionNewUser(params: {
   if (!settings) {
     await prisma.userSettings.create({
       data: {
-        aiMessagesMonthResetAt: now,
+        aiMessagesMonthResetAt: firstAiUsagePeriodEnd(now),
         language: locale,
         nextReminderAtUtc: now,
         timezone: "UTC",

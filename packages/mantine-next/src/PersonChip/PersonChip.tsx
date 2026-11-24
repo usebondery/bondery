@@ -25,6 +25,12 @@ export interface PersonChipProps {
   onClick?: () => void;
   rightSection?: ReactNode;
   size?: PersonChipSize;
+  /**
+   * Lets the chip shrink and ellipsize the name instead of holding its full
+   * content width. Use it in a row that must not overflow, such as a merge
+   * suggestion card on a narrow screen.
+   */
+  truncate?: boolean;
 }
 
 /**
@@ -46,6 +52,7 @@ export function PersonChip({
   interactive,
   label,
   rightSection,
+  truncate = false,
 }: PersonChipProps): ReactElement {
   const lastNameSuffix = lastName ? ` ${lastName}` : "";
   const fullName = (label ?? `${firstName}${lastNameSuffix}`).trim();
@@ -91,6 +98,7 @@ export function PersonChip({
         hasPerson,
         interactive: isInteractive,
         size,
+        truncate,
       })}
       variant={badgeVariant}
       vars={personChipBadgeVars(size)}

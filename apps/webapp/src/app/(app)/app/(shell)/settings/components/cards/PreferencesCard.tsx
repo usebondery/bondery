@@ -483,6 +483,20 @@ export function PreferencesCard() {
             </PreferencesField>
 
             <PreferencesField>
+              <ReminderTimePicker
+                label={renderFieldLabel(t("ReminderTime"), t("ReminderTimeTooltip"))}
+                onBlur={() => {
+                  detachPromise(persistReminderHour(reminderHour));
+                }}
+                onChange={setReminderHour}
+                timeFormat={timeFormat}
+                value={reminderHour}
+              />
+            </PreferencesField>
+          </PreferencesFieldRow>
+
+          <PreferencesFieldRow>
+            <PreferencesField>
               <TimeFormatPicker
                 label={renderFieldLabel(t("TimeFormat"), t("TimeFormatTooltip"))}
                 onChange={(nextFormat) => {
@@ -492,9 +506,7 @@ export function PreferencesCard() {
                 value={timeFormat}
               />
             </PreferencesField>
-          </PreferencesFieldRow>
 
-          <PreferencesFieldRow>
             <PreferencesField>
               <DateFormatPicker
                 label={renderFieldLabel(t("DateFormat"), t("DateFormatTooltip"))}
@@ -504,20 +516,6 @@ export function PreferencesCard() {
                 onChange={setDateFormat}
                 placeholder={t("DateFormatSearch")}
                 value={dateFormat}
-              />
-            </PreferencesField>
-          </PreferencesFieldRow>
-
-          <PreferencesFieldRow>
-            <PreferencesField>
-              <ReminderTimePicker
-                label={renderFieldLabel(t("ReminderTime"), t("ReminderTimeTooltip"))}
-                onBlur={() => {
-                  detachPromise(persistReminderHour(reminderHour));
-                }}
-                onChange={setReminderHour}
-                timeFormat={timeFormat}
-                value={reminderHour}
               />
             </PreferencesField>
           </PreferencesFieldRow>

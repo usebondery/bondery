@@ -1,26 +1,23 @@
 "use client";
 
-import { Stack } from "@mantine/core";
-import { IconBrandInstagram } from "@tabler/icons-react";
-import { IntegrationCard } from "@/components/shared/IntegrationCard";
+import { BrandIcon } from "@bondery/branding";
+import { TileCard } from "@bondery/mantine-next";
 import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { openInstagramImportModal } from "../modals/openInstagramImportModal";
 
 export function InstagramImportSection() {
   const t = useSettingsPageTranslations("DataManagement.InstagramImport");
+  const tDataManagement = useSettingsPageTranslations("DataManagement");
 
   return (
-    <Stack gap="sm">
-      <IntegrationCard
-        displayName={t("Instagram")}
-        icon={IconBrandInstagram}
-        iconColor="pink"
-        isConnected={false}
-        isDisabled={false}
-        isLinkable={false}
-        onClick={() => openInstagramImportModal()}
-        provider="instagram_import"
-      />
-    </Stack>
+    <TileCard
+      actionLabel={t("ImportAction")}
+      caption={tDataManagement("CategorySocials")}
+      description={t("IntroDescription1")}
+      icon={<BrandIcon name="instagram" size={32} />}
+      onClick={() => openInstagramImportModal()}
+      title={t("Instagram")}
+      variant="link"
+    />
   );
 }

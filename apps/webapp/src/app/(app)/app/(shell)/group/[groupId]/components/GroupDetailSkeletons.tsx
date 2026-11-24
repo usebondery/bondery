@@ -1,5 +1,6 @@
-import { Box, Stack } from "@mantine/core";
+import { Stack } from "@mantine/core";
 import { PageHeaderSkeleton } from "@/components/shell/PageHeaderSkeleton";
+import { PageWrapper } from "@/components/shell/PageWrapper";
 import { GroupCardSkeleton } from "../../../groups/components/GroupsSkeletons";
 import { PeopleTableSkeleton } from "../../../people/components/chrome/PeopleSkeletons";
 
@@ -9,12 +10,12 @@ import { PeopleTableSkeleton } from "../../../people/components/chrome/PeopleSke
  */
 export function GroupDetailPageSkeleton() {
   return (
-    <Box p="xl">
+    <PageWrapper>
       <Stack gap="xl">
         <PageHeaderSkeleton primaryActionWidth={160} />
         <GroupCardSkeleton />
         <PeopleTableSkeleton />
       </Stack>
-    </Box>
+    </PageWrapper>
   );
 }

@@ -1,4 +1,4 @@
-import type { Contact, InstagramPreparedContact } from "@bondery/schemas";
+import type { InstagramPreparedContact } from "@bondery/schemas";
 
 type ZipValidationError = "no-file" | "file-too-large" | "invalid-extension" | "invalid-mime";
 
@@ -63,40 +63,6 @@ export function validateInstagramZipFile(
 }
 
 export type ZipValidationErrorCode = ZipValidationError;
-
-export function toInstagramPreviewContact(contact: InstagramPreparedContact): Contact {
-  return {
-    avatar: null,
-    createdAt: new Date().toISOString(),
-    emails: [],
-    facebook: null,
-    firstName: contact.firstName,
-    gisPoint: null,
-    headline: null,
-    id: contact.tempId,
-    importantDates: null,
-    instagram: contact.instagramUrl,
-    keepFrequencyDays: null,
-    language: null,
-    lastInteraction: null,
-    lastInteractionActivityId: null,
-    lastName: contact.lastName,
-    latitude: null,
-    linkedin: null,
-    location: null,
-    longitude: null,
-    middleName: contact.middleName,
-    myself: false,
-    notes: null,
-    phones: [],
-    signal: null,
-    timezone: null,
-    updatedAt: new Date().toISOString(),
-    userId: "",
-    website: null,
-    whatsapp: null,
-  };
-}
 
 export function sortInstagramContactsForPreview(
   contacts: InstagramPreparedContact[],

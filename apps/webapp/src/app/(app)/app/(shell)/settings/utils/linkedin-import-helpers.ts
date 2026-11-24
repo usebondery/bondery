@@ -1,19 +1,4 @@
-import type { Contact, LinkedInPreparedContact } from "@bondery/schemas";
-
-function buildImportedTitle(position: string | null, company: string | null): string | null {
-  const normalizedPosition = typeof position === "string" ? position.trim() : "";
-  const normalizedCompany = typeof company === "string" ? company.trim() : "";
-
-  if (normalizedPosition && normalizedCompany) {
-    return `${normalizedPosition} @${normalizedCompany}`;
-  }
-
-  if (normalizedPosition) {
-    return normalizedPosition;
-  }
-
-  return normalizedCompany || null;
-}
+import type { LinkedInPreparedContact } from "@bondery/schemas";
 
 export type LinkedInImportStep =
   | "intro"
@@ -31,40 +16,6 @@ export const LINKEDIN_STEP_PROGRESS: Record<LinkedInImportStep, number> = {
   processing: 68,
   upload: 50,
 };
-
-export function toLinkedInPreviewContact(contact: LinkedInPreparedContact): Contact {
-  return {
-    avatar: null,
-    createdAt: new Date().toISOString(),
-    emails: [],
-    facebook: null,
-    firstName: contact.firstName,
-    gisPoint: null,
-    headline: buildImportedTitle(contact.position, contact.company),
-    id: contact.tempId,
-    importantDates: null,
-    instagram: null,
-    keepFrequencyDays: null,
-    language: null,
-    lastInteraction: null,
-    lastInteractionActivityId: null,
-    lastName: contact.lastName,
-    latitude: null,
-    linkedin: contact.linkedinUrl,
-    location: null,
-    longitude: null,
-    middleName: contact.middleName,
-    myself: false,
-    notes: null,
-    phones: [],
-    signal: null,
-    timezone: null,
-    updatedAt: new Date().toISOString(),
-    userId: "",
-    website: null,
-    whatsapp: null,
-  };
-}
 
 export function sortLinkedInContactsForPreview(
   contacts: LinkedInPreparedContact[],

@@ -1,6 +1,6 @@
 "use client";
 
-import { Group, Stack, Text } from "@mantine/core";
+import { Stack, Text } from "@mantine/core";
 import { TimePicker } from "@mantine/dates";
 import { IconBell } from "@tabler/icons-react";
 import type { ReactNode } from "react";
@@ -53,33 +53,30 @@ export function ReminderTimePicker({
           {description}
         </Text>
       ) : null}
-      <Group align="flex-end" grow wrap="wrap">
-        <div style={{ flex: 1, minWidth: 220 }}>
-          <TimePicker
-            amPmLabels={formatter.amPmLabels()}
-            format={timeFormat}
-            key={timeFormat}
-            leftSection={<IconBell size={16} />}
-            minutesStep={60}
-            onBlur={onBlur}
-            onChange={(nextValue) => {
-              if (!nextValue) {
-                return;
-              }
+      <TimePicker
+        amPmLabels={formatter.amPmLabels()}
+        format={timeFormat}
+        key={timeFormat}
+        leftSection={<IconBell size={16} />}
+        minutesStep={60}
+        onBlur={onBlur}
+        onChange={(nextValue) => {
+          if (!nextValue) {
+            return;
+          }
 
-              const parsedValue = parseReminderPickerInput(nextValue);
-              if (!parsedValue) {
-                return;
-              }
+          const parsedValue = parseReminderPickerInput(nextValue);
+          if (!parsedValue) {
+            return;
+          }
 
-              onChange(parsedValue);
-            }}
-            presets={presetGroups}
-            value={value}
-            withDropdown
-          />
-        </div>
-      </Group>
+          onChange(parsedValue);
+        }}
+        presets={presetGroups}
+        value={value}
+        w="100%"
+        withDropdown
+      />
     </Stack>
   );
 }
