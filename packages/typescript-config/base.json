@@ -26,7 +26,7 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "ES2022",
-    "tsBuildInfoFile": "${configDir}/.cache/tsconfig.tsbuildinfo",
+    "tsBuildInfoFile": "${configDir}/tsconfig.tsbuildinfo",
     "verbatimModuleSyntax": true
   }
 }

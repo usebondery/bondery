@@ -84,7 +84,7 @@ Every app and package `tsconfig.json` extends a preset from `@bondery/typescript
 
 Mobile and the Chrome extension use an `extends` array. The vendor config is first (`expo/tsconfig.base` or `./.wxt/tsconfig.json`). `@bondery/typescript-config/base.json` is last so overlapping keys use our flags.
 
-`tsBuildInfoFile` lives only in `base.json` as `${configDir}/.cache/tsconfig.tsbuildinfo`. App and package tsconfigs do not set that path.
+`tsBuildInfoFile` lives only in `base.json` as `${configDir}/tsconfig.tsbuildinfo`. App and package tsconfigs do not set that path. A `packages/*/.cache` directory breaks pnpm's injected package links, so the incremental file stays next to `tsconfig.json`, where `*.tsbuildinfo` is already ignored.
 
 `base.json` targets `ES2022` and sets `allowJs` to false. App tsconfigs and `nextjs.json` do not turn `allowJs` on. Expo's preset sets `allowJs` true; mobile lists our base last so the flag stays false. TypeScript programs include `.ts` and `.tsx` only. Node scripts stay `.mjs` and are not part of `tsc`. `check:tsconfig-extends` fails a tsconfig that sets `allowJs` to true.
 

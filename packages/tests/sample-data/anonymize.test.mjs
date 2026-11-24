@@ -196,3 +196,21 @@ describe("anonymize vcf", () => {
     });
   });
 });
+
+describe("anonymize vcf line endings", () => {
+  const INPUT = ["BEGIN:VCARD", "VERSION:3.0", "FN:Person Real", "END:VCARD"].join("\n");
+
+  it("keeps an LF source on LF, including the trailing newline", async () => {
+    await withTempDir(async (dir) => {
+      const input = path.join(dir, "in.vcf");
+      const output = path.join(dir, "out.vcf");
+      const source = `${INPUT}\n`;
+      await writeFile(input, source, "utf8");
+      await anonymize("vcf", input, output);
+      const text = await readFile(output, "utf8");
+      assert.equal(text.includes("\r\n"), false);
+      assert.equal(text.endsWith("\n"), true);
+      assert.equal(text.split("\n").length, source.split("\n").length);
+    });
+  });
+});

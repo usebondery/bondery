@@ -145,7 +145,7 @@
     "react-dom": "^19.2.7"
   },
   "scripts": {
-    "build": "node ../../scripts/pkg/clean-dist.mjs dist tsconfig.tsbuildinfo .cache/tsconfig.tsbuildinfo && tsc && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs emails",
+    "build": "node ../../scripts/pkg/clean-dist.mjs dist tsconfig.tsbuildinfo .cache && tsc && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs emails",
     "check:types": "tsc --noEmit",
     "compile": "tsc",
     "dev": "tsc --watch --preserveWatchOutput",

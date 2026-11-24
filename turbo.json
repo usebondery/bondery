@@ -143,7 +143,7 @@
     "@bondery/db#build": {
       "dependsOn": ["db:generate", "^build"],
       "env": ["DATABASE_URL"],
-      "outputs": ["dist/**", ".cache/tsconfig.tsbuildinfo"]
+      "outputs": ["dist/**", "tsconfig.tsbuildinfo"]
     },
     "api#build": {
       "dependsOn": ["^build"],
@@ -214,13 +214,7 @@
         "apps/website/.env.production.local",
         "apps/api/.env.production.local"
       ],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**",
-        ".cache/tsconfig.tsbuildinfo",
-        "dist/**",
-        "public/**"
-      ],
+      "outputs": [".next/**", "!.next/cache/**", "tsconfig.tsbuildinfo", "dist/**", "public/**"],
       "passThroughEnv": [
         "SYSTEMROOT",
         "WINDIR",
@@ -321,13 +315,7 @@
         "apps/website/.env.production.local",
         "apps/api/.env.production.local"
       ],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**",
-        ".cache/tsconfig.tsbuildinfo",
-        "dist/**",
-        "public/**"
-      ],
+      "outputs": [".next/**", "!.next/cache/**", "tsconfig.tsbuildinfo", "dist/**", "public/**"],
       "passThroughEnv": [
         "SYSTEMROOT",
         "WINDIR",
@@ -348,7 +336,7 @@
     },
     "check:types": {
       "dependsOn": ["transit"],
-      "outputs": [".cache/tsconfig.tsbuildinfo"]
+      "outputs": ["tsconfig.tsbuildinfo"]
     },
     "chrome-extension#build": {
       "dependsOn": ["^build"],
@@ -371,13 +359,7 @@
         "apps/website/.env.production.local",
         "apps/api/.env.production.local"
       ],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**",
-        ".cache/tsconfig.tsbuildinfo",
-        "dist/**",
-        "public/**"
-      ],
+      "outputs": [".next/**", "!.next/cache/**", "tsconfig.tsbuildinfo", "dist/**", "public/**"],
       "passThroughEnv": [
         "SYSTEMROOT",
         "WINDIR",
@@ -454,13 +436,7 @@
         "apps/website/.env.production.local",
         "apps/api/.env.production.local"
       ],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**",
-        ".cache/tsconfig.tsbuildinfo",
-        "dist/**",
-        "public/**"
-      ],
+      "outputs": [".next/**", "!.next/cache/**", "tsconfig.tsbuildinfo", "dist/**", "public/**"],
       "passThroughEnv": [
         "SYSTEMROOT",
         "WINDIR",
@@ -535,13 +511,7 @@
         "apps/website/.env.production.local",
         "apps/api/.env.production.local"
       ],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**",
-        ".cache/tsconfig.tsbuildinfo",
-        "dist/**",
-        "public/**"
-      ],
+      "outputs": [".next/**", "!.next/cache/**", "tsconfig.tsbuildinfo", "dist/**", "public/**"],
       "passThroughEnv": [
         "SYSTEMROOT",
         "WINDIR",
@@ -609,13 +579,7 @@
         "apps/website/.env.production.local",
         "apps/api/.env.production.local"
       ],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**",
-        ".cache/tsconfig.tsbuildinfo",
-        "dist/**",
-        "public/**"
-      ],
+      "outputs": [".next/**", "!.next/cache/**", "tsconfig.tsbuildinfo", "dist/**", "public/**"],
       "passThroughEnv": [
         "SYSTEMROOT",
         "WINDIR",

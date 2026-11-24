@@ -141,7 +141,7 @@
   "name": "@bondery/translations",
   "private": true,
   "scripts": {
-    "build": "node scripts/sync-locale-mirror.mjs && node scripts/run-i18next-cli.mjs types && node scripts/generate-resource-map.mjs && node scripts/generate-i18n-catalog.mjs && node scripts/generate-client-i18n-hooks.mjs && node ../../scripts/pkg/clean-dist.mjs dist tsconfig.tsbuildinfo .cache/tsconfig.tsbuildinfo && tsc && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs translations && node scripts/copy-json.mjs && node scripts/validate-manifest.mjs",
+    "build": "node scripts/sync-locale-mirror.mjs && node scripts/run-i18next-cli.mjs types && node scripts/generate-resource-map.mjs && node scripts/generate-i18n-catalog.mjs && node scripts/generate-client-i18n-hooks.mjs && node ../../scripts/pkg/clean-dist.mjs dist tsconfig.tsbuildinfo .cache && tsc && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs translations && node scripts/copy-json.mjs && node scripts/validate-manifest.mjs",
     "check:i18n:lint": "node scripts/run-i18next-cli.mjs lint --quiet",
     "check:i18n:types": "node scripts/run-i18next-cli.mjs types --ci",
     "check:i18n:usage": "node scripts/check-i18n-usage.mjs",

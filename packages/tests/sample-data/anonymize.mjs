@@ -27,6 +27,17 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const BASE_DATA_PATH = path.join(HERE, "base-contact-values.json");
 
 const LINE_BREAK = /\r?\n/;
+const CRLF = "\r\n";
+
+/** The newline the source file uses. A CRLF file stays CRLF. An LF file stays LF. */
+function sourceLineEnding(text) {
+  const crlfAt = text.indexOf(CRLF);
+  const lfAt = text.indexOf("\n");
+  if (crlfAt !== -1 && (lfAt === -1 || crlfAt <= lfAt)) {
+    return CRLF;
+  }
+  return "\n";
+}
 const BYTE_ORDER_MARK = /^\uFEFF/;
 
 /** The Android exporter folds at 74 octets plus the leading space, so a folded line is 75. */
@@ -393,7 +404,7 @@ function joinedValue(property) {
   return property.logical.slice(property.logical.indexOf(":") + 1);
 }
 
-function anonymizeVCardBlock({ baseData, block, index, random }) {
+function anonymizeVCardBlock({ baseData, block, index, lineEnding, random }) {
   const contact = contactFor(index + 1, baseData.contacts, () => random());
   const lines = [];
 
@@ -436,7 +447,7 @@ function anonymizeVCardBlock({ baseData, block, index, random }) {
     );
   }
 
-  return lines.join("\r\n");
+  return lines.join(lineEnding);
 }
 
 async function anonymizeVcf(inputPath, outputPath, baseData) {
@@ -447,15 +458,16 @@ async function anonymizeVcf(inputPath, outputPath, baseData) {
   }
 
   const random = seededRandom(`${inputPath}:${outputPath}`);
+  const lineEnding = sourceLineEnding(text);
   const outputBlocks = blocks.map((block, index) =>
-    anonymizeVCardBlock({ baseData, block, index, random }),
+    anonymizeVCardBlock({ baseData, block, index, lineEnding, random }),
   );
 
-  // Some exporters end the last record without a newline. Keep the source ending so the line
-  // count matches byte for byte.
-  const trailingNewline = text.endsWith("\r\n") ? "\r\n" : "";
+  // Some exporters end the last record without a newline. Keep that ending, and keep LF when
+  // the source is LF. A forced CRLF changes the line count the structure check compares.
+  const trailingNewline = text.endsWith(lineEnding) ? lineEnding : "";
   await mkdir(path.dirname(outputPath), { recursive: true });
-  await writeFile(outputPath, `${outputBlocks.join("\r\n")}${trailingNewline}`, "utf8");
+  await writeFile(outputPath, `${outputBlocks.join(lineEnding)}${trailingNewline}`, "utf8");
   console.log(`Anonymized ${outputBlocks.length} vCards to ${outputPath}`);
 }
 
