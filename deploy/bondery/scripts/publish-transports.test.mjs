@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { mkdir, mkdtemp, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { dirname, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { after, before, describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 
@@ -26,8 +26,10 @@ const STORAGE_SERVER_NAME_RE = /^ {6}serverName: bondery-beta-storage$/m;
  * of the schema, and Traefik rejects the whole file with "field not found, node: cert", which
  * drops the router and leaves the public domain on Traefik's own 404.
  */
-const STORAGE_CERT_FILE_RE = /^ {8}- certFile: .*bondery-beta-storage-client\.crt$/m;
-const STORAGE_KEY_FILE_RE = /^ {10}keyFile: .*bondery-beta-storage-client\.key$/m;
+const STORAGE_CERT_FILE_RE =
+  /^ {8}- certFile: \/etc\/dokploy\/traefik\/dynamic\/bondery-beta-storage-client\.crt$/m;
+const STORAGE_KEY_FILE_RE =
+  /^ {10}keyFile: \/etc\/dokploy\/traefik\/dynamic\/bondery-beta-storage-client\.key$/m;
 /** The CA is inline under rootCAs: a rootCAs path that Traefik cannot read fails silently. */
 const STORAGE_ROOT_CA_INLINE_RE =
   /^ {6}rootCAs:\n {8}- \|\n {10}-----BEGIN CERTIFICATE-----\n {10}MIIBdzCCAR2gAwIBAgIUU1RP$/m;
@@ -118,6 +120,11 @@ describe("publish-transports.sh", requiresSh, () => {
     assert.match(storage, STORAGE_CERT_FILE_RE);
     assert.match(storage, STORAGE_KEY_FILE_RE);
     assert.equal(
+      storage.includes("/traefik-dynamic/"),
+      false,
+      "paths must use the folder as TRAEFIK sees it, not the job's mount point",
+    );
+    assert.equal(
       INLINE_CERT_KEY_RE.test(storage),
       false,
       "an inline cert/key pair is not part of the serversTransport schema",
@@ -155,7 +162,7 @@ describe("publish-transports.sh", requiresSh, () => {
     assert.match(key, STORAGE_KEY_BODY_RE);
   });
 
-  it("every path the transport names exists in that folder", async () => {
+  it("every path the transport names resolves to a file that exists", async () => {
     const result = run("bondery-beta");
     assert.equal(result.status, 0, result.stderr);
 
@@ -169,12 +176,15 @@ describe("publish-transports.sh", requiresSh, () => {
 
     // The API transport is fully inline (CA only), so it names no file.
     assert.deepEqual(await referencedPaths("api"), []);
-    // The storage transport names its client certificate and key, and both must exist: a dangling
-    // path is exactly the failure that took the beta storage router down.
+
+    // The storage transport names its client certificate and key. Those paths are written from
+    // TRAEFIK's point of view, so map them back onto the folder this test actually populated: a
+    // path that only resolves from the job's view is the bug that took the beta storage down.
     const storagePaths = await referencedPaths("storage");
     assert.equal(storagePaths.length, 2);
     for (const path of storagePaths) {
-      await stat(path);
+      const local = join(dynamicDir, basename(path));
+      await stat(local);
     }
   });
 

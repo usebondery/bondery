@@ -31,6 +31,10 @@ set -eu
 
 PREFIX="${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}"
 DYNAMIC_DIR="${1:-/traefik-dynamic}"
+# Where TRAEFIK sees the same folder. The job mounts it at /traefik-dynamic, but Traefik mounts the
+# host folder at /etc/dokploy/traefik/dynamic, so a path written from the job's point of view
+# points at nothing inside Traefik's container. Every certFile/keyFile below must use this prefix.
+TRAEFIK_VIEW_DIR="${BONDERY_INFRA_TRAEFIK_VIEW_DIR:-/etc/dokploy/traefik/dynamic}"
 # The storage transport needs a client certificate next to its CA, because the gateway requires
 # one. The CA and the client certificate therefore live in the same directory.
 if [ "$#" -gt 0 ]; then
@@ -130,8 +134,8 @@ publish() { # service ca-file
     if [ -n "$cert_file" ]; then
       echo "      # The gateway requires a client certificate (mutual TLS)."
       echo "      certificates:"
-      echo "        - certFile: $DYNAMIC_DIR/$name-client.crt"
-      echo "          keyFile: $DYNAMIC_DIR/$name-client.key"
+      echo "        - certFile: $TRAEFIK_VIEW_DIR/$name-client.crt"
+      echo "          keyFile: $TRAEFIK_VIEW_DIR/$name-client.key"
     fi
     echo "      rootCAs:"
     echo "        - |"
