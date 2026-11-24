@@ -81,6 +81,8 @@ last_updated: 2026-11-23
 - AI messages: the free allowance is no longer affected by a past subscription. The counter used to keep a lifetime total that paid messages also added to, so an account that used its 300 Premium messages and cancelled arrived on the free plan with nothing left. Both plans now count the same monthly counter.
 - Premium: the 300-message cap now applies. A Premium subscriber can no longer send more than 300 messages in a period; the check skipped the limit for paid plans.
 - Self-host: apply the new database migration before this app version. It moves the AI reset column and the Stripe period bounds to `timestamptz` and points each paid account's reset at its current period end.
+- Webapp: a page opened from the phone menu no longer arrives with scrolling disabled. The shell used to leave its viewport unable to scroll after the menu closed, so the page stayed stuck until a reload. Every page reached from the menu now scrolls normally. On a phone the menu still holds the page behind it while it is open.
+- Webapp: the Instagram import and API key dialogs no longer change width partway through. The Instagram import grew to a much wider box on its last step, and the API key dialog narrowed when it showed the key. Each dialog now keeps one width from the first step to the last, like every other settings dialog.
 
 ### 🔄 Changed
 
