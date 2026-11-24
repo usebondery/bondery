@@ -38,7 +38,7 @@ describe("planChecks", () => {
   });
 
   it("runs the importer tests when a parser, a commit step, or the corpus changes", () => {
-    assert.ok(names(["packages/tests/importers/commit.test.ts"]).includes("importer-tests"));
+    assert.ok(names(["packages/tests/fixtures.mjs"]).includes("importer-tests"));
     assert.ok(
       names(["packages/tests/sample-data/samsung/contacts.vcf"]).includes("importer-tests"),
     );

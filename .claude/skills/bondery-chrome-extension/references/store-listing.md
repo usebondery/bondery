@@ -14,7 +14,7 @@ Inside the `(app)` group (i18n + Mantine) but **outside** `/app`, so the auth ga
 
 Do **not** import `apps/chrome-extension` into the webapp (or webapp feature components into the extension). Listing shots mount product chrome that already lives in the webapp (`PersonCard`, `PeopleMap`, …), not the extension popup.
 
-Copy is **hardcoded EN** in `_lib/copy.ts`. i18next lint ignores `apps/webapp/src/app/(app)/dev/store-shots/**`. Product strings inside mounted components stay on existing i18n. Fixtures: names from `packages/tests/sample-data/bondery`; avatars are copies under `apps/webapp/public/dev/store-shots/` so typecheck and docker prune do not import JPEGs from `packages/tests`. No remote CDN photos, no official LinkedIn/Instagram logos (Tabler brand icons + nominative labels).
+Copy is **hardcoded EN** in `_lib/copy.ts`. i18next lint ignores `apps/webapp/src/app/(app)/dev/store-shots/**`. Product strings inside mounted components stay on existing i18n. Fixtures: names from the `@bondery/test-fixtures` corpus; avatars are copies under `apps/webapp/public/dev/store-shots/` so typecheck and docker prune do not import JPEGs from the fixtures package. No remote CDN photos, no official LinkedIn/Instagram logos (Tabler brand icons + nominative labels).
 
 ## Spec
 

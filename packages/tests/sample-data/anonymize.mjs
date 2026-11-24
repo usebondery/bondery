@@ -23,6 +23,21 @@ import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 
+/**
+ * Writes the rewritten Instagram files back as one ZIP.
+ *
+ * `adm-zip` resolves through this workspace package. The scripts used to shell out to `zip`,
+ * which does not exist on Windows, so every ZIP fixture test failed there.
+ */
+async function writeZip(outputPath, files) {
+  const { default: AdmZip } = await import("adm-zip");
+  const zip = new AdmZip();
+  for (const file of files) {
+    zip.addFile(file.name, file.bytes);
+  }
+  zip.writeZip(outputPath);
+}
+
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const BASE_DATA_PATH = path.join(HERE, "base-contact-values.json");
 
@@ -593,8 +608,8 @@ async function anonymizeInstagram(inputPath, outputPath, baseData) {
   try {
     await mkdir(sourceDir, { recursive: true });
     await mkdir(outputDir, { recursive: true });
-    await execFileAsync("unzip", ["-q", inputPath, "-d", sourceDir]);
-
+    // `tar` (bsdtar) reads ZIP and ships with Windows and macOS; `unzip` does not exist on Windows.
+    await execFileAsync("tar", ["-xf", inputPath, "-C", sourceDir]);
     const entries = await readdir(sourceDir, { recursive: true, withFileTypes: true });
     const files = entries.filter((entry) => entry.isFile());
     if (files.length === 0) {
@@ -620,7 +635,7 @@ async function anonymizeInstagram(inputPath, outputPath, baseData) {
     );
 
     await mkdir(path.dirname(outputPath), { recursive: true });
-    await execFileAsync("zip", ["-q", "-r", path.resolve(outputPath), "."], { cwd: outputDir });
+    await writeZip(outputPath, written);
     console.log(`Anonymized ${written.length} Instagram export files to ${outputPath}`);
   } finally {
     await rm(workDir, { force: true, recursive: true });

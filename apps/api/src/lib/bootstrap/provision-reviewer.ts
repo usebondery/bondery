@@ -9,27 +9,15 @@
  * elevation. See `docs/adr/0027-reviewer-access-grants.md`.
  */
 import { readFile } from "node:fs/promises";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { prisma } from "@bondery/db";
 import { generateId } from "@bondery/helpers/ids";
-import { BONDERY_EXPORT_FILE_ENTRIES } from "@bondery/schemas";
-import AdmZip from "adm-zip";
+import { BONDERY_SAMPLE_EXPORT_ZIP } from "@bondery/test-fixtures/fixtures";
 import { applyBonderyImport } from "../../domains/me/import.js";
 import { provisionNewUser } from "../auth/provision-new-user.js";
 import logger from "../platform/logger.js";
 
 const DEFAULT_REVIEW_DAYS = 30;
 const MAX_REVIEW_DAYS = 90;
-
-const SAMPLE_EXPORT_DIR = fileURLToPath(
-  new URL("../../../../../packages/tests/sample-data/bondery/export-files/", import.meta.url),
-);
-
-const SAMPLE_EXPORT_FILES = [
-  "manifest.json",
-  ...BONDERY_EXPORT_FILE_ENTRIES.map((entry) => entry.name),
-];
 
 type ProvisionReviewerParams = {
   email: string;
@@ -61,16 +49,6 @@ function resolveDays(days: number | undefined): number {
     throw new Error(`--days must be an integer from 1 to ${MAX_REVIEW_DAYS}`);
   }
   return value;
-}
-
-/** The sample export is a directory of JSON files. The parser expects one ZIP. */
-async function buildSampleExportZip(): Promise<Buffer> {
-  const zip = new AdmZip();
-  for (const name of SAMPLE_EXPORT_FILES) {
-    const bytes = await readFile(path.join(SAMPLE_EXPORT_DIR, name));
-    zip.addFile(name, bytes);
-  }
-  return zip.toBuffer();
 }
 
 export type { ProvisionReviewerParams, ProvisionReviewerResult };
@@ -140,7 +118,7 @@ export async function provisionReviewerAccount(
         log: logger,
         user: { email, id: userId },
       },
-      await buildSampleExportZip(),
+      await readFile(BONDERY_SAMPLE_EXPORT_ZIP),
     );
     console.log("provision-reviewer: imported sample contacts");
   }

@@ -19,7 +19,7 @@
  * because the input already holds substitute values.
  */
 import { execFile } from "node:child_process";
-import { mkdtemp, readdir, readFile, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readdir, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
@@ -208,7 +208,10 @@ function checkVcf(sourceText, fixtureText, { structureOnly = false } = {}) {
 }
 
 async function unzip(zipPath, dir) {
-  await execFileAsync("unzip", ["-q", zipPath, "-d", dir]);
+  // `tar` (bsdtar) reads ZIP and ships with Windows and macOS; `unzip` does not exist on Windows.
+  // Unlike `unzip -d`, `tar` does not create the target directory.
+  await mkdir(dir, { recursive: true });
+  await execFileAsync("tar", ["-xf", zipPath, "-C", dir]);
 }
 
 /** Every JSON file in the archive, keyed by relative path. */

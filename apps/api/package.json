@@ -15,6 +15,7 @@
     "@bondery/helpers": "workspace:*",
     "@bondery/schemas": "workspace:*",
     "@bondery/translations": "workspace:*",
+    "@bondery/test-fixtures": "workspace:*",
     "@bondery/vcard": "workspace:*",
     "@fastify/auth": "^5.1.2",
     "@fastify/cookie": "^11.1.5",

@@ -1,0 +1,25 @@
+{
+  "dependencies": {
+    "adm-zip": "^0.6.1"
+  },
+  "description": "Anonymized contact-export corpus and importer fixtures for tests and reviewer provisioning",
+  "exports": {
+    "./fixtures": {
+      "default": "./fixtures.mjs",
+      "types": "./fixtures.d.mts"
+    },
+    "./fixtures.mjs": {
+      "default": "./fixtures.mjs",
+      "types": "./fixtures.d.mts"
+    }
+  },
+  "files": [
+    "fixtures.d.mts",
+    "fixtures.mjs",
+    "sample-data/bondery/bondery-sample-export.zip"
+  ],
+  "name": "@bondery/test-fixtures",
+  "private": true,
+  "type": "module",
+  "version": "1.11.3-rc.1"
+}
