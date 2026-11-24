@@ -147,6 +147,7 @@ function main() {
     "packages/mantine-next/package.json",
     "packages/openapi-spec/package.json",
     "packages/schemas/package.json",
+    "packages/tests/package.json",
     "packages/translations/package.json",
     "packages/typescript-config/package.json",
     "packages/vcard/package.json",

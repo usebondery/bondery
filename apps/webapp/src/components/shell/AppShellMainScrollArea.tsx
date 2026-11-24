@@ -117,7 +117,11 @@ export function AppShellMainScrollArea({
         },
         viewport: {
           height: "100%",
-          ...(scrollLocked ? { overflow: "hidden" } : {}),
+          // Set overflow here, not through Mantine's scrollbar flag. Locking hides the overflow,
+          // which unmounts the auto scrollbar, and the flag it left behind can keep the viewport
+          // `hidden` after the lock clears. The page then never scrolls again until a reload.
+          overflowX: "hidden",
+          overflowY: scrollLocked ? "hidden" : "auto",
         },
       }}
       type="auto"

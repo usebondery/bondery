@@ -121,6 +121,9 @@ importers:
       '@bondery/schemas':
         specifier: workspace:*
         version: link:../../packages/schemas
+      '@bondery/test-fixtures':
+        specifier: workspace:*
+        version: link:../../packages/tests
       '@bondery/translations':
         specifier: workspace:*
         version: link:../../packages/translations
@@ -1349,6 +1352,12 @@ importers:
       typescript:
         specifier: ^7.0.2
         version: 7.0.2
+
+  packages/tests:
+    dependencies:
+      adm-zip:
+        specifier: ^0.6.1
+        version: 0.6.1
 
   packages/translations:
     dependencies:

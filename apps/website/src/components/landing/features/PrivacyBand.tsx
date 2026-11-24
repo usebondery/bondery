@@ -1,3 +1,4 @@
+import { GITHUB_BRAND_COLOR, GITHUB_BRAND_HOVER } from "@bondery/branding";
 import { SOCIAL_LINKS } from "@bondery/helpers";
 import { ButtonLink, hrefAssert } from "@bondery/mantine-next";
 import landing from "@bondery/translations/locales/en/platform/website/WebsiteLanding.json" with {
@@ -53,13 +54,22 @@ export function PrivacyBand() {
             </List>
 
             <div className="flex flex-col gap-3 sm:flex-row">
+              {/* GitHub-branded: the stored brand black, not the neutral default variant.
+                  The CSS variables keep the hover state on-brand instead of primary purple. */}
               <ButtonLink
                 href={SOCIAL_LINKS.github}
                 leftSection={<IconBrandGithub size={18} />}
                 rel="noopener noreferrer"
                 size="md"
+                styles={{
+                  root: {
+                    "--button-bg": GITHUB_BRAND_COLOR,
+                    "--button-color": "#FFFFFF",
+                    "--button-hover": GITHUB_BRAND_HOVER,
+                    "--button-hover-color": "#FFFFFF",
+                  },
+                }}
                 target="_blank"
-                variant="default"
               >
                 {landing.PrivacyBand.ViewOnGitHub}
               </ButtonLink>

@@ -69,18 +69,19 @@ const CHECKS = [
     args: () => ["run", "test:sample-data"],
     command: "pnpm",
     name: "sample-data",
-    when: (files) => files.some((file) => file.startsWith("packages/tests/sample-data/")),
+    when: (files) =>
+      files.some((file) => file.startsWith("packages/tests/") && !file.endsWith("package.json")),
   },
   {
-    // The importer tests read the sample corpus and the API import code, so both can break them.
+    // The importer tests read the corpus through `@bondery/test-fixtures`, so a change to that
+    // package can break them just as the API import code can.
     args: () => ["run", "test:importers"],
     command: "pnpm",
     name: "importer-tests",
     when: (files) =>
       files.some(
         (file) =>
-          file.startsWith("packages/tests/importers/") ||
-          file.startsWith("packages/tests/sample-data/") ||
+          file.startsWith("packages/tests/") ||
           file.startsWith("apps/api/src/routes/import/") ||
           file.startsWith("apps/api/src/domains/import/") ||
           file.startsWith("apps/api/src/lib/integrations/mapy.ts"),

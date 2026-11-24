@@ -7,18 +7,14 @@
  */
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
-
-const HERE = path.dirname(fileURLToPath(import.meta.url));
+import { FIXTURES_DIR } from "@bondery/test-fixtures/fixtures";
 
 /**
- * The sample corpus, owned by `@bondery/tests`.
+ * The sample corpus, owned by `@bondery/test-fixtures`.
  *
- * The corpus is data, not code, so it is read from its workspace directory. Importing it through
- * the package name would need an `exports` entry, and a test asserting on a fixture path is
- * clearer when the path is visible here.
+ * Resolved through the package, so a test never encodes where the corpus lives on disk.
  */
-const SAMPLE_DATA_DIR = path.resolve(HERE, "../../../../../packages/tests/sample-data");
+const SAMPLE_DATA_DIR = FIXTURES_DIR;
 
 type BaseContact = {
   readonly id: string;

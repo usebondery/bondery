@@ -98,9 +98,8 @@ export function HeaderClient({ initialStars, webappUrl }: HeaderClientProps) {
         size="xs"
       >
         <Drawer.Overlay />
-        <Drawer.Content>
-          <Drawer.Header>
-            <Drawer.Title>{landing.Header.NavigationTitle}</Drawer.Title>
+        <Drawer.Content aria-label={landing.Header.NavigationTitle}>
+          <Drawer.Header style={{ justifyContent: "flex-end" }}>
             <ActionIconButton
               aria-label={landing.Header.Aria.CloseMenu}
               icon={<IconX />}

@@ -3178,9 +3178,9 @@ export default interface Resources {
         "Description": "Every source merges into one list, duplicates included.",
         "Title": "All the people you met in one place"
       },
-      "Sync": {
-        "Description": "Profiles refresh from the sources you saved them from.",
-        "Title": "Always up to date"
+      "Spreadsheet": {
+        "Description": "Your contacts deserve more than a spreadsheet or phone notes.",
+        "Title": "Better than a spreadsheet"
       },
       "Timeline": {
         "Description": "Notes and history on every person.",
@@ -3263,7 +3263,7 @@ export default interface Resources {
     "Hero": {
       "ImageAlt": "Bondery home dashboard with interactions timeline, contact stats, and reminders",
       "LearnMore": "Learn more",
-      "Subtitle": "Bondery merges your contacts, keeps them in sync, and reminds you to stay in touch.",
+      "Subtitle": "Bondery is a personal CRM that puts everyone you've ever met in one place, keeps them in sync, and reminds you to stay in touch.",
       "Title": "Build stronger bonds"
     },
     "Logo": {
@@ -3422,10 +3422,11 @@ export default interface Resources {
       "Merged": "Merged",
       "Soon": "Soon"
     },
-    "Sync": {
-      "NewCity": "New city",
-      "NewPhoto": "New photo",
-      "NewTitle": "New title"
+    "Spreadsheet": {
+      "Company": "Company",
+      "MetOn": "Met {date}",
+      "Name": "Name",
+      "When": "Met"
     },
     "Timeline": {
       "Call": {

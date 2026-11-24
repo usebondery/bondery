@@ -23,6 +23,32 @@ import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 
+/**
+ * Extracts a ZIP into `dir`.
+ *
+ * `adm-zip` resolves through this workspace package. The scripts used to shell out to `unzip`,
+ * which Windows lacks, then to `tar`, which GNU tar cannot read a ZIP with on Linux CI.
+ */
+async function extractZip(zipPath, dir) {
+  const { default: AdmZip } = await import("adm-zip");
+  await mkdir(dir, { recursive: true });
+  new AdmZip(zipPath).extractAllTo(dir, true);
+}
+
+/**
+ * Writes the rewritten Instagram files back as one ZIP.
+ *
+ * Same library as the read path, so one implementation serves every platform.
+ */
+async function writeZip(outputPath, files) {
+  const { default: AdmZip } = await import("adm-zip");
+  const zip = new AdmZip();
+  for (const file of files) {
+    zip.addFile(file.name, file.bytes);
+  }
+  zip.writeZip(outputPath);
+}
+
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const BASE_DATA_PATH = path.join(HERE, "base-contact-values.json");
 
@@ -593,8 +619,7 @@ async function anonymizeInstagram(inputPath, outputPath, baseData) {
   try {
     await mkdir(sourceDir, { recursive: true });
     await mkdir(outputDir, { recursive: true });
-    await execFileAsync("unzip", ["-q", inputPath, "-d", sourceDir]);
-
+    await extractZip(inputPath, sourceDir);
     const entries = await readdir(sourceDir, { recursive: true, withFileTypes: true });
     const files = entries.filter((entry) => entry.isFile());
     if (files.length === 0) {
@@ -620,7 +645,7 @@ async function anonymizeInstagram(inputPath, outputPath, baseData) {
     );
 
     await mkdir(path.dirname(outputPath), { recursive: true });
-    await execFileAsync("zip", ["-q", "-r", path.resolve(outputPath), "."], { cwd: outputDir });
+    await writeZip(outputPath, written);
     console.log(`Anonymized ${written.length} Instagram export files to ${outputPath}`);
   } finally {
     await rm(workDir, { force: true, recursive: true });

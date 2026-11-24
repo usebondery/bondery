@@ -15,6 +15,7 @@
     "@bondery/helpers": "workspace:*",
     "@bondery/schemas": "workspace:*",
     "@bondery/translations": "workspace:*",
+    "@bondery/test-fixtures": "workspace:*",
     "@bondery/vcard": "workspace:*",
     "@fastify/auth": "^5.1.2",
     "@fastify/cookie": "^11.1.5",
@@ -118,5 +119,5 @@
     "test:importers": "tsx --test src/test/importers/*.test.ts"
   },
   "type": "module",
-  "version": "1.11.3-rc.1"
+  "version": "1.11.3-rc.2"
 }

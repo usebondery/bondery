@@ -3281,7 +3281,7 @@ export type WebsiteLandingCatalog = {
       Description: string;
       Title: string;
     };
-    Sync: {
+    Spreadsheet: {
       Description: string;
       Title: string;
     };
@@ -3526,10 +3526,11 @@ export type WebsiteLandingVisualsCatalog = {
     Merged: string;
     Soon: string;
   };
-  Sync: {
-    NewCity: string;
-    NewPhoto: string;
-    NewTitle: string;
+  Spreadsheet: {
+    Company: string;
+    MetOn: string;
+    Name: string;
+    When: string;
   };
   Timeline: {
     Call: {

@@ -36,6 +36,7 @@ WORKDIR /deploy/api
 # Resolve prisma from @bondery/db (its dependency). Isolated + `pnpm deploy` does
 # not hoist it to the deploy root the way `nodeLinker: hoisted` did.
 RUN node -e "import('@bondery/db').then(() => console.log('@bondery/db resolvable'))" \
+  && node -e "import('@bondery/test-fixtures/fixtures').then((m) => { require('node:fs').accessSync(m.BONDERY_SAMPLE_EXPORT_ZIP); console.log('@bondery/test-fixtures ships the reviewer sample export'); })" \
   && test -f node_modules/@bondery/db/prisma.config.ts \
   && test -f node_modules/@bondery/db/prisma/migrations/migration_lock.toml \
   && test -f node_modules/@bondery/schemas/locale/supported-locales.json \

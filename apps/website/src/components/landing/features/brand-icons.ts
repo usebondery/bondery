@@ -8,7 +8,7 @@
  *
  * The AI clients (Claude, ChatGPT, MCP, Hermes, OpenClaw) use the same files in `AiClientLinks.tsx`:
  * `claude-ai`, `openai`, `mcp` (Simple Icons) and `hermes` as single-colour masks, `openclaw` full colour.
- * Each sits on a brand-coloured tile (`BrandTileLink.tsx`).
+ * Each sits on a brand-coloured tile (`BrandTileLink` from `@bondery/mantine-next`).
  */
 export const BRAND_ICONS = {
   instagram: { label: "Instagram", src: "/images/brands/instagram.svg" },

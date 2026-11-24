@@ -204,7 +204,7 @@ export function Footer() {
           </Box>
         </Flex>
         <Divider my="xl" />
-        <Flex px="md">
+        <Flex justify="center" px="md">
           <Logo iconSize={28} textSize="md" />
         </Flex>
       </Paper>

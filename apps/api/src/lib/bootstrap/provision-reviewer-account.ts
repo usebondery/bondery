@@ -8,27 +8,15 @@
  * The address local-part is the secret. The display name stays the fixed label `Reviewer`.
  */
 import { readFile } from "node:fs/promises";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { prisma } from "@bondery/db";
 import { generateId } from "@bondery/helpers/ids";
-import { BONDERY_EXPORT_FILE_ENTRIES } from "@bondery/schemas";
-import AdmZip from "adm-zip";
+import { BONDERY_SAMPLE_EXPORT_ZIP } from "@bondery/test-fixtures/fixtures";
 import { applyBonderyImport } from "../../domains/me/import.js";
 import { provisionNewUser } from "../auth/provision-new-user.js";
 import logger from "../platform/logger.js";
 
 const REVIEWER_EMAIL_ENV = "BONDERY_AUTH_REVIEWER_EMAIL";
 const REVIEWER_DISPLAY_NAME = "Reviewer";
-
-const SAMPLE_EXPORT_DIR = fileURLToPath(
-  new URL("../../../../../packages/tests/sample-data/bondery/export-files/", import.meta.url),
-);
-
-const SAMPLE_EXPORT_FILES = [
-  "manifest.json",
-  ...BONDERY_EXPORT_FILE_ENTRIES.map((entry) => entry.name),
-];
 
 function requireReviewerEmail(): string {
   const email = process.env[REVIEWER_EMAIL_ENV]?.trim().toLowerCase() ?? "";
@@ -42,16 +30,6 @@ function requireReviewerEmail(): string {
   }
 
   return email;
-}
-
-/** The sample export is a directory of JSON files. The parser expects one ZIP. */
-async function buildSampleExportZip(): Promise<Buffer> {
-  const zip = new AdmZip();
-  for (const name of SAMPLE_EXPORT_FILES) {
-    const bytes = await readFile(path.join(SAMPLE_EXPORT_DIR, name));
-    zip.addFile(name, bytes);
-  }
-  return zip.toBuffer();
 }
 
 export async function provisionReviewerAccount(): Promise<void> {
@@ -95,7 +73,7 @@ export async function provisionReviewerAccount(): Promise<void> {
       log: logger,
       user: { email, id: userId },
     },
-    await buildSampleExportZip(),
+    await readFile(BONDERY_SAMPLE_EXPORT_ZIP),
   );
   console.log("provision-reviewer-account: imported sample contacts");
 }

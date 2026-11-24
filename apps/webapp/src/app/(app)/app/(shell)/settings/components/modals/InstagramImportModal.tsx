@@ -78,12 +78,14 @@ export function InstagramImportModal({
   useEffect(() => {
     modals.updateModal({
       modalId,
-      size: step === "finished" ? "80rem" : "lg",
+      // One width for every step, like the other import flows. A wider finished step made this
+      // dialog resize between steps while the rest of the settings modals stayed `lg`.
+      size: "lg",
       title: (
         <ModalTitle icon={<IconBrandInstagram size={20} stroke={1.5} />} text={t("ModalTitle")} />
       ),
     });
-  }, [modalId, step, t]);
+  }, [modalId, t]);
 
   if (step === "intro") {
     return renderWithNavigationProgress(
