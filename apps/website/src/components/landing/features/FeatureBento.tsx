@@ -5,7 +5,7 @@ import {
   IconAffiliate,
   IconBellRinging,
   IconMessageChatbot,
-  IconRefresh,
+  IconTable,
   IconTimelineEvent,
   IconUserPlus,
 } from "@tabler/icons-react";
@@ -15,8 +15,9 @@ import { BentoCard, type BentoCardProps } from "./BentoCard";
 import { GlobeVisual } from "./GlobeVisual";
 import { Reveal } from "./Reveal";
 import { SourcesVisual } from "./SourcesVisual";
+import { SpreadsheetVisual } from "./SpreadsheetVisual";
 import { TimelineVisual } from "./TimelineVisual";
-import { ReminderEmailVisual, SyncVisual } from "./visuals";
+import { ReminderEmailVisual } from "./visuals";
 
 type BentoTile = BentoCardProps & {
   id: string;
@@ -77,12 +78,12 @@ const TILES: BentoTile[] = [
     visual: <GlobeVisual />,
   },
   {
-    description: landing.Bento.Sync.Description,
-    icon: IconRefresh,
-    id: "sync",
+    description: landing.Bento.Spreadsheet.Description,
+    icon: IconTable,
+    id: "spreadsheet",
     span: "half",
-    title: landing.Bento.Sync.Title,
-    visual: <SyncVisual />,
+    title: landing.Bento.Spreadsheet.Title,
+    visual: <SpreadsheetVisual />,
   },
 ];
 

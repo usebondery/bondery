@@ -101,10 +101,11 @@
     "Merged": "Merged",
     "Soon": "Soon"
   },
-  "Sync": {
-    "NewCity": "New city",
-    "NewPhoto": "New photo",
-    "NewTitle": "New title"
+  "Spreadsheet": {
+    "Company": "Company",
+    "MetOn": "Met {date}",
+    "Name": "Name",
+    "When": "Met"
   },
   "Timeline": {
     "Call": {

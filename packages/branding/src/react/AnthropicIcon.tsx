@@ -1,4 +1,5 @@
 import type { CSSProperties, ImgHTMLAttributes, ReactElement } from "react";
+import { ANTHROPIC_BRAND_COLOR } from "#colors.js";
 
 const ANTHROPIC_MARK_SRC = new URL("../assets/brands/anthropic.svg", import.meta.url).href;
 
@@ -8,7 +9,7 @@ const ANTHROPIC_MARK_SRC = new URL("../assets/brands/anthropic.svg", import.meta
  * The SVG in `src/assets/brands/anthropic.svg` is the source. This wrapper
  * only sizes it, and optionally recolors it with a CSS mask.
  */
-export const ANTHROPIC_MARK_COLOR = "#D97757";
+export const ANTHROPIC_MARK_COLOR: string = ANTHROPIC_BRAND_COLOR;
 
 export type AnthropicIconProps = Omit<
   ImgHTMLAttributes<HTMLImageElement>,

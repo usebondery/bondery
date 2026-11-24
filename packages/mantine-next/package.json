@@ -534,6 +534,18 @@
       "node": "./dist/Notifications/WarningNotificationTemplate.js",
       "types": "./src/Notifications/WarningNotificationTemplate.ts"
     },
+    "./nextjs/BrandTileLink": {
+      "default": "./dist/nextjs/BrandTileLink/index.js",
+      "import": "./dist/nextjs/BrandTileLink/index.js",
+      "node": "./dist/nextjs/BrandTileLink/index.js",
+      "types": "./src/nextjs/BrandTileLink/index.ts"
+    },
+    "./nextjs/BrandTileLink/BrandTileLink": {
+      "default": "./dist/nextjs/BrandTileLink/BrandTileLink.js",
+      "import": "./dist/nextjs/BrandTileLink/BrandTileLink.js",
+      "node": "./dist/nextjs/BrandTileLink/BrandTileLink.js",
+      "types": "./src/nextjs/BrandTileLink/BrandTileLink.tsx"
+    },
     "./PeopleMultiPickerInput/PeopleMultiPickerInput": {
       "default": "./dist/PeopleMultiPickerInput/PeopleMultiPickerInput.js",
       "import": "./dist/PeopleMultiPickerInput/PeopleMultiPickerInput.js",

@@ -3,8 +3,8 @@ import { LogoIcon } from "@bondery/mantine-next";
 import visuals from "@bondery/translations/locales/en/platform/website/WebsiteLandingVisuals.json" with {
   type: "json",
 };
-import { Badge, Group, Paper, type PaperProps, Text } from "@mantine/core";
-import { IconBriefcase, IconCake, IconMail, IconRefresh } from "@tabler/icons-react";
+import { Group, Paper, type PaperProps, Text } from "@mantine/core";
+import { IconBriefcase, IconCake, IconMail } from "@tabler/icons-react";
 import type { CSSProperties, ReactNode } from "react";
 import { formatMessage } from "@/lib/i18n/message";
 import { PersonAvatar, SAMPLE_PEOPLE } from "./sample-people";
@@ -111,43 +111,4 @@ function ReminderEmailVisual() {
   );
 }
 
-const SYNCED = [
-  { change: visuals.Sync.NewTitle, person: "grace", source: "LinkedIn" },
-  { change: visuals.Sync.NewCity, person: "margaret", source: "LinkedIn" },
-  { change: visuals.Sync.NewPhoto, person: "ada", source: "Instagram" },
-] as const;
-
-/** Profiles that refresh from the sources they were saved from. */
-function SyncVisual() {
-  return (
-    <Surface className="w-full max-w-sm" p={0}>
-      {SYNCED.map((row, index) => (
-        <div className={index > 0 ? "border-line border-t" : undefined} key={row.person}>
-          <Group gap="sm" px="sm" py={10} wrap="nowrap">
-            <PersonAvatar person={row.person} size="md" />
-            <div className="min-w-0 flex-1">
-              <Text fw={600} size="sm" truncate>
-                {SAMPLE_PEOPLE[row.person].name}
-              </Text>
-              <Text c="dimmed" size="xs" truncate>
-                {formatMessage(visuals.Sources.FromSource, { source: row.source })}
-              </Text>
-            </div>
-            <Badge
-              className="shrink-0"
-              color="teal"
-              leftSection={<IconRefresh size={12} />}
-              size="sm"
-              tt="none"
-              variant="light"
-            >
-              {row.change}
-            </Badge>
-          </Group>
-        </div>
-      ))}
-    </Surface>
-  );
-}
-
-export { ReminderEmailVisual, Surface, SyncVisual };
+export { ReminderEmailVisual, Surface };

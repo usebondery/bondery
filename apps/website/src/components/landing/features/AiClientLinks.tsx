@@ -1,12 +1,20 @@
 "use client";
 
+import { ANTHROPIC_BRAND_COLOR, CHATGPT_TILE_COLOR, DARK_TILE_COLOR } from "@bondery/branding";
+import { BrandTileLink, type BrandTileLinkProps } from "@bondery/mantine-next";
 import landing from "@bondery/translations/locales/en/platform/website/WebsiteLanding.json" with {
   type: "json",
 };
 import { Tooltip } from "@mantine/core";
-import { BrandTileLink, type BrandTileLinkProps } from "./BrandTileLink";
 
-type ClientLink = Omit<BrandTileLinkProps, "size">;
+/**
+ * One size for every tile and one glyph scale for every mark. Both live here, so a client can
+ * never end up a different size than its neighbours in the row.
+ */
+const TILE_SIZE = 56;
+const TILE_GLYPH_SCALE = 0.58;
+
+type ClientLink = Omit<BrandTileLinkProps, "glyphScale" | "size">;
 
 /*
  * Claude goes to its connector settings. Everything else goes to the MCP docs: MCP
@@ -14,38 +22,37 @@ type ClientLink = Omit<BrandTileLinkProps, "size">;
  *
  * Each tile uses the product's real logo on its brand colour (marks from Dashboard Icons and
  * Simple Icons, see `brand-icons.ts`). Glyphs are masks, so one SVG serves any tile colour.
+ * The fill colours come from `@bondery/branding`, not from literals here.
  */
 const CLIENT_LINKS: readonly ClientLink[] = [
   {
-    background: "#D97757",
+    background: ANTHROPIC_BRAND_COLOR,
     external: true,
     glyph: { color: "#FFFFFF", kind: "mask", src: "/images/brands/claude-ai.svg" },
-    glyphScale: 0.62,
     href: "https://claude.ai/customize/connectors",
     label: "Claude",
   },
   {
-    background: "#FFFFFF",
+    background: CHATGPT_TILE_COLOR,
     glyph: { color: "#000000", kind: "mask", src: "/images/brands/openai.svg" },
     href: "/docs/apps/mcp#other-clients",
     label: "ChatGPT",
   },
   {
-    background: "#16181D",
+    background: DARK_TILE_COLOR,
     glyph: { color: "#FFFFFF", kind: "mask", src: "/images/brands/mcp.svg" },
     href: "/docs/apps/mcp",
     label: "MCP",
   },
   {
-    background: "#16181D",
+    background: DARK_TILE_COLOR,
     glyph: { color: "#FFFFFF", kind: "mask", src: "/images/brands/hermes.svg" },
     href: "/docs/apps/mcp#other-clients",
     label: "Hermes",
   },
   {
-    background: "#16181D",
+    background: DARK_TILE_COLOR,
     glyph: { kind: "image", src: "/images/brands/openclaw.svg" },
-    glyphScale: 0.7,
     href: "/docs/apps/mcp#other-clients",
     label: "OpenClaw",
   },
@@ -64,7 +71,7 @@ export function AiClientLinks() {
         style={{ listStyle: "none" }}
       >
         {CLIENT_LINKS.map((client) => (
-          <li key={client.label}>
+          <li className="flex" key={client.label}>
             <Tooltip
               events={{ focus: true, hover: true, touch: false }}
               label={client.label}
@@ -72,7 +79,7 @@ export function AiClientLinks() {
               withArrow
             >
               <span className="inline-flex">
-                <BrandTileLink {...client} />
+                <BrandTileLink glyphScale={TILE_GLYPH_SCALE} size={TILE_SIZE} {...client} />
               </span>
             </Tooltip>
           </li>

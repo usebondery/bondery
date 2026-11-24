@@ -6,13 +6,13 @@ How Bondery says what it does. Strategy lives in [positioning.md](./positioning.
 
 ## The claim
 
-| Layer                                                  | Copy                                                                                                  |
-| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
-| **Headline**                                           | Build stronger bonds                                                                                  |
-| **Subhead**                                            | Bondery merges your contacts, keeps them in sync, and reminds you to stay in touch.                   |
-| **Long form** (meta description, about, store listing) | Bondery brings together everyone you know. Merged, searchable, always in sync, and ready for your AI. |
-| **Features title**                                     | Everything you need to build stronger bonds                                                           |
-| **Voice tagline**                                      | A buddy for the relationships that matter                                                             |
+| Layer                                                  | Copy                                                                                                                             |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| **Headline**                                           | Build stronger bonds                                                                                                             |
+| **Subhead**                                            | Bondery is a personal CRM that puts everyone you've ever met in one place, keeps them in sync, and reminds you to stay in touch. |
+| **Long form** (meta description, about, store listing) | Bondery brings together everyone you know. Merged, searchable, always in sync, and ready for your AI.                            |
+| **Features title**                                     | Everything you need to build stronger bonds                                                                                      |
+| **Voice tagline**                                      | A buddy for the relationships that matter                                                                                        |
 
 The headline is the **brand promise**. The voice tagline stays as the warm-friend brand line for tone and secondary placements (about page, emails). Do not stack both in the hero.
 
@@ -59,7 +59,7 @@ One line each. Ten words or fewer.
 | Proactive            | Birthdays and anniversaries reach your inbox ahead of time. | Email reminders for key dates       |
 | AI context           | Give Claude or any MCP client your contact book.            | Your network, in your AI            |
 | Search               | Search your network. See who is in a city before you go.    | Find anyone                         |
-| Stay current         | Profiles refresh from the sources you saved them from.      | Always up to date                   |
+| Better than a list   | Contacts deserve more than a spreadsheet or phone notes.    | Better than a spreadsheet           |
 
 Claim limits are in [positioning.md](./positioning.md#five-things-bondery-does). Check them before adding a pillar.
 
