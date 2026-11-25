@@ -3,13 +3,16 @@
 ## End-to-end order
 
 ```text
-PR → verify → merge main → stage-images (:sha; :beta + :X.Y.Z-rc.N only on named RC cuts)
+PR → verify → merge main → stage-images (:sha; on a named RC cut: whole-release smoke, then :X.Y.Z-rc.N + :beta + Dokploy beta)
 → RC (optional): package X.Y.Z-rc.N → tag vX.Y.Z-rc.N → verify digests + GitHub prerelease + staging zip
 → production: drop -rc, dated changelog, sync-version
 → merge main → :sha only (unused for GA containers)
-→ git tag vX.Y.Z → CWS + promote last :X.Y.Z-rc.N → :X.Y.Z
+→ git tag vX.Y.Z → validate (MIN_EXTENSION_VERSION <= live) → CWS + promote last :X.Y.Z-rc.N → :X.Y.Z (api and webapp)
+→ ONE smoke of the whole release (api + webapp, real Traefik)
 → STOP until user confirms Chrome Web Store listing is live
-→ approve production-containers → :production + :latest; Dokploy pin BONDERY_INFRA_VERSION=X.Y.Z
+→ approve production-containers → :production + :latest for both components
+→ deploy_production pins BONDERY_INFRA_VERSION=X.Y.Z in Dokploy, then redeploys (never "either component")
+→ record the live extension version: pnpm run release:record-extension X.Y.Z, then sync-version
 → git push origin main:release  (website CD; not extension-gated)
 → post-release comms (monthly)
 ```

@@ -55,4 +55,5 @@ Listing screenshots (1280×800 store-shots generator): [store-listing.md](../../
 - [ ] Production: `vX.Y.Z` extension job succeeded (CWS)
 - [ ] RC: staging zip attached to the GitHub prerelease
 - [ ] User confirmed extension live in CWS before production-containers
-- [ ] `MIN_EXTENSION_VERSION` comes from `sync-version` (previous production), not a hand-edit
+- [ ] `MIN_EXTENSION_VERSION` comes from `sync-version` (the live extension record), not a hand-edit, and is not above the newest published GitHub release
+- [ ] After the listing is live: `pnpm run release:record-extension X.Y.Z`, then `pnpm run sync-version`, in the next PR

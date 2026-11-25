@@ -76,7 +76,7 @@ Schema migrations run automatically via `api` `pre_start` on deploy — no separ
 
 ### CI redeploy webhook (Bondery production)
 
-After `vX.Y.Z` release tags: GitHub Actions promotes semver images, runs compose smoke, promotes `:production` on success, then fetches **production Infisical** and calls `BONDERY_OPS_DOKPLOY_SERVICES_DEPLOY_WEBHOOK` with `refs/heads/release`. Configure the Dokploy Compose app branch to **`release`**. See [dokploy.mdx](../../docs/contributing/dokploy.mdx).
+After `vX.Y.Z` release tags: GitHub Actions promotes the semver images, runs ONE compose smoke for api and webapp together, and moves `:production` only for a release that passed. It then fetches **production Infisical**, sets `BONDERY_INFRA_VERSION=X.Y.Z` on the Dokploy Compose app through the Dokploy API, and calls `BONDERY_OPS_DOKPLOY_SERVICES_DEPLOY_WEBHOOK` with `refs/heads/release`. The deploy runs only when every component of the release is ready, and it runs the pinned version, not the floating `:production` tag. Configure the Dokploy Compose app branch to **`release`**. See [dokploy.mdx](../../docs/contributing/dokploy.mdx).
 
 ### Infisical → Dokploy env sync
 
@@ -91,19 +91,19 @@ See [workflows README](../../.github/workflows/README.md#dokploy-env-sync-sync-d
 
 ### Release smoke (local)
 
-Reproduce the CI release smoke against a pulled GHCR tag:
+Reproduce the CI release smoke against a pulled GHCR tag. It starts api and webapp at that tag together, runs a real Traefik (the version Dokploy runs) on a root-owned fixture folder, and sends requests for the api and storage domains through it. It needs Docker, and it publishes ports `26631`, `26632`, `8333`, and `54322` on the host, so stop other Bondery stacks first and do not run it next to a dev stack:
 
 ```bash
 docker network create dokploy-network || true
 # docker login ghcr.io  # when pulling private images
-node deploy/bondery/scripts/smoke-release.mjs --service webapp --tag 1.7.5
-node deploy/bondery/scripts/smoke-release.mjs --service api --tag 1.7.5
+node deploy/bondery/scripts/smoke-release.mjs --tag 1.7.5
 ```
 
 ### Image tags (api / webapp)
 
-- **`production` (default):** floating channel (`pull_policy: always`). Production only.
-- **`beta`:** set `BONDERY_INFRA_VERSION=beta` on the staging Dokploy app so it tracks `:beta` from `main`, not the production release.
+- **Compose default:** the production `X.Y.Z` of the release that ships the compose file. `sync-version` stamps it, so a checkout of `vX.Y.Z` runs `X.Y.Z`.
+- **Production Dokploy:** the release workflow sets `BONDERY_INFRA_VERSION=X.Y.Z` before it redeploys. Never rely on the floating `:production` tag for a deploy: it moves per component.
+- **`beta`:** set `BONDERY_INFRA_VERSION=beta` on the staging Dokploy app so it tracks `:beta`. `:beta` moves only after an RC passed the same release smoke.
 - **Semver:** pin for frozen rollback.
 
 A second stack on the same Traefik must set `BONDERY_INFRA_TRAEFIK_PREFIX=bondery-beta` in Infisical **staging** (beta sync). Infisical **production** should be `bondery` or omitted (compose default). Same router names on one Traefik overwrite production HTTPS routes. The same-host beta stack must also set `BONDERY_INFRA_POSTGRES_HOST_PORT=5433` so it does not steal production's `127.0.0.1:5432`.

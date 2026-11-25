@@ -251,7 +251,6 @@ jobs:
       checkout_ref: ${{ github.event_name == 'workflow_dispatch' && github.sha || needs.validate.outputs.tag }}
       source_tag: ${{ needs.resolve_meta.outputs.source_tag }}
       force_rebuild: ${{ github.event_name == 'workflow_dispatch' && inputs.force_rebuild == true }}
-      use_production_gate: ${{ needs.detect_changes.outputs.extension == 'true' }}
 
   release_webapp:
     needs: [ validate, detect_changes, resolve_meta ]
@@ -264,7 +263,59 @@ jobs:
       checkout_ref: ${{ github.event_name == 'workflow_dispatch' && github.sha || needs.validate.outputs.tag }}
       source_tag: ${{ needs.resolve_meta.outputs.source_tag }}
       force_rebuild: ${{ github.event_name == 'workflow_dispatch' && inputs.force_rebuild == true }}
-      use_production_gate: ${{ needs.detect_changes.outputs.extension == 'true' }}
+
+  # A release is one unit. Both images exist at X.Y.Z (stage jobs above), then ONE smoke runs api
+  # and webapp together. A component is "not part of this run" only when detect_changes says it
+  # is unchanged (a retry-promote of one component); otherwise it must have succeeded.
+  smoke_release:
+    needs: [ validate, detect_changes, release_api, release_webapp ]
+    if: >-
+      always() &&
+      needs.validate.result == 'success' &&
+      (needs.release_api.result == 'success' ||
+        (needs.detect_changes.outputs.api != 'true' && needs.release_api.result == 'skipped')) &&
+      (needs.release_webapp.result == 'success' ||
+        (needs.detect_changes.outputs.webapp != 'true' && needs.release_webapp.result == 'skipped'))
+    uses: ./.github/workflows/shared-smoke-bondery.yml
+    secrets: inherit
+    with:
+      checkout_ref: ${{ github.event_name == 'workflow_dispatch' && github.sha || needs.validate.outputs.tag }}
+      image_tag: ${{ needs.validate.outputs.version }}
+
+  extension_production_gate:
+    needs: [ detect_changes, smoke_release ]
+    if: ${{ needs.smoke_release.result == 'success' && needs.detect_changes.outputs.extension == 'true' }}
+    environment: production-containers
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Extension gate approved — promote to :production"
+
+  # No component moves to :production unless the whole release passed its smoke.
+  promote_production_api:
+    needs: [ validate, detect_changes, smoke_release, extension_production_gate ]
+    if: >-
+      always() &&
+      needs.smoke_release.result == 'success' &&
+      needs.detect_changes.outputs.api == 'true' &&
+      (needs.extension_production_gate.result == 'success' || needs.extension_production_gate.result == 'skipped')
+    uses: ./.github/workflows/shared-promote-production.yml
+    secrets: inherit
+    with:
+      image_name: ghcr.io/usebondery/api
+      version: ${{ needs.validate.outputs.version }}
+
+  promote_production_webapp:
+    needs: [ validate, detect_changes, smoke_release, extension_production_gate ]
+    if: >-
+      always() &&
+      needs.smoke_release.result == 'success' &&
+      needs.detect_changes.outputs.webapp == 'true' &&
+      (needs.extension_production_gate.result == 'success' || needs.extension_production_gate.result == 'skipped')
+    uses: ./.github/workflows/shared-promote-production.yml
+    secrets: inherit
+    with:
+      image_name: ghcr.io/usebondery/webapp
+      version: ${{ needs.validate.outputs.version }}
 
   release_extension:
     needs: [ validate, detect_changes ]
@@ -276,17 +327,20 @@ jobs:
       flavor: production
       publish_cws: true
 
-  notify_dokploy:
-    needs:
-      - validate
-      - release_api
-      - release_webapp
+  # Deploys the release. It runs only when every component of the release is on :production: a
+  # component is absent only when detect_changes says it is unchanged. Never on "either one".
+  # It pins BONDERY_INFRA_VERSION=X.Y.Z in Dokploy before the redeploy, so the deploy runs both
+  # images at this version and never follows the floating :production tag.
+  deploy_production:
+    needs: [ validate, detect_changes, promote_production_api, promote_production_webapp ]
     if: >-
       always() &&
-      (
-        needs.release_api.result == 'success' ||
-        needs.release_webapp.result == 'success'
-      )
+      needs.validate.result == 'success' &&
+      (needs.detect_changes.outputs.api == 'true' || needs.detect_changes.outputs.webapp == 'true') &&
+      (needs.promote_production_api.result == 'success' ||
+        (needs.detect_changes.outputs.api != 'true' && needs.promote_production_api.result == 'skipped')) &&
+      (needs.promote_production_webapp.result == 'success' ||
+        (needs.detect_changes.outputs.webapp != 'true' && needs.promote_production_webapp.result == 'skipped'))
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -296,12 +350,17 @@ jobs:
         with:
           persist-credentials: false
 
+      - uses: ./.github/actions/shared/setup-pnpm
+
+      - name: Build helpers (env manifest exports)
+        run: pnpm --filter @bondery/helpers run build
+
       - uses: ./.github/actions/shared/infisical-production-secrets
 
-      - uses: ./.github/actions/shared/dokploy-deploy-webhook
-        with:
-          webhook_url: ${{ env.BONDERY_OPS_DOKPLOY_SERVICES_DEPLOY_WEBHOOK }}
-          branch: release
+      - name: Pin the version in Dokploy and redeploy
+        env:
+          VERSION: ${{ needs.validate.outputs.version }}
+        run: node deploy/scripts/pin-dokploy-version.mjs --version "$VERSION"
 
   github_release_finalize:
     needs:
@@ -311,6 +370,7 @@ jobs:
       - release_api
       - release_webapp
       - release_extension
+      - deploy_production
     if: always() && needs.validate.result == 'success'
     runs-on: ubuntu-latest
     permissions:
@@ -329,6 +389,9 @@ jobs:
           RELEASE_API_RESULT: ${{ needs.release_api.result }}
           RELEASE_WEBAPP_RESULT: ${{ needs.release_webapp.result }}
           EXTENSION_RESULT: ${{ needs.release_extension.result }}
+          DEPLOY_RESULT: ${{ needs.deploy_production.result }}
+          API_CHANGED: ${{ needs.detect_changes.outputs.api }}
+          WEBAPP_CHANGED: ${{ needs.detect_changes.outputs.webapp }}
           GITHUB_EVENT_NAME: ${{ github.event_name }}
           RETRY_NOTE: ${{ github.event_name == 'workflow_dispatch' && inputs.note || '' }}
           RC_VERSION: ${{ needs.resolve_meta.outputs.rc_version }}

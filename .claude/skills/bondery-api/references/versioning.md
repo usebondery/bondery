@@ -45,10 +45,10 @@ See breaking-change rules in [api-design.md](./api-design.md).
 
 Some clients use **header-based** protocol versioning:
 
-| Client           | Mechanism                                                                                        | On mismatch          |
-| ---------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| Mobile sync      | `X-Bondery-Sync-Protocol`, SQLite schema headers                                                 | 426 Upgrade Required |
-| Chrome extension | `X-Bondery-Extension-Version` below `MIN_EXTENSION_VERSION` (previous production CalVer, 3-part) | 426 Upgrade Required |
+| Client           | Mechanism                                                                                                                                | On mismatch          |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| Mobile sync      | `X-Bondery-Sync-Protocol`, SQLite schema headers                                                                                         | 426 Upgrade Required |
+| Chrome extension | `X-Bondery-Extension-Version` below `MIN_EXTENSION_VERSION` (the extension version live in the Chrome Web Store, 3-part; never above it) | 426 Upgrade Required |
 
 `GET /extension/manifest` returns `minVersion` (426 floor) and `latestVersion` (current production CalVer for a non-blocking update nudge). While the API package is an RC, `latestVersion` is the previous production tag — never the RC string.
 
@@ -62,5 +62,5 @@ If third-party integrators require long-lived API stability, URL path versioning
 
 - [ ] Contract change classified as breaking vs non-breaking
 - [ ] Breaking changes update API, all clients, and OpenAPI in same PR
-- [ ] Sync/extension protocol changes handle 426 on clients; `MIN_EXTENSION_VERSION` comes from `sync-version` (previous production), not a hand-edit
+- [ ] Sync/extension protocol changes handle 426 on clients; `MIN_EXTENSION_VERSION` comes from `sync-version` (the live extension record), not a hand-edit
 - [ ] No `/v1` path segments added without explicit product decision

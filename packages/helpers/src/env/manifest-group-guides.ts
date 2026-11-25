@@ -53,7 +53,7 @@ export const DEPLOY_GROUP_GUIDES: Readonly<Record<string, readonly string[]>> = 
   "Chrome extension OAuth": ["Generate: openssl rand -hex 16   # BONDERY_PUBLIC_OAUTH_CLIENT_ID"],
   Email: ["SMTP settings (env_file → api only)."],
   "Image pin": [
-    "Omit BONDERY_INFRA_VERSION on production to pull :production, or pin X.Y.Z. Staging may pin a named RC or :beta (RC cuts only). RC is not a self-host channel.",
+    "Omit BONDERY_INFRA_VERSION to run the images that this compose file names: its default is the production X.Y.Z of the release it ships in. Production Dokploy is pinned to X.Y.Z by the release workflow. Staging may pin a named RC or :beta (RC cuts only). RC is not a self-host channel.",
     "BONDERY_INFRA_TRAEFIK_PREFIX defaults to bondery. Infisical staging: bondery-beta. Infisical production: bondery or omit.",
     "BONDERY_INFRA_TRAEFIK_DYNAMIC_DIR: leave empty on Dokploy. Another Traefik: the host folder its file provider watches (Coolify: /data/coolify/proxy/dynamic).",
   ],

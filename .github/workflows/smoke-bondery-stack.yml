@@ -1,19 +1,13 @@
 name: Smoke · Bondery stack
 
-# Manual full-stack smoke drill. Release smoke runs inside release.yml via shared-release-container.yml.
+# Manual full-stack smoke drill: api and webapp at one tag, behind a real Traefik. The release
+# smoke runs inside release.yml (smoke_release) and stage-images.yml (smoke_rc).
 
 on:
   workflow_dispatch:
     inputs:
-      service:
-        description: Service profile to smoke
-        required: true
-        type: choice
-        options:
-          - webapp
-          - api
       image_tag:
-        description: Semver image tag to pull from GHCR (e.g. 1.7.5)
+        description: Tag of both images to pull from GHCR (e.g. 1.7.5)
         required: true
         type: string
 
@@ -49,5 +43,4 @@ jobs:
       - name: Run release smoke
         run: |
           node deploy/bondery/scripts/smoke-release.mjs \
-            --service "${{ inputs.service }}" \
             --tag "${{ inputs.image_tag }}"

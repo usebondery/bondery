@@ -66,7 +66,7 @@ export const RUNTIME_ENTRIES: EnvVarDef[] = [
       include: true,
     },
     description:
-      "Image tag for api and webapp: production CalVer pin (X.Y.Z), or omit for floating `:production`. Staging Dokploy may pin a named RC (`X.Y.Z-rc.N`) or floating `:beta` (RC cuts only). RC is not a self-host channel.",
+      "Image tag for api and webapp: production CalVer pin (X.Y.Z). Omit it to run the version the compose file names. The release workflow pins it on production Dokploy. Staging Dokploy may pin a named RC (`X.Y.Z-rc.N`) or floating `:beta` (RC cuts only). RC is not a self-host channel.",
     exampleValue: "",
     group: "Infra",
     opsExample: { group: "Build metadata", include: true, value: "" },

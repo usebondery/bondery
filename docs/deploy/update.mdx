@@ -16,7 +16,7 @@ Requires Docker Compose **v2.38+**.
 
 ## Image upgrades
 
-By default both services use the floating **`production`** image tag with **`pull_policy: always`** in [`docker-compose.yml`](../../deploy/bondery/docker-compose.yml). That means every `docker compose up -d` (or Dokploy redeploy) **pulls the latest `production` images** from GHCR — you do not need to bump a version in `.env` to receive app updates.
+Both services run the image version that [`docker-compose.yml`](../../deploy/bondery/docker-compose.yml) names by default. Each release stamps its own version there, so the compose file of release `vX.Y.Z` runs `api` and `webapp` at `X.Y.Z`. The two images always move together. To upgrade, fetch the compose files of the new release (check out its `vX.Y.Z` tag), then pull and start:
 
 <PlatformCode
   posix={`./scripts/upgrade.sh`}
@@ -24,11 +24,11 @@ By default both services use the floating **`production`** image tag with **`pul
 docker compose up -d`}
 />
 
-This pulls the latest `api`/`webapp` images and runs `docker compose up -d`. On Windows, run the two `docker compose` commands from `deploy/bondery`. When the `api` image changes, Compose recreates `api` and re-runs `pre_start`.
+This pulls the `api`/`webapp` images that the compose file names and runs `docker compose up -d`. On Windows, run the two `docker compose` commands from `deploy/bondery`. When the `api` image changes, Compose recreates `api` and re-runs `pre_start`.
 
 ### Pinning a version
 
-Pin semver via `BONDERY_INFRA_VERSION` when you want a frozen rollback target instead of tracking `production` (pins **both** api and webapp):
+Set `BONDERY_INFRA_VERSION` to run a version other than the one in your compose file, for example a rollback target (it pins **both** api and webapp):
 
 <PlatformCode
   posix={`BONDERY_INFRA_VERSION=1.7.4 docker compose up -d api webapp`}
