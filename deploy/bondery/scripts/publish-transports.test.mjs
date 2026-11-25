@@ -2,11 +2,15 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { mkdir, mkdtemp, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { basename, dirname, join, resolve } from "node:path";
+import { dirname, join, relative, resolve } from "node:path";
 import { after, before, describe, it } from "node:test";
+import { setTimeout as sleep } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 
 const SCRIPT = resolve(dirname(fileURLToPath(import.meta.url)), "../traefik/publish-transports.sh");
+
+/** Where Traefik mounts its dynamic folder, which the job's certificate paths must start with. */
+const TRAEFIK_DYNAMIC_DIR = "/etc/dokploy/traefik/dynamic";
 
 const API_CA =
   "-----BEGIN CERTIFICATE-----\nMIIBdzCCAR2gAwIBAgIUAPI\nQ0EgZm9yIHRlc3Rz\n-----END CERTIFICATE-----\n";
@@ -27,9 +31,9 @@ const STORAGE_SERVER_NAME_RE = /^ {6}serverName: bondery-beta-storage$/m;
  * drops the router and leaves the public domain on Traefik's own 404.
  */
 const STORAGE_CERT_FILE_RE =
-  /^ {8}- certFile: \/etc\/dokploy\/traefik\/dynamic\/bondery-beta-storage-client\.crt$/m;
+  /^ {8}- certFile: \/etc\/dokploy\/traefik\/dynamic\/certificates\/bondery-beta\/storage-client\.crt$/m;
 const STORAGE_KEY_FILE_RE =
-  /^ {10}keyFile: \/etc\/dokploy\/traefik\/dynamic\/bondery-beta-storage-client\.key$/m;
+  /^ {10}keyFile: \/etc\/dokploy\/traefik\/dynamic\/certificates\/bondery-beta\/storage-client\.key$/m;
 /** The CA is inline under rootCAs: a rootCAs path that Traefik cannot read fails silently. */
 const STORAGE_ROOT_CA_INLINE_RE =
   /^ {6}rootCAs:\n {8}- \|\n {10}-----BEGIN CERTIFICATE-----\n {10}MIIBdzCCAR2gAwIBAgIUU1RP$/m;
@@ -44,12 +48,12 @@ const UNKNOWN_SERVICE_RE = /unknown service/;
 const NO_CERTIFICATE_RE = /has no certificate/;
 const NO_PRIVATE_KEY_RE = /has no private key/;
 const DYNAMIC_DIR_ERROR_RE = /BONDERY_INFRA_TRAEFIK_DYNAMIC_DIR/;
+const WROTE_TRANSPORT_RE = /wrote .*bondery-reload-storage-transport\.yml/;
 const PERMISSION_BITS_RE = /[0-7]{3}$/;
 
 /** PEM shape and a distinctive body marker, so a copy is proven to be the source's bytes. */
 const BEGIN_CERTIFICATE_RE = /-----BEGIN CERTIFICATE-----/;
 const BEGIN_PRIVATE_KEY_RE = /-----BEGIN PRIVATE KEY-----/;
-const STORAGE_CA_BODY_RE = /U3RvcmFnZSBDQQ==/;
 const STORAGE_CERT_BODY_RE = /RU5U/;
 const STORAGE_KEY_BODY_RE = /S0VZ/;
 
@@ -153,11 +157,12 @@ describe("publish-transports.sh", requiresSh, () => {
     const result = run("bondery-beta");
     assert.equal(result.status, 0, result.stderr);
 
-    const cert = await readFile(join(dynamicDir, "bondery-beta-storage-client.crt"), "utf8");
+    const certDir = join(dynamicDir, "certificates", "bondery-beta");
+    const cert = await readFile(join(certDir, "storage-client.crt"), "utf8");
     assert.match(cert, BEGIN_CERTIFICATE_RE);
     assert.match(cert, STORAGE_CERT_BODY_RE);
 
-    const key = await readFile(join(dynamicDir, "bondery-beta-storage-client.key"), "utf8");
+    const key = await readFile(join(certDir, "storage-client.key"), "utf8");
     assert.match(key, BEGIN_PRIVATE_KEY_RE);
     assert.match(key, STORAGE_KEY_BODY_RE);
   });
@@ -183,7 +188,7 @@ describe("publish-transports.sh", requiresSh, () => {
     const storagePaths = await referencedPaths("storage");
     assert.equal(storagePaths.length, 2);
     for (const path of storagePaths) {
-      const local = join(dynamicDir, basename(path));
+      const local = join(dynamicDir, relative(TRAEFIK_DYNAMIC_DIR, path));
       await stat(local);
     }
   });
@@ -207,8 +212,9 @@ describe("publish-transports.sh", requiresSh, () => {
     // The transport names the key but does not contain it, so it can be world-readable; the smoke
     // and Traefik both read it as users other than the one that wrote it.
     assert.equal(await permissionsOf("bondery-beta-mode-storage-transport.yml"), "644");
-    assert.equal(await permissionsOf("bondery-beta-mode-storage-client.key"), "600");
-    assert.equal(await permissionsOf("bondery-beta-mode-storage-client.crt"), "644");
+    assert.equal(await permissionsOf("certificates/bondery-beta-mode/storage-client.key"), "600");
+    assert.equal(await permissionsOf("certificates/bondery-beta-mode/storage-client.crt"), "644");
+    assert.equal(await permissionsOf("certificates/bondery-beta-mode"), "755");
   });
 
   it("leaves up-to-date files alone, so Traefik does not reload", async () => {
@@ -228,10 +234,59 @@ describe("publish-transports.sh", requiresSh, () => {
     );
     assert.deepEqual(written.sort(), [
       "bondery-isolation-api-transport.yml",
-      "bondery-isolation-storage-client.crt",
-      "bondery-isolation-storage-client.key",
       "bondery-isolation-storage-transport.yml",
     ]);
+    // The certificate material sits in this stack's own folder, with no prefix on the file names.
+    assert.deepEqual(
+      (await readdir(join(dynamicDir, "certificates", "bondery-isolation"))).sort(),
+      ["storage-client.crt", "storage-client.key"],
+    );
+  });
+
+  it("removes the flat files of older versions, and only this stack's", async () => {
+    const legacyDir = join(root, "legacy");
+    await mkdir(legacyDir);
+    const flat = (name) => join(legacyDir, name);
+    const stale = [
+      "bondery-beta-storage-client.crt",
+      "bondery-beta-storage-client.key",
+      "bondery-beta-api-ca.crt",
+      "bondery-beta-storage-ca.crt",
+    ];
+    // Another stack's files and Traefik's own files must survive.
+    const kept = ["bondery-storage-client.key", "bondery-api-ca.crt", "acme.json"];
+    for (const name of [...stale, ...kept]) {
+      await writeFile(flat(name), "old");
+    }
+    const result = run("bondery-beta", [legacyDir, `api=${apiCa}`, `storage=${storageCa}`]);
+    assert.equal(result.status, 0, result.stderr);
+    assert.deepEqual((await readdir(legacyDir)).sort(), [
+      "acme.json",
+      "bondery-api-ca.crt",
+      "bondery-beta-api-transport.yml",
+      "bondery-beta-storage-transport.yml",
+      "bondery-storage-client.key",
+      "certificates",
+    ]);
+  });
+
+  it("rewrites the transport when only a certificate changed, so Traefik reloads", async () => {
+    const reloadDir = join(root, "reload");
+    await mkdir(reloadDir);
+    const transport = join(reloadDir, "bondery-reload-storage-transport.yml");
+    const args = [reloadDir, `storage=${storageCa}`];
+    assert.equal(run("bondery-reload", args).status, 0);
+    const firstWrite = (await stat(transport)).mtimeMs;
+
+    // A renewed client certificate: same transport text, new file content in a subfolder that
+    // Traefik does not watch. Only a rewrite of the transport raises the event it reloads on.
+    await writeFile(storageClientCert, STORAGE_CLIENT_CERT.replace("RU5U", "TkVX"));
+    await sleep(20);
+    const result = run("bondery-reload", args);
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, WROTE_TRANSPORT_RE);
+    assert.equal((await stat(transport)).mtimeMs > firstWrite, true);
+    await writeFile(storageClientCert, STORAGE_CLIENT_CERT);
   });
 
   it("refuses a prefix that could escape the folder or break the YAML", () => {

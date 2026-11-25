@@ -5,3 +5,7 @@ last_updated: 2026-11-25
 ---
 
 ## [Unreleased]
+
+### 🔄 Changed
+
+- Self-host and hosted: the `traefik-transport` job now keeps Traefik's storage client certificate and key in `certificates/<prefix>/` inside the folder Traefik watches, as `storage-client.crt` and `storage-client.key`. Before, they sat next to the transport files as `<prefix>-storage-client.crt` and `.key`. Each stack now has one folder for its certificate files. On the next deploy the job removes the old flat files, so nothing needs your action. Do not edit the folder: the job rewrites it.
