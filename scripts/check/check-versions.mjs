@@ -189,6 +189,18 @@ function main() {
     errors.push("sync-version --check failed (see sync-version output)");
   }
 
+  try {
+    execSync("node scripts/check/check-min-extension-version.mjs --offline", {
+      cwd: root,
+      encoding: "utf8",
+      stdio: "pipe",
+    });
+  } catch (error) {
+    errors.push(
+      `MIN_EXTENSION_VERSION is above the recorded live extension version: ${error.stderr ?? error.message}`.trim(),
+    );
+  }
+
   checkReleaseChangelog(version);
 
   if (errors.length > 0) {
