@@ -25,6 +25,10 @@ After every change, run `pnpm run check:changed` before you report. It runs only
 
 Prefer a Biome rule for any code-structure rule (native rules first, GritQL plugins for custom patterns). Use a script only for what Biome cannot do: comment wording, rules scoped to the diff, commit messages and cross-file consistency.
 
+## Commits: commit means push
+
+When the user asks you to commit, commit and push the branch in the same step. Never push `main` or `master` without asking first. Report a failed push; do not retry it silently.
+
 ## Agent files: one source
 
 Edit agent definitions in `.agents/agents/`, skills in `.agents/skills/`, and team MCP servers in `.agents/mcp/mcp.json`. Never edit `.claude/agents/`, `.claude/skills/`, `.cursor/agents/`, `.mcp.json`, or `.cursor/mcp.json`: they are generated mirrors so Claude Code (including inside Orca) and Cursor see the same files. Pre-commit runs `pnpm run agents:sync` and stages the mirrors; `check:agent-files` fails on drift in `check:changed` and CI. Plane MCP is stdio via `scripts/dev/plane-mcp-stdio.mjs` and reads `.agents/mcp/plane.env.local` (gitignored; seed from `plane.env.local.example` or `pnpm run setup:worktree`).
