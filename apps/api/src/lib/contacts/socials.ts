@@ -39,7 +39,7 @@ function asSocialPlatform(value: string): SocialPlatform | null {
   return null;
 }
 
-export type { SocialPlatform };
+export type { SocialPlatform } from "@bondery/schemas";
 
 /** Loads normalized socials rows and merges them into contact-shaped objects. */
 export async function attachContactSocials<T extends ContactWithId>(

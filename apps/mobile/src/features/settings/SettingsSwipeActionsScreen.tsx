@@ -5,8 +5,8 @@ import { useRouter } from "expo-router";
 import { ScrollView } from "react-native";
 import { StackNavBar } from "../../components/chrome";
 import { Paper } from "../../components/ui/Paper";
-import { Select } from "../../components/ui/Select";
 import { Stack } from "../../components/ui/Stack";
+import { Select } from "../../components/ui/select";
 import { updateSettings } from "../../lib/api/client";
 import {
   useCommonTranslations,

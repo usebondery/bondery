@@ -67,7 +67,7 @@ Keep it brief.`),
     },
     ({ firstName, lastName, headline, notes }) => {
       const lines = [
-        `Add this person to my Bondery CRM as a new contact.`,
+        "Add this person to my Bondery CRM as a new contact.",
         `firstName: ${firstName}`,
       ];
       if (lastName) {
@@ -80,8 +80,8 @@ Keep it brief.`),
         lines.push(`notes: ${notes}`);
       }
       lines.push(
-        `Call create_contact with those fields. You may also set phones, emails, addresses, and social handles on create_contact or update_contact ([] clears a list). Birthdays and other dates use update_important_dates. If a similar name already exists, call search_contacts first and ask whether to update the existing person (update_contact) instead of creating a duplicate.`,
-        `This requires Full access (mcp:write).`,
+        "Call create_contact with those fields. You may also set phones, emails, addresses, and social handles on create_contact or update_contact ([] clears a list). Birthdays and other dates use update_important_dates. If a similar name already exists, call search_contacts first and ask whether to update the existing person (update_contact) instead of creating a duplicate.",
+        "This requires Full access (mcp:write).",
       );
       return userText(lines.join("\n"));
     },

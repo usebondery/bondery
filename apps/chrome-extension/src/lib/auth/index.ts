@@ -45,7 +45,7 @@ function base64URLEncode(buffer: Uint8Array): string {
   for (const byte of buffer) {
     binary += String.fromCharCode(byte);
   }
-  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/[=]/g, "");
+  return btoa(binary).replace(/\+/gu, "-").replace(/\//gu, "_").replace(/[=]/gu, "");
 }
 
 const STORAGE_KEY = "bondery_auth_tokens";
@@ -167,7 +167,7 @@ function decodeJwtPayload(token: string): JwtClaims | null {
     if (!payloadPart) {
       return null;
     }
-    const payload = payloadPart.replace(/-/g, "+").replace(/_/g, "/");
+    const payload = payloadPart.replace(/-/gu, "+").replace(/_/gu, "/");
     const decoded = atob(payload);
     const parsed: unknown = JSON.parse(decoded);
     if (!isJwtPayload(parsed)) {

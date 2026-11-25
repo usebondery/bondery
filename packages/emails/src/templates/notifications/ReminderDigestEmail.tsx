@@ -8,8 +8,8 @@ import { EmailBody } from "#shared/EmailBody.js";
 import { EmailWrapper } from "#shared/EmailWrapper.js";
 import { EMAIL_MUTED, EMAIL_TEXT } from "#shared/email-styles.js";
 
-const PATTERN_5C732B_RE = /\s+/;
-const PATTERN_5C2F2B24_RE = /\/+$/;
+const PATTERN_5C732B_RE = /\s+/u;
+const PATTERN_5C2F2B24_RE = /\/+$/u;
 
 function getInitials(name: string) {
   return name

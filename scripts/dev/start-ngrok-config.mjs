@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { resolve } from "node:path";
 
-const PATTERN_5B5C5C2F5D_RE = /[\\/]/;
+const PATTERN_5B5C5C2F5D_RE = /[\\/]/u;
 
 function main() {
   const [, , configName] = process.argv;

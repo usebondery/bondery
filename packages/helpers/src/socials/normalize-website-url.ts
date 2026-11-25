@@ -1,4 +1,4 @@
-const HTTPS_RE = /^https?:\/\//i;
+const HTTPS_RE = /^https?:\/\//iu;
 
 /**
  * Normalizes a website URL for storage and linking.

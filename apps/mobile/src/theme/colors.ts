@@ -184,11 +184,11 @@ const AVATAR_COLOR_PALETTE_HEX = [
   "#4263eb", // indigo
 ] as const;
 
+export { BRAND_SURFACES } from "@bondery/branding/colors";
 export type { MobileThemeColors, MobileThemeMode };
 export {
   AVATAR_COLOR_PALETTE_HEX,
   BRAND_PRIMARY,
-  BRAND_SURFACES,
   MOBILE_THEME_COLORS,
   OAUTH_PROVIDER_COLORS,
   PRIMARY_BUTTON_BACKGROUND,

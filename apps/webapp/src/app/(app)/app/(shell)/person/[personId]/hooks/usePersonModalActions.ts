@@ -7,9 +7,9 @@ import { useRouter } from "next/navigation";
 import { openDeleteContactModal } from "@/components/contacts/openDeleteContactModal";
 import { searchContactsPage } from "@/lib/contacts/searchContacts";
 import { routeAssert } from "@/lib/navigation/route/assert";
-import { openAddPeopleToGroupSelectionModal } from "../../../people/components/modals/AddPeopleToGroupSelectionModal";
-import { openMergeWithModal } from "../../../people/components/modals/MergeWithModal";
-import { openShareContactModal } from "../../../people/components/modals/ShareContactModal";
+import { openAddPeopleToGroupSelectionModal } from "../../../people/components/modals/openAddPeopleToGroupSelectionModal";
+import { openMergeWithModal } from "../../../people/components/modals/openMergeWithModal";
+import { openShareContactModal } from "../../../people/components/modals/openShareContactModal";
 
 interface UsePersonModalActionsOptions {
   contact: Contact | null;

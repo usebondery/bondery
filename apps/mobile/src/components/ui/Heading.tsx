@@ -2,7 +2,7 @@ import { cn } from "cn";
 import { type HeadingOrder, headingClassName } from "./headingClassName";
 import { Text, type TextProps } from "./Text";
 
-export type { HeadingOrder };
+export type { HeadingOrder } from "./headingClassName";
 
 export type HeadingProps = Omit<TextProps, "fw" | "size"> & {
   order: HeadingOrder;

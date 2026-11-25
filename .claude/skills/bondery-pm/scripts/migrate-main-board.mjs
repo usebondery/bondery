@@ -1,22 +1,23 @@
 #!/usr/bin/env node
 const BUG_FIX_BROKEN_REGRESSION_CRASH_DOESN_RE =
-  /\b(bug|fix\b|broken|regression|crash|doesn'?t work)\b/i;
-const ISO_SOC_TAX_LEGAL_GDPR_LLC_RE = /\b(ISO|SOC|tax|legal|GDPR|LLC)\b/i;
-const SPIKE_EVALUATE_RESEARCH_ADR_RE = /\b(spike|evaluate|research|ADR)\b/i;
+  /\b(?<group1>bug|fix\b|broken|regression|crash|doesn'?t work)\b/iu;
+const ISO_SOC_TAX_LEGAL_GDPR_LLC_RE = /\b(?<group1>ISO|SOC|tax|legal|GDPR|LLC)\b/iu;
+const SPIKE_EVALUATE_RESEARCH_ADR_RE = /\b(?<group1>spike|evaluate|research|ADR)\b/iu;
 const UPGRADE_DEPS_COMPOSE_DOCKER_TRAEFIK_ENV_RE =
-  /\b(upgrade|deps|compose|docker|traefik|env manifest|changelog|smoke|rls|migration tests)\b/i;
+  /\b(?<group1>upgrade|deps|compose|docker|traefik|env manifest|changelog|smoke|rls|migration tests)\b/iu;
 const OUTCOME_NSANITY_CHECK_NNOTES_NROADMAP_RE =
-  /^Outcome\n([\s\S]*?)(?:\nSanity check|\nNotes|\nRoadmap|$)/;
-const PATTERN_5C2E24_RE = /\.$/;
-const LLC_ISO_TRUSTPILOT_DUNS_GDPR_SOC_RE = /^(LLC|ISO\s*\d+|Trustpilot|DUNS|GDPR|SOC\s*2?)$/i;
+  /^Outcome\n(?<group1>[\s\S]*?)(?:\nSanity check|\nNotes|\nRoadmap|$)/u;
+const PATTERN_5C2E24_RE = /\.$/u;
+const LLC_ISO_TRUSTPILOT_DUNS_GDPR_SOC_RE =
+  /^(?<group1>LLC|ISO\s*\d+|Trustpilot|DUNS|GDPR|SOC\s*2?)$/iu;
 const LET_USERS_ENABLE_FIX_REDUCE_IMPROVE_RE =
-  /\b(let|users?|enable|fix|reduce|improve|ship|secure|file|publish|migrate|create|after|export|import|obtain|register|transfer|evaluate|research|connect|add|remove|upgrade|deploy|document)\b/i;
-const PATTERN_5C732B_RE = /\s+/;
-const DOCS_MD_DOCUMENTATION_RE = /docs\/|\.md|documentation/i;
-const APPS_MOBILE_MOBILE_RE = /apps\/mobile|Mobile:/i;
-const APPS_WEBAPP_WEBAPP_RE = /apps\/webapp|webapp/i;
-const CHROME_EXTENSION_RE = /chrome|extension/i;
-const APPS_API_API_RE = /apps\/api|\/api\//i;
+  /\b(?<group1>let|users?|enable|fix|reduce|improve|ship|secure|file|publish|migrate|create|after|export|import|obtain|register|transfer|evaluate|research|connect|add|remove|upgrade|deploy|document)\b/iu;
+const PATTERN_5C732B_RE = /\s+/u;
+const DOCS_MD_DOCUMENTATION_RE = /docs\/|\.md|documentation/iu;
+const APPS_MOBILE_MOBILE_RE = /apps\/mobile|Mobile:/iu;
+const APPS_WEBAPP_WEBAPP_RE = /apps\/webapp|webapp/iu;
+const CHROME_EXTENSION_RE = /chrome|extension/iu;
+const APPS_API_API_RE = /apps\/api|\/api\//iu;
 
 /**
  * Bulk-migrate MAIN Plane work items to bondery-pm conventions.
@@ -61,8 +62,8 @@ const LABELS = {
   surfaceWebapp: "1e7f2400-14a6-49a4-8dc2-5c88a49e0ed4",
 };
 
-const TITLE_PREFIX_RE = /^\[(Bug|Chore|Feature|Research|Business Ops)\]\s+/;
-const ROADMAP_RE = /ROADMAP-(\d+)/i;
+const TITLE_PREFIX_RE = /^\[(?<group1>Bug|Chore|Feature|Research|Business Ops)\]\s+/u;
+const ROADMAP_RE = /ROADMAP-(?<group1>\d+)/iu;
 
 const STATE_MAP = {
   [STATES.backlog]: STATES.icebox,
@@ -84,16 +85,16 @@ function stripTitlePrefix(name) {
 }
 
 const ENGINEERING_SUBTASK_RE =
-  /^(DB(?:\s+migration)?|API(?:\s*\+\s*Types)?|API\/Data|Server component|Client component|Client UI|Navigation|Translations|Edge cases|Webapp|Mobile|Docs|Compose|Infra|Tests|Types|Prisma schema|Cleanup|Upload|Migration|Env[:/]|Install and configure|Person detail|Bridge|Rewrite|Remove pepper|Schema \+|Stripe|Archive apps)\b/i;
+  /^(?<group1>DB(?:\s+migration)?|API(?:\s*\+\s*Types)?|API\/Data|Server component|Client component|Client UI|Navigation|Translations|Edge cases|Webapp|Mobile|Docs|Compose|Infra|Tests|Types|Prisma schema|Cleanup|Upload|Migration|Env[:/]|Install and configure|Person detail|Bridge|Rewrite|Remove pepper|Schema \+|Stripe|Archive apps)\b/iu;
 
 const BUSINESS_OPS_RE =
-  /\b(reddit|linkedin|facebook|instagram|trustpilot|hacker news|product hunt|mastodon|posts on|chrome store|about page|maskot|bondery\.com|schedule calls with reddit)\b/i;
+  /\b(?<group1>reddit|linkedin|facebook|instagram|trustpilot|hacker news|product hunt|mastodon|posts on|chrome store|about page|maskot|bondery\.com|schedule calls with reddit)\b/iu;
 
 const FEATURE_RE =
-  /\b(import data|export|onboarding tutorial|open contact|vcard|e2ee|encrypt|graph node|voice notes|smart (?:search|message)|related contacts|recommendation on who|mcp\/cli|ai parse|replace hero|double sidebar|monicahq|dex|filters in addition|mobile basic contact|keep in touch)\b/i;
+  /\b(?<group1>import data|export|onboarding tutorial|open contact|vcard|e2ee|encrypt|graph node|voice notes|smart (?:search|message)|related contacts|recommendation on who|mcp\/cli|ai parse|replace hero|double sidebar|monicahq|dex|filters in addition|mobile basic contact|keep in touch)\b/iu;
 
 const PLACEHOLDER_OUTCOMES =
-  /^(what|overview|i18n|libsodium|maskot|tbd|pending review|see outcome(?:\s*—\s*pending review)?|n\/a)$/i;
+  /^(?<group1>what|overview|i18n|libsodium|maskot|tbd|pending review|see outcome(?:\s*—\s*pending review)?|n\/a)$/iu;
 
 function capitalizeOutcome(sentence) {
   const trimmed = sentence.replace(PATTERN_5C2E24_RE, "").trim();
@@ -104,7 +105,7 @@ function capitalizeOutcome(sentence) {
 }
 
 function escapeHtml(s) {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return s.replace(/&/gu, "&amp;").replace(/</gu, "&lt;").replace(/>/gu, "&gt;");
 }
 
 if (process.argv[1]?.endsWith("migrate-main-board.mjs")) {
@@ -161,7 +162,7 @@ export function extractOutcome(descriptionStripped) {
   if (!line || PLACEHOLDER_OUTCOMES.test(line)) {
     return "";
   }
-  return line.replace(/\s+/g, " ").trim();
+  return line.replace(/\s+/gu, " ").trim();
 }
 
 /** True when the title body already reads like an outcome, not a label or component. */
@@ -254,20 +255,20 @@ export function buildDescription(item) {
 
   const outcome = existing.split("\n")[0] || item.name;
   let html = `<h2>Outcome</h2><p>${escapeHtml(outcome)}</p>`;
-  html += `<h2>Sanity check</h2><ul>`;
-  html += `<li><strong>Who is the user?</strong> operator/founder</li>`;
-  html += `<li><strong>What pain or opportunity?</strong> See outcome — pending review</li>`;
-  html += `<li><strong>How do we know?</strong> founder</li>`;
-  html += `<li><strong>Smallest shippable slice:</strong> not this week</li>`;
-  html += `<li><strong>How will we know it worked?</strong> pending review</li>`;
-  html += `</ul>`;
+  html += "<h2>Sanity check</h2><ul>";
+  html += "<li><strong>Who is the user?</strong> operator/founder</li>";
+  html += "<li><strong>What pain or opportunity?</strong> See outcome — pending review</li>";
+  html += "<li><strong>How do we know?</strong> founder</li>";
+  html += "<li><strong>Smallest shippable slice:</strong> not this week</li>";
+  html += "<li><strong>How will we know it worked?</strong> pending review</li>";
+  html += "</ul>";
 
   if (roadmap) {
     html += `<h2>Roadmap</h2><p>ROADMAP-${roadmap[1]} — see public roadmap.</p>`;
   }
 
   if (!hasLegacy) {
-    html += `<blockquote><p>Legacy migration — sanity check pending review</p></blockquote>`;
+    html += "<blockquote><p>Legacy migration — sanity check pending review</p></blockquote>";
   }
 
   if (existing && !existing.startsWith("##")) {

@@ -7,10 +7,10 @@ import {
   toApiErrorResponse,
 } from "../lib/platform/errors/to-api-error-response.js";
 
-const RETRY_THE_CALL_ONCE_PATTERN = /Retry the call once/;
-const SEARCH_CONTACTS_PATTERN = /search_contacts/;
-const CONTACT_NOT_FOUND_PATTERN = /^Contact not found\. /;
-const DOCS_API_ERRORS_CONTACT_NOT_FOUND_PATTERN = /\/docs\/api\/errors\/contact_not_found$/;
+const RETRY_THE_CALL_ONCE_PATTERN = /Retry the call once/u;
+const SEARCH_CONTACTS_PATTERN = /search_contacts/u;
+const CONTACT_NOT_FOUND_PATTERN = /^Contact not found\. /u;
+const DOCS_API_ERRORS_CONTACT_NOT_FOUND_PATTERN = /\/docs\/api\/errors\/contact_not_found$/u;
 
 describe("toApiErrorResponse", () => {
   it("maps DomainError 4xx with catalog code, type, message, and doc_url", () => {

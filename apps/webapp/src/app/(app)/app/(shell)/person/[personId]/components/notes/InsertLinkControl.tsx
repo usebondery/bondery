@@ -8,8 +8,8 @@ import { useEditorState } from "@tiptap/react";
 import { useState } from "react";
 import { useNotesEditorTranslations } from "@/lib/i18n/generated/hooks";
 
-const HTTP_OR_HTTPS_PREFIX = /^https?:\/\//i;
-const MAILTO_PREFIX = /^mailto:/i;
+const HTTP_OR_HTTPS_PREFIX = /^https?:\/\//iu;
+const MAILTO_PREFIX = /^mailto:/iu;
 
 type LinkMarkAttrs = {
   href?: string;

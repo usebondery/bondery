@@ -6,9 +6,9 @@ import {
   buildReconfirmSettingsUrl,
 } from "./callback-urls.js";
 
-const LOGIN_PATH = /\/login/;
-const HAS_RETURNED = /has_returned=/;
-const AUTH_START = /\/auth\/start/;
+const LOGIN_PATH = /\/login/u;
+const HAS_RETURNED = /has_returned=/u;
+const AUTH_START = /\/auth\/start/u;
 
 const ORIGIN = "https://app.usebondery.com";
 const REVOKE_KEY_ID = "11111111-1111-4111-8111-111111111111";

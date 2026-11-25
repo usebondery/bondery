@@ -22,7 +22,7 @@ function scrollToHash() {
     return;
   }
 
-  const element = document.getElementById(id);
+  const element = document.querySelector(`#${CSS.escape(id)}`);
   if (!element) {
     return;
   }

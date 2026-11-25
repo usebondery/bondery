@@ -5,12 +5,12 @@ import type { SQLiteDatabase } from "expo-sqlite";
 import { SYNC_META_KEYS } from "../constants.ts";
 import { runSyncMigrations, wipeSyncDatabase } from "./migrations.ts";
 
-const PRAGMA_WAL_RE = /PRAGMA\s+journal_mode\s*=\s*WAL/i;
-const WHITESPACE_RE = /\s+/;
-const CREATE_TABLE_RE = /CREATE TABLE IF NOT EXISTS (\w+)/i;
-const DROP_TABLE_RE = /DROP TABLE IF EXISTS (\w+)/i;
-const ALTER_ADD_COLUMN_RE = /ALTER TABLE (\w+) ADD COLUMN (\w+)/i;
-const PRAGMA_TABLE_INFO_RE = /PRAGMA table_info\((\w+)\)/i;
+const PRAGMA_WAL_RE = /PRAGMA\s+journal_mode\s*=\s*WAL/iu;
+const WHITESPACE_RE = /\s+/u;
+const CREATE_TABLE_RE = /CREATE TABLE IF NOT EXISTS (?<group1>\w+)/iu;
+const DROP_TABLE_RE = /DROP TABLE IF EXISTS (?<group1>\w+)/iu;
+const ALTER_ADD_COLUMN_RE = /ALTER TABLE (?<group1>\w+) ADD COLUMN (?<group2>\w+)/iu;
+const PRAGMA_TABLE_INFO_RE = /PRAGMA table_info\((?<group1>\w+)\)/iu;
 function isWalPragma(sql: string): boolean {
   return PRAGMA_WAL_RE.test(sql);
 }

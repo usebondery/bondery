@@ -59,7 +59,7 @@ import {
 } from "@/lib/query/interactionsListParams";
 import { SELECTABLE_CONTACTS } from "@/lib/query/sharedListParams";
 import { nonEmpty } from "@/lib/shared/nonEmpty";
-import { openNewActivityModal } from "./components/NewActivityModal";
+import { openNewActivityModal } from "./components/openNewActivityModal";
 
 type ActivityParticipantRef = string | InteractionParticipant;
 

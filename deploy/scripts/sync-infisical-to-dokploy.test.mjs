@@ -13,8 +13,8 @@ import {
   readDokployConfig,
 } from "./sync-infisical-to-dokploy.mjs";
 
-const INFRA_VERSION_LINE_RE = /BONDERY_INFRA_VERSION=1\.8\.2/;
-const WEBAPP_DOMAIN_LINE_RE = /BONDERY_INFRA_WEBAPP_DOMAIN=app\.usebondery\.com/;
+const INFRA_VERSION_LINE_RE = /BONDERY_INFRA_VERSION=1\.8\.2/u;
+const WEBAPP_DOMAIN_LINE_RE = /BONDERY_INFRA_WEBAPP_DOMAIN=app\.usebondery\.com/u;
 
 describe("sync-infisical-to-dokploy", () => {
   const websiteEnv = {

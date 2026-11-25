@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 import { CSP_REPORT_GROUP } from "./csp.js";
 import { buildSecurityHeaders } from "./headers.js";
 
-const GEOLOCATION_SELF_RE = /geolocation=\(self\)/;
+const GEOLOCATION_SELF_RE = /geolocation=\(self\)/u;
 
 const CSP = "default-src 'self'";
 

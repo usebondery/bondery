@@ -8,8 +8,8 @@ import {
 import type { StorageAdapter, StoragePutOptions } from "./adapter.js";
 import { createS3Client, type S3ConnectionConfig } from "./s3-client.js";
 
-const LEADING_SLASHES_PATTERN = /^\/+/;
-const TRAILING_SLASH_PATTERN = /\/$/;
+const LEADING_SLASHES_PATTERN = /^\/+/u;
+const TRAILING_SLASH_PATTERN = /\/$/u;
 
 function isStorageObjectMissingError(error: unknown): boolean {
   if (!error || typeof error !== "object") {
@@ -101,7 +101,7 @@ export class S3Storage implements StorageAdapter {
   }
 
   async listKeys(bucket: string, prefix: string): Promise<string[]> {
-    const normalizedPrefix = prefix.replace(/^\/+|\/+$/g, "");
+    const normalizedPrefix = prefix.replace(/^\/+|\/+$/gu, "");
     const listPrefix = normalizedPrefix ? `${normalizedPrefix}/` : "";
     const keys: string[] = [];
     let continuationToken: string | undefined;

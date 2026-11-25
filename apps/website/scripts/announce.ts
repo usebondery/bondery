@@ -37,7 +37,7 @@ import { allPostMeta } from "../content/blog/metadata";
 import { postDiscordAnnouncement } from "./lib/discord";
 import { postRedditAnnouncement, type RedditConfig } from "./lib/reddit";
 
-const TRAILING_SLASH_RE = /\/$/;
+const TRAILING_SLASH_RE = /\/$/u;
 loadEnvConfig(
   `${path.dirname(fileURLToPath(import.meta.url))}/..`,
   process.env["NODE_ENV"] !== "production",

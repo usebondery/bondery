@@ -7,8 +7,8 @@
  */
 import { fileURLToPath } from "node:url";
 
-const LEADING_SLASHES = /^\/+/;
-const TRAILING_SEPARATORS = /[\\/]+$/;
+const LEADING_SLASHES = /^\/+/u;
+const TRAILING_SEPARATORS = /[\\/]+$/u;
 
 /** Absolute path of the committed corpus. */
 export const FIXTURES_DIR = fileURLToPath(new URL("./sample-data/", import.meta.url));

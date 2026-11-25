@@ -42,7 +42,7 @@ function main() {
    * @returns {string}
    */
   function aliasName(url) {
-    return new URL(url).hostname.replace(new RegExp(`\\.${TLD}$`), "");
+    return new URL(url).hostname.replace(new RegExp(`\\.${TLD}$`, "u"), "");
   }
 
   const TARGETS = {

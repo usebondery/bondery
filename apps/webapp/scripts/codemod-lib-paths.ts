@@ -7,7 +7,7 @@ import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const TS_TSX_MD = /\.(ts|tsx|md)$/;
+const TS_TSX_MD = /\.(?<group1>ts|tsx|md)$/u;
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const webappRoot = join(__dirname, "..");
@@ -80,7 +80,7 @@ for (const file of walk(webappRoot)) {
 
   if (content !== original) {
     writeFileSync(file, content, "utf8");
-    updated++;
+    updated += 1;
     console.log(relative(webappRoot, file));
   }
 }

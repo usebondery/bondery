@@ -103,7 +103,7 @@ export function toJsonSafe(value: unknown): unknown {
 export function toSyncRow(row: Record<string, unknown>): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(row)) {
-    const snakeKey = key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+    const snakeKey = key.replace(/[A-Z]/gu, (letter) => `_${letter.toLowerCase()}`);
     out[snakeKey] = toJsonSafe(value);
   }
   return out;

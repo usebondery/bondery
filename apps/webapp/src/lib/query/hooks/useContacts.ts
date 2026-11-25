@@ -1,6 +1,5 @@
 "use client";
 
-import type { Contact } from "@bondery/schemas";
 import {
   type InfiniteData,
   type UseInfiniteQueryResult,
@@ -212,4 +211,5 @@ export function useContactGroupsQueries(contactIds: string[]) {
   });
 }
 
-export type { Contact, SortOrder };
+export type { Contact } from "@bondery/schemas";
+export type { SortOrder } from "@/lib/api/domains/contacts";

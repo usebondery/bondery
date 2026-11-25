@@ -17,7 +17,7 @@ import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { createDraftPhone } from "../contactChannelConstants";
 import { TelephonePrefixFlag } from "./TelephonePrefixFlag";
 
-const TRAILING_DASH_DIGITS_RE = /-\d+$/;
+const TRAILING_DASH_DIGITS_RE = /-\d+$/u;
 type SheetMode = "add" | "edit";
 
 type PhoneFormValues = {

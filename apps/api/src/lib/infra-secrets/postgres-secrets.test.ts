@@ -13,8 +13,8 @@ import {
 } from "./postgres-secrets.js";
 import { createCertificateAuthority, DAY_MS, issueServerCertificate } from "./x509.js";
 
-const ALTNAMES_HOSTNAME_PATTERN = /altnames|Hostname/;
-const CERTIFICATE_PATTERN = /certificate/;
+const ALTNAMES_HOSTNAME_PATTERN = /altnames|Hostname/u;
+const CERTIFICATE_PATTERN = /certificate/u;
 
 function quietLog(): (message: string) => void {
   return () => undefined;

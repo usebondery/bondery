@@ -1,6 +1,7 @@
 import { SYNC_TABLE_KEYS, type SyncTableKey } from "@bondery/schemas/sync";
 
-export { SYNC_TABLE_KEYS, type SyncTableKey };
+export type { SyncTableKey } from "@bondery/schemas/sync";
+export { SYNC_TABLE_KEYS } from "@bondery/schemas/sync";
 
 export const SYNC_TABLES = Object.fromEntries(SYNC_TABLE_KEYS.map((key) => [key, key])) as Record<
   SyncTableKey,

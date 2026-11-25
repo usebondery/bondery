@@ -21,7 +21,7 @@ import {
 } from "@tabler/icons-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
-import { openNewActivityModal } from "@/app/(app)/app/(shell)/interactions/components/NewActivityModal";
+import { openNewActivityModal } from "@/app/(app)/app/(shell)/interactions/components/openNewActivityModal";
 import ContactsTable, {
   type ColumnConfig,
   type SortOrder,
@@ -48,9 +48,9 @@ import { DEBOUNCE_MS } from "@/lib/platform/config";
 import { parseContactsListParams } from "@/lib/query/contactsListParams";
 import { useContactsInfiniteQuery } from "@/lib/query/hooks/useContacts";
 import { TagFilterSelect } from "./components/chrome/TagFilterSelect";
-import { openAddPeopleToGroupSelectionModal } from "./components/modals/AddPeopleToGroupSelectionModal";
-import { openMergeWithModal } from "./components/modals/MergeWithModal";
-import { openShareContactModal } from "./components/modals/ShareContactModal";
+import { openAddPeopleToGroupSelectionModal } from "./components/modals/openAddPeopleToGroupSelectionModal";
+import { openMergeWithModal } from "./components/modals/openMergeWithModal";
+import { openShareContactModal } from "./components/modals/openShareContactModal";
 
 const DEFAULT_COLUMN_KEYS = ["name", "headline", "location", "lastInteraction", "social"] as const;
 

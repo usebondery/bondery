@@ -1,9 +1,9 @@
 import { resolveCookieDomain } from "./resolve-cookie-domain.js";
 
-const PATTERN_5C2F2B24_RE = /\/+$/;
+const PATTERN_5C2F2B24_RE = /\/+$/u;
 const Z0_Z0_Z0_Z0_Z0_Z0_RE =
-  /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*$/;
-const PATTERN_5E5C647B312C_RE = /^\d{1,3}(\.\d{1,3}){3}$/;
+  /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*$/u;
+const PATTERN_5E5C647B312C_RE = /^\d{1,3}(?<group1>\.\d{1,3}){3}$/u;
 
 function isValidRpIdOverride(value: string): boolean {
   if (!value || isIpHostname(value) || value.includes("/") || value.includes(":")) {

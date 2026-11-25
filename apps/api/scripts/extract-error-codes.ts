@@ -17,11 +17,11 @@ function walk(dir: string) {
 
     const content = readFileSync(path, "utf8");
     const patterns = [
-      /(?:internal|badRequest|notFound|forbidden|conflict|unauthorized)\([^)]*?,\s*"([A-Z][A-Z0-9_]+)"/g,
-      /(?:internal|badRequest|notFound|forbidden|conflict|unauthorized)\(\s*"([A-Z][A-Z0-9_]+)"/g,
-      /new DomainError\([^)]*?,\s*"([A-Z][A-Z0-9_]+)"/g,
-      /ErrorCodes\.([A-Z][A-Z0-9_]+)/g,
-      /code:\s*"([A-Z][A-Z0-9_]+)"/g,
+      /(?:internal|badRequest|notFound|forbidden|conflict|unauthorized)\([^)]*?,\s*"(?<group1>[A-Z][A-Z0-9_]+)"/gu,
+      /(?:internal|badRequest|notFound|forbidden|conflict|unauthorized)\(\s*"(?<group1>[A-Z][A-Z0-9_]+)"/gu,
+      /new DomainError\([^)]*?,\s*"(?<group1>[A-Z][A-Z0-9_]+)"/gu,
+      /ErrorCodes\.(?<group1>[A-Z][A-Z0-9_]+)/gu,
+      /code:\s*"(?<group1>[A-Z][A-Z0-9_]+)"/gu,
     ];
 
     for (const pattern of patterns) {

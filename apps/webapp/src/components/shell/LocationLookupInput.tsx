@@ -14,7 +14,7 @@ import { type ReactNode, useEffect, useRef, useState } from "react";
 import { fetchGeocodeSuggestions } from "@/lib/api/geocode";
 import { DEBOUNCE_MS } from "@/lib/platform/config";
 
-const A_Z_2 = /^[a-z]{2}$/;
+const A_Z_2 = /^[a-z]{2}$/u;
 
 interface LocationLookupInputProps {
   ariaLabel?: string;
@@ -70,18 +70,18 @@ export function LocationLookupInput({
     extractCountryCodeFromLabel(value),
   );
   const [loading, setLoading] = useState(false);
-  const suggestionsByKey = useRef<Record<string, ContactAddressEntry>>({});
-  const optionFlagByKey = useRef<Record<string, string>>({});
-  const optionTextByKey = useRef<Record<string, string>>({});
-  const optionFlagByLabel = useRef<Record<string, string>>({});
+  const suggestionsByKeyRef = useRef<Record<string, ContactAddressEntry>>({});
+  const optionFlagByKeyRef = useRef<Record<string, string>>({});
+  const optionTextByKeyRef = useRef<Record<string, string>>({});
+  const optionFlagByLabelRef = useRef<Record<string, string>>({});
   /** Tracks whether the user has actively changed the input value. */
-  const userHasTyped = useRef<boolean>(false);
+  const userHasTypedRef = useRef<boolean>(false);
   const activeQueryRef = useRef<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   // Sync the flag when value changes externally (e.g. after enrichment invalidates contact data)
   useEffect(() => {
-    if (!userHasTyped.current) {
+    if (!userHasTypedRef.current) {
       setSelectedFlag(extractCountryCodeFromLabel(value));
     }
   }, [value]);
@@ -89,7 +89,7 @@ export function LocationLookupInput({
   useEffect(() => {
     // Skip the initial API call when the component mounts with a pre-populated value.
     // Only start fetching suggestions after the user types.
-    if (!userHasTyped.current) {
+    if (!userHasTypedRef.current) {
       return;
     }
 
@@ -97,10 +97,10 @@ export function LocationLookupInput({
       const text = value.trim();
       if (text.length < GEOCODE_SUGGEST_MIN_QUERY_LENGTH) {
         setOptions([]);
-        suggestionsByKey.current = {};
-        optionFlagByKey.current = {};
-        optionFlagByLabel.current = {};
-        optionTextByKey.current = {};
+        suggestionsByKeyRef.current = {};
+        optionFlagByKeyRef.current = {};
+        optionFlagByLabelRef.current = {};
+        optionTextByKeyRef.current = {};
         return;
       }
 
@@ -140,10 +140,10 @@ export function LocationLookupInput({
               labels.push({ label: displayLabel, value: key });
             }
 
-            suggestionsByKey.current = dictionary;
-            optionFlagByKey.current = flags;
-            optionFlagByLabel.current = flagsByLabel;
-            optionTextByKey.current = textsByKey;
+            suggestionsByKeyRef.current = dictionary;
+            optionFlagByKeyRef.current = flags;
+            optionFlagByLabelRef.current = flagsByLabel;
+            optionTextByKeyRef.current = textsByKey;
             setOptions(labels);
           } catch (error) {
             if (error instanceof Error && error.name === "AbortError") {
@@ -151,10 +151,10 @@ export function LocationLookupInput({
             }
             if (activeQueryRef.current === text) {
               setOptions([]);
-              suggestionsByKey.current = {};
-              optionFlagByKey.current = {};
-              optionFlagByLabel.current = {};
-              optionTextByKey.current = {};
+              suggestionsByKeyRef.current = {};
+              optionFlagByKeyRef.current = {};
+              optionFlagByLabelRef.current = {};
+              optionTextByKeyRef.current = {};
             }
           } finally {
             if (activeQueryRef.current === text) {
@@ -185,28 +185,28 @@ export function LocationLookupInput({
       loading={loading}
       onBlur={onBlur}
       onChange={(v) => {
-        userHasTyped.current = true;
+        userHasTypedRef.current = true;
         onChange(v);
-        setSelectedFlag(optionFlagByLabel.current[v] ?? null);
+        setSelectedFlag(optionFlagByLabelRef.current[v] ?? null);
       }}
       onOptionSubmit={(selectedKey) => {
-        const selected = suggestionsByKey.current[selectedKey];
+        const selected = suggestionsByKeyRef.current[selectedKey];
         if (!selected) {
           return;
         }
 
         onChange(geocodeSuggestionDisplayLabel(selected));
-        setSelectedFlag(optionFlagByKey.current[selectedKey] ?? null);
+        setSelectedFlag(optionFlagByKeyRef.current[selectedKey] ?? null);
         onSuggestionSelect(selected);
       }}
       placeholder={placeholder}
       renderOption={({ option }) => (
         <Group gap="xs" wrap="nowrap">
           <span
-            className={cn("fi", flagIconClass(optionFlagByKey.current[option.value] || "aq"))}
+            className={cn("fi", flagIconClass(optionFlagByKeyRef.current[option.value] || "aq"))}
             style={{ flexShrink: 0, width: 18 }}
           />
-          <span>{optionTextByKey.current[option.value] ?? option.value}</span>
+          <span>{optionTextByKeyRef.current[option.value] ?? option.value}</span>
         </Group>
       )}
       rightSection={
@@ -222,4 +222,7 @@ export function LocationLookupInput({
 }
 
 // Re-export for consumers that need stable suggestion keys
-export { geocodeSuggestionDisplayKey, geocodeSuggestionDisplayLabel };
+export {
+  geocodeSuggestionDisplayKey,
+  geocodeSuggestionDisplayLabel,
+} from "@bondery/helpers/geocode";

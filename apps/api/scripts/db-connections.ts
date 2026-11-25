@@ -7,15 +7,15 @@
 
 /** The module that implements the rules. It alone may set TLS options by hand. */
 
-const TRAILING_OPEN_PAREN_PATTERN = /\s*\($/;
+const TRAILING_OPEN_PAREN_PATTERN = /\s*\($/u;
 
-const PG_IMPORT = /from\s+["'](?:pg|pg-boss)["']|require\(\s*["'](?:pg|pg-boss)["']\s*\)/;
-const CONSTRUCTOR = /\bnew\s+(?:pg\.)?(?:Pool|Client|PgBoss)\s*\(/g;
+const PG_IMPORT = /from\s+["'](?:pg|pg-boss)["']|require\(\s*["'](?:pg|pg-boss)["']\s*\)/u;
+const CONSTRUCTOR = /\bnew\s+(?:pg\.)?(?:Pool|Client|PgBoss)\s*\(/gu;
 /** The constructor's arguments must spread pgConnectionConfig(...) before the call closes. */
-const CONFIGURED_ARGUMENT = /^\s*\{\s*\.\.\.pgConnectionConfig\(/;
-const INSECURE_TLS = /rejectUnauthorized\s*:\s*false/;
+const CONFIGURED_ARGUMENT = /^\s*\{\s*\.\.\.pgConnectionConfig\(/u;
+const INSECURE_TLS = /rejectUnauthorized\s*:\s*false/u;
 /** libpq TLS parameters that Prisma's schema engine ignores without an error. */
-const LIBPQ_TLS_IN_URL = /[?&](?:sslmode=verify-(?:full|ca)|sslrootcert=)/;
+const LIBPQ_TLS_IN_URL = /[?&](?:sslmode=verify-(?:full|ca)|sslrootcert=)/u;
 
 type DbConnectionViolation = {
   line: number;

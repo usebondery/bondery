@@ -1,6 +1,6 @@
 import { type DateTimeFormatContext, formatUserDate } from "#date/format-user.js";
 
-const PATTERN_5E285C647B34_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
+const PATTERN_5E285C647B34_RE = /^(?<group1>\d{4})-(?<group2>\d{2})-(?<group3>\d{2})$/u;
 
 const MONTHS_PER_YEAR = 12;
 

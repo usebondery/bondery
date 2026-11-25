@@ -20,63 +20,63 @@ const STACK_FILES = [
 
 const NODES = ["seaweedfs-master", "seaweedfs-volume", "seaweedfs-filer", "seaweedfs-s3"];
 const S3_ENDPOINT_LINE =
-  /^\s+BONDERY_PRIVATE_S3_ENDPOINT: https:\/\/\$\{BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-storage:8443\s*$/;
+  /^\s+BONDERY_PRIVATE_S3_ENDPOINT: https:\/\/\$\{BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-storage:8443\s*$/u;
 const TLS_WRAPPER_ENTRYPOINT =
-  /entrypoint:\s*\[\s*"\/bin\/sh",\s*"\/etc\/bondery\/tls-entrypoint\.sh",/;
-const HASH_COMMENT_RE = /#.*$/;
-const TOML_HEADER_RE = /^\[([^\]]+)\]$/;
-const TOML_PAIR_RE = /^([A-Za-z0-9_]+)\s*=\s*(.+)$/;
-const TOML_QUOTED_VALUE_RE = /^"(.*)"$/;
-const S3_ENDPOINT_KEY_RE = /^\s+BONDERY_PRIVATE_S3_ENDPOINT:/;
-const STORAGE_TLS_CA_OR_CLUSTER_VOLUME_RE = /storage-tls-(?:ca|cluster):/;
+  /entrypoint:\s*\[\s*"\/bin\/sh",\s*"\/etc\/bondery\/tls-entrypoint\.sh",/u;
+const HASH_COMMENT_RE = /#.*$/u;
+const TOML_HEADER_RE = /^\[(?<group1>[^\]]+)\]$/u;
+const TOML_PAIR_RE = /^(?<group1>[A-Za-z0-9_]+)\s*=\s*(?<group2>.+)$/u;
+const TOML_QUOTED_VALUE_RE = /^"(?<group1>.*)"$/u;
+const S3_ENDPOINT_KEY_RE = /^\s+BONDERY_PRIVATE_S3_ENDPOINT:/u;
+const STORAGE_TLS_CA_OR_CLUSTER_VOLUME_RE = /storage-tls-(?:ca|cluster):/u;
 const STACK_SECRETS_COMPLETED_RE =
-  /stack-secrets:\s*\n\s*condition:\s*service_completed_successfully/;
-const STORAGE_TMPFS_RE = /tmpfs:\s*\n\s*- \/run\/bondery-storage/;
-const STORAGE_TLS_CA_OR_CLIENT_VOLUME_RE = /storage-tls-(?:ca|client):/;
-const TLS_HEALTH_HTTPS_RE = /tls-health\.sh",\s*"https:\/\//;
-const VOLUME_IP_RE = /command: "volume [^"]*-ip=seaweedfs-volume/;
-const S3_HTTPS_PORT_RE = /-port\.https=8443/;
-const S3_CERT_FILE_RE = /-cert\.file=\/run\/bondery-storage\/tls\/tls\.crt/;
-const S3_KEY_FILE_RE = /-key\.file=\/run\/bondery-storage\/tls\/tls\.key/;
+  /stack-secrets:\s*\n\s*condition:\s*service_completed_successfully/u;
+const STORAGE_TMPFS_RE = /tmpfs:\s*\n\s*- \/run\/bondery-storage/u;
+const STORAGE_TLS_CA_OR_CLIENT_VOLUME_RE = /storage-tls-(?:ca|client):/u;
+const TLS_HEALTH_HTTPS_RE = /tls-health\.sh",\s*"https:\/\//u;
+const VOLUME_IP_RE = /command: "volume [^"]*-ip=seaweedfs-volume/u;
+const S3_HTTPS_PORT_RE = /-port\.https=8443/u;
+const S3_CERT_FILE_RE = /-cert\.file=\/run\/bondery-storage\/tls\/tls\.crt/u;
+const S3_KEY_FILE_RE = /-key\.file=\/run\/bondery-storage\/tls\/tls\.key/u;
 /** The gateway requires a client certificate from the storage CA (mutual TLS). */
-const S3_VERIFY_CLIENT_CERT_RE = /-tlsVerifyClientCert(\s|$)/;
-const S3_CLIENT_CA_FILE_RE = /-cacert\.file=\/run\/bondery-storage\/tls\/ca\.crt/;
+const S3_VERIFY_CLIENT_CERT_RE = /-tlsVerifyClientCert(?<group1>\s|$)/u;
+const S3_CLIENT_CA_FILE_RE = /-cacert\.file=\/run\/bondery-storage\/tls\/ca\.crt/u;
 const STORAGE_CLIENT_CERT_ENV_LINE =
-  /^\s+BONDERY_PRIVATE_S3_TLS_CERT_FILE: \/bondery-storage\/client\/tls\.crt\s*$/;
+  /^\s+BONDERY_PRIVATE_S3_TLS_CERT_FILE: \/bondery-storage\/client\/tls\.crt\s*$/u;
 const STORAGE_CLIENT_KEY_ENV_LINE =
-  /^\s+BONDERY_PRIVATE_S3_TLS_KEY_FILE: \/bondery-storage\/client\/tls\.key\s*$/;
-const STORAGE_API_KEY_MOUNT_RE = /storage-tls-traefik:\/bondery-storage\/traefik/;
-const WEED_S3_EXEC_RE = /exec su-exec seaweed weed s3/;
-const ICEBERG_PORT_OFF_RE = /-port\.iceberg=0/;
-const STORAGE_KEY_INSTALL_RE = /install -o seaweed -g seaweed -m 0600 [^\n]*tls\.key/;
-const S3_READY_CACERT_RE = /--cacert [^\n]*https:\/\/localhost:8443\//;
-const TRAEFIK_STORAGE_PORT_8443_RE = /-storage\.loadbalancer\.server\.port=8443"/;
-const TRAEFIK_STORAGE_SCHEME_HTTPS_RE = /-storage\.loadbalancer\.server\.scheme=https"/;
-const TRAEFIK_STORAGE_HTTP_PORT_8333_RE = /loadbalancer\.server\.port=8333/;
+  /^\s+BONDERY_PRIVATE_S3_TLS_KEY_FILE: \/bondery-storage\/client\/tls\.key\s*$/u;
+const STORAGE_API_KEY_MOUNT_RE = /storage-tls-traefik:\/bondery-storage\/traefik/u;
+const WEED_S3_EXEC_RE = /exec su-exec seaweed weed s3/u;
+const ICEBERG_PORT_OFF_RE = /-port\.iceberg=0/u;
+const STORAGE_KEY_INSTALL_RE = /install -o seaweed -g seaweed -m 0600 [^\n]*tls\.key/u;
+const S3_READY_CACERT_RE = /--cacert [^\n]*https:\/\/localhost:8443\//u;
+const TRAEFIK_STORAGE_PORT_8443_RE = /-storage\.loadbalancer\.server\.port=8443"/u;
+const TRAEFIK_STORAGE_SCHEME_HTTPS_RE = /-storage\.loadbalancer\.server\.scheme=https"/u;
+const TRAEFIK_STORAGE_HTTP_PORT_8333_RE = /loadbalancer\.server\.port=8333/u;
 const TRAEFIK_STORAGE_PUBLIC_METHODS_RE =
-  /-storage\.rule=Host\(`[^`]+`\) && \(Method\(`GET`\) \|\| Method\(`HEAD`\) \|\| Method\(`OPTIONS`\)\)"/;
-const TRAEFIK_DROP_COOKIE_RE = /-storage-public-read\.headers\.customrequestheaders\.Cookie="/;
+  /-storage\.rule=Host\(`[^`]+`\) && \(Method\(`GET`\) \|\| Method\(`HEAD`\) \|\| Method\(`OPTIONS`\)\)"/u;
+const TRAEFIK_DROP_COOKIE_RE = /-storage-public-read\.headers\.customrequestheaders\.Cookie="/u;
 const TRAEFIK_DROP_AUTHORIZATION_RE =
-  /-storage-public-read\.headers\.customrequestheaders\.Authorization="/;
+  /-storage-public-read\.headers\.customrequestheaders\.Authorization="/u;
 const TRAEFIK_TRANSPORT_COMPLETED_RE =
-  /traefik-transport:\s*\n\s*condition:\s*service_completed_successfully/;
-const STORAGE_CERTIFICATE_COMMON_NAME_RE = /STORAGE_CERTIFICATE_COMMON_NAME = "([^"]+)"/;
-const DEV_S3_LOOPBACK_PORT_RE = /- "127\.0\.0\.1:8443:8443"/;
-const PUBLIC_S3_PORT_RE = /- "(?:0\.0\.0\.0:)?\d+:8443"/;
-const DEV_TLS_RESET_RE = /security\.toml:[^\n]*!reset|tls-entrypoint\.sh[^\n]*!reset/;
+  /traefik-transport:\s*\n\s*condition:\s*service_completed_successfully/u;
+const STORAGE_CERTIFICATE_COMMON_NAME_RE = /STORAGE_CERTIFICATE_COMMON_NAME = "(?<group1>[^"]+)"/u;
+const DEV_S3_LOOPBACK_PORT_RE = /- "127\.0\.0\.1:8443:8443"/u;
+const PUBLIC_S3_PORT_RE = /- "(?:0\.0\.0\.0:)?\d+:8443"/u;
+const DEV_TLS_RESET_RE = /security\.toml:[^\n]*!reset|tls-entrypoint\.sh[^\n]*!reset/u;
 
 /** The transport job must publish the storage client certificate, inlined rather than by path. */
-const TRANSPORT_STORAGE_CLIENT_CERT_RE = /dirname "\$ca_file"\)\/tls\.crt/;
-const TRANSPORT_CLIENT_CERT_BLOCK_RE = /echo " +certificates:"/;
-const TRANSPORT_INLINE_CERT_RE = /inline_pem "\$cert_file" CERTIFICATE/;
-const TRANSPORT_INLINE_KEY_RE = /inline_pem "\$key_file" "PRIVATE KEY"/;
-const TRANSPORT_FILE_MODE_RE = /chmod 0600 "\$staging"/;
+const TRANSPORT_STORAGE_CLIENT_CERT_RE = /dirname "\$ca_file"\)\/tls\.crt/u;
+const TRANSPORT_CLIENT_CERT_BLOCK_RE = /echo " +certificates:"/u;
+const TRANSPORT_INLINE_CERT_RE = /inline_pem "\$cert_file" CERTIFICATE/u;
+const TRANSPORT_INLINE_KEY_RE = /inline_pem "\$key_file" "PRIVATE KEY"/u;
+const TRANSPORT_FILE_MODE_RE = /chmod 0600 "\$staging"/u;
 
 /** The example proxy configurations must reach the gateway, which requires a client certificate. */
 const CADDY_CLIENT_CERT_RE =
-  /tls_client_auth \/etc\/caddy\/bondery-storage\/tls\.crt \/etc\/caddy\/bondery-storage\/tls\.key/;
-const NGINX_CLIENT_CERT_RE = /proxy_ssl_certificate \/etc\/nginx\/bondery-storage\/tls\.crt;/;
-const NGINX_CLIENT_KEY_RE = /proxy_ssl_certificate_key \/etc\/nginx\/bondery-storage\/tls\.key;/;
+  /tls_client_auth \/etc\/caddy\/bondery-storage\/tls\.crt \/etc\/caddy\/bondery-storage\/tls\.key/u;
+const NGINX_CLIENT_CERT_RE = /proxy_ssl_certificate \/etc\/nginx\/bondery-storage\/tls\.crt;/u;
+const NGINX_CLIENT_KEY_RE = /proxy_ssl_certificate_key \/etc\/nginx\/bondery-storage\/tls\.key;/u;
 
 /**
  * Minimal reader for seaweedfs/security.toml: `[section]` headers and `key = value` lines.
@@ -140,7 +140,7 @@ export function checkStorageTls({ root, serviceBlock }) {
     // because the gateway requires one, the client certificate pair.
     const requiredLines = Math.max(endpointLines.length, 1);
     const caLines = apiBlock.match(
-      /^\s+BONDERY_PRIVATE_S3_TLS_CA_FILE: \/bondery-storage\/client\/ca\.crt\s*$/gm,
+      /^\s+BONDERY_PRIVATE_S3_TLS_CA_FILE: \/bondery-storage\/client\/ca\.crt\s*$/gmu,
     );
     if ((caLines?.length ?? 0) < requiredLines) {
       fail(
@@ -157,7 +157,7 @@ export function checkStorageTls({ root, serviceBlock }) {
         "api must present its storage client key: BONDERY_PRIVATE_S3_TLS_KEY_FILE: /bondery-storage/client/tls.key",
       ],
     ]) {
-      const lines = apiBlock.match(new RegExp(pattern.source, "gm"));
+      const lines = apiBlock.match(new RegExp(pattern.source, "gmu"));
       if ((lines?.length ?? 0) < requiredLines) {
         fail(message);
       }
@@ -262,7 +262,7 @@ export function checkStorageTls({ root, serviceBlock }) {
       [TRAEFIK_STORAGE_PORT_8443_RE, "Traefik must forward to the HTTPS port 8443"],
       [TRAEFIK_STORAGE_SCHEME_HTTPS_RE, "Traefik must use scheme https"],
       [
-        new RegExp(`-storage\\.loadbalancer\\.serverstransport=${P}-storage@file"`),
+        new RegExp(`-storage\\.loadbalancer\\.serverstransport=${P}-storage@file"`, "u"),
         "Traefik must verify the storage CA with the published transport (<prefix>-storage@file)",
       ],
       [TRAEFIK_STORAGE_HTTP_PORT_8333_RE, "Traefik must not forward to the HTTP port 8333", false],
@@ -271,7 +271,7 @@ export function checkStorageTls({ root, serviceBlock }) {
         "the public storage router must match GET, HEAD, and OPTIONS only",
       ],
       [
-        new RegExp(`-storage\\.middlewares=${P}-storage-public-read"`),
+        new RegExp(`-storage\\.middlewares=${P}-storage-public-read"`, "u"),
         "the public storage router must use the <prefix>-storage-public-read middleware",
       ],
       [TRAEFIK_DROP_COOKIE_RE, "the public-read middleware must drop the Cookie header"],

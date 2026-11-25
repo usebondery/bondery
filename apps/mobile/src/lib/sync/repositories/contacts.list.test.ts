@@ -9,11 +9,11 @@ import {
   listContactNotesFields,
 } from "../../resources/contacts-list-sql.ts";
 
-const SQL_LIMIT_RE = /LIMIT/i;
-const SQL_OFFSET_RE = /OFFSET/i;
-const SQL_LIMIT_OFFSET_PLACEHOLDERS_RE = /LIMIT \? OFFSET \?/;
-const SQL_NOTES_RE = /\bnotes\b/;
-const SQL_NOTES_UPDATED_AT_RE = /\bnotes_updated_at\b/;
+const SQL_LIMIT_RE = /LIMIT/iu;
+const SQL_OFFSET_RE = /OFFSET/iu;
+const SQL_LIMIT_OFFSET_PLACEHOLDERS_RE = /LIMIT \? OFFSET \?/u;
+const SQL_NOTES_RE = /\bnotes\b/u;
+const SQL_NOTES_UPDATED_AT_RE = /\bnotes_updated_at\b/u;
 describe("buildContactsListSelectSql", () => {
   it("omits LIMIT when limit is absent", () => {
     const { sql, params } = buildContactsListSelectSql({ query: "ada" });

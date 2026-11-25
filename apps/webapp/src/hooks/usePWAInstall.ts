@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const MOBI_ANDROID_IPHONE_IPAD_I = /Mobi|Android|iPhone|iPad/i;
+const MOBI_ANDROID_IPHONE_IPAD_I = /Mobi|Android|iPhone|iPad/iu;
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -45,7 +45,7 @@ export function usePWAInstall(): UsePWAInstallResult {
   const [isChromiumDesktop, setIsChromiumDesktop] = useState(false);
   const [isPWAInstalled, setIsPWAInstalled] = useState(false);
   const [isInstalledFromBrowser, setIsInstalledFromBrowser] = useState(false);
-  const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null);
+  const deferredPromptRef = useRef<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
     const nav = navigator as Navigator & { userAgentData?: { mobile: boolean } };
@@ -67,7 +67,7 @@ export function usePWAInstall(): UsePWAInstallResult {
 
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
-      deferredPrompt.current = e as BeforeInstallPromptEvent;
+      deferredPromptRef.current = e as BeforeInstallPromptEvent;
 
       if (!isStandalone && !isMobile) {
         // Chrome only fires this when the app is NOT installed, so clear any stale flag
@@ -77,7 +77,7 @@ export function usePWAInstall(): UsePWAInstallResult {
     };
 
     const handleAppInstalled = () => {
-      deferredPrompt.current = null;
+      deferredPromptRef.current = null;
       localStorage.setItem(PWA_INSTALLED_KEY, "true");
       setIsInstalledFromBrowser(true);
     };
@@ -91,12 +91,12 @@ export function usePWAInstall(): UsePWAInstallResult {
   }, []);
 
   const install = async () => {
-    const promptEvent = deferredPrompt.current;
+    const promptEvent = deferredPromptRef.current;
     if (!promptEvent) {
       return false;
     }
 
-    deferredPrompt.current = null;
+    deferredPromptRef.current = null;
     try {
       await promptEvent.prompt();
       await promptEvent.userChoice;

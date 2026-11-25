@@ -1,7 +1,7 @@
 import type { StorageAdapter } from "./adapter.js";
 import { S3Storage } from "./s3.js";
 
-const TRAILING_SLASHES_PATTERN = /\/+$/;
+const TRAILING_SLASHES_PATTERN = /\/+$/u;
 
 let storageAdapter: StorageAdapter | null = null;
 

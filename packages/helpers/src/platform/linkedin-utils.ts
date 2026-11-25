@@ -1,5 +1,5 @@
 const LINKEDIN_COM_COMPANY_SCHOOL_ORGANIZATION_RE =
-  /linkedin\.com\/(?:company|school|organization|showcase)\/([^/?#]+)/i;
+  /linkedin\.com\/(?:company|school|organization|showcase)\/(?<group1>[^/?#]+)/iu;
 
 /**
  * LinkedIn URL utilities.

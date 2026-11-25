@@ -9,9 +9,9 @@ import { after, before, describe, it } from "node:test";
 import type { FastifyInstance } from "fastify";
 import { loadTestEnv } from "./load-test-env.js";
 
-const APPLICATION_JSON_PATTERN = /application\/json/;
-const CATCH_UP_SKILL_FRONTMATTER_PATTERN = /^---\nname: catch-up\n/;
-const MCP_SERVER_NOT_CONNECTED_PATTERN = /the Bondery MCP server is not connected/;
+const APPLICATION_JSON_PATTERN = /application\/json/u;
+const CATCH_UP_SKILL_FRONTMATTER_PATTERN = /^---\nname: catch-up\n/u;
+const MCP_SERVER_NOT_CONNECTED_PATTERN = /the Bondery MCP server is not connected/u;
 
 loadTestEnv();
 

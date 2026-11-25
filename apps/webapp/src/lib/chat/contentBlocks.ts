@@ -2,8 +2,8 @@ export type ContentBlock =
   | { kind: "text"; content: string }
   | { kind: "list"; listType: "ordered" | "unordered"; items: string[] };
 
-export const ORDERED_RE = /^\d+\.\s+(.*)/;
-export const UNORDERED_RE = /^[-*]\s+(.*)/;
+export const ORDERED_RE = /^\d+\.\s+(?<group1>.*)/u;
+export const UNORDERED_RE = /^[-*]\s+(?<group1>.*)/u;
 
 /**
  * Splits raw text into blocks of plain text and markdown-style lists.

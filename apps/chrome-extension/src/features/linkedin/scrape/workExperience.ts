@@ -2,10 +2,10 @@
  * LinkedIn Work Experience types and date parsing.
  */
 
-const MONTH_YEAR_RE = /([A-Za-zÀ-ž]+)\.?\s+((19|20)\d{2})/;
-const TRAILING_DOT_RE = /\.$/;
-const YEAR_WORD_RE = /\b((19|20)\d{2})\b/;
-const EN_DASH_SPLIT_RE = /\s*[–—\u2013-]\s*/;
+const MONTH_YEAR_RE = /(?<group1>[A-Za-zÀ-ž]+)\.?\s+(?<group2>(?<group3>19|20)\d{2})/u;
+const TRAILING_DOT_RE = /\.$/u;
+const YEAR_WORD_RE = /\b(?<group1>(?<group2>19|20)\d{2})\b/u;
+const EN_DASH_SPLIT_RE = /\s*[–—\u2013-]\s*/u;
 
 interface WorkEntry {
   /** LinkedIn company handle or numeric ID — used to build the canonical URL server-side */
@@ -127,7 +127,7 @@ function parseMonthYear(text: string): string | undefined {
 
 // "Present" / "current" in the languages LinkedIn is available in.
 const PRESENT_RE =
-  /\b(present|current|today|heute|vandaag|idag|hoy|hoje|adesso|attualmente|ahora|actuellement|teraz|tällä hetkellä|şimdi|současnost|dnes|nyní|nüüd|nyt|nå|nú|сейчас|現在|现在|현재|الآن)\b/i;
+  /\b(?<group1>present|current|today|heute|vandaag|idag|hoy|hoje|adesso|attualmente|ahora|actuellement|teraz|tällä hetkellä|şimdi|současnost|dnes|nyní|nüüd|nyt|nå|nú|сейчас|現在|现在|현재|الآن)\b/iu;
 
 function parseDateRange(text: string): { startDate?: string; endDate?: string } {
   // Strip the duration suffix "· X years Y months" so it doesn't confuse the parser.

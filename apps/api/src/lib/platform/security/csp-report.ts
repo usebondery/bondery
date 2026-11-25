@@ -25,7 +25,7 @@ const RAW_URL_LENGTH_FACTOR = 4;
 const MAX_HOST_LENGTH = 253;
 /** Bound on the work one request can cause. */
 const MAX_VIOLATIONS = 20;
-const QUERY_OR_FRAGMENT_PATTERN = /[?#]/;
+const QUERY_OR_FRAGMENT_PATTERN = /[?#]/u;
 
 type CompactedCspViolation = {
   blockedOriginPath?: string;

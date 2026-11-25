@@ -5,7 +5,7 @@ import { DEFAULT_PHONE_REACT_MASK_EXPRESSION, type TelephonePrefixOption } from 
 
 /** Lexicographic order on dial digits (`+420` before `+43`). */
 export function compareTelephonePrefixByDialDigits(a: string, b: string): number {
-  const dialDigits = (value: string) => value.replace(/\D/g, "");
+  const dialDigits = (value: string) => value.replace(/\D/gu, "");
   return dialDigits(a).localeCompare(dialDigits(b));
 }
 
@@ -75,7 +75,7 @@ export function getTelephonePrefixSearchTexts(
     option.displayPrefix,
     option.value,
     option.countryCode,
-    option.value.replace(/\D/g, ""),
+    option.value.replace(/\D/gu, ""),
   ];
 }
 

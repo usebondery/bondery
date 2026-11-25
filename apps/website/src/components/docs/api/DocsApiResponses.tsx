@@ -14,7 +14,7 @@ import {
 import { formatText } from "@/lib/i18n/message";
 import { DocsApiSchema } from "./DocsApiSchema";
 
-const EXAMPLE_LABEL_RE = /^example(\s+\S+)?$/i;
+const EXAMPLE_LABEL_RE = /^example(?<group1>\s+\S+)?$/iu;
 function formatSample(sample: unknown): string {
   if (typeof sample === "string") {
     return sample;

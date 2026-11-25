@@ -32,7 +32,7 @@ import {
   PreferencesFieldRow,
   PreferencesFormBody,
   PreferencesThemeField,
-} from "@/app/(app)/app/(shell)/settings/components/PreferencesFormLayout";
+} from "@/app/(app)/app/(shell)/settings/components/preferencesFormLayout";
 import { DefaultPhoneCountryPicker } from "@/components/shared/DefaultPhoneCountryPicker";
 import { LanguagePicker } from "@/components/shared/LanguagePicker";
 import { TimezonePicker } from "@/components/shared/TimezonePicker";
@@ -47,7 +47,7 @@ import { SettingsSection } from "./SettingsSection";
 import { ThemePicker } from "./ThemePicker";
 import { TimeFormatPicker } from "./TimeFormatPicker";
 
-const TIME_24H_OPTIONAL_SECONDS = /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/;
+const TIME_24H_OPTIONAL_SECONDS = /^(?<group1>[01]\d|2[0-3]):[0-5]\d(?<group2>:[0-5]\d)?$/u;
 
 function callingPrefixFromCountry(country: string | null): string {
   if (!country) {

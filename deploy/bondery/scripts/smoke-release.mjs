@@ -58,9 +58,9 @@ const DEFAULT_IMAGES = {
   webapp: "ghcr.io/usebondery/webapp",
 };
 
-const ENV_QUOTE_NEEDED_RE = /[\s#="'\\]/;
-const HTTP_200_RE = /HTTP\/[\d.]+ 200/;
-const HTTP_403_RE = /HTTP\/[\d.]+ 403/;
+const ENV_QUOTE_NEEDED_RE = /[\s#="'\\]/u;
+const HTTP_200_RE = /HTTP\/[\d.]+ 200/u;
+const HTTP_403_RE = /HTTP\/[\d.]+ 403/u;
 
 /** Compose interpolates the process environment over `--env-file`. Infisical staging must not win. */
 let smokeImageTag = "";
@@ -80,13 +80,16 @@ function parseArgs() {
   let imageName;
   let skipPull = false;
 
-  for (let i = 0; i < args.length; i++) {
+  for (let i = 0; i < args.length; i += 1) {
     if (args[i] === "--service") {
-      service = args[++i];
+      i += 1;
+      service = args[i];
     } else if (args[i] === "--tag") {
-      tag = args[++i];
+      i += 1;
+      tag = args[i];
     } else if (args[i] === "--image") {
-      imageName = args[++i];
+      i += 1;
+      imageName = args[i];
     } else if (args[i] === "--skip-pull") {
       skipPull = true;
     }
@@ -140,7 +143,7 @@ function parseEnvValue(raw) {
 
 function formatEnvLine(key, value) {
   if (ENV_QUOTE_NEEDED_RE.test(value)) {
-    return `${key}="${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+    return `${key}="${value.replace(/\\/gu, "\\\\").replace(/"/gu, '\\"')}"`;
   }
   return `${key}=${value}`;
 }
@@ -244,7 +247,7 @@ function logReadyHealthFailure(url) {
 }
 
 function waitFor(predicate, { attempts = 40, intervalSec = 3, label = "service" }) {
-  for (let i = 1; i <= attempts; i++) {
+  for (let i = 1; i <= attempts; i += 1) {
     if (predicate()) {
       console.log(`${label} healthy`);
       return;

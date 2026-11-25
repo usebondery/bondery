@@ -1,6 +1,6 @@
 import type { GroupWithCount } from "@bondery/schemas";
 import { useEffect, useState } from "react";
-import { SelectOptionRow, SelectSheet } from "@/components/ui/Select";
+import { SelectOptionRow, SelectSheet } from "@/components/ui/select";
 import { Text } from "@/components/ui/Text";
 import { useCommonTranslations, useMobileContactsTranslations } from "@/lib/i18n/generated/hooks";
 import { mapGroupToSelectItem } from "@/lib/select/mapGroupToSelectItem";

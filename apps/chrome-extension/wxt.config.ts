@@ -8,7 +8,7 @@ import { defineConfig } from "wxt";
 import { CWS_EXTENSION_PUBLIC_KEY } from "./cws-public-key";
 import { loopbackHostPermissionPatterns } from "./src/lib/auth/oauth-urls";
 
-const LOOPBACK_HOST_RE = /localhost|127\.0\.0\.1/i;
+const LOOPBACK_HOST_RE = /localhost|127\.0\.0\.1/iu;
 const require = createRequire(import.meta.url);
 const { version } = require("./package.json") as { version: string };
 const parsedVersion = parseCalver(version);

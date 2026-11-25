@@ -4,10 +4,10 @@ import { describe, it } from "node:test";
 import { INTERNAL_API_CA_FILE_ENV, trustInternalApiCa } from "./internalApiTls.server";
 
 const CANNOT_READ_BONDERY_API_CLIENT_CA_CRT_ENOENT_API =
-  /cannot read \(\/bondery-api\/client\/ca\.crt\): ENOENT.*api:secrets/;
-const DOES_NOT_USE_HTTPS = /does not use https/;
-const NO_PEM = /no PEM/;
-const NOT_ENCRYPTED = /not encrypted/;
+  /cannot read \(\/bondery-api\/client\/ca\.crt\): ENOENT.*api:secrets/u;
+const DOES_NOT_USE_HTTPS = /does not use https/u;
+const NO_PEM = /no PEM/u;
+const NOT_ENCRYPTED = /not encrypted/u;
 
 const SYSTEM_CA = "-----BEGIN CERTIFICATE-----\nU1lTVEVN\n-----END CERTIFICATE-----";
 const API_CA = "-----BEGIN CERTIFICATE-----\nQVBJIENB\n-----END CERTIFICATE-----";

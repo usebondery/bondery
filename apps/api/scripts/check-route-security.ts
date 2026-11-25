@@ -55,13 +55,13 @@ function collectRouteFiles(dir: string): string[] {
 function collectExportedRoutePlugins(dir: string): string[] {
   const exports: string[] = [];
   for (const file of collectRouteFiles(dir)) {
-    const rel = relative(routesRoot, file).replace(/\\/g, "/");
+    const rel = relative(routesRoot, file).replace(/\\/gu, "/");
     if (NON_ROUTE_FILES.has(rel)) {
       continue;
     }
 
     const content = readFileSync(file, "utf8");
-    const matches = content.matchAll(/export const (\w+Routes): AppRoutePlugin/g);
+    const matches = content.matchAll(/export const (?<group1>\w+Routes): AppRoutePlugin/gu);
     for (const match of matches) {
       const [, name] = match;
       if (name && !NESTED_ROUTE_EXPORTS.has(name)) {
@@ -69,7 +69,7 @@ function collectExportedRoutePlugins(dir: string): string[] {
       }
     }
 
-    const asyncMatches = content.matchAll(/export async function (\w+Routes)\(/g);
+    const asyncMatches = content.matchAll(/export async function (?<group1>\w+Routes)\(/gu);
     for (const match of asyncMatches) {
       const [, name] = match;
       if (name && !NESTED_ROUTE_EXPORTS.has(name)) {
@@ -83,12 +83,12 @@ function collectExportedRoutePlugins(dir: string): string[] {
 const violations: string[] = [];
 
 for (const file of collectRouteFiles(routesRoot)) {
-  const rel = relative(join(__dirname, "..", "src"), file).replace(/\\/g, "/");
+  const rel = relative(join(__dirname, "..", "src"), file).replace(/\\/gu, "/");
   if (!rel.startsWith("routes/")) {
     continue;
   }
 
-  const routeRel = rel.replace(/^routes\//, "");
+  const routeRel = rel.replace(/^routes\//u, "");
   if (NON_ROUTE_FILES.has(routeRel)) {
     continue;
   }
@@ -104,7 +104,7 @@ for (const file of collectRouteFiles(routesRoot)) {
 }
 
 const registerAllContent = readFileSync(registerAllPath, "utf8");
-const mountedPlugins = [...registerAllContent.matchAll(/plugin:\s*(\w+)/g)].map(
+const mountedPlugins = [...registerAllContent.matchAll(/plugin:\s*(?<group1>\w+)/gu)].map(
   (match) => match[1],
 );
 

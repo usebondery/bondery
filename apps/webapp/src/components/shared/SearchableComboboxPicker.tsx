@@ -1,6 +1,5 @@
 "use client";
 
-import { filterBySearchQuery, matchesSearchQuery } from "@bondery/helpers";
 import { Combobox, Input, ScrollArea, Stack, Text, useCombobox } from "@mantine/core";
 import { IconSearch } from "@tabler/icons-react";
 import type { ReactNode } from "react";
@@ -8,7 +7,7 @@ import { useState } from "react";
 import {
   SearchableComboboxTargetItem,
   type SearchableComboboxTargetItemProps,
-} from "@/components/shared/SearchableComboboxItem";
+} from "@/components/shared/searchableComboboxItem";
 import classes from "./SearchableComboboxPicker.module.css";
 
 const styles = {
@@ -18,8 +17,7 @@ const styles = {
 
 const OPTIONS_MAX_HEIGHT = 240;
 
-export { selectedComboboxOptionStyle } from "@/components/shared/SearchableComboboxItem";
-export { filterBySearchQuery, matchesSearchQuery };
+export { selectedComboboxOptionStyle } from "@/components/shared/searchableComboboxItem";
 
 export type SearchableComboboxPickerRenderOptionsContext = {
   query: string;
@@ -182,3 +180,5 @@ export function SearchableComboboxPicker({
     </Stack>
   );
 }
+
+export { filterBySearchQuery, matchesSearchQuery } from "@bondery/helpers";

@@ -28,9 +28,9 @@ import { parse } from "yaml";
 
 import { createCheck } from "./check-report.mjs";
 
-const BFF_WEBAPP_RE = /\b(BFF|webapp)\b/i;
-const PATTERN_5B2E2C3B3A29_RE = /[.,;:)]$/;
-const PATTERN_5C2F2B24_RE = /\/+$/;
+const BFF_WEBAPP_RE = /\b(?<group1>BFF|webapp)\b/iu;
+const PATTERN_5B2E2C3B3A29_RE = /[.,;:)]$/u;
+const PATTERN_5C2F2B24_RE = /\/+$/u;
 
 const check = createCheck("check-docs-api-routes");
 
@@ -99,11 +99,11 @@ const HTTP_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"];
  */
 const MENTION = new RegExp(
   `(?<![A-Za-z0-9_-])(${HTTP_METHODS.join("|")})\\s+(\\/[A-Za-z0-9{}\\-_/.:]*)`,
-  "g",
+  "gu",
 );
 
 /** Any absolute URL, so an example curl command is checked too. */
-const URL_PATTERN = /https?:\/\/[A-Za-z0-9.-]+(\/[A-Za-z0-9{}\-_/.:]*)?/g;
+const URL_PATTERN = /https?:\/\/[A-Za-z0-9.-]+(?<group1>\/[A-Za-z0-9{}\-_/.:]*)?/gu;
 
 /**
  * `true` when the line marks the path as a webapp BFF route. The BFF forwards
@@ -128,7 +128,9 @@ function trimPath(raw) {
  * A bare trailing slash is a sentence artifact, so it is dropped too.
  */
 function normalizePath(path) {
-  const normalized = path.replace(/:([A-Za-z0-9_]+)/g, "{$1}").replace(PATTERN_5C2F2B24_RE, "");
+  const normalized = path
+    .replace(/:(?<group1>[A-Za-z0-9_]+)/gu, "{$1}")
+    .replace(PATTERN_5C2F2B24_RE, "");
   return normalized.length === 0 ? "/" : normalized;
 }
 
@@ -223,7 +225,7 @@ if (specRoutes.size === 0) {
 
   for (const filePath of walkMdxFiles(docsRoot).sort()) {
     const path = repoPath(filePath);
-    const lines = readFileSync(filePath, "utf8").split(/\r?\n/);
+    const lines = readFileSync(filePath, "utf8").split(/\r?\n/u);
     pages += 1;
 
     for (const [index, line] of lines.entries()) {

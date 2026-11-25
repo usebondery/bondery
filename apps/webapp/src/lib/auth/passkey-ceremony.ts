@@ -1,5 +1,5 @@
-const TIMED_OUT_I = /\btimed?\s*out\b/i;
-const NOT_ALLOWED_I = /not allowed/i;
+const TIMED_OUT_I = /\btimed?\s*out\b/iu;
+const NOT_ALLOWED_I = /not allowed/iu;
 
 const CANCEL_CODES = new Set([
   "AbortError",

@@ -4,8 +4,8 @@ import type { SQLiteDatabase } from "expo-sqlite";
 import { resetPendingAvatarJobsForTests } from "../avatar-file-queue.ts";
 import { applyPeopleShapeOp, PEOPLE_UPSERT_SQL } from "./people.ts";
 
-const AVATAR_CLOCK_COLUMNS_RE = /avatar_updated_at, avatar_local_updated_at/;
-const PEOPLE_UPSERT_CLOCK_PLACEHOLDERS_RE = /\?, \?, NULL, \?/;
+const AVATAR_CLOCK_COLUMNS_RE = /avatar_updated_at, avatar_local_updated_at/u;
+const PEOPLE_UPSERT_CLOCK_PLACEHOLDERS_RE = /\?, \?, NULL, \?/u;
 describe("people upsert sql", () => {
   it("writes avatar_updated_at from the server and preserves avatar_local_updated_at", () => {
     assert.equal(

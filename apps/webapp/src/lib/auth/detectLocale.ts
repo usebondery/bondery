@@ -76,7 +76,7 @@ function normalizeTimezone(rawTimezone: string): string {
   return "UTC";
 }
 
-export { LOCALE_PREFS_COOKIE };
+export { LOCALE_PREFS_COOKIE } from "@/lib/cookies/constants";
 
 /**
  * Detects the user's timezone and time format preference from the browser environment.

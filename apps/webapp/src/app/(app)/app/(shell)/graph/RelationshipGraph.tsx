@@ -10,7 +10,7 @@ import { Box } from "@mantine/core";
 import { type RefObject, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { CollapsedRelationshipEdge } from "./collapseRelationshipEdges";
-import { GraphHubMarker, GraphPersonMarker } from "./GraphCanvasMarkers";
+import { GraphHubMarker, GraphPersonMarker } from "./graphCanvasMarkers";
 import {
   type GraphMarkerDrag,
   mountRelationshipGraph,
@@ -46,7 +46,7 @@ interface RelationshipGraphProps {
   selectedNodeId: string | null;
 }
 
-export type { RelationshipGraphControls };
+export type { RelationshipGraphControls } from "./mountRelationshipGraph";
 
 /**
  * d3 writes positions onto the SVG and the HTML markers.

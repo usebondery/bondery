@@ -121,7 +121,8 @@ function PageToc({ items, selector = "h2[id], h3[id], h4[id]", variant }: PageTo
               key={heading.id}
               onClick={(event) => {
                 event.preventDefault();
-                const node = heading.getNode?.() ?? document.getElementById(heading.id);
+                const node =
+                  heading.getNode?.() ?? document.querySelector(`#${CSS.escape(heading.id)}`);
                 node?.scrollIntoView({ behavior: "smooth", block: "start" });
                 window.history.replaceState(null, "", `#${heading.id}`);
               }}

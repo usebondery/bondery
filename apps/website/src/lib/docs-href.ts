@@ -1,5 +1,5 @@
-const MDX_EXT_RE = /\.mdx$/;
-const MD_EXT_RE = /\.md$/;
+const MDX_EXT_RE = /\.mdx$/u;
+const MD_EXT_RE = /\.md$/u;
 /**
  * Resolve an MDX href against the current docs page URL.
  * Strips `.mdx` so relative source links stay on `/docs` routes.

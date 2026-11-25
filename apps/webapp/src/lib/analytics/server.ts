@@ -21,7 +21,7 @@ const posthogClient = posthogKey
 let serverProductAnalyticsEnabled = true;
 
 /** PostHog event names must use `category:object_action`. */
-export const PRODUCT_EVENT_NAME_PATTERN = /^[a-z][a-z0-9_]*:[a-z][a-z0-9_]*$/;
+export const PRODUCT_EVENT_NAME_PATTERN = /^[a-z][a-z0-9_]*:[a-z][a-z0-9_]*$/u;
 
 /** Sync server capture guard from client-loaded settings (best-effort). */
 export function setServerProductAnalyticsEnabled(enabled: boolean): void {

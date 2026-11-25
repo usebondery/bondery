@@ -16,7 +16,7 @@ import {
   voyagerFetch,
 } from "./voyagerShared";
 
-const PRIVACY_PROFILE_OR_MINI_RE = /PrivacySettings|ProfileCard|MiniProfile/i;
+const PRIVACY_PROFILE_OR_MINI_RE = /PrivacySettings|ProfileCard|MiniProfile/iu;
 function buildGeoEntityMap(entities: VoyagerEntity[]): Map<string, VoyagerEntity> {
   const map = new Map<string, VoyagerEntity>();
   for (const e of entities) {
@@ -192,7 +192,7 @@ function dashProfilePath(
 ): string {
   const decoration = decorationId ? `&decorationId=${decorationId}` : "";
   return (
-    `/voyager/api/identity/dash/profiles?q=memberIdentity` +
+    "/voyager/api/identity/dash/profiles?q=memberIdentity" +
     `&memberIdentity=${encodeURIComponent(memberIdentity)}` +
     decoration
   );

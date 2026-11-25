@@ -7,7 +7,7 @@ import { Text } from "../../../components/ui/Text";
 import { MOBILE_LAYOUT } from "../../../theme/tokens";
 import { formatContactName } from "../../contacts/contactUtils";
 
-const WHITESPACE_RE = /\s+/;
+const WHITESPACE_RE = /\s+/u;
 interface SettingsAccountProfileCardProps {
   contact: Contact | null;
   email: string | null;

@@ -17,7 +17,7 @@ import {
 import { chromeExtensionRedirectUris } from "./chrome-extension-redirect-uris.js";
 import { disableDcrOAuthClients } from "./disable-dcr-oauth-clients.js";
 
-const TRAILING_SLASHES_PATTERN = /\/+$/;
+const TRAILING_SLASHES_PATTERN = /\/+$/u;
 
 function resolveWebappOrigin(): string {
   const origin = (process.env["BONDERY_PUBLIC_WEBAPP_URL"] ?? "").replace(

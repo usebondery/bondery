@@ -25,42 +25,42 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { createCheck } from "./check-report.mjs";
 
-const PATTERN_5C2B285C642B_RE = /\+(\d+)/;
+const PATTERN_5C2B285C642B_RE = /\+(?<group1>\d+)/u;
 
 const ROOT = join(fileURLToPath(new URL(".", import.meta.url)), "../..");
 
 /** Wording that marks a defect left in place. Each entry explains what to do instead. */
 const BANNED = [
-  { label: "workaround", pattern: /\bwork[\s-]?arounds?\b/i },
-  { label: "hack", pattern: /\bhack(?:s|y|ed)?\b/i },
-  { label: "kludge", pattern: /\bkludge\b/i },
-  { label: "band-aid", pattern: /\bband[\s-]?aid\b/i },
-  { label: "for now", pattern: /\bfor now\b/i },
-  { label: "temporary fix", pattern: /\btemporary (?:fix|solution|measure)\b/i },
-  { label: "quick and dirty", pattern: /\bquick[\s-]and[\s-]dirty\b/i },
+  { label: "workaround", pattern: /\bwork[\s-]?arounds?\b/iu },
+  { label: "hack", pattern: /\bhack(?:s|y|ed)?\b/iu },
+  { label: "kludge", pattern: /\bkludge\b/iu },
+  { label: "band-aid", pattern: /\bband[\s-]?aid\b/iu },
+  { label: "for now", pattern: /\bfor now\b/iu },
+  { label: "temporary fix", pattern: /\btemporary (?:fix|solution|measure)\b/iu },
+  { label: "quick and dirty", pattern: /\bquick[\s-]and[\s-]dirty\b/iu },
 ];
 
 /** A tracked exception: the marker plus an issue number or URL. */
-const ALLOW_MARKER = /allow-workaround\((#\d+|https?:\/\/[^\s)]+)\)/i;
+const ALLOW_MARKER = /allow-workaround\((?<group1>#\d+|https?:\/\/[^\s)]+)\)/iu;
 /** The bare marker, removed before matching so its own name is not reported. */
-const ALLOW_MARKER_ANY = /allow-workaround\([^)]*\)/gi;
+const ALLOW_MARKER_ANY = /allow-workaround\([^)]*\)/giu;
 /** This check's own name, as it appears in hook, CI and script wiring. */
-const OWN_NAME = /no-workarounds/gi;
+const OWN_NAME = /no-workarounds/giu;
 
 /** Code and config only. Prose docs and agent guidance legitimately discuss these words. */
-const CHECKED_EXTENSIONS = /\.(?:ts|tsx|js|jsx|mjs|cjs|mts|cts|yml|yaml|prisma|sql|sh)$/;
+const CHECKED_EXTENSIONS = /\.(?:ts|tsx|js|jsx|mjs|cjs|mts|cts|yml|yaml|prisma|sql|sh)$/u;
 const EXCLUDED_PATHS = [
-  /(?:^|\/)node_modules\//,
-  /(?:^|\/)dist\//,
-  /(?:^|\/)\.next\//,
-  /(?:^|\/)generated\//,
-  /\.d\.[cm]?ts$/,
-  /^docs\//,
-  /^\.agents\//,
-  /^\.claude\//,
-  /^\.cursor\//,
-  /^llm-plugins\//,
-  /^scripts\/check\/check-no-workarounds\./,
+  /(?:^|\/)node_modules\//u,
+  /(?:^|\/)dist\//u,
+  /(?:^|\/)\.next\//u,
+  /(?:^|\/)generated\//u,
+  /\.d\.[cm]?ts$/u,
+  /^docs\//u,
+  /^\.agents\//u,
+  /^\.claude\//u,
+  /^\.cursor\//u,
+  /^llm-plugins\//u,
+  /^scripts\/check\/check-no-workarounds\./u,
 ];
 
 function isCheckedPath(path) {

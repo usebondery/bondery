@@ -19,7 +19,7 @@ loadTestEnv();
 
 const { createTestApp } = await import("./create-test-app.js");
 
-const WEBAPP_URL = (process.env["BONDERY_PUBLIC_WEBAPP_URL"] ?? "").replace(/\/+$/, "");
+const WEBAPP_URL = (process.env["BONDERY_PUBLIC_WEBAPP_URL"] ?? "").replace(/\/+$/u, "");
 const GENERATE_REGISTER_OPTIONS_PATH = "/auth/passkey/generate-register-options";
 
 async function createTestUser(): Promise<{ id: string; email: string }> {

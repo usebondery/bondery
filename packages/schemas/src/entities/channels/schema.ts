@@ -17,7 +17,7 @@ function refinePhoneEntryDigits(
   data: { value: string },
   context: z.core.$RefinementCtx<{ value: string }>,
 ) {
-  if (data.value.replace(/\D/g, "").length === 0) {
+  if (data.value.replace(/\D/gu, "").length === 0) {
     context.addIssue({
       code: "custom",
       message: "Phone number is required",
@@ -78,7 +78,7 @@ export const phoneEntrySchema = phoneEntryInputSchema.transform((value) => ({
   ...value,
   preferred: value.preferred ?? false,
   prefix: value.prefix.trim(),
-  value: value.value.replace(/\D/g, ""),
+  value: value.value.replace(/\D/gu, ""),
 })) satisfies z.ZodType<PhoneEntryInput>;
 
 /** Single email row before PATCH /api/contacts/:id emails array. */

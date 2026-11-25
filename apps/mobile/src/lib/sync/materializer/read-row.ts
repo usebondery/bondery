@@ -1,4 +1,4 @@
-const GIS_POINT_RE = /POINT\s*\(\s*([-\d.]+)\s+([-\d.]+)\s*\)/i;
+const GIS_POINT_RE = /POINT\s*\(\s*(?<group1>[-\d.]+)\s+(?<group2>[-\d.]+)\s*\)/iu;
 export type ShapeOperation = "insert" | "update" | "delete";
 
 export interface ShapeRowMessage {

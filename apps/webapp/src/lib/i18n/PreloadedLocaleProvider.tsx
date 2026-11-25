@@ -1,6 +1,6 @@
 import { getT } from "next-i18next/server";
 import type { ReactNode } from "react";
-import { LocaleProvider } from "@/components/shell/UserLocaleProvider";
+import { LocaleProvider } from "@/components/shell/localeProvider";
 import { getRouteResources } from "@/lib/i18n/getRouteResources.server";
 import { preloadWebNamespaces } from "@/lib/i18n/preloadNamespaces.server";
 import { resolveLocaleSettings } from "@/lib/i18n/resolveLocaleSettings";

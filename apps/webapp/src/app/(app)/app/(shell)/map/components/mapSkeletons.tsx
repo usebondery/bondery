@@ -1,5 +1,5 @@
 import { Paper, SimpleGrid, Skeleton } from "@mantine/core";
-import { PeopleTableSkeleton } from "@/app/(app)/app/(shell)/people/components/chrome/PeopleSkeletons";
+import { PeopleTableSkeleton } from "@/app/(app)/app/(shell)/people/components/chrome/peopleSkeletons";
 import { PageHeaderSkeleton } from "@/components/shell/PageHeaderSkeleton";
 import { PageWrapper } from "@/components/shell/PageWrapper";
 

@@ -14,10 +14,10 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const routesRoot = join(__dirname, "..", "src", "routes");
 const allowlistPath = join(__dirname, "route-writes-allowlist.json");
 
-const WRITE_PATTERN = /\.from\([^)]+\)\s*\.(insert|update|delete|upsert)\s*\(/;
+const WRITE_PATTERN = /\.from\([^)]+\)\s*\.(?<group1>insert|update|delete|upsert)\s*\(/u;
 
 const allowlist = new Set(
-  (JSON.parse(readFileSync(allowlistPath, "utf8")) as string[]).map((p) => p.replace(/\\/g, "/")),
+  (JSON.parse(readFileSync(allowlistPath, "utf8")) as string[]).map((p) => p.replace(/\\/gu, "/")),
 );
 
 function walk(dir: string): string[] {
@@ -37,7 +37,7 @@ function walk(dir: string): string[] {
 const violations: string[] = [];
 
 for (const file of walk(routesRoot)) {
-  const rel = relative(routesRoot, file).replace(/\\/g, "/");
+  const rel = relative(routesRoot, file).replace(/\\/gu, "/");
   const content = readFileSync(file, "utf8");
   if (!WRITE_PATTERN.test(content)) {
     continue;

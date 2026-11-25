@@ -1,4 +1,4 @@
-const AVATAR_CLOCK_QUERY_RE = /[?&]t=(\d+)\b/;
+const AVATAR_CLOCK_QUERY_RE = /[?&]t=(?<group1>\d+)\b/u;
 /** Returns an epoch-ms cache-bust token, or null when the clock is missing or not a date. */
 export function toCacheBustToken(value: string | null | undefined): number | null {
   if (value === null || value === undefined) {

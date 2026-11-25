@@ -11,7 +11,7 @@ import { API_ROUTES, BETTER_AUTH_BASE_PATH } from "@bondery/helpers/globals/path
 import { buildAuthTranslations } from "./build-auth-translations.js";
 import { withLoopbackUrlAlias } from "./loopback-alias-urls.js";
 
-const TRAILING_SLASHES_PATTERN = /\/+$/;
+const TRAILING_SLASHES_PATTERN = /\/+$/u;
 
 export const authTranslations = buildAuthTranslations();
 

@@ -66,7 +66,7 @@ type SocialLoginCardProps = {
   websiteUrl: string;
 };
 
-export type { LoginBusyAction };
+export type { LoginBusyAction } from "./LoginProviderButtons";
 
 export type LoginSurface = "oauth" | "webapp";
 

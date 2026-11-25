@@ -41,10 +41,6 @@ interface UseDictationResult {
   toggle: () => void;
 }
 
-export type {
-  DictationAvailability,
-  DictationSelection,
-  DictationStatus,
-  UseDictationOptions,
-  UseDictationResult,
-};
+export type { DictationAvailability } from "@/lib/speech/dictation/dictationAvailability";
+export type { DictationStatus } from "@/lib/speech/dictation/dictationHandlers";
+export type { DictationSelection, UseDictationOptions, UseDictationResult };

@@ -3,7 +3,7 @@ import { combinePhoneNumber, normalizePhoneSocialStorage } from "#phone/index.js
 import { normalizeWebsiteUrl } from "#socials/normalize-website-url.js";
 
 function escapeRegexValue(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
 }
 export interface SocialPlatformConfig {
   baseUrl: string;
@@ -17,7 +17,7 @@ export const socialPlatforms: Record<string, SocialPlatformConfig> = {
     name: "Facebook",
     urlPattern: new RegExp(
       `(?:https?:\\/\\/)?(?:www\\.)?${escapeRegexValue(SOCIAL_PLATFORM_URL_DETAILS.facebook.domain)}\\/([^\\/\\?]+)`,
-      "i",
+      "iu",
     ),
   },
   instagram: {
@@ -25,7 +25,7 @@ export const socialPlatforms: Record<string, SocialPlatformConfig> = {
     name: "Instagram",
     urlPattern: new RegExp(
       `(?:https?:\\/\\/)?(?:www\\.)?${escapeRegexValue(SOCIAL_PLATFORM_URL_DETAILS.instagram.domain)}\\/([^\\/\\?]+)`,
-      "i",
+      "iu",
     ),
   },
   linkedin: {
@@ -33,13 +33,13 @@ export const socialPlatforms: Record<string, SocialPlatformConfig> = {
     name: "LinkedIn",
     urlPattern: new RegExp(
       `(?:https?:\\/\\/)?(?:www\\.)?${escapeRegexValue(SOCIAL_PLATFORM_URL_DETAILS.linkedin.domain)}\\/in\\/([^\\/\\?]+)`,
-      "i",
+      "iu",
     ),
   },
   whatsapp: {
     baseUrl: SOCIAL_PLATFORM_URL_DETAILS.whatsapp.deepLinkBaseUrl,
     name: "WhatsApp",
-    urlPattern: /(?:https?:\/\/)?(?:wa\.me|api\.whatsapp\.com\/send\?phone=)\/?([\d]+)/i,
+    urlPattern: /(?:https?:\/\/)?(?:wa\.me|api\.whatsapp\.com\/send\?phone=)\/?(?<group1>[\d]+)/iu,
   },
 };
 
@@ -98,7 +98,7 @@ export function createSocialUrl(platform: string, username: string): string {
   }
 
   if (platform === "signal") {
-    const digits = username.replace(/\D/g, "");
+    const digits = username.replace(/\D/gu, "");
     return digits ? `https://signal.me/#p/${digits}` : "";
   }
 
@@ -122,7 +122,7 @@ export function createSocialUrl(platform: string, username: string): string {
  * Formats a phone number for WhatsApp (removes non-numeric characters).
  */
 export function formatWhatsAppNumber(phone: string): string {
-  return phone.replace(/\D/g, "");
+  return phone.replace(/\D/gu, "");
 }
 
 /**
@@ -213,7 +213,7 @@ export function processContactSocialFieldValue(
 
   if (field === "whatsapp" || field === "signal") {
     if (options?.dialCode) {
-      const numberOnly = inputValue.replace(/[^\d]/g, "");
+      const numberOnly = inputValue.replace(/[^\d]/gu, "");
       if (!numberOnly) {
         return { value: "" };
       }

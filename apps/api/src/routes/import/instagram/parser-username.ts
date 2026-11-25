@@ -3,10 +3,10 @@ import {
   COMMON_PERSON_NAME_TOKEN_SET as COMMON_NAME_TOKENS,
 } from "@bondery/helpers/name";
 
-const LEADING_AT_PATTERN = /^@+/;
-const REPEATED_CHAR_PATTERN = /^(.)\1+$/u;
-const HTTP_PROTOCOL_PATTERN = /^https?:\/\//i;
-const DOT_UNDERSCORE_SEPARATOR_PATTERN = /[._]+/;
+const LEADING_AT_PATTERN = /^@+/u;
+const REPEATED_CHAR_PATTERN = /^(?<group1>.)\1+$/u;
+const HTTP_PROTOCOL_PATTERN = /^https?:\/\//iu;
+const DOT_UNDERSCORE_SEPARATOR_PATTERN = /[._]+/u;
 
 /** Shortest username the compact-name splitter tries to split. */
 const MIN_COMPACT_USERNAME_LENGTH = 4;

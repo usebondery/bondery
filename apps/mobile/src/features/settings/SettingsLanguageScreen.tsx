@@ -20,8 +20,8 @@ import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { ScrollView } from "react-native";
 import { StackNavBar } from "../../components/chrome";
-import { Select } from "../../components/ui/Select";
 import { Stack } from "../../components/ui/Stack";
+import { Select } from "../../components/ui/select";
 import { Text } from "../../components/ui/Text";
 import { fetchSettings, updateSettings } from "../../lib/api/client";
 import { resolveDisplayedError } from "../../lib/api/resolveDisplayedError";
@@ -42,7 +42,7 @@ import { nonEmpty } from "../../lib/text";
 import { useShowErrorToast } from "../../lib/toast/useShowErrorToast";
 import { MOBILE_LAYOUT } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
-import { SettingsAsyncState } from "./components/SettingsAsyncState";
+import { SettingsAsyncState } from "./components/settingsAsyncState";
 
 type ReminderHourValue = `${string}:00:00`;
 

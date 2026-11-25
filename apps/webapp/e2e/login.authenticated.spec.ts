@@ -1,21 +1,21 @@
 import { expect, test } from "@playwright/test";
 
-const LOGIN_PATH = /\/login/;
-const APP_HOME_PATH = /\/app\/home/;
-const APP_HOME_URL = /\/app\/home(?:[/?#]|$)/;
-const APP_CHAT_URL = /\/app\/chat(?:[/?#]|$)/;
+const LOGIN_PATH = /\/login/u;
+const APP_HOME_PATH = /\/app\/home/u;
+const APP_HOME_URL = /\/app\/home(?:[/?#]|$)/u;
+const APP_CHAT_URL = /\/app\/chat(?:[/?#]|$)/u;
 
 const HOME = "/app/home";
 
 const appDestinations = [
-  { name: "People", url: /\/app\/people(?:[/?#]|$)/ },
-  { name: "Interactions", url: /\/app\/interactions(?:[/?#]|$)/ },
-  { name: "Keep in touch", url: /\/app\/keep-in-touch(?:[/?#]|$)/ },
-  { name: "Groups", url: /\/app\/groups(?:[/?#]|$)/ },
-  { name: "Map", url: /\/app\/map(?:[/?#]|$)/ },
-  { name: "Fix & merge", url: /\/app\/fix(?:[/?#]|$)/ },
-  { name: "Settings", url: /\/app\/settings(?:[/?#]|$)/ },
-  { name: "Home", url: /\/app\/home(?:[/?#]|$)/ },
+  { name: "People", url: /\/app\/people(?:[/?#]|$)/u },
+  { name: "Interactions", url: /\/app\/interactions(?:[/?#]|$)/u },
+  { name: "Keep in touch", url: /\/app\/keep-in-touch(?:[/?#]|$)/u },
+  { name: "Groups", url: /\/app\/groups(?:[/?#]|$)/u },
+  { name: "Map", url: /\/app\/map(?:[/?#]|$)/u },
+  { name: "Fix & merge", url: /\/app\/fix(?:[/?#]|$)/u },
+  { name: "Settings", url: /\/app\/settings(?:[/?#]|$)/u },
+  { name: "Home", url: /\/app\/home(?:[/?#]|$)/u },
 ] as const;
 
 test.describe("authenticated session", () => {

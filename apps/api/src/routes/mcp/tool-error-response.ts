@@ -17,13 +17,13 @@ import {
 } from "@bondery/schemas/errors";
 import { URLS } from "../../lib/platform/config.js";
 
-const TRAILING_SLASH_PATTERN = /\/$/;
-const TOOL_A_Z0_PATTERN = /tool ([a-z0-9_]+)/i;
+const TRAILING_SLASH_PATTERN = /\/$/u;
+const TOOL_A_Z0_PATTERN = /tool (?<group1>[a-z0-9_]+)/iu;
 
 const INPUT_VALIDATION_PREFIX = "Input validation error:";
 const OUTPUT_VALIDATION_PREFIX = "Output validation error:";
-const TOOL_NOT_FOUND_RE = /^Tool (.+?) not found$/;
-const TOOL_DISABLED_RE = /^Tool (.+?) disabled$/;
+const TOOL_NOT_FOUND_RE = /^Tool (?<group1>.+?) not found$/u;
+const TOOL_DISABLED_RE = /^Tool (?<group1>.+?) disabled$/u;
 
 function envelope(
   code: string,

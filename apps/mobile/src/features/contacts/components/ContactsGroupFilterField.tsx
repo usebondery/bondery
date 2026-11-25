@@ -1,7 +1,7 @@
 import type { GroupWithCount } from "@bondery/schemas";
 import { IconPlus } from "@tabler/icons-react-native";
-import { Select, SelectOptionRow } from "@/components/ui/Select";
 import type { SheetAction } from "@/components/ui/Sheet";
+import { Select, SelectOptionRow } from "@/components/ui/select";
 import { Text } from "@/components/ui/Text";
 import { useCommonTranslations, useMobileContactsTranslations } from "@/lib/i18n/generated/hooks";
 import { mapGroupToSelectItem } from "@/lib/select/mapGroupToSelectItem";

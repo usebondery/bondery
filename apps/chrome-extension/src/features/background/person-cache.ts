@@ -16,8 +16,8 @@ import { openWebappPersonTab } from "../../lib/navigation";
 import { firstNonEmpty } from "../../lib/text";
 import { backgroundState } from "./state";
 
-const LINKEDIN_IN_PATHNAME_RE = /^\/in\/([^/?#]+)\/?$/;
-const SINGLE_PATH_SEGMENT_RE = /^\/([^/?#]+)\/?$/;
+const LINKEDIN_IN_PATHNAME_RE = /^\/in\/(?<group1>[^/?#]+)\/?$/u;
+const SINGLE_PATH_SEGMENT_RE = /^\/(?<group1>[^/?#]+)\/?$/u;
 const personExistenceCache = new Map<string, { result: SocialLookupResult; expiresAt: number }>();
 const personExistenceLookupInFlight = new Map<string, Promise<SocialLookupResult | null>>();
 const PERSON_EXISTENCE_CACHE_TTL_MS = 30_000;

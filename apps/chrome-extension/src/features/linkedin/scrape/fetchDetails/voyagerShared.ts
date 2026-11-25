@@ -6,10 +6,10 @@ import { extLog } from "../../../../lib/log";
 import { extractProfileUrnFromComponentKey } from "../sduiProfile";
 import { logVoyagerExchange } from "./voyagerDump";
 
-const DIGITS_ONLY_RE = /^\d+$/;
-const JSESSIONID_COOKIE_RE = /JSESSIONID="?([^";]+)"?/;
-const HTML_COMMENT_WRAPPER_RE = /^<!--(.+)-->$/s;
-const URN_ID_SUFFIX_RE = /:([A-Za-z0-9_-]+)$/;
+const DIGITS_ONLY_RE = /^\d+$/u;
+const JSESSIONID_COOKIE_RE = /JSESSIONID="?(?<group1>[^";]+)"?/u;
+const HTML_COMMENT_WRAPPER_RE = /^<!--(?<group1>.+)-->$/su;
+const URN_ID_SUFFIX_RE = /:(?<group1>[A-Za-z0-9_-]+)$/u;
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 interface VoyagerTimePeriod {
@@ -175,7 +175,7 @@ function resolveEmploymentType(urn: string, entityMap?: Map<string, string>): st
   if (DIGITS_ONLY_RE.test(key)) {
     return undefined;
   }
-  return key.replace(/-/g, " ");
+  return key.replace(/-/gu, " ");
 }
 
 function formatVoyagerDate(d?: { month?: number; year?: number }): string | undefined {

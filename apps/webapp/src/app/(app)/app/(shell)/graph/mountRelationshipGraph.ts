@@ -99,7 +99,7 @@ type GraphHandlers = {
   selectedNodeId: string | null;
 };
 
-export type { RelationshipGraphControls };
+export type { RelationshipGraphControls } from "./graphViewControls";
 
 export type GraphMarkerDrag = {
   end: (id: string) => void;

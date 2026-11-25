@@ -4,7 +4,7 @@ import { formatContactName } from "@bondery/helpers/contact";
 import type { Contact, MapPin } from "@bondery/schemas";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { useCallback, useState } from "react";
-import { openMergeWithModal } from "@/app/(app)/app/(shell)/people/components/modals/MergeWithModal";
+import { openMergeWithModal } from "@/app/(app)/app/(shell)/people/components/modals/openMergeWithModal";
 import type { ContactTableRow, SortOrder } from "@/components/contacts/ContactsTableV2";
 import { openDeleteContactModal } from "@/components/contacts/openDeleteContactModal";
 import { openDeleteContactsModal } from "@/components/contacts/openDeleteContactsModal";

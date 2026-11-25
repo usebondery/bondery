@@ -10,7 +10,7 @@ import {
  *
  * @deprecated Prefer `normalizePhoneInput` or `normalizePhoneParts`.
  */
-const PATTERN_285C647B337D_RE = /(\d{3})(\d{3})(\d{4})/;
+const PATTERN_285C647B337D_RE = /(?<group1>\d{3})(?<group2>\d{3})(?<group3>\d{4})/u;
 
 export function parsePhoneNumber(
   phoneNumber: string | null | undefined,
@@ -69,7 +69,7 @@ export function formatPhoneNumber(phoneNumber: string, defaultCountry?: string |
  * @returns Full phone number
  */
 export function combinePhoneNumber(dialCode: string, number: string): string {
-  const cleanNumber = number.replace(/\D/g, "");
+  const cleanNumber = number.replace(/\D/gu, "");
   return dialCode + cleanNumber;
 }
 

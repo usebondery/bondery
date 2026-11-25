@@ -2,7 +2,7 @@ import { hexColorSchema } from "@bondery/schemas";
 import { HEX_RADIX, parseHexChannels } from "../../lib/color";
 import { GROUP_COLOR_SWATCHES } from "./constants";
 
-const HEX_PATTERN = /^#?([0-9A-Fa-f]{6})$/;
+const HEX_PATTERN = /^#?(?<group1>[0-9A-Fa-f]{6})$/u;
 
 export function normalizeHex(value: string): string {
   const trimmed = value.trim();

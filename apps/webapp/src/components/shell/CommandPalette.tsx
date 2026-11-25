@@ -2,7 +2,7 @@
 
 import { WEBAPP_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 import { Kbd, parseShortcutKeys } from "@bondery/mantine-next";
-import { Spotlight, spotlight } from "@mantine/spotlight";
+import { Spotlight } from "@mantine/spotlight";
 import {
   IconBook2,
   IconCalendarPlus,
@@ -15,8 +15,8 @@ import {
   IconUserSearch,
 } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
-import { openNewActivityModal } from "@/app/(app)/app/(shell)/interactions/components/NewActivityModal";
-import { openAddContactModal } from "@/app/(app)/app/(shell)/people/components/modals/AddContactModal";
+import { openNewActivityModal } from "@/app/(app)/app/(shell)/interactions/components/openNewActivityModal";
+import { openAddContactModal } from "@/app/(app)/app/(shell)/people/components/modals/openAddContactModal";
 import { openBonderyExportModal } from "@/app/(app)/app/(shell)/settings/components/modals/openBonderyExportModal";
 import { openBonderyImportModal } from "@/app/(app)/app/(shell)/settings/components/modals/openBonderyImportModal";
 import {
@@ -29,10 +29,8 @@ import { routeAssert } from "@/lib/navigation/route/assert";
 import { routePerson } from "@/lib/navigation/route/person";
 import { HOTKEYS } from "@/lib/platform/config";
 import { useWebappRuntimeConfig } from "@/lib/platform/runtimeConfig.client";
-import { useAppNavigationLinks } from "./NavigationSidebar";
+import { useAppNavigationLinks } from "./navigationSidebar";
 import { peopleSearchActions } from "./PeopleSearchSpotlight";
-
-export { spotlight };
 
 export function CommandPalette() {
   const t = useCommandPaletteTranslations();
@@ -160,3 +158,5 @@ export function CommandPalette() {
     />
   );
 }
+
+export { spotlight } from "@mantine/spotlight";

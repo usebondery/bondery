@@ -1,5 +1,5 @@
-const LINKEDIN_IN_HANDLE_RE = /\/in\/([^/?#]+)/i;
-const LINKEDIN_IN_PATH_RE = /\/in\/([^/]+)/i;
+const LINKEDIN_IN_HANDLE_RE = /\/in\/(?<group1>[^/?#]+)/iu;
+const LINKEDIN_IN_PATH_RE = /\/in\/(?<group1>[^/]+)/iu;
 /** Normalise a LinkedIn vanity handle from a slug, encoded slug, or profile URL. */
 
 export function normalizeLinkedInVanityHandle(value: string): string {

@@ -6,7 +6,7 @@ import {
   type SampleRequestInput,
 } from "./api-sample-request.js";
 
-const CURL_GET_CONTACTS_RE = /^curl -X GET "https:\/\/api\.usebondery\.com\/contacts\?limit=50"/;
+const CURL_GET_CONTACTS_RE = /^curl -X GET "https:\/\/api\.usebondery\.com\/contacts\?limit=50"/u;
 const SERVERS = [
   { description: "Local development server", url: "https://api.usebondery.test" },
   { description: "Production server", url: "https://api.usebondery.com" },
@@ -169,7 +169,7 @@ describe("buildSampleRequest", () => {
       path: "/contacts/map-pins",
     });
 
-    assert.ok(sample.curl.includes(`maxLat=1`));
+    assert.ok(sample.curl.includes("maxLat=1"));
     assert.ok(sample.curl.includes(`tag_id=${PATH_PLACEHOLDERS.id}`));
     assert.ok(sample.curl.includes("mode=address"));
     assert.ok(!sample.curl.includes("search="));

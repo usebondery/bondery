@@ -20,7 +20,7 @@ import { IconChevronDown, IconPlus, IconTrash } from "@tabler/icons-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useChatSessions } from "@/lib/chat/ChatSessionsContext";
+import { useChatSessions } from "@/lib/chat/chatSessionsProvider";
 import { formatCompactAge } from "@/lib/chat/formatCompactAge";
 import { type ChatSessionGroupId, groupChatSessionsByAge } from "@/lib/chat/groupChatSessionsByAge";
 import { useConfirmDeleteChatSession } from "@/lib/chat/useConfirmDeleteChatSession";

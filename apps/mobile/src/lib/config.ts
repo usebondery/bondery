@@ -8,8 +8,8 @@ import {
 } from "./config-loopback";
 import { nonEmpty } from "./text";
 
-const TRAILING_SLASHES_RE = /\/+$/;
-const API_SUFFIX_RE = /\/api$/;
+const TRAILING_SLASHES_RE = /\/+$/u;
+const API_SUFFIX_RE = /\/api$/u;
 type MobileExtra = {
   apiUrl?: string;
   storageUrl?: string;
@@ -42,7 +42,7 @@ const rawApiUrl = normalizeMobileUrlForDevice(extra.apiUrl ?? "");
 const rawStorageUrl = normalizeMobileUrlForDevice(extra.storageUrl ?? "");
 
 const API_URL = rawApiUrl ? normalizeApiBaseUrl(rawApiUrl) : "";
-const STORAGE_URL = rawStorageUrl.replace(/\/+$/, "");
+const STORAGE_URL = rawStorageUrl.replace(/\/+$/u, "");
 const WEBSITE_URL = nonEmpty(extra.websiteUrl) ?? "https://usebondery.com";
 const HAS_MOBILE_CONFIG = Boolean(API_URL && STORAGE_URL);
 const SYNC_DEBUG = extra.syncDebug === "1" || extra.syncDebug === "true";

@@ -3,13 +3,13 @@
  * Better Auth puts the verify token in the query string.
  */
 
-const TOKEN_QUERY_PARAM_PATTERN = /[?&]token=/i;
+const TOKEN_QUERY_PARAM_PATTERN = /[?&]token=/iu;
 export function redactSensitiveAuthQuery(url: string): string {
   if (!TOKEN_QUERY_PARAM_PATTERN.test(url)) {
     return url;
   }
 
-  return url.replace(/([?&]token=)[^&]*/gi, "$1REDACTED");
+  return url.replace(/(?<group1>[?&]token=)[^&]*/giu, "$1REDACTED");
 }
 
 export function isMagicLinkVerifyPath(urlPath: string): boolean {

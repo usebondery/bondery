@@ -94,7 +94,9 @@
     "enabled": true,
     "rules": {
       "a11y": {
+        "noAmbiguousAnchorText": "error",
         "noNoninteractiveElementInteractions": "error",
+        "noStaticElementInteractions": "error",
         "noSvgWithoutTitle": "off"
       },
       "complexity": {
@@ -109,6 +111,7 @@
         "noExcessiveNestedCallbacks": "error",
         "noExcessiveNestedTestSuites": "error",
         "noForEach": "error",
+        "noRedundantDefaultExport": "error",
         "noUnnecessaryTemplateExpression": "error",
         "noUselessCatchBinding": "error",
         "noUselessReturn": "error",
@@ -118,6 +121,9 @@
         "noVoid": "error",
         "useArrayFind": "error",
         "useArraySome": "error",
+        "useDateNow": "error",
+        "useIndexOf": "error",
+        "useMathMinMax": "error",
         "useMaxParams": "info",
         "useRegexpTest": "error"
       },
@@ -143,6 +149,7 @@
         "useGraphqlNamedOperations": "error",
         "useImportExtensions": "off",
         "useInlineScriptId": "error",
+        "useJsonImportAttributes": "error",
         "useLoneAnonymousOperation": "error",
         "useSingleJsDocAsterisk": "error",
         "useUniqueElementIds": "error"
@@ -152,10 +159,13 @@
         "noAsyncPromiseFinally": "error",
         "noAwaitInPromiseMethods": "error",
         "noBaseToString": "error",
+        "noBooleanSortComparator": "error",
+        "noBufferConstructor": "error",
         "noChainedComparison": "error",
         "noConstantComparisons": "error",
         "noDoubleComparison": "error",
         "noDuplicateMapKeys": "error",
+        "noDuplicateTypeConstituents": "error",
         "noDynamicDelete": "error",
         "noDynamicRequire": "error",
         "noEagerArrayMethodsInLoops": "error",
@@ -163,24 +173,38 @@
         "noFloatingPromises": "error",
         "noImpliedEval": "error",
         "noInvalidFetchOptions": "error",
+        "noInvalidRemoveEventListener": "error",
         "noInvalidThis": "error",
+        "noJsRestrictedProperties": "error",
+        "noLateCurrentTargetAccess": "error",
+        "noLateEventControl": "error",
         "noMapSpread": "error",
         "noMeaninglessVoidOperator": "error",
         "noMisleadingReturnType": "error",
+        "noMismatchedMapKey": "error",
         "noMissingThrow": "error",
         "noMisusedPromises": "error",
         "noMisusedSpread": "error",
         "noNegatedArrayPredicate": "error",
+        "noNegationInEqualityCheck": "error",
         "noNestedTemplateLiterals": "error",
         "noNewArray": "error",
+        "noNonScalableViewport": "error",
+        "noNumberArgumentOutOfRange": "error",
+        "noObjectLiteralComparison": "error",
+        "noObsoleteAttributes": "error",
+        "noObsoleteTags": "error",
+        "noPathConcat": "error",
         "noPlaywrightNthMethods": "error",
         "noProcessExit": "error",
         "noPromiseExecutorReturn": "error",
         "noReactDirectStateMutation": "error",
         "noReactObjectTypeAsDefaultProp": "error",
         "noRedundantTypeConstituents": "error",
+        "noRestrictedDependencies": "error",
         "noReturnArrayPush": "error",
         "noReturnInFinally": "error",
+        "noSelfImport": "error",
         "noSharedBranchCode": "error",
         "noSinglePromiseInPromiseMethods": "error",
         "noTailwindArbitraryValue": "error",
@@ -230,6 +254,7 @@
         "noTanstackQueryRestDestructuring": "error",
         "noTanstackQueryVoidQueryFn": "error",
         "noThisOutsideOfClass": "error",
+        "noUninvokedArrayCallback": "error",
         "noUnmodifiedLoopCondition": "error",
         "noUnsafeIframeSandbox": "error",
         "noUnsafePlusOperands": "error",
@@ -257,6 +282,7 @@
         "useCatchErrorName": "error",
         "useConsistentHeadingLevel": "error",
         "useConsistentUnicodeBom": "error",
+        "useControlLabel": "error",
         "useDisposables": "off",
         "useExhaustiveSwitchCases": "error",
         "useExpectToContain": "error",
@@ -290,6 +316,7 @@
         "useTanstackQueryInfiniteQueryPropertyOrder": "error",
         "useTanstackQueryStableQueryClient": "error",
         "useTopLevelHeading": "error",
+        "useValidNamespaceImports": "error",
         "useValidTestTitle": "error"
       },
       "performance": {
@@ -311,6 +338,7 @@
       },
       "style": {
         "noCommonJs": "error",
+        "noDoneCallback": "error",
         "noEnum": "error",
         "noExcessiveClassesPerFile": "error",
         "noExcessiveLinesPerFile": {
@@ -319,8 +347,10 @@
             "maxLines": 500
           }
         },
+        "noExportedImports": "error",
         "noHeadElement": "error",
         "noHexColors": "error",
+        "noIncrementDecrement": "error",
         "noInferrableTypes": "error",
         "noJsxLiterals": {
           "level": "error",
@@ -353,6 +383,7 @@
         },
         "noMagicNumbers": "info",
         "noMultiAssign": "error",
+        "noMultilineString": "error",
         "noNamespace": "error",
         "noNestedTernary": "info",
         "noParameterAssign": "error",
@@ -361,10 +392,16 @@
         "noPlaywrightEval": "error",
         "noPlaywrightWaitForSelector": "error",
         "noProcessEnv": "info",
+        "noRestrictedGlobals": "error",
+        "noRestrictedTypes": "error",
         "noRootType": "error",
+        "noShoutyConstants": "error",
         "noSubstr": "error",
+        "noUnusedTemplateLiteral": "error",
         "noUselessElse": "error",
+        "noVueOptionsApi": "error",
         "noYodaExpression": "error",
+        "useAsConstAssertion": "error",
         "useAtIndex": "error",
         "useBlockStatements": "error",
         "useCollapsedElseIf": "error",
@@ -414,27 +451,74 @@
         "useDefaultParameterLast": "error",
         "useDeprecatedReason": "error",
         "useDestructuring": "error",
+        "useDomQuerySelector": "error",
+        "useEnumInitializers": "error",
         "useErrorCause": "warn",
         "useExplicitLengthCheck": "error",
         "useExportsLast": "error",
+        "useFilenamingConvention": {
+          "level": "error",
+          "options": {
+            "strictCase": true
+          }
+        },
         "useForOf": "error",
+        "useFragmentSyntax": "error",
         "useGraphqlNamingConvention": "error",
+        "useGroupedAccessorPairs": "error",
         "useImportsFirst": "error",
         "useInputName": "error",
         "useLoneExecutableDefinition": "error",
+        "useNamedCaptureGroup": "error",
+        "useNamingConvention": {
+          "level": "error",
+          "options": {
+            "conventions": [
+              {
+                "formats": ["PascalCase"],
+                "selector": {
+                  "kind": "typeParameter"
+                }
+              },
+              {
+                "match": "T(.+)",
+                "selector": {
+                  "kind": "typeParameter"
+                }
+              },
+              {
+                "match": ".*"
+              }
+            ],
+            "requireAscii": true,
+            "strictCase": false
+          }
+        },
         "useNodeAssertStrict": "error",
         "useNumberNamespace": "error",
         "useNumericSeparators": "error",
         "useObjectSpread": "error",
         "useReactFunctionComponents": "error",
+        "useReadonlyClassProperties": "error",
+        "useReduceTypeParameter": "error",
         "useSelfClosingElements": "error",
         "useShorthandAssign": "error",
+        "useSingleVarDeclarator": "error",
+        "useSpreadOverApply": "error",
+        "useSymbolDescription": "error",
         "useTestHooksInOrder": "error",
         "useTestHooksOnTop": "error",
         "useThisInClassMethods": "error",
         "useThrowNewError": "error",
         "useThrowOnlyError": "error",
-        "useVarsOnTop": "error"
+        "useTrimStartEnd": "error",
+        "useUnicodeRegex": "error",
+        "useUnifiedTypeSignatures": "error",
+        "useVarsOnTop": "error",
+        "useVueConsistentDefinePropsDeclaration": "error",
+        "useVueDefineMacrosOrder": "error",
+        "useVueMultiWordComponentNames": "error",
+        "useVueNextTickPromise": "error"
       },
       "suspicious": {
         "noAlert": "error",
@@ -473,6 +557,7 @@
         "noReturnAssign": "error",
         "noShadow": "error",
         "noSkippedTests": "error",
+        "noThenProperty": "error",
         "noUnassignedVariables": "error",
         "noUndeclaredEnvVars": {
           "level": "error",
@@ -512,6 +597,7 @@
         "useExpect": "error",
         "useGuardForIn": "error",
         "useNumberToFixedDigitsArgument": "error",
+        "useStaticResponseMethods": "error",
         "useStrictMode": "error"
       }
     }
@@ -522,6 +608,24 @@
     }
   },
   "overrides": [
+    {
+      "includes": [
+        "apps/mobile/**",
+        "apps/webapp/**",
+        "apps/website/**",
+        "apps/chrome-extension/**",
+        "packages/mantine-next/**",
+        "packages/emails/**",
+        "packages/branding/**"
+      ],
+      "linter": {
+        "rules": {
+          "nursery": {
+            "useReactNamingConvention": "error"
+          }
+        }
+      }
+    },
     {
       "assist": {
         "enabled": false
@@ -853,6 +957,55 @@
         }
       },
       "includes": ["apps/webapp/src/lib/query/**"]
+    },
+    {
+      "includes": [
+        "apps/chrome-extension/src/features/linkedin/scrape/workExperience.ts",
+        "packages/helpers/src/instagram/parseInstagramUsername.ts"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "useNamingConvention": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["**/*OAuth*.ts", "**/*OAuth*.tsx"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useFilenamingConvention": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "apps/chrome-extension/package.json",
+        "apps/mobile/package.json",
+        "apps/mobile/src/lib/sync/ids.ts",
+        "apps/mobile/src/lib/toast/notifications.ts",
+        "packages/branding/package.json",
+        "packages/db/package.json",
+        "packages/db/prisma.config.ts",
+        "packages/emails/package.json",
+        "packages/helpers/package.json",
+        "packages/helpers/src/ids/generate-id.ts",
+        "packages/helpers/src/ids/remap-import-id.ts",
+        "packages/mantine-next/package.json",
+        "packages/schemas/package.json",
+        "packages/translations/package.json",
+        "packages/vcard/package.json"
+      ],
+      "linter": {
+        "rules": {
+          "nursery": {
+            "noRestrictedDependencies": "off"
+          }
+        }
+      }
     }
   ],
   "plugins": [

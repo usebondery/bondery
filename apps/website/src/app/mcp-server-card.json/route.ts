@@ -5,7 +5,7 @@ import { WEBSITE_URL } from "@/lib/config";
 import { discoveryCorsPreflight, withDiscoveryCors } from "@/lib/discovery-cors";
 import websitePackage from "../../../package.json" with { type: "json" };
 
-const TRAILING_SLASHES_RE = /\/+$/;
+const TRAILING_SLASHES_RE = /\/+$/u;
 /**
  * MCP Server Card (experimental `server-card` extension).
  *

@@ -15,10 +15,10 @@ import {
   toCoreCalver,
 } from "../pkg/calver.mjs";
 
-const VERSION_RE = /version:\s*"([^"]+)"/;
-const VERSIONNAME_RE = /versionName\s+"([^"]+)"/;
-const BONDERY_INFRA_VERSION_RE_2 = /^BONDERY_INFRA_VERSION=(\d+\.\d+\.\d+)/m;
-const BONDERY_INFRA_VERSION_RE = /^# BONDERY_INFRA_VERSION=(\d+\.\d+\.\d+)/m;
+const VERSION_RE = /version:\s*"(?<group1>[^"]+)"/u;
+const VERSIONNAME_RE = /versionName\s+"(?<group1>[^"]+)"/u;
+const BONDERY_INFRA_VERSION_RE_2 = /^BONDERY_INFRA_VERSION=(?<group1>\d+\.\d+\.\d+)/mu;
+const BONDERY_INFRA_VERSION_RE = /^# BONDERY_INFRA_VERSION=(?<group1>\d+\.\d+\.\d+)/mu;
 
 function main() {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");

@@ -134,7 +134,7 @@ export function GraphClient({ focus }: GraphClientProps) {
     }) ?? false;
   const query = useRelationshipGraphQuery(focus);
   const controlsRef = useRef<RelationshipGraphControls | null>(null);
-  const neighborCursor = useRef(-1);
+  const neighborCursorRef = useRef(-1);
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchLoading, setSearchLoading] = useState(false);
@@ -208,7 +208,7 @@ export function GraphClient({ focus }: GraphClientProps) {
           setSelectedNodeId(null);
           setSelectedEdgeKey(null);
           setSelectedHubId(null);
-          neighborCursor.current = -1;
+          neighborCursorRef.current = -1;
           return;
         }
         setSearchInput("");
@@ -241,8 +241,8 @@ export function GraphClient({ focus }: GraphClientProps) {
       }
       event.preventDefault();
       const delta = event.key === "ArrowRight" || event.key === "ArrowDown" ? 1 : -1;
-      const nextIndex = stepIndex(neighborCursor.current, delta, neighbors.length);
-      neighborCursor.current = nextIndex;
+      const nextIndex = stepIndex(neighborCursorRef.current, delta, neighbors.length);
+      neighborCursorRef.current = nextIndex;
       const nextId = neighbors[nextIndex];
       if (nextId) {
         setSelectedNodeId(nextId);
@@ -345,7 +345,7 @@ export function GraphClient({ focus }: GraphClientProps) {
                       setSelectedNodeId(null);
                       setSelectedEdgeKey(null);
                       setSelectedHubId(null);
-                      neighborCursor.current = -1;
+                      neighborCursorRef.current = -1;
                     }}
                     onHover={() => undefined}
                     onOpenPerson={(personId: string) => router.push(routePerson(personId))}
@@ -353,19 +353,19 @@ export function GraphClient({ focus }: GraphClientProps) {
                       setSelectedEdgeKey(edgeKey);
                       setSelectedNodeId(personId);
                       setSelectedHubId(null);
-                      neighborCursor.current = -1;
+                      neighborCursorRef.current = -1;
                     }}
                     onSelectHub={(hubId: string) => {
                       setSelectedHubId(hubId);
                       setSelectedNodeId(null);
                       setSelectedEdgeKey(null);
-                      neighborCursor.current = -1;
+                      neighborCursorRef.current = -1;
                     }}
                     onSelectNode={(personId: string) => {
                       setSelectedNodeId(personId);
                       setSelectedEdgeKey(null);
                       setSelectedHubId(null);
-                      neighborCursor.current = -1;
+                      neighborCursorRef.current = -1;
                     }}
                     searchQuery={searchQuery}
                     selectedEdgeKey={selectedEdgeKey}

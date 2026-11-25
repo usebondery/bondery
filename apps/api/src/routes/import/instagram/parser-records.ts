@@ -12,7 +12,7 @@ import {
   normalizeUsernameFromHref,
 } from "./parser-username.js";
 
-const UFEFF_PATTERN = /^\uFEFF/;
+const UFEFF_PATTERN = /^\uFEFF/u;
 
 type InstagramStringData = {
   href?: unknown;
@@ -226,7 +226,7 @@ export type { InstagramRelationshipItem, InstagramStringData, ParsedRecord };
 
 export const FOLLOWING_FILE_NAME = "following.json";
 export const CLOSE_FRIENDS_FILE_NAME = "close_friends.json";
-export const FOLLOWERS_FILE_PATTERN = /^followers(?:_\d+)?\.json$/i;
+export const FOLLOWERS_FILE_PATTERN = /^followers(?:_\d+)?\.json$/iu;
 
 export function normalizePath(path: string): string {
   return path.replaceAll("\\", "/").toLowerCase();

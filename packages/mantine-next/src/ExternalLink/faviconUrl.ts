@@ -1,4 +1,4 @@
-const WWW_RE = /^www\./;
+const WWW_RE = /^www\./u;
 
 /** Returns the hostname of an `http(s)` or protocol-relative URL, or `null` for any other input. */
 export function linkHostname(href: string): string | null {

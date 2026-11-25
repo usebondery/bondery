@@ -92,7 +92,7 @@ describe("findMultipartCeilingViolations", () => {
     const big = "export const UPLOAD_LIMITS = { default: 100 * 1024 * 1024, image: 1 } as const;";
     const violations = findMultipartCeilingViolations(goodBuildApp, big);
     assert.equal(violations.length, 1);
-    assert.match(violations[0], new RegExp(String(MAX_DEFAULT_UPLOAD_BYTES)));
+    assert.match(violations[0], new RegExp(String(MAX_DEFAULT_UPLOAD_BYTES), "u"));
   });
 
   it("holds for the real build-app and config", () => {

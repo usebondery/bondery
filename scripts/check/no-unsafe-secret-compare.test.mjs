@@ -14,7 +14,7 @@ import { dirname, join } from "node:path";
 import { after, before, describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 
-const CONSTANTTIMEEQUAL_RE = /constantTimeEqual/;
+const CONSTANTTIMEEQUAL_RE = /constantTimeEqual/u;
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const pluginPath = join(repoRoot, "biome", "plugins", "no-unsafe-secret-compare.grit");
@@ -40,7 +40,7 @@ const CASES = [
   ],
   [
     "apps/api/src/member.ts",
-    `export const f = (t: string, env: Record<string, string>) => t == env.STRIPE_WEBHOOK_SECRET;`,
+    "export const f = (t: string, env: Record<string, string>) => t == env.STRIPE_WEBHOOK_SECRET;",
     1,
   ],
   [
@@ -52,12 +52,12 @@ const CASES = [
   ],
   [
     "apps/webapp/src/server.ts",
-    `export const f = (a: string, password: string) => a === password;`,
+    "export const f = (a: string, password: string) => a === password;",
     1,
   ],
   [
     "apps/api/src/transcripts/x.ts",
-    `export const f = (a: string, secret: string) => a === secret;`,
+    "export const f = (a: string, secret: string) => a === secret;",
     1,
   ],
   [
@@ -83,12 +83,12 @@ export const f = (token: string, secret: string) => constantTimeEqual(token, sec
   ],
   [
     "apps/mobile/src/client.ts",
-    `export const f = (currentAccessToken: string, expectedAccessToken: string) => currentAccessToken === expectedAccessToken;`,
+    "export const f = (currentAccessToken: string, expectedAccessToken: string) => currentAccessToken === expectedAccessToken;",
     0,
   ],
   [
     "scripts/dev/setup.ts",
-    `export const f = (value: string, password: string) => value === password;`,
+    "export const f = (value: string, password: string) => value === password;",
     0,
   ],
 ];

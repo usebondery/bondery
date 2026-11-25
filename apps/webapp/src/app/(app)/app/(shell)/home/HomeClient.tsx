@@ -29,8 +29,8 @@ import {
   IconUserPlus,
 } from "@tabler/icons-react";
 import Link from "next/link";
-import { openNewActivityModal } from "@/app/(app)/app/(shell)/interactions/components/NewActivityModal";
-import { openAddContactModal } from "@/app/(app)/app/(shell)/people/components/modals/AddContactModal";
+import { openNewActivityModal } from "@/app/(app)/app/(shell)/interactions/components/openNewActivityModal";
+import { openAddContactModal } from "@/app/(app)/app/(shell)/people/components/modals/openAddContactModal";
 import { GettingStartedRailSlot } from "@/components/home/GettingStartedRailSlot";
 import { HomeStatsGrid } from "@/components/home/HomeStatsGrid";
 import { UpcomingReminderCard } from "@/components/home/UpcomingReminderCard";

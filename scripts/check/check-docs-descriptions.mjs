@@ -19,11 +19,11 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "./check-report.mjs";
 
-const PATTERN_5C723F5C6E_RE = /\r?\n/;
-const DESCRIPTION_RE_2 = /^description\s*:/;
-const DESCRIPTION_RE = /^description\s*:\s*/;
-const RELEASE_NOTES_FROM_RE = /release notes from/i;
-const DOCS_CHANGELOG_MDX_RE = /^docs\/changelog\/(\d+\.\d+\.\d+)\.mdx$/;
+const PATTERN_5C723F5C6E_RE = /\r?\n/u;
+const DESCRIPTION_RE_2 = /^description\s*:/u;
+const DESCRIPTION_RE = /^description\s*:\s*/u;
+const RELEASE_NOTES_FROM_RE = /release notes from/iu;
+const DOCS_CHANGELOG_MDX_RE = /^docs\/changelog\/(?<group1>\d+\.\d+\.\d+)\.mdx$/u;
 
 const check = createCheck("check-docs-descriptions");
 
@@ -133,7 +133,7 @@ const warnings = [];
  * release, so the check rejects it.
  */
 const COUNTED_CATEGORY_PATTERN =
-  /(?:^|[^\d.])\d+\s+(new features?|fixes|changes|breaking changes?|security fixes?|dependency updates?|ci changes?|test changes?|documentation updates?)\b/i;
+  /(?:^|[^\d.])\d+\s+(?<group1>new features?|fixes|changes|breaking changes?|security fixes?|dependency updates?|ci changes?|test changes?|documentation updates?)\b/iu;
 
 function isGeneratedSummary(text) {
   return COUNTED_CATEGORY_PATTERN.test(text) || RELEASE_NOTES_FROM_RE.test(text);
@@ -208,7 +208,7 @@ for (const filePath of walkMdxFiles(docsRoot).sort()) {
       `${path}: release description must name version ${version}. The page title is the bare version, so the sentence has to carry it for search results and link previews.`,
     );
   }
-  if (!/\bBondery\b/.test(text)) {
+  if (!/\bBondery\b/u.test(text)) {
     check.add(
       `${path}: release description must name Bondery, because the page title is only a version number.`,
     );

@@ -13,9 +13,9 @@ const SCRIPT = path.join(HERE, "anonymize.mjs");
 const INSTAGRAM_ZIP = path.join(HERE, "instagram", "instagram-export.zip");
 
 const instagramPath = "connections/followers_and_following/";
-const VCARD_BOUNDARY = /^BEGIN:VCARD$/m;
-const VCARD_END = /^END:VCARD$/m;
-const NULLISH_SUBSTITUTE = /undefined|null\r\n/;
+const VCARD_BOUNDARY = /^BEGIN:VCARD$/mu;
+const VCARD_END = /^END:VCARD$/mu;
+const NULLISH_SUBSTITUTE = /undefined|null\r\n/u;
 
 async function withTempDir(run) {
   const dir = await mkdtemp(path.join(tmpdir(), "bondery-anonymize-test-"));

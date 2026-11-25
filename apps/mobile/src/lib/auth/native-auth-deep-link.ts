@@ -1,4 +1,4 @@
-const LEADING_SLASHES_RE = /^\/+/;
+const LEADING_SLASHES_RE = /^\/+/u;
 export const AUTH_SCHEME = "bondery";
 
 /**

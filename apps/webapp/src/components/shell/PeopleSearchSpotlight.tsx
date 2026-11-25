@@ -32,7 +32,8 @@ export function PeopleSearchSpotlight() {
   const latestRequestRef = useRef(0);
 
   const debouncedSearch = useDebouncedCallback(async (q: string) => {
-    const requestId = ++latestRequestRef.current;
+    latestRequestRef.current += 1;
+    const requestId = latestRequestRef.current;
     setIsLoading(true);
     const contacts = await searchContacts(q);
     if (requestId === latestRequestRef.current) {

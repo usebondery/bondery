@@ -76,4 +76,4 @@ export function useDeclineMergeRecommendationMutation() {
   });
 }
 
-export type { MergeRecommendation };
+export type { MergeRecommendation } from "@bondery/schemas";

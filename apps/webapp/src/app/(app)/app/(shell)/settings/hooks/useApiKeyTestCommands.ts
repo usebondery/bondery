@@ -3,7 +3,7 @@
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { CodeBlockPlatform } from "@bondery/mantine-next";
 
-const TRAILING_SLASHES = /\/+$/;
+const TRAILING_SLASHES = /\/+$/u;
 
 /**
  * Test request per desktop OS for a freshly minted API key.

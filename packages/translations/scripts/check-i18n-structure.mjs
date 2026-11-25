@@ -9,7 +9,7 @@ import {
   SOURCE_LOCALE,
 } from "./lib/namespace-locales.mjs";
 
-const TSX_JSX_MJS_RE = /\.(tsx?|jsx?|mjs)$/;
+const TSX_JSX_MJS_RE = /\.(?<group1>tsx?|jsx?|mjs)$/u;
 
 const check = createCheck("check-i18n-structure");
 
@@ -66,7 +66,7 @@ function walkJson(dir, prefix = "", acc = []) {
     if (entry.isDirectory()) {
       walkJson(full, rel, acc);
     } else if (entry.name.endsWith(".json")) {
-      acc.push(rel.replace(/\\/g, "/"));
+      acc.push(rel.replace(/\\/gu, "/"));
     }
   }
   return acc;
@@ -84,7 +84,7 @@ const enFiles = new Set(walkJson(path.join(localesRoot, SOURCE_LOCALE)));
 const englishOnlyFiles = new Set(
   Object.values(manifest.namespaces)
     .filter((entry) => entry.englishOnly)
-    .map((entry) => entry.path.replace(/\\/g, "/")),
+    .map((entry) => entry.path.replace(/\\/gu, "/")),
 );
 for (const locale of LOCALES) {
   if (locale === SOURCE_LOCALE) {
@@ -133,7 +133,7 @@ for (const [name, entry] of Object.entries(manifest.namespaces)) {
 
 for (const file of enFiles) {
   const manifestEntry = Object.entries(manifest.namespaces).find(
-    ([, entry]) => entry.path.replace(/\\/g, "/") === file,
+    ([, entry]) => entry.path.replace(/\\/gu, "/") === file,
   );
   if (!manifestEntry) {
     fail(`orphan locale file without manifest entry: ${file}`);
@@ -157,23 +157,23 @@ if (languagesRelativePath) {
 
 // --- Forbidden patterns ---
 const forbidden = [
-  { label: "loadTranslation", pattern: /\bloadTranslation\b/ },
-  { label: "translationsByLocale", pattern: /\btranslationsByLocale\b/ },
+  { label: "loadTranslation", pattern: /\bloadTranslation\b/u },
+  { label: "translationsByLocale", pattern: /\btranslationsByLocale\b/u },
   {
     label: "import { en }",
-    pattern: /import\s*\{\s*en\s*\}\s*from\s*["']@bondery\/translations["']/,
+    pattern: /import\s*\{\s*en\s*\}\s*from\s*["']@bondery\/translations["']/u,
   },
-  { label: "WebAppCommon", pattern: /\bWebAppCommon\b/ },
-  { label: "MobileApp.", pattern: /MobileApp\./ },
+  { label: "WebAppCommon", pattern: /\bWebAppCommon\b/u },
+  { label: "MobileApp.", pattern: /MobileApp\./u },
   {
     label: "useTranslations dotted namespace",
-    pattern: /\buseTranslations\(\s*["'][^"']+\.[^"']+["']\s*\)/,
+    pattern: /\buseTranslations\(\s*["'][^"']+\.[^"']+["']\s*\)/u,
   },
 ];
 
 for (const root of SCAN_ROOTS) {
   for (const file of walk(root)) {
-    const rel = path.relative(repoRoot, file).replace(/\\/g, "/");
+    const rel = path.relative(repoRoot, file).replace(/\\/gu, "/");
     if (rel.includes("/scripts/codemod-")) {
       continue;
     }

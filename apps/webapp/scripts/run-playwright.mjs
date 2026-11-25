@@ -8,7 +8,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { ensureWslgDisplay } from "./ensure-wslg-display.mjs";
 
-const SETUP = /(?:^|=)setup$/;
+const SETUP = /(?:^|=)setup$/u;
 
 function main() {
   const webappRoot = join(dirname(fileURLToPath(import.meta.url)), "..");

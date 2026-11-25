@@ -26,8 +26,8 @@ const ROOTS = [
 ];
 const SINGLE_FILES = ["packages/db/prisma.config.ts"];
 const SKIP_DIRS = new Set(["node_modules", "dist", "generated", ".turbo"]);
-const SOURCE_FILE = /\.(?:ts|mts|js|mjs)$/;
-const TEST_FILE = /\.test\.(?:ts|mts|js|mjs)$/;
+const SOURCE_FILE = /\.(?:ts|mts|js|mjs)$/u;
+const TEST_FILE = /\.test\.(?:ts|mts|js|mjs)$/u;
 
 function walk(dir: string): string[] {
   const files: string[] = [];
@@ -52,7 +52,7 @@ const files = [
 
 let checked = 0;
 for (const file of files) {
-  const rel = relative(repoRoot, file).replace(/\\/g, "/");
+  const rel = relative(repoRoot, file).replace(/\\/gu, "/");
   // This rule file names the patterns it forbids.
   if (rel === "apps/api/scripts/db-connections.ts") {
     continue;

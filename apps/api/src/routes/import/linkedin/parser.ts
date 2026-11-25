@@ -11,11 +11,11 @@ import AdmZip from "adm-zip";
 import { parse as parseCsv } from "csv-parse/sync";
 import type { UploadFile } from "../../../lib/data/select-fragments.js";
 
-const UFEFF_PATTERN = /^\uFEFF/;
-const HTTP_PROTOCOL_PATTERN = /^https?:\/\//i;
-const QUERY_SUFFIX_PATTERN = /\?.*$/;
-const HASH_SUFFIX_PATTERN = /#.*$/;
-const R_N_PATTERN = /\r?\n/;
+const UFEFF_PATTERN = /^\uFEFF/u;
+const HTTP_PROTOCOL_PATTERN = /^https?:\/\//iu;
+const QUERY_SUFFIX_PATTERN = /\?.*$/u;
+const HASH_SUFFIX_PATTERN = /#.*$/u;
+const R_N_PATTERN = /\r?\n/u;
 
 const LINKEDIN_REQUIRED_HEADERS = [
   "First Name",

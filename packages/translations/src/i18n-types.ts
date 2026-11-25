@@ -51,12 +51,12 @@ export type ExtensionNamespace = import("./generated/i18n/namespaces.js").Extens
 
 /** Translation keys available under an optional keyPrefix within a namespace. */
 export type PrefixedKeys<
-  NS extends NamespaceKey,
+  Namespace extends NamespaceKey,
   Prefix extends string | undefined = undefined,
-> = NestedKeyPaths<SubtreeAtPrefix<Catalog[NS], Prefix>>;
+> = NestedKeyPaths<SubtreeAtPrefix<Catalog[Namespace], Prefix>>;
 
 /** Valid keyPrefix values for a namespace (object branch paths in the JSON tree). */
-export type BranchPrefixFor<NS extends NamespaceKey> = NamespacePrefixes[NS];
+export type BranchPrefixFor<Namespace extends NamespaceKey> = NamespacePrefixes[Namespace];
 
 /**
  * Bivariant translate fn for utilities that accept dynamic or cross-section keys.
@@ -71,6 +71,6 @@ export type LooseTranslateFn = {
 
 /** Namespace-scoped translate function with optional prefix narrowing. */
 export type TranslateFn<
-  NS extends NamespaceKey,
+  Namespace extends NamespaceKey,
   Prefix extends string | undefined = undefined,
-> = TFunction<NS, Prefix extends string ? Prefix : undefined>;
+> = TFunction<Namespace, Prefix extends string ? Prefix : undefined>;

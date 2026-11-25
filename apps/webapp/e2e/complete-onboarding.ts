@@ -1,8 +1,8 @@
 import type { Page } from "@playwright/test";
 import { expect } from "@playwright/test";
 
-const APP_HOME_URL = /\/app\/home(?:[/?#]|$)/;
-const APP_ONBOARDING_URL = /\/app\/onboarding(?:[/?#]|$)/;
+const APP_HOME_URL = /\/app\/home(?:[/?#]|$)/u;
+const APP_ONBOARDING_URL = /\/app\/onboarding(?:[/?#]|$)/u;
 
 /** Finish first-run onboarding when the magic-link lands on `/app/onboarding`. */
 export async function completeOnboardingIfNeeded(page: Page): Promise<void> {

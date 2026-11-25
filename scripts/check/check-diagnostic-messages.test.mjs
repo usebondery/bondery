@@ -12,7 +12,7 @@ import {
   literalText,
 } from "./check-diagnostic-messages.mjs";
 
-const MJS_GRIT_RE = /\.(?:mjs|grit)$/;
+const MJS_GRIT_RE = /\.(?:mjs|grit)$/u;
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
@@ -72,7 +72,7 @@ describe("hasRemedy", () => {
 
 describe("extractArguments", () => {
   it("reads a template literal containing parentheses and braces", () => {
-    const source = `check.add(\`a (b) {c} \${fn({ d: 1 })}\`);`;
+    const source = "check.add(`a (b) {c} ${fn({ d: 1 })}`);";
     assert.deepEqual(
       extractArguments(source, "check.add(").map((entry) => entry.argument),
       ["`a (b) {c} ${fn({ d: 1 })}`"],
@@ -80,7 +80,7 @@ describe("extractArguments", () => {
   });
 
   it("stops at a top-level comma so a second argument is not swallowed", () => {
-    const source = `check.add(\`first\`, { extra: true });`;
+    const source = "check.add(`first`, { extra: true });";
     assert.deepEqual(
       extractArguments(source, "check.add(").map((entry) => entry.argument),
       ["`first`"],

@@ -80,7 +80,7 @@ function userFacingMessage(code, template, locale, existing) {
     return existing;
   }
 
-  const fallback = template.replace(/\b\w/g, (c) => c.toLowerCase());
+  const fallback = template.replace(/\b\w/gu, (c) => c.toLowerCase());
   return `${fallback.charAt(0).toUpperCase()}${fallback.slice(1)}.`;
 }
 

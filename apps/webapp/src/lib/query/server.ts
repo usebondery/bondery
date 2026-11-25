@@ -1,5 +1,5 @@
 import type { QueryClient, QueryFunction, QueryKey } from "@tanstack/react-query";
-import { type DehydratedState, dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { type DehydratedState, dehydrate } from "@tanstack/react-query";
 import { getQueryClient } from "./client";
 
 export async function prefetchQuery<T>(
@@ -18,4 +18,4 @@ export function getServerQueryClient(): QueryClient {
   return getQueryClient();
 }
 
-export { HydrationBoundary };
+export { HydrationBoundary } from "@tanstack/react-query";

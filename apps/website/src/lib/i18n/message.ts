@@ -1,6 +1,6 @@
 import { createElement, Fragment, type ReactNode } from "react";
 
-const TOKEN = /\{(\w+)\}/g;
+const TOKEN = /\{(?<group1>\w+)\}/gu;
 
 /** Values for `{token}` placeholders. A value may be a node, so a message can wrap a link. */
 type MessageValues = Record<string, ReactNode>;

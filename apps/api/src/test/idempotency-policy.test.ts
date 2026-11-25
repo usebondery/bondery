@@ -17,7 +17,7 @@ import {
   stripeIdempotencyKey,
 } from "../lib/platform/idempotency-policy.js";
 
-const A_F_PATTERN = /^[0-9a-f]{64}$/;
+const A_F_PATTERN = /^[0-9a-f]{64}$/u;
 
 describe("idempotency policy", () => {
   it("accepts printable ASCII keys and rejects everything else", () => {

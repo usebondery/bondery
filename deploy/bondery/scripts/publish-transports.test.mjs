@@ -17,22 +17,22 @@ const STORAGE_CLIENT_CERT =
 const STORAGE_CLIENT_KEY =
   "-----BEGIN PRIVATE KEY-----\nMIIBdzCCAR2gAwIBAgIUQUJD\nS0VZ\n-----END PRIVATE KEY-----\n";
 
-const API_TRANSPORT_NAME_RE = /^ {4}bondery-beta-api:$/m;
-const API_SERVER_NAME_RE = /^ {6}serverName: bondery-beta-api$/m;
+const API_TRANSPORT_NAME_RE = /^ {4}bondery-beta-api:$/mu;
+const API_SERVER_NAME_RE = /^ {6}serverName: bondery-beta-api$/mu;
 const API_CA_INLINE_RE =
-  /^ {8}- \|\n {10}-----BEGIN CERTIFICATE-----\n {10}MIIBdzCCAR2gAwIBAgIUAPI$/m;
-const STORAGE_SERVER_NAME_RE = /^ {6}serverName: bondery-beta-storage$/m;
-const STORAGE_CA_INLINE_RE = /^ {10}MIIBdzCCAR2gAwIBAgIUU1RP$/m;
+  /^ {8}- \|\n {10}-----BEGIN CERTIFICATE-----\n {10}MIIBdzCCAR2gAwIBAgIUAPI$/mu;
+const STORAGE_SERVER_NAME_RE = /^ {6}serverName: bondery-beta-storage$/mu;
+const STORAGE_CA_INLINE_RE = /^ {10}MIIBdzCCAR2gAwIBAgIUU1RP$/mu;
 const STORAGE_CLIENT_CERT_INLINE_RE =
-  /^ {6}certificates:\n {8}- cert: \|\n {12}-----BEGIN CERTIFICATE-----$/m;
-const STORAGE_CLIENT_KEY_INLINE_RE = /^ {10}key: \|\n {12}-----BEGIN PRIVATE KEY-----$/m;
-const STORAGE_CLIENT_CERT_BODY_RE = /^ {12}RU5U$/m;
-const PREFIX_CHARSET_ERROR_RE = /lowercase letters, digits, and dashes/;
-const UNKNOWN_SERVICE_RE = /unknown service/;
-const NO_CERTIFICATE_RE = /has no certificate/;
-const NO_PRIVATE_KEY_RE = /has no private key/;
-const DYNAMIC_DIR_ERROR_RE = /BONDERY_INFRA_TRAEFIK_DYNAMIC_DIR/;
-const PERMISSION_BITS_RE = /[0-7]{3}$/;
+  /^ {6}certificates:\n {8}- cert: \|\n {12}-----BEGIN CERTIFICATE-----$/mu;
+const STORAGE_CLIENT_KEY_INLINE_RE = /^ {10}key: \|\n {12}-----BEGIN PRIVATE KEY-----$/mu;
+const STORAGE_CLIENT_CERT_BODY_RE = /^ {12}RU5U$/mu;
+const PREFIX_CHARSET_ERROR_RE = /lowercase letters, digits, and dashes/u;
+const UNKNOWN_SERVICE_RE = /unknown service/u;
+const NO_CERTIFICATE_RE = /has no certificate/u;
+const NO_PRIVATE_KEY_RE = /has no private key/u;
+const DYNAMIC_DIR_ERROR_RE = /BONDERY_INFRA_TRAEFIK_DYNAMIC_DIR/u;
+const PERMISSION_BITS_RE = /[0-7]{3}$/u;
 
 describe("publish-transports.sh", () => {
   let root;
@@ -121,7 +121,7 @@ describe("publish-transports.sh", () => {
     const mtimeBefore = (await stat(target)).mtimeMs;
     const result = run("bondery-beta");
     assert.equal(result.status, 0, result.stderr);
-    assert.equal(result.stdout.match(/up to date/g)?.length, 2);
+    assert.equal(result.stdout.match(/up to date/gu)?.length, 2);
     assert.equal((await stat(target)).mtimeMs, mtimeBefore);
   });
 

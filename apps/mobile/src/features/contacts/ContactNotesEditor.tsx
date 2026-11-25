@@ -60,8 +60,8 @@ function ContactNotesEditor({ id, isMyselfMode = false }: ContactNotesEditorProp
   const [loadedContact, setLoadedContact] = useState<Contact | null>(null);
 
   const editorRef = useRef<EnrichedMarkdownTextInputInstance>(null);
-  const pendingMarkdown = useRef<string | null>(null);
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingMarkdownRef = useRef<string | null>(null);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isSavingRef = useRef<boolean>(false);
   const isTransitioningToMentionRef = useRef<boolean>(false);
 
@@ -141,27 +141,27 @@ function ContactNotesEditor({ id, isMyselfMode = false }: ContactNotesEditorProp
   }
 
   function scheduleAutosave(markdown: string) {
-    pendingMarkdown.current = markdown;
-    if (saveTimer.current) {
-      clearTimeout(saveTimer.current);
+    pendingMarkdownRef.current = markdown;
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
     }
     setSaveStatus("idle");
-    saveTimer.current = setTimeout(() => {
-      if (pendingMarkdown.current !== null) {
-        detachPromise(saveNotes(pendingMarkdown.current));
-        pendingMarkdown.current = null;
+    saveTimerRef.current = setTimeout(() => {
+      if (pendingMarkdownRef.current !== null) {
+        detachPromise(saveNotes(pendingMarkdownRef.current));
+        pendingMarkdownRef.current = null;
       }
     }, AUTOSAVE_DELAY_MS);
   }
 
   useFocusEffect(() => () => {
-    if (saveTimer.current) {
-      clearTimeout(saveTimer.current);
-      saveTimer.current = null;
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = null;
     }
-    if (pendingMarkdown.current !== null) {
-      detachPromise(saveNotes(pendingMarkdown.current));
-      pendingMarkdown.current = null;
+    if (pendingMarkdownRef.current !== null) {
+      detachPromise(saveNotes(pendingMarkdownRef.current));
+      pendingMarkdownRef.current = null;
     }
   });
 

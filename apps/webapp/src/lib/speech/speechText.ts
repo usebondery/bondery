@@ -7,13 +7,13 @@ interface SpeechTextPart {
   type: string;
 }
 
-const BOLD_MARKER_RE = /\*\*/g;
-const WIRE_TOKEN_RE = /\[\[bp:[^\]]+\]\]/g;
-const WHITESPACE_RE = /\s+/g;
-const PARAGRAPH_BREAK_RE = /\n{2,}/;
-const SENTENCE_SPLIT_RE = /(?<=[.!?…])\s+/;
-const SENTENCE_END_RE = /[.!?…:]$/;
-const LEADING_PUNCTUATION_RE = /^[,.;:!?…)\]]/;
+const BOLD_MARKER_RE = /\*\*/gu;
+const WIRE_TOKEN_RE = /\[\[bp:[^\]]+\]\]/gu;
+const WHITESPACE_RE = /\s+/gu;
+const PARAGRAPH_BREAK_RE = /\n{2,}/u;
+const SENTENCE_SPLIT_RE = /(?<=[.!?…])\s+/u;
+const SENTENCE_END_RE = /[.!?…:]$/u;
+const LEADING_PUNCTUATION_RE = /^[,.;:!?…)\]]/u;
 
 /**
  * Splits message parts into spoken paragraphs.

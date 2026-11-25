@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { contactIdSchema, EXAMPLE_CONTACT_ID } from "#contact-id/index.js";
 
-export { contactIdSchema, EXAMPLE_CONTACT_ID };
+export { contactIdSchema, EXAMPLE_CONTACT_ID } from "#contact-id/index.js";
 
 /** Bulk delete body: `{ ids: uuid[] }` with at least one element. */
 export const wireIdsRequestSchema = z.object({

@@ -10,8 +10,8 @@ import { getPeoplePageTranslations } from "@/lib/i18n/generated/hooks.server";
 import { staticPageTitle } from "@/lib/metadata/pageTitles";
 import { parseContactsListParams } from "@/lib/query/contactsListParams";
 import { PeopleHeaderClient } from "./components/chrome/PeopleHeaderClient";
-import { PeopleTableSkeleton } from "./components/chrome/PeopleSkeletons";
 import { PeopleTableLoader } from "./components/chrome/PeopleTableLoader";
+import { PeopleTableSkeleton } from "./components/chrome/peopleSkeletons";
 
 /** Matches DEFAULT_COLUMNS in PeopleClient - used to derive the skeleton shape. */
 const DEFAULT_VISIBLE_COLUMNS: ColumnKey[] = [

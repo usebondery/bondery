@@ -10,7 +10,7 @@ import { firstNonEmpty } from "@/lib/shared/nonEmpty";
 import { ClusterMapBubble, PersonMapAvatarMarker } from "./mapMarkerIcons";
 import type { PeopleMapMarker } from "./PeopleMap";
 
-const PATTERN = /\s+/;
+const PATTERN = /\s+/u;
 
 const CLUSTER_RADIUS_PX = 50;
 

@@ -3,7 +3,7 @@ import { expect, test as setup } from "@playwright/test";
 import { completeOnboardingIfNeeded } from "./complete-onboarding";
 import { loginWithEmail } from "./email-login";
 
-const APP_HOME_URL = /\/app\/home(?:[/?#]|$)/;
+const APP_HOME_URL = /\/app\/home(?:[/?#]|$)/u;
 
 const AUTH_DIR = ".auth";
 const AUTH_FILE = ".auth/email-user.json";

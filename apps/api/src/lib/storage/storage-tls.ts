@@ -45,7 +45,7 @@ export async function inspectObjectStorageTls(
   // Present the client certificate too, so the report describes the session the S3 client makes.
   // A gateway that requires one would otherwise reject the probe and hide the TLS version.
   const client = resolveS3ClientCertificate(endpoint, env);
-  const host = url.hostname.replace(/^\[|\]$/g, "");
+  const host = url.hostname.replace(/^\[|\]$/gu, "");
   return new Promise((resolve, reject) => {
     const socket = connect(
       {

@@ -37,7 +37,7 @@ export function useEnrichLoop({ errorTitle }: UseEnrichLoopParams) {
           errorMessage: "Missing LinkedIn handle",
           status: "failed",
         });
-        failedCount++;
+        failedCount += 1;
         consecutiveTimeouts = 0;
         setState({ currentPerson: null, failed: failedCount });
         return;
@@ -47,7 +47,7 @@ export function useEnrichLoop({ errorTitle }: UseEnrichLoopParams) {
 
       if (result.success) {
         await patchEnrichQueueItem(item.queueItemId, { status: "completed" });
-        completedCount++;
+        completedCount += 1;
         consecutiveTimeouts = 0;
         setState({ completed: completedCount, currentPerson: null });
         return;
@@ -57,9 +57,9 @@ export function useEnrichLoop({ errorTitle }: UseEnrichLoopParams) {
         errorMessage: result.error,
         status: "failed",
       });
-      failedCount++;
+      failedCount += 1;
       if (result.error === "timeout") {
-        consecutiveTimeouts++;
+        consecutiveTimeouts += 1;
         if (consecutiveTimeouts >= MAX_CONSECUTIVE_TIMEOUTS) {
           abortReason = "circuit_breaker";
           setState({ currentPerson: null });

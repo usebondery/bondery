@@ -12,7 +12,7 @@ import { PASSKEY_LIMITS } from "@bondery/schemas";
 import { APIError, createAuthMiddleware, getSessionFromCtx } from "better-auth/api";
 import { isJwtShapedToken } from "./bearer-token-format.js";
 
-const BEARER_S_S_PATTERN = /^Bearer\s+(\S+)/i;
+const BEARER_S_S_PATTERN = /^Bearer\s+(?<group1>\S+)/iu;
 
 const PASSKEY_REGISTER_PATHS = new Set([
   "/passkey/generate-register-options",

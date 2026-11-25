@@ -17,7 +17,6 @@ import {
   placeFocusHubs,
   placeGroupMembersOnCanvas,
   placeHubsOnCanvas,
-  RELATIONSHIP_GRAPH_GROUP_HULL_CAP,
   RELATIONSHIP_GRAPH_HUB_CAP,
   selectGraphGroups,
   withHubLogos,
@@ -475,7 +474,7 @@ async function getFocusedGraph(
   });
 }
 
-export { RELATIONSHIP_GRAPH_GROUP_HULL_CAP, RELATIONSHIP_GRAPH_HUB_CAP };
+export { RELATIONSHIP_GRAPH_HUB_CAP } from "./graph-hubs.js";
 
 /** Global graph stops at this many people. A larger book sets `truncated`. */
 export const RELATIONSHIP_GRAPH_NODE_CAP = 500;
@@ -497,3 +496,5 @@ export async function getRelationshipGraph(
   }
   return getGlobalGraph(db, userId, avatarOptions, flags);
 }
+
+export { RELATIONSHIP_GRAPH_GROUP_HULL_CAP } from "./graph-hubs.js";

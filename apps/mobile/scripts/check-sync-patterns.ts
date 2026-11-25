@@ -8,10 +8,10 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "../../../scripts/check/check-report.mjs";
 
-const SOURCE_FILE_EXT_RE = /\.(tsx?|jsx?)$/;
-const FROM_SYNC_REPOSITORIES_RE = /from\s+["'][^"']*lib\/sync\/repositories\//;
-const FROM_TANSTACK_QUERY_RE = /from\s+["']@tanstack\/react-query["']/;
-const FROM_SQLITE_QUERY_CLIENT_RE = /from\s+["'][^"']*lib\/sync\/sqlite-query-client["']/;
+const SOURCE_FILE_EXT_RE = /\.(?<group1>tsx?|jsx?)$/u;
+const FROM_SYNC_REPOSITORIES_RE = /from\s+["'][^"']*lib\/sync\/repositories\//u;
+const FROM_TANSTACK_QUERY_RE = /from\s+["']@tanstack\/react-query["']/u;
+const FROM_SQLITE_QUERY_CLIENT_RE = /from\s+["'][^"']*lib\/sync\/sqlite-query-client["']/u;
 const report = createCheck("check-sync-patterns");
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -41,13 +41,13 @@ const BANNED_IMPORTS = [
 ];
 
 const BANNED_PATTERNS = [
-  { re: /\bisSyncReady\b/, rule: "no-is-sync-ready-branch" },
+  { re: /\bisSyncReady\b/u, rule: "no-is-sync-ready-branch" },
   {
-    re: /from\s+["'][^"']*lib\/api\/client["'][^;]*fetchContacts/,
+    re: /from\s+["'][^"']*lib\/api\/client["'][^;]*fetchContacts/u,
     rule: "no-fetch-contacts-page-rest",
   },
-  { re: /use(Contacts|Groups|Tags)Store/, rule: "no-entity-zustand-stores" },
-  { re: /from\s+["'][^"']*lib\/store["']/, rule: "no-lib-store-import" },
+  { re: /use(?<group1>Contacts|Groups|Tags)Store/u, rule: "no-entity-zustand-stores" },
+  { re: /from\s+["'][^"']*lib\/store["']/u, rule: "no-lib-store-import" },
 ];
 
 const DOMAIN_READ_EXPORTS = [
@@ -85,7 +85,7 @@ function walk(dir: string, acc: string[] = []): string[] {
 }
 
 function isAllowedFile(rel: string): boolean {
-  const normalized = rel.replace(/\\/g, "/");
+  const normalized = rel.replace(/\\/gu, "/");
   return (
     normalized.startsWith("lib/api/") ||
     normalized.startsWith("lib/domains/") ||
@@ -95,13 +95,13 @@ function isAllowedFile(rel: string): boolean {
 
 function checkDomainReadImports(rel: string, content: string): Violation[] {
   const domainImportRe =
-    /import\s*\{([^}]+)\}\s*from\s*["'][^"']*lib\/domains\/(?:contacts|groups|tags)["']/g;
+    /import\s*\{(?<group1>[^}]+)\}\s*from\s*["'][^"']*lib\/domains\/(?:contacts|groups|tags)["']/gu;
   const violations: Violation[] = [];
 
   for (const match of content.matchAll(domainImportRe)) {
     const imported = match[1] ?? "";
     for (const name of DOMAIN_READ_EXPORTS) {
-      const nameRe = new RegExp(`\\b${name}\\b`);
+      const nameRe = new RegExp(`\\b${name}\\b`, "u");
       if (nameRe.test(imported)) {
         violations.push({
           detail: `Feature imports tier-1 read ${name} from lib/domains — use lib/sync/hooks instead`,
@@ -118,7 +118,7 @@ function checkDomainReadImports(rel: string, content: string): Violation[] {
 
 function checkFile(absPath: string): Violation[] {
   const rel = relative(MOBILE_SRC, absPath);
-  const normalized = rel.replace(/\\/g, "/");
+  const normalized = rel.replace(/\\/gu, "/");
   const content = readFileSync(absPath, "utf8");
   const violations: Violation[] = [];
 
@@ -178,6 +178,7 @@ function checkFile(absPath: string): Violation[] {
   for (const name of BANNED_IMPORTS) {
     const importRe = new RegExp(
       `import\\s*\\{[^}]*\\b${name}\\b[^}]*\\}\\s*from\\s*["'][^"']*lib/api/client["']`,
+      "u",
     );
     if (importRe.test(content)) {
       violations.push({

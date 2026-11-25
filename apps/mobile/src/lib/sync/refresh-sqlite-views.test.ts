@@ -135,8 +135,14 @@ describe("refreshSqliteViews", () => {
     const tagsKey = ["sqlite", "tags", "list"] as const;
     let contacts = 0;
     let tags = 0;
-    const contactsRead = () => ++contacts;
-    const tagsRead = () => ++tags;
+    const contactsRead = () => {
+      contacts += 1;
+      return contacts;
+    };
+    const tagsRead = () => {
+      tags += 1;
+      return tags;
+    };
 
     await Promise.all([
       client.prefetchQuery({

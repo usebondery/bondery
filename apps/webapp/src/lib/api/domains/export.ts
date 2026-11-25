@@ -7,7 +7,7 @@ import {
   clientApiJsonOrNull,
 } from "@/lib/api/client";
 
-const FILENAME_PATTERN = /filename="([^"]+)"/i;
+const FILENAME_PATTERN = /filename="(?<group1>[^"]+)"/iu;
 
 export function parseBonderyExportFilename(
   contentDisposition: string | null,

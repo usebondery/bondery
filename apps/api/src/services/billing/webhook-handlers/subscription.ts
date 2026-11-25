@@ -15,7 +15,7 @@ import {
   upsertSubscription,
 } from "../subscription.js";
 
-const UUID_PATTERN = /^[0-9a-f-]{36}$/i;
+const UUID_PATTERN = /^[0-9a-f-]{36}$/iu;
 
 function customerId(customer: string | Stripe.Customer | Stripe.DeletedCustomer): string {
   return typeof customer === "string" ? customer : customer.id;

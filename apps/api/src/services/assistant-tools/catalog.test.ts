@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { createChatTools } from "../chat/create-chat-tools.js";
 import { ASSISTANT_TOOL_NAMES } from "./catalog.js";
 
-const TOOL_NAME_RE = /registerTool\(\s*"([a-z0-9_]+)"/g;
+const TOOL_NAME_RE = /registerTool\(\s*"(?<group1>[a-z0-9_]+)"/gu;
 
 function mcpRegisteredToolNames(): string[] {
   const toolsDir = join(dirname(fileURLToPath(import.meta.url)), "../../routes/mcp/tools");

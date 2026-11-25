@@ -7,7 +7,7 @@ import {
   type ActionIconGraphic,
   renderActionIconGraphic,
 } from "#ActionIconButton/actionIconGraphic.js";
-import Link, { type AppHref } from "#nextjs/NextLink.js";
+import Link, { type AppHref } from "#nextjs/nextLink.js";
 
 export type ActionIconLinkProps = Omit<ActionIconProps, "component" | "href" | "children"> & {
   href?: AppHref;

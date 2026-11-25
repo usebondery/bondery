@@ -1,4 +1,4 @@
-const JS_TS_FILE_EXT_RE = /\.(js|ts|tsx)$/;
+const JS_TS_FILE_EXT_RE = /\.(?<group1>js|ts|tsx)$/u;
 const fs = require("node:fs");
 const { getDefaultConfig } = require("expo/metro-config");
 const path = require("node:path");
@@ -16,7 +16,7 @@ const { withUniwindConfig } = require("uniwind/metro");
 const _origReadFile = fs.promises.readFile;
 const READ_FILE_MAX_ATTEMPTS = 10;
 fs.promises.readFile = async function emfileRetryReadFile(...args) {
-  for (let attempt = 0; attempt < READ_FILE_MAX_ATTEMPTS; attempt++) {
+  for (let attempt = 0; attempt < READ_FILE_MAX_ATTEMPTS; attempt += 1) {
     try {
       return await _origReadFile.apply(fs.promises, args);
     } catch (error) {
@@ -83,7 +83,7 @@ if (metroMaxWorkers) {
 function toBlockPattern(dir) {
   // blockList entries must be RegExps. Escape path separators and regex
   // metacharacters (critical on Windows) and match everything under `dir`.
-  return new RegExp(`${dir.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}.*`);
+  return new RegExp(`${dir.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")}.*`, "u");
 }
 
 const blockListPatterns = [
@@ -132,7 +132,7 @@ const WORKSPACE_SOURCE_PACKAGES = [
 ];
 
 function normalizePath(filePath) {
-  return filePath.replace(/\\/g, "/");
+  return filePath.replace(/\\/gu, "/");
 }
 
 function resolveWorkspaceSourceFile(pkgRoot, subpath) {

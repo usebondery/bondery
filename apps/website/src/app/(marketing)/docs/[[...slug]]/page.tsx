@@ -21,7 +21,7 @@ import { getDocsGithubUrl, getDocsPageUrl, getPageMarkdownUrl } from "@/lib/get-
 import { openapi } from "@/lib/openapi";
 import { getFilteredPageTree, getPageImage, source } from "@/lib/source";
 
-const HASH_PREFIX_RE = /^#/;
+const HASH_PREFIX_RE = /^#/u;
 type PageProps = {
   params: Promise<{ slug?: string[] }>;
 };

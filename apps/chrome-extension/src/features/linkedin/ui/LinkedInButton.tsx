@@ -11,7 +11,7 @@ import { profileCache, scrapeLinkedInProfile } from "../scrape/scrapeProfile";
 import { getTopcard } from "../scrape/sduiProfile";
 import { toApiWorkHistory } from "../scrape/workExperience";
 
-const PROFILE_PHOTO_URL_RE = /profile|displayphoto|shrink/i;
+const PROFILE_PHOTO_URL_RE = /profile|displayphoto|shrink/iu;
 
 interface LinkedInButtonProps {
   username: string;
@@ -138,5 +138,6 @@ function LinkedInButton({ username }: LinkedInButtonProps) {
   );
 }
 
-export { extractProfilePhotoUrl, profileCache };
+export { profileCache } from "../scrape/scrapeProfile";
+export { extractProfilePhotoUrl };
 export default LinkedInButton;

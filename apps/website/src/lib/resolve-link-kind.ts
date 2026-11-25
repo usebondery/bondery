@@ -1,4 +1,4 @@
-const WWW_PREFIX_RE = /^www\./;
+const WWW_PREFIX_RE = /^www\./u;
 type LinkKind = "external" | "internal" | "special";
 
 const INTERNAL_HOST_SUFFIXES = ["usebondery.com", "localhost"] as const;

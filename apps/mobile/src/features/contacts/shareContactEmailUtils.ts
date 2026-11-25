@@ -4,7 +4,7 @@ const MAX_SHARE_RECIPIENTS = 10;
 const MAX_SHARE_MESSAGE_LENGTH = 2000;
 const MESSAGE_LENGTH_COUNTER_THRESHOLD = 1800;
 
-const RECIPIENT_SPLIT_REGEX = /[\s,;]+/;
+const RECIPIENT_SPLIT_REGEX = /[\s,;]+/u;
 
 function parseRecipientTokens(text: string): string[] {
   return text

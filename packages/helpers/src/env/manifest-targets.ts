@@ -1,7 +1,7 @@
 import { DEV_PORTS } from "@bondery/schemas/constants/dev-ports";
 import type { EnvTargetWrite, SyncTargetConfig, TargetId } from "./manifest-types.js";
 
-const TRAILING_SLASH_RE = /\/$/;
+const TRAILING_SLASH_RE = /\/$/u;
 const LOCAL_POSTGRES_DB = "bondery";
 const LOCAL_POSTGRES_HOST = "127.0.0.1";
 const LOCAL_POSTGRES_USER = "postgres";

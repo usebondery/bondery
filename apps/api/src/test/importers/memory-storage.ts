@@ -6,7 +6,7 @@
  */
 import type { StorageAdapter, StoragePutOptions } from "../../lib/storage/adapter.js";
 
-const LEADING_SLASHES = /^\/+/;
+const LEADING_SLASHES = /^\/+/u;
 
 function keyOf(bucket: string, key: string): string {
   return `${bucket}/${key.replace(LEADING_SLASHES, "")}`;

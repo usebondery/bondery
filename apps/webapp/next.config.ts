@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { NextConfig } from "next";
 
-const STORE_V_I = /[/\\]store[/\\]v\d+/i;
+const STORE_V_I = /[/\\]store[/\\]v\d+/iu;
 
 const appDir = path.dirname(fileURLToPath(import.meta.url));
 const monorepoRoot = path.join(appDir, "../..");

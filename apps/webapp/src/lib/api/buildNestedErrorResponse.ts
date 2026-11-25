@@ -7,7 +7,7 @@ import {
 } from "@bondery/schemas/errors";
 import { buildWebappRuntimeConfigFromEnv } from "@/lib/platform/runtimeConfig.server";
 
-const PATTERN = /\/$/;
+const PATTERN = /\/$/u;
 
 type BuildNestedErrorResponseParams = {
   code: ApiErrorCode;

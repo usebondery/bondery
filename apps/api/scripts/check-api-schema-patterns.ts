@@ -23,10 +23,10 @@ const INTERNAL_ROUTE_FILES = new Set(["webhooks/stripe.ts", "mcp/index.ts"]);
 const NON_ROUTE_FILES = loadRouteNonPluginFiles();
 
 const ROUTE_METHOD_RE =
-  /fastify\.(get|post|put|patch|delete)\(\s*[\s\S]*?schema:\s*\{[\s\S]*?\}\s*satisfies\s+FastifyZodOpenApiSchema/gs;
+  /fastify\.(?<group1>get|post|put|patch|delete)\(\s*[\s\S]*?schema:\s*\{[\s\S]*?\}\s*satisfies\s+FastifyZodOpenApiSchema/gsu;
 
 const ROUTE_WITHOUT_SCHEMA_RE =
-  /fastify\.(get|post|put|patch|delete)\(\s*["'`][^"'`]+["'`]\s*,\s*async/g;
+  /fastify\.(?<group1>get|post|put|patch|delete)\(\s*["'`][^"'`]+["'`]\s*,\s*async/gu;
 
 function collectRouteFiles(dir: string): string[] {
   const files: string[] = [];
@@ -46,12 +46,12 @@ function collectRouteFiles(dir: string): string[] {
 const violations: string[] = [];
 
 for (const file of collectRouteFiles(routesRoot)) {
-  const rel = relative(join(__dirname, "..", "src"), file).replace(/\\/g, "/");
+  const rel = relative(join(__dirname, "..", "src"), file).replace(/\\/gu, "/");
   if (!rel.startsWith("routes/")) {
     continue;
   }
 
-  const routeRel = rel.replace(/^routes\//, "");
+  const routeRel = rel.replace(/^routes\//u, "");
   if (INTERNAL_ROUTE_FILES.has(routeRel) || NON_ROUTE_FILES.has(routeRel)) {
     continue;
   }

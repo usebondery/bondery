@@ -8,9 +8,9 @@ import { spawn, spawnSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
-const JAVA_VERSION_RE = /JAVA_VERSION="(\d+)/;
-const PATTERN_5B5C73225D_RE = /[\s"]/;
-const PATTERN_5C723F5C6E_RE = /\r?\n/;
+const JAVA_VERSION_RE = /JAVA_VERSION="(?<group1>\d+)/u;
+const PATTERN_5B5C73225D_RE = /[\s"]/u;
+const PATTERN_5C723F5C6E_RE = /\r?\n/u;
 
 function main() {
   const isWindows = process.platform === "win32";

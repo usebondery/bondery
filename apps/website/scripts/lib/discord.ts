@@ -67,5 +67,5 @@ export async function postDiscordAnnouncement(
     throw new Error(`Discord webhook failed: ${response.status} ${response.statusText}\n${body}`);
   }
 
-  console.log(`[Discord] ✅ Announcement posted successfully.`);
+  console.log("[Discord] ✅ Announcement posted successfully.");
 }

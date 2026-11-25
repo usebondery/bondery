@@ -8,13 +8,13 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "../../../scripts/check/check-report.mjs";
 
-const JS_TS_EXTENSION = /\.(tsx?|jsx?)$/;
+const JS_TS_EXTENSION = /\.(?<group1>tsx?|jsx?)$/u;
 
 const check = createCheck("check-analytics-events");
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const WEBAPP_SRC = join(__dirname, "..", "src");
-const EVENT_NAME_PATTERN = /^[a-z][a-z0-9_]*:[a-z][a-z0-9_]*$/;
+const EVENT_NAME_PATTERN = /^[a-z][a-z0-9_]*:[a-z][a-z0-9_]*$/u;
 
 type Violation = { file: string; rule: string; detail: string };
 
@@ -34,7 +34,7 @@ function walk(dir: string, acc: string[] = []): string[] {
 }
 
 function extractEventNames(content: string, callee: string): string[] {
-  const pattern = new RegExp(`${callee}\\(\\s*["'\`]([^"'\`]+)["'\`]`, "g");
+  const pattern = new RegExp(`${callee}\\(\\s*["'\`]([^"'\`]+)["'\`]`, "gu");
   const names: string[] = [];
   let match = pattern.exec(content);
   while (match) {
@@ -48,7 +48,7 @@ function extractEventNames(content: string, callee: string): string[] {
 }
 
 function checkFile(absPath: string): Violation[] {
-  const rel = relative(WEBAPP_SRC, absPath).replace(/\\/g, "/");
+  const rel = relative(WEBAPP_SRC, absPath).replace(/\\/gu, "/");
   if (rel.startsWith("lib/analytics/")) {
     return [];
   }

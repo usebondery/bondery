@@ -3,9 +3,9 @@ import { describe, it } from "node:test";
 import { createMcpHandler, McpServer } from "@modelcontextprotocol/server";
 import { loadMcpSkills } from "./skills.js";
 
-const DATA_M_PATTERN = /^data: (.*)$/m;
-const NNAME_CATCH_UP_N_PATTERN = /^---\nname: catch-up\n/;
-const THE_BONDERY_MCP_SERVER_IS_NOT_CONNECTED_PATTERN = /the Bondery MCP server is not connected/;
+const DATA_M_PATTERN = /^data: (?<group1>.*)$/mu;
+const NNAME_CATCH_UP_N_PATTERN = /^---\nname: catch-up\n/u;
+const THE_BONDERY_MCP_SERVER_IS_NOT_CONNECTED_PATTERN = /the Bondery MCP server is not connected/u;
 
 const SKILLS = ["catch-up", "get-to-know", "onboarding", "reach-out", "remember", "share-person"];
 const PROTOCOL_VERSION = "2026-07-28";

@@ -1,8 +1,8 @@
 import path from "node:path";
 
-const MD_OR_MDX_EXT_RE = /\.mdx?$/i;
-const INDEX_SUFFIX_RE = /\/index$/;
-const TRAILING_SLASHES_RE = /\/+$/;
+const MD_OR_MDX_EXT_RE = /\.mdx?$/iu;
+const INDEX_SUFFIX_RE = /\/index$/u;
+const TRAILING_SLASHES_RE = /\/+$/u;
 /**
  * Rewrite links in docs Markdown so agents can follow them.
  *
@@ -22,7 +22,7 @@ const TRAILING_SLASHES_RE = /\/+$/;
 
 const DOCS_DIR = "docs";
 
-const FENCE = /^\s*(`{3,}|~{3,})/;
+const FENCE = /^\s*(?<group1>`{3,}|~{3,})/u;
 
 const SKIP_PREFIXES = ["http://", "https://", "mailto:", "tel:", "#"];
 
@@ -73,7 +73,7 @@ function docsPath(
   isPublicPage: HasDocsPage,
   sourceBaseUrl: string,
 ): string {
-  const trimmed = stripDocsSuffix(relativePath.replace(/\\/g, "/"));
+  const trimmed = stripDocsSuffix(relativePath.replace(/\\/gu, "/"));
 
   if (trimmed.length === 0 || trimmed === "index") {
     return `/docs.md${suffix}`;
@@ -119,7 +119,7 @@ function rewriteDocsHref(href: string, options: RewriteOptions): string {
     return rewritten.startsWith("http") ? rewritten : absolute(siteOrigin, rewritten);
   }
 
-  const sourceDir = path.posix.dirname(`${DOCS_DIR}/${filePath.replace(/\\/g, "/")}`);
+  const sourceDir = path.posix.dirname(`${DOCS_DIR}/${filePath.replace(/\\/gu, "/")}`);
   const resolved = path.posix.normalize(path.posix.join(sourceDir, pathname));
 
   if (!resolved.startsWith(`${DOCS_DIR}/`) && resolved !== DOCS_DIR) {
@@ -144,7 +144,7 @@ function absolutizeDocsLinks(markdown: string, siteOrigin: string): string {
 
   // Match `/docs`, `/docs.md`, and `/docs/<slug>` link targets only.
   return markdown.replace(
-    /\]\(\/docs(?=[).md/#?])([^)\s]*)\)/g,
+    /\]\(\/docs(?=[).md/#?])(?<group1>[^)\s]*)\)/gu,
     (_match, rest: string) => `](${origin}/docs${rest})`,
   );
 }
@@ -176,7 +176,7 @@ function rewriteDocsMarkdownLinks(markdown: string, options: RewriteOptions): st
       continue;
     }
 
-    lines[index] = line.replace(/\]\(([^()\s]+)\)/g, (match, target: string) => {
+    lines[index] = line.replace(/\]\((?<group1>[^()\s]+)\)/gu, (match, target: string) => {
       const rewritten = rewriteDocsHref(target, options);
       return rewritten === target ? match : `](${rewritten})`;
     });

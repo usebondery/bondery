@@ -4,7 +4,7 @@ import { type InlineToken, parseInlineTokens } from "@bondery/helpers";
 import type { Contact } from "@bondery/schemas";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { useCurrentLocale } from "@/components/shell/UserLocaleProvider";
+import { useCurrentLocale } from "@/components/shell/localeProvider";
 import { getContactDetail } from "@/lib/api/domains/contacts";
 import { getGroupDetail } from "@/lib/api/domains/groups";
 import { getInteractionDetail } from "@/lib/api/domains/interactions";

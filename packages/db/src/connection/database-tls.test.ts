@@ -14,18 +14,18 @@ import {
 } from "./database-tls.js";
 
 const DATABASE_SSL_MODE_IS_VERIFY_FULL_RE =
-  /DATABASE_SSL_MODE is verify-full but the database URL has sslmode=disable/;
-const FALLS_BACK_TO_AN_UNENCRYPTED_CONNECTION_RE = /falls back to an unencrypted connection/;
-const MUST_BE_ONE_OF_RE = /must be one of/;
-const NOT_BOTH_RE = /not both/;
-const DOES_NOT_CHECK_IT_RE = /does not check it/;
-const CLIENT_CERTIFICATES_RE = /Client certificates/;
-const KEEP_ONE_RE = /Keep one/;
+  /DATABASE_SSL_MODE is verify-full but the database URL has sslmode=disable/u;
+const FALLS_BACK_TO_AN_UNENCRYPTED_CONNECTION_RE = /falls back to an unencrypted connection/u;
+const MUST_BE_ONE_OF_RE = /must be one of/u;
+const NOT_BOTH_RE = /not both/u;
+const DOES_NOT_CHECK_IT_RE = /does not check it/u;
+const CLIENT_CERTIFICATES_RE = /Client certificates/u;
+const KEEP_ONE_RE = /Keep one/u;
 const DATABASE_SSL_ROOT_CERT_FILE_POINTS_RE =
-  /DATABASE_SSL_ROOT_CERT_FILE points to a file that cannot be read \(.*missing\.crt\)/;
-const DOES_NOT_CONTAIN_PEM_CERTIFICATE_RE = /does not contain a PEM certificate/;
-const NO_ENCRYPTION_RE = /no encryption/;
-const CERTIFICATE_RE = /certificate/i;
+  /DATABASE_SSL_ROOT_CERT_FILE points to a file that cannot be read \(.*missing\.crt\)/u;
+const DOES_NOT_CONTAIN_PEM_CERTIFICATE_RE = /does not contain a PEM certificate/u;
+const NO_ENCRYPTION_RE = /no encryption/u;
+const CERTIFICATE_RE = /certificate/iu;
 
 const URL_BASE = "postgresql://bondery_app:pw@bondery-db:5432/bondery";
 
@@ -136,7 +136,7 @@ describe("resolveDatabaseTls", () => {
 
   it("reads a literal \\n in an inline PEM as a newline", () => {
     const settings = resolveDatabaseTls(URL_BASE, {
-      DATABASE_SSL_ROOT_CERT: PEM.replace(/\n/g, "\\n"),
+      DATABASE_SSL_ROOT_CERT: PEM.replace(/\n/gu, "\\n"),
     });
     assert.deepEqual(settings.ca, { kind: "inline", pem: PEM });
   });

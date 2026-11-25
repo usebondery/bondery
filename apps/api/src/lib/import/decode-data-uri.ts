@@ -2,7 +2,7 @@
  * Decodes a data URI (e.g. from an embedded vCard photo) into a buffer and media type.
  */
 
-const DATA_URI_PATTERN = /^data:([^;]+);base64,(.+)$/;
+const DATA_URI_PATTERN = /^data:(?<group1>[^;]+);base64,(?<group2>.+)$/u;
 export function decodeDataUri(uri: string): { buffer: Buffer; contentType: string } | null {
   const match = uri.match(DATA_URI_PATTERN);
   const [, contentType, base64] = match ?? [];

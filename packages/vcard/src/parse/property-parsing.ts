@@ -126,7 +126,7 @@ export function normalizeMediaUri(property: VCardProperty): VCardMedia {
       pref: parsePref(property),
       source: "legacy-inline",
       types: getParameterValues(property, "TYPE").map((type) => type.toLowerCase()),
-      uri: `data:${normalizedMediaType};base64,${rawValue.replace(/\s+/g, "")}`,
+      uri: `data:${normalizedMediaType};base64,${rawValue.replace(/\s+/gu, "")}`,
     };
   }
 
@@ -211,8 +211,8 @@ export function getParameterValues(property: VCardProperty, name: string): strin
 
 export function decodeTextValue(value: string): string {
   return value
-    .replace(/\\n/gi, "\n")
-    .replace(/\\,/g, ",")
-    .replace(/\\;/g, ";")
-    .replace(/\\\\/g, "\\");
+    .replace(/\\n/giu, "\n")
+    .replace(/\\,/gu, ",")
+    .replace(/\\;/gu, ";")
+    .replace(/\\\\/gu, "\\");
 }

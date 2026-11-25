@@ -60,4 +60,4 @@ export function useDeleteApiKeyMutation() {
   });
 }
 
-export { settingsKeys };
+export { settingsKeys } from "@/lib/query/keys";

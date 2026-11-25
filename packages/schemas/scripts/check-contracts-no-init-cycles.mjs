@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "../../../scripts/check/check-report.mjs";
 
-const TS_TSX_RE = /\.(ts|tsx)$/;
+const TS_TSX_RE = /\.(?<group1>ts|tsx)$/u;
 
 const check = createCheck("check-contracts-no-init-cycles");
 
@@ -53,7 +53,7 @@ function collectSourceFiles(dir) {
 }
 
 function isGuardedFile(relPath) {
-  const normalized = relPath.replace(/\\/g, "/");
+  const normalized = relPath.replace(/\\/gu, "/");
   return GUARDED_RELATIVE_PATHS.some((guarded) => {
     if (guarded.endsWith(".ts")) {
       return normalized === guarded;
@@ -66,7 +66,7 @@ const violations = [];
 
 for (const file of collectSourceFiles(srcRoot)) {
   const rel = relative(srcRoot, file);
-  const normalized = rel.replace(/\\/g, "/");
+  const normalized = rel.replace(/\\/gu, "/");
   const content = readFileSync(file, "utf8");
 
   if (isGuardedFile(rel)) {
@@ -80,7 +80,7 @@ for (const file of collectSourceFiles(srcRoot)) {
       violations.push({ file: rel, forbidden: "#geocode/*" });
     }
 
-    if (normalized.startsWith("entities/") && /\.meta\(\s*\{[^}]*\bexample\s*:/s.test(content)) {
+    if (normalized.startsWith("entities/") && /\.meta\(\s*\{[^}]*\bexample\s*:/su.test(content)) {
       violations.push({
         file: rel,
         forbidden: ".meta({ example }) on entity schemas",

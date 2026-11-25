@@ -2,18 +2,18 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { MCP_SERVER_INSTRUCTIONS } from "./instructions.js";
 
-const SEARCH_CONTACTS_PATTERN = /search_contacts/;
-const GET_CONTACT_PATTERN = /get_contact/;
-const GET_CONTACT_LINKEDIN_PATTERN = /get_contact_linkedin/;
-const UPDATE_CONTACT_PATTERN = /update_contact/;
-const UPDATE_IMPORTANT_DATES_PATTERN = /update_important_dates/;
-const PARTICIPANTIDS_PATTERN = /participantIds/;
-const FULL_ACCESS_PATTERN = /Full access/;
-const OWN_CONTACT_CARD_PATTERN = /own contact card/;
-const DOC_URL_PATTERN = /doc_url/;
-const CREATE_AGENT_FEEDBACK_PATTERN = /create_agent_feedback/;
-const REQUEST_ID_PATTERN = /request_id/;
-const DO_NOT_SEND_CONTACT_DATA_PATTERN = /do not send contact data/i;
+const SEARCH_CONTACTS_PATTERN = /search_contacts/u;
+const GET_CONTACT_PATTERN = /get_contact/u;
+const GET_CONTACT_LINKEDIN_PATTERN = /get_contact_linkedin/u;
+const UPDATE_CONTACT_PATTERN = /update_contact/u;
+const UPDATE_IMPORTANT_DATES_PATTERN = /update_important_dates/u;
+const PARTICIPANTIDS_PATTERN = /participantIds/u;
+const FULL_ACCESS_PATTERN = /Full access/u;
+const OWN_CONTACT_CARD_PATTERN = /own contact card/u;
+const DOC_URL_PATTERN = /doc_url/u;
+const CREATE_AGENT_FEEDBACK_PATTERN = /create_agent_feedback/u;
+const REQUEST_ID_PATTERN = /request_id/u;
+const DO_NOT_SEND_CONTACT_DATA_PATTERN = /do not send contact data/iu;
 
 describe("mCP_SERVER_INSTRUCTIONS", () => {
   it("names the search-then-get path and the write-access split", () => {

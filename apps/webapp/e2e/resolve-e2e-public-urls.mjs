@@ -12,7 +12,7 @@ import { dirname, resolve } from "node:path";
 import tls from "node:tls";
 import { fileURLToPath } from "node:url";
 
-const PATTERN = /^[\d.]+$/;
+const PATTERN = /^[\d.]+$/u;
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 

@@ -1,7 +1,7 @@
 import { expect, test as setup } from "@playwright/test";
 
-const APP_PATH_PREFIX = /\/app\//;
-const OAUTH_ERROR_QUERY = /error=oauth/;
+const APP_PATH_PREFIX = /\/app\//u;
+const OAUTH_ERROR_QUERY = /error=oauth/u;
 
 const authFile = ".auth/user.json";
 

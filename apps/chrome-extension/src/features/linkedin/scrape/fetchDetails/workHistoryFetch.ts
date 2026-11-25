@@ -17,11 +17,11 @@ import {
   voyagerFetch,
 } from "./voyagerShared";
 
-const COLLECTION_WORD_RE = /collection/i;
-const POSITION_WORD_RE = /position/i;
-const GROUP_WORD_RE = /group/i;
-const POSITION_GROUP_WORD_RE = /positiongroup/i;
-const EXPERIENCE_WORD_RE = /experience/i;
+const COLLECTION_WORD_RE = /collection/iu;
+const POSITION_WORD_RE = /position/iu;
+const GROUP_WORD_RE = /group/iu;
+const POSITION_GROUP_WORD_RE = /positiongroup/iu;
+const EXPERIENCE_WORD_RE = /experience/iu;
 function mapPositionEntity(
   pos: VoyagerEntity,
   employmentTypeByUrn?: Map<string, string>,
@@ -127,7 +127,7 @@ function extractPositionsFromApiResponse(
   if (flatPositions.length > 0) {
     extLog.debug(`[linkedin][fetchDetails] Found ${flatPositions.length} flat Position entities`);
     extLog.debug(
-      `[linkedin][fetchDetails] Sample flat position:`,
+      "[linkedin][fetchDetails] Sample flat position:",
       JSON.stringify(flatPositions[0], null, 2),
     );
     return flatPositions
@@ -145,7 +145,7 @@ function extractPositionsFromApiResponse(
 
   if (positionGroups.length > 0) {
     extLog.debug(
-      `[linkedin][fetchDetails] Sample PositionGroup:`,
+      "[linkedin][fetchDetails] Sample PositionGroup:",
       JSON.stringify(positionGroups[0], null, 2),
     );
   }
@@ -204,9 +204,9 @@ function extractPositionsFromApiResponse(
     extLog.debug(`[linkedin][fetchDetails] Checking data.elements (${dataElements.length} items)`);
     for (const el of dataElements) {
       extLog.debug(
-        `[linkedin][fetchDetails] data.element keys:`,
+        "[linkedin][fetchDetails] data.element keys:",
         Object.keys(el),
-        `$type:`,
+        "$type:",
         el.$type,
       );
     }
@@ -292,7 +292,7 @@ function extractNestedPositions(
     if (first) {
       extLog.debug(
         `[linkedin][fetchDetails] Extracted ${positions.length} nested positions from group`,
-        `keys of first:`,
+        "keys of first:",
         Object.keys(first),
       );
     }
@@ -340,7 +340,7 @@ export async function fetchFullWorkHistory(
 
     let untitledFallback: { entries: WorkEntry[]; apiEntities: VoyagerEntity[] } | null = null;
 
-    for (let i = 0; i < responses.length; i++) {
+    for (let i = 0; i < responses.length; i += 1) {
       const data = responses[i];
       const path = paths[i];
       if (!data || !path) {
@@ -384,7 +384,7 @@ export async function fetchFullWorkHistory(
       );
     }
   } else {
-    extLog.warn(`[linkedin][fetchDetails] No profileUrn — cannot call dash API`);
+    extLog.warn("[linkedin][fetchDetails] No profileUrn — cannot call dash API");
   }
 
   // ── Step 3: Fall back to live page position entities ──
@@ -406,7 +406,7 @@ export async function fetchFullWorkHistory(
 
   if (positionEntities.length > 0) {
     extLog.debug(
-      `[linkedin][fetchDetails] Sample position (live):`,
+      "[linkedin][fetchDetails] Sample position (live):",
       JSON.stringify(positionEntities[0], null, 2),
     );
 

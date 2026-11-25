@@ -9,8 +9,8 @@ import { fileURLToPath } from "node:url";
 import { detachPromise } from "@bondery/helpers/async";
 import { checkEnvVariables } from "@bondery/helpers/env";
 import { readBuildMetadata } from "@bondery/helpers/infra/build-metadata";
-import { buildApp } from "./build-app.js";
 import { buildServer } from "./build-server.js";
+
 import { runDevelopmentBootstrap } from "./lib/bootstrap/dev-startup.js";
 import {
   apiCertificateDaysLeft,
@@ -66,4 +66,5 @@ detachPromise(start(), (error) => {
   process.exitCode = 1;
 });
 
-export { buildApp, buildServer };
+export { buildApp } from "./build-app.js";
+export { buildServer } from "./build-server.js";

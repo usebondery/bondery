@@ -36,5 +36,5 @@ function normalizePaginatedList<T, K extends string>(
   };
 }
 
-export type { PaginationMeta };
+export type { PaginationMeta } from "@bondery/schemas";
 export { normalizePaginatedList };

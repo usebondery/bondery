@@ -13,7 +13,7 @@ import {
 } from "@tabler/icons-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useDeferredValue, useEffect, useState, useTransition } from "react";
-import { openNewActivityModal } from "@/app/(app)/app/(shell)/interactions/components/NewActivityModal";
+import { openNewActivityModal } from "@/app/(app)/app/(shell)/interactions/components/openNewActivityModal";
 import ContactsTable, {
   type BulkSelectionAction,
   type ColumnConfig,
@@ -40,8 +40,8 @@ import {
   useGroupMembersInfiniteQuery,
   useGroupMembersQuery,
 } from "@/lib/query/hooks/useGroups";
-import { openAddPeopleToGroupModal } from "../../groups/components/AddPeopleToGroupModal";
 import { GroupCard } from "../../groups/components/GroupCard";
+import { openAddPeopleToGroupModal } from "../../groups/components/openAddPeopleToGroupModal";
 import { useGroupDetailActions } from "./hooks/useGroupDetailActions";
 import { useGroupDetailSelection } from "./hooks/useGroupDetailSelection";
 

@@ -24,7 +24,7 @@ import { oauthProviders } from "./oauth-provider-config.js";
 import { resolveUnconfiguredSocialOAuthProvider } from "./oauth-social-request.js";
 import { isMagicLinkVerifyPath } from "./redact-auth-query.js";
 
-const TRAILING_SLASHES_PATTERN = /\/+$/;
+const TRAILING_SLASHES_PATTERN = /\/+$/u;
 
 const authServerMetadataHandler = oauthProviderAuthServerMetadata(auth);
 const openIdConfigMetadataHandler = oauthProviderOpenIdConfigMetadata(auth);

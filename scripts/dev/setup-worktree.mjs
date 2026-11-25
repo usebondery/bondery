@@ -190,7 +190,7 @@ async function main() {
     const text = readFileSync(targetEnv, "utf-8");
     const values = {};
     for (const key of LOCAL_ONLY_KEYS) {
-      const match = text.match(new RegExp(`^${key}=(.*)$`, "m"));
+      const match = text.match(new RegExp(`^${key}=(.*)$`, "mu"));
       if (match) {
         values[key] = match[1];
       }
@@ -204,7 +204,7 @@ async function main() {
     }
     let text = readFileSync(targetEnv, "utf-8");
     for (const [key, value] of Object.entries(values)) {
-      text = text.replace(new RegExp(`^${key}=.*$`, "m"), () => `${key}=${value}`);
+      text = text.replace(new RegExp(`^${key}=.*$`, "mu"), () => `${key}=${value}`);
     }
     writeFileSync(targetEnv, text);
     console.log(`Kept local values for ${Object.keys(values).join(", ")}`);

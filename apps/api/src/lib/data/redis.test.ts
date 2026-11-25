@@ -8,7 +8,7 @@ import {
   shutdownRedis,
 } from "./redis.js";
 
-const BONDERY_PRIVATE_REDIS_URL_MUST_BE_SET_PATTERN = /BONDERY_PRIVATE_REDIS_URL must be set/;
+const BONDERY_PRIVATE_REDIS_URL_MUST_BE_SET_PATTERN = /BONDERY_PRIVATE_REDIS_URL must be set/u;
 
 describe("redis shared clients", () => {
   it("returns undefined when BONDERY_PRIVATE_REDIS_URL is unset", () => {

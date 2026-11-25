@@ -16,9 +16,9 @@ import {
   verifyEmailTransport,
 } from "../lib/notifications/transporter.js";
 
-const BONDERY_PRIVATE_EMAIL_MUST_BE_SET_PATTERN = /BONDERY_PRIVATE_EMAIL_\* must be set/;
-const SMTP_VERIFY_FAILED_PATTERN = /SMTP verify failed/;
-const PNPM_RUN_START_MAILPIT_PATTERN = /pnpm run start:mailpit/;
+const BONDERY_PRIVATE_EMAIL_MUST_BE_SET_PATTERN = /BONDERY_PRIVATE_EMAIL_\* must be set/u;
+const SMTP_VERIFY_FAILED_PATTERN = /SMTP verify failed/u;
+const PNPM_RUN_START_MAILPIT_PATTERN = /pnpm run start:mailpit/u;
 
 const baseConfig = {
   fromAddress: "robot@usebondery.com",

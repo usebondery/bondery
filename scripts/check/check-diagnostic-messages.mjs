@@ -34,9 +34,9 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { createCheck } from "./check-report.mjs";
 
-const PATTERN_5E5B2227605D_RE = /^["'`]/;
-const ZA_RE = /^[a-zA-Z_$][\w$]*\s*\+/;
-const MJS_GRIT_RE = /\.(?:mjs|grit)$/;
+const PATTERN_5E5B2227605D_RE = /^["'`]/u;
+const ZA_RE = /^[a-zA-Z_$][\w$]*\s*\+/u;
+const MJS_GRIT_RE = /\.(?:mjs|grit)$/u;
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(__dirname, "../..");
@@ -51,7 +51,7 @@ const SELF_PATH = "check-diagnostic-messages.mjs";
  * The opt-out for a message whose remedy is built in an interpolated value. The note after the
  * colon names where the remedy lives, so a reviewer can check the claim.
  */
-const REMEDY_IN_VALUE = /diagnostic-message:\s*remedy-in-value\s+(\S.*)/;
+const REMEDY_IN_VALUE = /diagnostic-message:\s*remedy-in-value\s+(?<group1>\S.*)/u;
 
 /**
  * An imperative verb at the start of the message or of any clause. The clause anchor keeps a noun
@@ -66,30 +66,30 @@ const REMEDY_VERB = new RegExp(
     "stage|raise|tighten|correct|shorten|extend|include|omit|say|drop|strip|escape|encode|" +
     "decode|sort|filter|join|fill"
   })\\b`,
-  "i",
+  "iu",
 );
 
 /** A modal that states the required end state, which is a remedy phrased as a constraint. */
-const REMEDY_MODAL = /\b(?:must|expected|is required|are required|has to|have to)\b/i;
+const REMEDY_MODAL = /\b(?:must|expected|is required|are required|has to|have to)\b/iu;
 
 /** An inline-code token: the identifier, path, or command the reader should use. */
-const INLINE_CODE = /`[^`\n]+`/;
+const INLINE_CODE = /`[^`\n]+`/u;
 
 /** A repository path, or a filename with an extension a reader can open. */
 const REPO_PATH =
-  /(?:^|[\s(:])(?:apps|packages|docs|scripts|biome|deploy|llm-plugins|\.agents)\/|\.(?:ts|tsx|mts|cts|js|jsx|mjs|cjs|json|jsonc|mdx|md|yaml|yml|prisma|sql|sh|grit|css|html)\b/;
+  /(?:^|[\s(:])(?:apps|packages|docs|scripts|biome|deploy|llm-plugins|\.agents)\/|\.(?:ts|tsx|mts|cts|js|jsx|mjs|cjs|json|jsonc|mdx|md|yaml|yml|prisma|sql|sh|grit|css|html)\b/u;
 
 /** A command the reader can run. */
-const COMMAND = /\b(?:pnpm|node|git|docker|turbo)\s+[\w:.-]/;
+const COMMAND = /\b(?:pnpm|node|git|docker|turbo)\s+[\w:.-]/u;
 
 /** A module constant, such as DEV_URLS or UPLOAD_LIMITS, which names the place to change. */
-const CONSTANT = /\b[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+\b/;
+const CONSTANT = /\b[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+\b/u;
 
 /** A camelCase symbol, such as allowedDevOrigins, which names the place to change. */
-const CAMEL_SYMBOL = /\b[a-z][a-zA-Z0-9]*[A-Z][a-zA-Z0-9]*\b/;
+const CAMEL_SYMBOL = /\b[a-z][a-zA-Z0-9]*[A-Z][a-zA-Z0-9]*\b/u;
 
 /** A function or method call, such as sanitizeNotesHtml(), which names what to call. */
-const SYMBOL_CALL = /\b[A-Za-z_$][\w$.]*\(\)/;
+const SYMBOL_CALL = /\b[A-Za-z_$][\w$.]*\(\)/u;
 
 /**
  * Calls whose first argument is a diagnostic message shown to a reader.
@@ -307,7 +307,7 @@ export function extractArguments(source, callee) {
  */
 export function findMessages(source, path) {
   if (path.endsWith(".grit")) {
-    return [...source.matchAll(/message="([^"]*)"/g)].map((match) => ({
+    return [...source.matchAll(/message="(?<group1>[^"]*)"/gu)].map((match) => ({
       line: source.slice(0, match.index).split("\n").length,
       text: match[1],
     }));
@@ -323,7 +323,7 @@ export function findMessages(source, path) {
       seen.add(offset);
       messages.push({
         line: source.slice(0, offset).split("\n").length,
-        text: literalText(argument).replace(/\s+/g, " ").trim(),
+        text: literalText(argument).replace(/\s+/gu, " ").trim(),
       });
     }
   }

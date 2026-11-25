@@ -17,20 +17,20 @@ import { consumeStepUpToken, mintStepUpToken } from "../lib/auth/step-up-redis.j
 import { requireRedisCommands, shutdownRedis } from "../lib/data/redis.js";
 import { loadTestEnv } from "./load-test-env.js";
 
-const AUTH_START_PATTERN = /\/auth\/start/;
-const NEWLINE_OR_COMMA_PATTERN = /[\n,]/;
-const CALLBACKURL_PATTERN = /callbackURL=/;
-const CONFIRM_ACTION_DELETE_ACCOUNT_PATTERN = /\/confirm\?action=delete_account/;
-const LOGIN_PATTERN = /\/login/;
+const AUTH_START_PATTERN = /\/auth\/start/u;
+const NEWLINE_OR_COMMA_PATTERN = /[\n,]/u;
+const CALLBACKURL_PATTERN = /callbackURL=/u;
+const CONFIRM_ACTION_DELETE_ACCOUNT_PATTERN = /\/confirm\?action=delete_account/u;
+const LOGIN_PATTERN = /\/login/u;
 const CONFIRM_ACTION_DELETE_ACCOUNT_HAS_RETURNED_PATTERN =
-  /\/confirm\?action=delete_account&has_returned=1/;
+  /\/confirm\?action=delete_account&has_returned=1/u;
 
 loadTestEnv();
 
 const { createTestApp } = await import("./create-test-app.js");
 const { setMagicLinkSendCaptureForTests } = await import("../lib/auth/send-magic-link.js");
 
-const WEBAPP_URL = (process.env["BONDERY_PUBLIC_WEBAPP_URL"] ?? "").replace(/\/+$/, "");
+const WEBAPP_URL = (process.env["BONDERY_PUBLIC_WEBAPP_URL"] ?? "").replace(/\/+$/u, "");
 const LOGIN_CALLBACK_URL = `${WEBAPP_URL}/auth/start`;
 const LOGIN_ERROR_CALLBACK_URL = `${WEBAPP_URL}/login`;
 const RECONFIRM_CALLBACK_URL = `${WEBAPP_URL}/app/settings?action=delete_account`;

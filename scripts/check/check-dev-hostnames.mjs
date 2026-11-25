@@ -21,8 +21,8 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "./check-report.mjs";
 
-const ALLOWEDDEVORIGINS_RE = /allowedDevOrigins:\s*\[([\s\S]*?)\]/;
-const ENV_EXAMPLE_RE = /\.env.*\.example$/;
+const ALLOWEDDEVORIGINS_RE = /allowedDevOrigins:\s*\[(?<group1>[\s\S]*?)\]/u;
+const ENV_EXAMPLE_RE = /\.env.*\.example$/u;
 
 const check = createCheck("check-dev-hostnames");
 
@@ -51,9 +51,9 @@ function read(filePath) {
 function checkDevUrls() {
   const filePath = join(ROOT, "packages/schemas/src/constants/dev-ports.ts");
   const source = read(filePath);
-  const declared = [...source.matchAll(/"https:\/\/([a-z0-9.-]*usebondery\.test)"/gi)].map(
-    (match) => match[1],
-  );
+  const declared = [
+    ...source.matchAll(/"https:\/\/(?<group1>[a-z0-9.-]*usebondery\.test)"/giu),
+  ].map((match) => match[1]);
   for (const hostname of declared) {
     if (!EXPECTED_HOSTS.includes(hostname)) {
       check.add(
@@ -110,7 +110,7 @@ function checkAllowedDevOrigins() {
       );
       continue;
     }
-    const entries = [...(match[1] ?? "").matchAll(/"([^"]+)"/g)].map((entry) => entry[1]);
+    const entries = [...(match[1] ?? "").matchAll(/"(?<group1>[^"]+)"/gu)].map((entry) => entry[1]);
     for (const hostname of EXPECTED_HOSTS) {
       // Mailpit is served by Docker, not by either Next.js app.
       if (hostname.startsWith("mail.")) {
@@ -201,7 +201,7 @@ function checkEnvExamples() {
         continue;
       }
       const source = read(fullPath);
-      for (const match of source.matchAll(/https?:\/\/[a-z0-9.-]*usebondery\.test/gi)) {
+      for (const match of source.matchAll(/https?:\/\/[a-z0-9.-]*usebondery\.test/giu)) {
         const { hostname } = new URL(match[0]);
         if (!EXPECTED_HOSTS.includes(hostname) && !seen.has(`${repoPath(fullPath)}:${hostname}`)) {
           seen.add(`${repoPath(fullPath)}:${hostname}`);

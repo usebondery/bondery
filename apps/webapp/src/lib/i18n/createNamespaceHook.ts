@@ -6,13 +6,13 @@ import { useT } from "next-i18next/client";
  * resolves keys only within that namespace catalog.
  */
 export function createNamespaceHook<
-  NS extends NamespaceKey,
-  const Prefix extends BranchPrefixFor<NS> | undefined = undefined,
->(namespace: NS, keyPrefix?: Prefix): TranslateFn<NS, Prefix> {
+  Namespace extends NamespaceKey,
+  const Prefix extends BranchPrefixFor<Namespace> | undefined = undefined,
+>(namespace: Namespace, keyPrefix?: Prefix): TranslateFn<Namespace, Prefix> {
   // biome-ignore lint/correctness/useHookAtTopLevel: factory returns a custom hook
   const { t } = useT(
     namespace as Parameters<typeof useT>[0],
     keyPrefix ? { keyPrefix } : undefined,
   );
-  return t as TranslateFn<NS, Prefix>;
+  return t as TranslateFn<Namespace, Prefix>;
 }

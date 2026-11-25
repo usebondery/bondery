@@ -46,7 +46,7 @@ import {
   useCreateInteractionMutation,
   useUpdateInteractionMutation,
 } from "@/lib/query/hooks/useInteractions";
-import { openAddContactModal } from "../../people/components/modals/AddContactModal";
+import { openAddContactModal } from "../../people/components/modals/openAddContactModal";
 import classes from "./NewActivityModal.module.css";
 
 type ActivityParticipantRef = string | { id: string };

@@ -111,7 +111,7 @@ export function ContactPhonesSection({
   };
 
   const handlePhoneChange = (index: number, value: string) => {
-    const rawValue = value.replace(/\D/g, "");
+    const rawValue = value.replace(/\D/gu, "");
     const parsed = parsePhoneNumber(value);
     const changes =
       parsed && value.includes("+")
@@ -121,7 +121,7 @@ export function ContactPhonesSection({
   };
 
   const handleDraftPhoneChange = (value: string) => {
-    const rawValue = value.replace(/\D/g, "");
+    const rawValue = value.replace(/\D/gu, "");
     const parsed = parsePhoneNumber(value);
 
     if (parsed && value.includes("+")) {

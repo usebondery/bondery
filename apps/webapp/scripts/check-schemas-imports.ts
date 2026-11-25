@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "../../../scripts/check/check-report.mjs";
 
-const JS_TS_EXTENSION = /\.(tsx?|jsx?)$/;
+const JS_TS_EXTENSION = /\.(?<group1>tsx?|jsx?)$/u;
 
 const check = createCheck("check-schemas-imports");
 
@@ -20,19 +20,19 @@ type Violation = { file: string; rule: string; detail: string };
 const FORBIDDEN_RUNTIME_IMPORTS: Array<{ pattern: RegExp; rule: string; detail: string }> = [
   {
     detail: "Use @bondery/schemas for types/schemas; OpenAPI fixtures are API-only",
-    pattern: /import\s+(?!type\s)\{[^}]*\}\s*from\s*["']@bondery\/schemas\/openapi(?:\/|["'])/,
+    pattern: /import\s+(?!type\s)\{[^}]*\}\s*from\s*["']@bondery\/schemas\/openapi(?:\/|["'])/u,
     rule: "no-openapi-runtime-import",
   },
   {
     detail: "registerOpenApiComponentSchemas is API-only",
     pattern:
-      /import\s+(?!type\s)\{[^}]*registerOpenApiComponentSchemas[^}]*\}\s*from\s*["']@bondery\/schemas["']/,
+      /import\s+(?!type\s)\{[^}]*registerOpenApiComponentSchemas[^}]*\}\s*from\s*["']@bondery\/schemas["']/u,
     rule: "no-openapi-registry-import",
   },
   {
     detail: "EXAMPLE_* fixtures must not be imported from the root schemas barrel",
     pattern:
-      /import\s+(?!type\s)\{[^}]*\bEXAMPLE_[A-Z0-9_]+\b[^}]*\}\s*from\s*["']@bondery\/schemas["']/,
+      /import\s+(?!type\s)\{[^}]*\bEXAMPLE_[A-Z0-9_]+\b[^}]*\}\s*from\s*["']@bondery\/schemas["']/u,
     rule: "no-example-from-root-barrel",
   },
 ];

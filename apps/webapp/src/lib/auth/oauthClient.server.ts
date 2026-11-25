@@ -9,7 +9,7 @@ import {
   resolveServerApiBaseUrl,
 } from "@/lib/api/resolveServerApiUrl";
 
-const TRAILING_SLASHES = /\/+$/;
+const TRAILING_SLASHES = /\/+$/u;
 
 // `api:access` is the scope tied to the API's single canonical protected
 // resource (see apps/api/src/lib/auth/index.ts) — omitting it, or omitting

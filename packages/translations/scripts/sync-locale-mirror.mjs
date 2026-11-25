@@ -95,7 +95,7 @@ function main() {
       // An englishOnly namespace has no file in other locales. Mirror the source locale's copy so
       // i18next-cli sees a complete tree. Nothing is written back to src/locales.
       const sourceLocale = localesForNamespace(entry).includes(locale) ? locale : SOURCE_LOCALE;
-      const source = path.join(localesRoot, sourceLocale, entry.path.replace(/\\/g, "/"));
+      const source = path.join(localesRoot, sourceLocale, entry.path.replace(/\\/gu, "/"));
       const target = path.join(mirrorRoot, locale, `${namespace}.json`);
 
       if (!fs.existsSync(source)) {

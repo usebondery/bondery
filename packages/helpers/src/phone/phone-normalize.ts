@@ -1,7 +1,7 @@
 import { countryCodes } from "#phone/country-codes.js";
 import { getCountryCodeForTimezone } from "#phone/phone-default-country.js";
 
-const PATTERN_5E30302B_RE = /^00+/;
+const PATTERN_5E30302B_RE = /^00+/u;
 
 type NormalizedPhone = {
   identityKey: string;
@@ -58,7 +58,7 @@ type DialCodeEntry = {
 };
 
 function digitsOnly(value: string): string {
-  return value.replace(/\D/g, "");
+  return value.replace(/\D/gu, "");
 }
 
 /** Canonical E.164-style prefix for storage and matching (`+1-268` → `+1268`). */

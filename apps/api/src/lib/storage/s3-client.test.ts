@@ -27,15 +27,15 @@ import {
   warnOnInsecureProductionStorage,
 } from "./storage-tls.js";
 
-const CERTIFICATE_PATTERN = /certificate/i;
-const DOES_NOT_USE_TLS_PATTERN = /does not use TLS/;
-const CANNOT_READ_PATTERN = /cannot read/;
-const NO_PEM_CERTIFICATE_PATTERN = /no PEM certificate/;
-const MUST_START_WITH_HTTPS_PATTERN = /must start with https/;
-const NOT_A_VALID_URL_PATTERN = /not a valid URL/;
-const TLSV1_PATTERN = /^TLSv1\.[23]$/;
-const CLIENT_CERT_REFUSED_RE = /certificate|socket hang up|handshake/i;
-const PAIR_REQUIRED_RE = /Set both/;
+const CERTIFICATE_PATTERN = /certificate/iu;
+const DOES_NOT_USE_TLS_PATTERN = /does not use TLS/u;
+const CANNOT_READ_PATTERN = /cannot read/u;
+const NO_PEM_CERTIFICATE_PATTERN = /no PEM certificate/u;
+const MUST_START_WITH_HTTPS_PATTERN = /must start with https/u;
+const NOT_A_VALID_URL_PATTERN = /not a valid URL/u;
+const TLSV1_PATTERN = /^TLSv1\.[23]$/u;
+const CLIENT_CERT_REFUSED_RE = /certificate|socket hang up|handshake/iu;
+const PAIR_REQUIRED_RE = /Set both/u;
 
 const CREDENTIALS = { accessKeyId: "test", region: "eu-central-1", secretAccessKey: "test" };
 

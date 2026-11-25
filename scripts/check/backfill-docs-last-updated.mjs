@@ -17,10 +17,10 @@ import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const PATTERN_5C723F5C6E_RE = /\r?\n/;
-const LAST_UPDATED_RE_2 = /^last_updated\s*:/;
-const LAST_UPDATED_RE = /^last_updated\s*:/m;
-const PATTERN_5E2D2D2D24_RE = /^---$/m;
+const PATTERN_5C723F5C6E_RE = /\r?\n/u;
+const LAST_UPDATED_RE_2 = /^last_updated\s*:/u;
+const LAST_UPDATED_RE = /^last_updated\s*:/mu;
+const PATTERN_5E2D2D2D24_RE = /^---$/mu;
 
 function main() {
   const __dirname = dirname(fileURLToPath(import.meta.url));

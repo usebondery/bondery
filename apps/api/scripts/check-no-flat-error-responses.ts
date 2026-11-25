@@ -21,15 +21,15 @@ const scanRoots = [
 const FLAT_PATTERNS: Array<{ name: string; regex: RegExp }> = [
   {
     name: "top-level { code, error } object",
-    regex: /\{\s*code:\s*["'][a-z0-9_]+["'],\s*error:\s*["']/,
+    regex: /\{\s*code:\s*["'][a-z0-9_]+["'],\s*error:\s*["']/u,
   },
   {
     name: "reply.send({ error: string })",
-    regex: /\.send\(\{\s*error:\s*["'`]/,
+    regex: /\.send\(\{\s*error:\s*["'`]/u,
   },
   {
     name: "Response.json({ code: ... })",
-    regex: /Response\.json\(\s*\{\s*code:\s*["']/,
+    regex: /Response\.json\(\s*\{\s*code:\s*["']/u,
   },
 ];
 
@@ -52,10 +52,10 @@ function collectTsFiles(dir: string): string[] {
 
 for (const root of scanRoots) {
   for (const filePath of collectTsFiles(root)) {
-    const rel = relative(repoRoot, filePath).replace(/\\/g, "/");
+    const rel = relative(repoRoot, filePath).replace(/\\/gu, "/");
     const lines = readFileSync(filePath, "utf8").split("\n");
 
-    for (let i = 0; i < lines.length; i++) {
+    for (let i = 0; i < lines.length; i += 1) {
       const line = lines[i];
       const trimmed = line.trim();
       if (trimmed.startsWith("//") || trimmed.startsWith("*")) {

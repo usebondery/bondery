@@ -15,7 +15,7 @@ type UpgradeButtonProps = Omit<ButtonProps, "onClick" | "loading"> & {
 
 export function UpgradeButton({ onSuccess, ...rest }: UpgradeButtonProps) {
   const t = useCheckoutTranslations();
-  const checkoutMountId = `stripe-embedded-checkout-${useId().replace(/:/g, "")}`;
+  const checkoutMountId = `stripe-embedded-checkout-${useId().replace(/:/gu, "")}`;
   const { data: subscriptionStatus } = useSubscriptionQuery();
   const { closeCheckout, openCheckout, isLoading, isModalOpen } = useEmbeddedCheckout({
     checkoutMountId,

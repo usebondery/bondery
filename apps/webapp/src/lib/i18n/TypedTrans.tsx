@@ -6,11 +6,11 @@ import type { ReactElement } from "react";
 import { transT } from "@/lib/i18n/transT";
 
 type TypedTransProps<
-  NS extends NamespaceKey,
+  Namespace extends NamespaceKey,
   Prefix extends string | undefined,
-  Key extends Parameters<TranslateFn<NS, Prefix>>[0],
+  Key extends Parameters<TranslateFn<Namespace, Prefix>>[0],
 > = {
-  t: TranslateFn<NS, Prefix>;
+  t: TranslateFn<Namespace, Prefix>;
   i18nKey: Key;
   components?: Record<string, ReactElement>;
   values?: Record<string, unknown>;
@@ -20,9 +20,9 @@ type TypedTransProps<
  * Namespace-scoped `<Trans>` wrapper that preserves typed translation keys from our hooks.
  */
 export function TypedTrans<
-  NS extends NamespaceKey,
+  Namespace extends NamespaceKey,
   Prefix extends string | undefined,
-  Key extends Parameters<TranslateFn<NS, Prefix>>[0],
->({ t, i18nKey, components, values }: TypedTransProps<NS, Prefix, Key>) {
+  Key extends Parameters<TranslateFn<Namespace, Prefix>>[0],
+>({ t, i18nKey, components, values }: TypedTransProps<Namespace, Prefix, Key>) {
   return <Trans components={components} i18nKey={i18nKey as never} t={transT(t)} values={values} />;
 }

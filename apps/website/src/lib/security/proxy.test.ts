@@ -3,8 +3,8 @@ import { describe, it } from "node:test";
 import { NextRequest } from "next/server";
 import { config, proxy } from "../../proxy.js";
 
-const WHITESPACE_RE = /\s+/;
-const CSP_NONCE_RE = /'nonce-[^']+'/;
+const WHITESPACE_RE = /\s+/u;
+const CSP_NONCE_RE = /'nonce-[^']+'/u;
 function requestFor(pathname: string): NextRequest {
   return new NextRequest(new URL(pathname, "https://www.example.test"));
 }

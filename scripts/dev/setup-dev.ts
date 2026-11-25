@@ -29,7 +29,7 @@ const INVENTABLE_AUTH = [
 ] as const;
 
 function generatePostgresPassword(): string {
-  return randomBytes(24).toString("base64").replace(/[/+=]/g, "").slice(0, 32);
+  return randomBytes(24).toString("base64").replace(/[/+=]/gu, "").slice(0, 32);
 }
 
 function isPostgresPasswordPlaceholder(value: string | undefined): boolean {
@@ -44,7 +44,7 @@ function run(cmd: string) {
 }
 
 function readEnvAssignment(content: string, key: string): string | undefined {
-  const match = content.match(new RegExp(`^${key}=(.*)$`, "m"));
+  const match = content.match(new RegExp(`^${key}=(.*)$`, "mu"));
   if (!match) {
     return undefined;
   }
@@ -152,7 +152,7 @@ function seedPostgresTls(envPath: string) {
 const LOCAL_S3_ENDPOINT = "https://127.0.0.1:8443";
 const LEGACY_LOCAL_S3_ENDPOINTS = new Set(["http://127.0.0.1:8333", "http://localhost:8333"]);
 /** The retired plaintext gateway on any host, including a Tailscale name from phone testing. */
-const LEGACY_PRIVATE_S3_ENDPOINT = /^http:\/\/[^/]+:8333\/?$/;
+const LEGACY_PRIVATE_S3_ENDPOINT = /^http:\/\/[^/]+:8333\/?$/u;
 
 /** True when the endpoint is the retired plaintext gateway rather than a deliberate override. */
 function isLegacyPrivateS3Endpoint(endpoint: string): boolean {
@@ -210,7 +210,7 @@ const LEGACY_LOCAL_INTERNAL_API_URLS = new Set([
 ]);
 const LOCAL_PUBLIC_API_URL = "https://api.usebondery.test";
 /** The old plaintext API port, on loopback, a LAN IP, or a Tailscale IP or name (phone testing). */
-const LEGACY_PUBLIC_API_URL = /^http:\/\/[^/]+:26631\/?$/;
+const LEGACY_PUBLIC_API_URL = /^http:\/\/[^/]+:26631\/?$/u;
 
 /**
  * Public reads through the local gateway. Browsers load avatars and logos from this URL, so it
@@ -219,7 +219,7 @@ const LEGACY_PUBLIC_API_URL = /^http:\/\/[^/]+:26631\/?$/;
  */
 const LOCAL_PUBLIC_STORAGE_URL = "http://127.0.0.1:8333";
 /** The retired plaintext gateway, on loopback, a LAN IP, or a Tailscale name (phone testing). */
-const LEGACY_PUBLIC_STORAGE_URL = /^http:\/\/[^/]+:8333\/?$/;
+const LEGACY_PUBLIC_STORAGE_URL = /^http:\/\/[^/]+:8333\/?$/u;
 /** The mutual-TLS gateway. Anonymous browser reads are refused there, so it is never a public URL. */
 const MUTUAL_TLS_GATEWAY_URLS = new Set(["https://127.0.0.1:8443", "https://localhost:8443"]);
 

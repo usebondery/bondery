@@ -5,7 +5,7 @@ import { discoveryCorsPreflight, withDiscoveryCors } from "@/lib/discovery-cors"
 import websitePackage from "../../../../package.json" with { type: "json" };
 import catalog from "./manifest.json" with { type: "json" };
 
-const TRAILING_SLASHES_RE = /\/+$/;
+const TRAILING_SLASHES_RE = /\/+$/u;
 /** ARD manifest schema version (not the Bondery app version). */
 const ARD_SPEC_VERSION = "1.0" as const;
 

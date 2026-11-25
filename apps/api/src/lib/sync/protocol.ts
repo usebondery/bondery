@@ -8,7 +8,7 @@ import {
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { URLS } from "../platform/config.js";
 
-const TRAILING_SLASH_PATTERN = /\/$/;
+const TRAILING_SLASH_PATTERN = /\/$/u;
 
 function websiteBaseUrl(): string {
   return (URLS.website ?? "https://usebondery.com").replace(TRAILING_SLASH_PATTERN, "");

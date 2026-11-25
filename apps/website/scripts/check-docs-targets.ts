@@ -5,7 +5,7 @@ import { glob } from "tinyglobby";
 const ROOT = join(process.cwd(), "../..");
 const DOCS_DIR = join(ROOT, "docs");
 
-const FENCE = /^\s*(`{3,}|~{3,})/;
+const FENCE = /^\s*(?<group1>`{3,}|~{3,})/u;
 
 type Broken = { file: string; line: number; target: string; resolved: string };
 
@@ -102,9 +102,9 @@ async function main() {
 
         if (!exists(resolved)) {
           broken.push({
-            file: relative(ROOT, file).replace(/\\/g, "/"),
+            file: relative(ROOT, file).replace(/\\/gu, "/"),
             line: index + 1,
-            resolved: relative(ROOT, resolved).replace(/\\/g, "/"),
+            resolved: relative(ROOT, resolved).replace(/\\/gu, "/"),
             target: raw,
           });
         }

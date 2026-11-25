@@ -35,7 +35,7 @@ import { missingTailscaleHostMessage, resolveTailscaleDeviceUrl } from "./tailsc
 const HTTPS_PREFIX = "https://";
 const TLD = "test";
 const PORTLESS_PROXY_PORT = 443;
-const IPV4_RE = /^\d{1,3}(\.\d{1,3}){3}$/;
+const IPV4_RE = /^\d{1,3}(?<group1>\.\d{1,3}){3}$/u;
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const OUTPUT_PATH = join(repoRoot, ".temp/connect-laptop.ps1");

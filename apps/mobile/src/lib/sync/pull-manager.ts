@@ -316,7 +316,8 @@ function stopSafetyTimer(): void {
 }
 
 async function startPullSync(): Promise<void> {
-  const request = ++lifecycleRequest;
+  lifecycleRequest += 1;
+  const request = lifecycleRequest;
   await stopPullRuntime();
   if (request !== lifecycleRequest) {
     return;
@@ -398,7 +399,7 @@ function resumePullSync(): void {
   detachPromise(startPullSync());
 }
 
-export type { SyncPullReason };
+export type { SyncPullReason } from "./pull-types";
 export {
   bootstrapSync,
   getHasInitialSyncSnapshot,

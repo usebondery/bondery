@@ -23,7 +23,7 @@ export default defineConfig({
   projects: [
     {
       name: "hero-shot",
-      testMatch: /hero-shot\.spec\.ts/,
+      testMatch: /hero-shot\.spec\.ts/u,
     },
   ],
   reporter: [["list"]],

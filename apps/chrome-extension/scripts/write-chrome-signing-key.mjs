@@ -1,6 +1,6 @@
 import { writeFileSync } from "node:fs";
 
-const PEM_PRIVATE_KEY_BEGIN_RE = /^-----BEGIN [\w ]*PRIVATE KEY-----/m;
+const PEM_PRIVATE_KEY_BEGIN_RE = /^-----BEGIN [\w ]*PRIVATE KEY-----/mu;
 function main() {
   const [, , out] = process.argv;
   if (!out) {

@@ -126,7 +126,7 @@ export {
   type BrandTileLinkProps,
 } from "#nextjs/BrandTileLink/index.js";
 export { ButtonLink, type ButtonLinkProps } from "#nextjs/ButtonLink/index.js";
-export { type AppHref, hrefAssert } from "#nextjs/NextLink.js";
+export { type AppHref, hrefAssert } from "#nextjs/nextLink.js";
 export { PersonAvatar } from "#nextjs/PersonAvatar/index.js";
 export { PersonAvatarTooltip } from "#nextjs/PersonAvatar/PersonAvatarTooltip.js";
 export { PersonAvatarGroup } from "#nextjs/PersonAvatarGroup/index.js";

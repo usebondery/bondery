@@ -1,6 +1,6 @@
 "use client";
 
-import { PersonChip } from "@bondery/mantine-next/PersonChip/PersonChip";
+import { PersonChip } from "@bondery/mantine-next/PersonChip/personChip";
 import { Divider, Group, Paper, Stack, Text } from "@mantine/core";
 import type { ReactElement } from "react";
 

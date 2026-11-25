@@ -10,11 +10,11 @@ import {
 } from "../sduiProfile";
 import type { VoyagerEntity } from "./voyagerShared";
 
-const PROFILE_URN_KIND_RE = /fsd_profile|fs_profile/;
-const PRIVACY_OR_PROFILE_CARD_RE = /PrivacySettings|ProfileCard/i;
-const PRIVACY_PROFILE_OR_MINI_RE = /PrivacySettings|ProfileCard|MiniProfile/i;
-const PRIVACY_SETTINGS_RE = /PrivacySettings/i;
-const PROFILE_ABOUT_RE = /profile\.About|ProfileAbout|AboutTopLevel/i;
+const PROFILE_URN_KIND_RE = /fsd_profile|fs_profile/u;
+const PRIVACY_OR_PROFILE_CARD_RE = /PrivacySettings|ProfileCard/iu;
+const PRIVACY_PROFILE_OR_MINI_RE = /PrivacySettings|ProfileCard|MiniProfile/iu;
+const PRIVACY_SETTINGS_RE = /PrivacySettings/iu;
+const PROFILE_ABOUT_RE = /profile\.About|ProfileAbout|AboutTopLevel/iu;
 /** How deep `findExpandableText` descends into nested Voyager objects. */
 const MAX_EXPANDABLE_TEXT_DEPTH = 8;
 

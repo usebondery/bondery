@@ -18,7 +18,7 @@ import { createCliLogger } from "@bondery/helpers/cli";
 import { getSyncableEnvVars, parseEnvContent } from "../../packages/helpers/src/env/index.ts";
 import { upsertEnvAssignments } from "./env-upsert.js";
 
-const PATTERN_5C723F5C6E_RE = /\r?\n/;
+const PATTERN_5C723F5C6E_RE = /\r?\n/u;
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, "../..");

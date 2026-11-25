@@ -8,7 +8,7 @@
  * (type-stripped `.ts`); they must not copy these regexes.
  */
 
-const PATTERN_5E76285C642B_RE = /^v(\d+\.\d+\.\d+)$/;
+const PATTERN_5E76285C642B_RE = /^v(?<group1>\d+\.\d+\.\d+)$/u;
 
 type CalverVersion = {
   major: number;
@@ -18,8 +18,9 @@ type CalverVersion = {
   rc: number | null;
 };
 
-const CALVER_RE = /^(?:v)?(\d+)\.(\d+)\.(\d+)(?:-rc\.([1-9]\d*))?$/;
-const CHROME_FOUR_PART_RE = /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/;
+const CALVER_RE =
+  /^(?:v)?(?<group1>\d+)\.(?<group2>\d+)\.(?<group3>\d+)(?:-rc\.(?<group4>[1-9]\d*))?$/u;
+const CHROME_FOUR_PART_RE = /^(?<group1>\d+)\.(?<group2>\d+)\.(?<group3>\d+)\.(?<group4>\d+)$/u;
 
 function toInt(value: string): number {
   return Number.parseInt(value, 10);

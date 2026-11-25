@@ -1,6 +1,6 @@
 import type { SyncWakeEvent } from "@bondery/schemas/sync";
 
-export type { SyncWakeEvent };
+export type { SyncWakeEvent } from "@bondery/schemas/sync";
 
 export interface SyncWakeBus {
   publish: (userId: string, event: SyncWakeEvent) => Promise<void>;

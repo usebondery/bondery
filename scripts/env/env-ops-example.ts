@@ -3,7 +3,6 @@ import { join } from "node:path";
 import type { createCliLogger } from "@bondery/helpers/cli";
 import { type EnvFileVar, formatEnvFile, OPS_GENERATED_HEADER } from "./env-file-format.js";
 import {
-  collectOpsSyncRows,
   ENV_MANIFEST,
   OPS_GROUP_GUIDES,
   resolveExampleValue,
@@ -36,8 +35,6 @@ export function collectOpsExampleRows(packageVersion: string, infraPinVersion = 
   return sortOpsExampleRows(rows);
 }
 
-export { collectOpsSyncRows };
-
 export function writeOpsExample(
   repoRoot: string,
   dryRun: boolean,
@@ -57,3 +54,5 @@ export function writeOpsExample(
   }
   log.info(`${dryRun ? "Would write" : "Wrote"} ${opsPath}`);
 }
+
+export { collectOpsSyncRows } from "./env-manifest.ts";

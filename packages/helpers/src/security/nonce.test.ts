@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { createNonce } from "./nonce.js";
 
-const ZA_Z0_RE = /^[A-Za-z0-9+/]+=*$/;
+const ZA_Z0_RE = /^[A-Za-z0-9+/]+=*$/u;
 
 describe("createNonce", () => {
   it("returns a base64-encoded UUID", () => {

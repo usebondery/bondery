@@ -3,7 +3,7 @@ import { intlTagForLocale } from "./supported-locale/schema.js";
 
 const DATE_FORMAT_VALUES = ["locale", "mdy", "dmy", "ymd"] as const;
 const TIME_FORMAT_VALUES = ["24h", "12h"] as const;
-const AMBIGUOUS_NUMERIC_DATE = /^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$/;
+const AMBIGUOUS_NUMERIC_DATE = /^(?<group1>\d{1,2})[/.-](?<group2>\d{1,2})[/.-](?<group3>\d{4})$/u;
 
 type NumericDateOrder = "mdy" | "dmy" | "ymd";
 

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { clipEmailPreview, EMAIL_PREVIEW_MAX_CHARS } from "./chrome.js";
 
-const PATTERN_5E6120622B_RE = /^a b+/;
+const PATTERN_5E6120622B_RE = /^a b+/u;
 
 describe("clipEmailPreview", () => {
   it("keeps inbox preview at or under 90 characters", () => {

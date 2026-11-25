@@ -7,7 +7,7 @@ import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const BEFORE_INITIALIZATION_I = /before initialization/i;
+const BEFORE_INITIALIZATION_I = /before initialization/iu;
 
 async function main() {
   const __dirname = dirname(fileURLToPath(import.meta.url));

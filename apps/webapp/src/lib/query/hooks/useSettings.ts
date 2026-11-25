@@ -2,7 +2,7 @@
 
 import type { ImportFollowupPlatform } from "@bondery/schemas";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { applyUserLocaleFromRef } from "@/components/shell/UserLocaleProvider";
+import { applyUserLocaleFromRef } from "@/components/shell/localeProvider";
 import { applyUserSessionFromRef } from "@/components/shell/UserSessionProvider";
 import type { UpdateSettingsPatch } from "@/lib/api/domains/settings";
 import {

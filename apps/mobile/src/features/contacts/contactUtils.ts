@@ -1,5 +1,5 @@
 import { abbreviateLocationCountry, formatAddressLabel } from "@bondery/helpers/address";
-import { formatContactName } from "@bondery/helpers/contact";
+
 import { formatUserDate } from "@bondery/helpers/date";
 import { combinePhoneNumber, formatPhoneNumber } from "@bondery/helpers/phone";
 import type { Contact, ContactAddressEntry, EmailEntry, PhoneEntry } from "@bondery/schemas";
@@ -35,7 +35,7 @@ function getAvatarHash(first: string | null | undefined, last: string | null | u
     return 0;
   }
   let hash = 0;
-  for (let i = 0; i < normalized.length; i++) {
+  for (let i = 0; i < normalized.length; i += 1) {
     hash = (hash << 5) - hash + normalized.charCodeAt(i);
     // biome-ignore lint/nursery/useMathTrunc: 32-bit wrap keeps the avatar color hash stable
     hash |= 0;
@@ -290,6 +290,7 @@ function parseContactEmails(contact: Contact): EmailEntry[] {
   return parseEmails(contact.emails).filter((email) => email.value.trim().length > 0);
 }
 
+export { formatContactName } from "@bondery/helpers/contact";
 export type { AddressCardLines };
 export {
   contactMatchesQuery,
@@ -297,7 +298,6 @@ export {
   formatAbsoluteDate,
   formatAddressCardLines,
   formatContactLocation,
-  formatContactName,
   formatDisplayAddress,
   formatDisplayPhone,
   formatRelativeDate,

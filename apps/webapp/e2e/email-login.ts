@@ -1,7 +1,7 @@
 import type { Page } from "@playwright/test";
 import { waitForMagicLinkVerifyUrl } from "./mailpit";
 
-const SIGNED_IN_URL = /\/app\/(home|onboarding)(?:[/?#]|$)/;
+const SIGNED_IN_URL = /\/app\/(?<group1>home|onboarding)(?:[/?#]|$)/u;
 
 /** Sign in through `/login` email magic-link and wait for `/app/home` or onboarding. */
 export async function loginWithEmail(page: Page, email: string): Promise<void> {

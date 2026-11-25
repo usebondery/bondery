@@ -30,7 +30,7 @@ function useMarkerDrag(
   id: string,
   onSelect: () => void,
 ) {
-  const moved = useRef(false);
+  const movedRef = useRef(false);
 
   useEffect(
     () => () => {
@@ -43,7 +43,7 @@ function useMarkerDrag(
     if (event.button !== 0) {
       return;
     }
-    moved.current = false;
+    movedRef.current = false;
     event.stopPropagation();
     event.currentTarget.setPointerCapture(event.pointerId);
     event.currentTarget.style.cursor = "grabbing";
@@ -56,7 +56,7 @@ function useMarkerDrag(
       return;
     }
     if (Math.hypot(event.movementX, event.movementY) > 2) {
-      moved.current = true;
+      movedRef.current = true;
     }
     dragRef.current?.move(id, event.clientX, event.clientY);
   }
@@ -68,7 +68,7 @@ function useMarkerDrag(
     event.currentTarget.style.cursor = "grab";
     setDragCursor(false);
     dragRef.current?.end(id);
-    if (selectChip && !moved.current) {
+    if (selectChip && !movedRef.current) {
       onSelect();
     }
   }

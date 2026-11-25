@@ -89,7 +89,7 @@ function sleep(ms) {
 }
 
 function fullName(contact) {
-  return `${contact.firstName ?? ""} ${contact.lastName ?? ""}`.replace(/\s+/g, " ").trim();
+  return `${contact.firstName ?? ""} ${contact.lastName ?? ""}`.replace(/\s+/gu, " ").trim();
 }
 
 function titleCandidates(contact) {

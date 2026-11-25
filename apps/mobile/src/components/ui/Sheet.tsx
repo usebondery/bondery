@@ -1,10 +1,8 @@
 import {
   type BottomSheetBackdropProps,
-  BottomSheetFlatList,
   BottomSheetFooter,
   type BottomSheetFooterProps,
   BottomSheetModal,
-  BottomSheetScrollView,
   BottomSheetView,
   useBottomSheetScrollableCreator,
 } from "@gorhom/bottom-sheet";
@@ -413,5 +411,6 @@ function Sheet({
   );
 }
 
+export { BottomSheetFlatList, BottomSheetScrollView } from "@gorhom/bottom-sheet";
 export type { SheetAction, SheetProps, SheetSearch, SheetSnapPoint };
-export { BottomSheetFlatList, BottomSheetScrollView, Sheet, useSheetScrollable };
+export { Sheet, useSheetScrollable };

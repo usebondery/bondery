@@ -1,8 +1,8 @@
 import { Stack } from "@mantine/core";
 import { PageHeaderSkeleton } from "@/components/shell/PageHeaderSkeleton";
 import { PageWrapper } from "@/components/shell/PageWrapper";
-import { GroupCardSkeleton } from "../../../groups/components/GroupsSkeletons";
-import { PeopleTableSkeleton } from "../../../people/components/chrome/PeopleSkeletons";
+import { GroupCardSkeleton } from "../../../groups/components/groupsSkeletons";
+import { PeopleTableSkeleton } from "../../../people/components/chrome/peopleSkeletons";
 
 /**
  * Full-page skeleton for the group detail page.

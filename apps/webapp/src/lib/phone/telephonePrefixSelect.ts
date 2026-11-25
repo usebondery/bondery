@@ -11,9 +11,9 @@ function matchesPrefixQuery(option: TelephonePrefixOption, query: string): boole
     return true;
   }
 
-  const digits = normalized.replace(/\D/g, "");
+  const digits = normalized.replace(/\D/gu, "");
   if (digits) {
-    return option.value.replace(/\D/g, "").includes(digits);
+    return option.value.replace(/\D/gu, "").includes(digits);
   }
 
   return (

@@ -14,7 +14,7 @@ import { dirname, join } from "node:path";
 import { after, before, describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 
-const CN_RE = /cn\(\)/;
+const CN_RE = /cn\(\)/u;
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const pluginPath = join(repoRoot, "biome", "plugins", "use-cn-for-classname.grit");
@@ -33,15 +33,15 @@ declare const className: string | undefined;
 /** Each case: [name, jsx expression for className, expected diagnostic count]. */
 const CASES = [
   ["static string", `"p-2"`, 0],
-  ["identifier", `{className}`, 0],
-  ["member access", `{classes.card}`, 0],
+  ["identifier", "{className}", 0],
+  ["member access", "{classes.card}", 0],
   ["cn call", `{cn("p-2", className)}`, 0],
   ["cn with conditional", `{cn("p-2", isActive && "p-4")}`, 0],
   ["cn with ternary", `{cn(isActive ? "p-2" : "p-4")}`, 0],
-  ["cn with dynamic class", `{cn(\`fi fi-\${country}\`)}`, 0],
-  ["cn with nested call", `{cn(country.toUpperCase())}`, 0],
+  ["cn with dynamic class", "{cn(`fi fi-${country}`)}", 0],
+  ["cn with nested call", "{cn(country.toUpperCase())}", 0],
   ["ternary selecting one class", `{isActive ? "p-2" : "p-4"}`, 0],
-  ["template literal", `{\`p-2 \${className}\`}`, 1],
+  ["template literal", "{`p-2 ${className}`}", 1],
   ["concatenation", `{"p-2 " + className}`, 1],
   ["array join", `{["p-2", className].join(" ")}`, 1],
   ["clsx helper", `{clsx("p-2", className)}`, 1],

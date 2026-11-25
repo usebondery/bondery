@@ -8,11 +8,11 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "../../../scripts/check/check-report.mjs";
 
-const JS_TS_EXTENSION = /\.(tsx?|jsx?)$/;
-const USE_A_Z_MODAL = /\buse[A-Z]\w*Modal\(/;
-const MODAL = /<Modal[\s>]/;
-const FUNCTION_MODAL_FUNCTION_FORM_MODALBODY = /function\s+\w+Modal|function\s+\w+Form|ModalBody/;
-const CONTACTSTABLE = /<ContactsTable[\s>]/;
+const JS_TS_EXTENSION = /\.(?<group1>tsx?|jsx?)$/u;
+const USE_A_Z_MODAL = /\buse[A-Z]\w*Modal\(/u;
+const MODAL = /<Modal[\s>]/u;
+const FUNCTION_MODAL_FUNCTION_FORM_MODALBODY = /function\s+\w+Modal|function\s+\w+Form|ModalBody/u;
+const CONTACTSTABLE = /<ContactsTable[\s>]/u;
 
 const check = createCheck("check-modal-patterns");
 
@@ -29,7 +29,7 @@ const ALLOWED_DECLARATIVE_MODAL_FILES = new Set([
 
 const ALLOWED_UPDATE_MODAL_FILES = new Set([
   "lib/modals/useModalBlocking.ts",
-  "app/(app)/app/(shell)/people/components/modals/AddPeopleToGroupSelectionModal.tsx",
+  "app/(app)/app/(shell)/people/components/modals/openAddPeopleToGroupSelectionModal.tsx",
   "app/(app)/app/(shell)/settings/components/modals/openApiKeyModal.tsx",
   "app/(app)/app/(shell)/settings/components/modals/LinkedInImportModal.tsx",
   "app/(app)/app/(shell)/settings/components/modals/InstagramImportModal.tsx",
@@ -39,12 +39,13 @@ const ALLOWED_UPDATE_MODAL_FILES = new Set([
 ]);
 
 const DISMISS_UPDATE_PATTERN =
-  /modals\.updateModal\(\{(?:(?!\bmodals\.(?:open|close)\b)[\s\S])*?(closeOnEscape|closeOnClickOutside|withCloseButton)/;
+  /modals\.updateModal\(\{(?:(?!\bmodals\.(?:open|close)\b)[\s\S])*?(?<group1>closeOnEscape|closeOnClickOutside|withCloseButton)/u;
 
 const DISMISS_OPEN_PATTERN =
-  /modals\.open\(\{(?:(?!\bmodals\.(?:open|updateModal|close)\b)[\s\S])*?(closeOnEscape|closeOnClickOutside|withCloseButton)/;
+  /modals\.open\(\{(?:(?!\bmodals\.(?:open|updateModal|close)\b)[\s\S])*?(?<group1>closeOnEscape|closeOnClickOutside|withCloseButton)/u;
 
-const BLOCKING_STATE_PATTERN = /\b(isSubmitting|isPending|actionLoading|isParsing|isImporting)\b/;
+const BLOCKING_STATE_PATTERN =
+  /\b(?<group1>isSubmitting|isPending|actionLoading|isParsing|isImporting)\b/u;
 
 function walk(dir: string, acc: string[] = []): string[] {
   for (const entry of readdirSync(dir)) {
@@ -62,7 +63,7 @@ function walk(dir: string, acc: string[] = []): string[] {
 }
 
 function normalizeRel(rel: string): string {
-  return rel.replace(/\\/g, "/");
+  return rel.replace(/\\/gu, "/");
 }
 
 function hasModalBlockingHelper(content: string): boolean {

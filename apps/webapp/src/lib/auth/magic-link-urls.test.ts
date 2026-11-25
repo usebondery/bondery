@@ -7,7 +7,7 @@ import {
   searchWithoutTransientAuthErrors,
 } from "./magic-link-urls.js";
 
-const AUTH_START = /\/auth\/start/;
+const AUTH_START = /\/auth\/start/u;
 
 const ORIGIN = "https://app.usebondery.com";
 

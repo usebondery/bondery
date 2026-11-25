@@ -22,7 +22,7 @@ export type { ServerExceptionContext };
  */
 export function rootCause(error: unknown): unknown {
   let current = error;
-  for (let depth = 0; depth < MAX_CAUSE_DEPTH; depth++) {
+  for (let depth = 0; depth < MAX_CAUSE_DEPTH; depth += 1) {
     const cause = (current as { cause?: unknown } | null)?.cause;
     if (!(cause instanceof Error)) {
       break;

@@ -11,7 +11,7 @@ export function pickRandomItems<T>(
   }
 
   const copy = [...items];
-  for (let i = copy.length - 1; i > 0; i--) {
+  for (let i = copy.length - 1; i > 0; i -= 1) {
     const j = Math.floor(random() * (i + 1));
     const current = copy[i];
     const swap = copy[j];

@@ -16,11 +16,9 @@ import type {
 
 import { mergeContactsRequestSchema } from "@bondery/schemas";
 
-import { mergeRecommendationsQuerySchema } from "@bondery/schemas/http";
-
-const HTTP_PROTOCOL_PATTERN = /^https?:\/\//;
-const WWW_PREFIX_PATTERN = /^www\./;
-const TRAILING_SLASH_PATTERN = /\/$/;
+const HTTP_PROTOCOL_PATTERN = /^https?:\/\//u;
+const WWW_PREFIX_PATTERN = /^www\./u;
+const TRAILING_SLASH_PATTERN = /\/$/u;
 
 // ── Constants ────────────────────────────────────────────────────
 
@@ -90,8 +88,6 @@ export const MERGE_RECOMMENDATION_ALGORITHM_VERSION = "v1";
 
 export const mergeContactsBodySchema = mergeContactsRequestSchema;
 
-export { mergeRecommendationsQuerySchema };
-
 // ── Helper Types ─────────────────────────────────────────────────
 
 export type MergeRecommendationCandidate = {
@@ -107,7 +103,7 @@ export type MergeRecommendationCandidate = {
 // ── Normalisation Helpers ────────────────────────────────────────
 
 export function normalizeDiacritics(value: string): string {
-  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return value.normalize("NFD").replace(/[\u0300-\u036f]/gu, "");
 }
 
 export function normalizeNamePart(value: string | null | undefined): string {
@@ -119,7 +115,7 @@ export function normalizeNamePart(value: string | null | undefined): string {
 
     .toLowerCase()
 
-    .replace(/[^a-z0-9]+/g, "")
+    .replace(/[^a-z0-9]+/gu, "")
 
     .trim();
 }
@@ -413,3 +409,5 @@ export function withEmptySocials<T extends { id: string }>(
     whatsapp: null,
   }));
 }
+
+export { mergeRecommendationsQuerySchema } from "@bondery/schemas/http";

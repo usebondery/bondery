@@ -4,7 +4,7 @@ import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import type { ContactPreview } from "@bondery/schemas";
 import { Avatar } from "@mantine/core";
 import type { ReactElement } from "react";
-import Link, { hrefAssert } from "#nextjs/NextLink.js";
+import Link, { hrefAssert } from "#nextjs/nextLink.js";
 import { PersonAvatarTooltip } from "#nextjs/PersonAvatar/PersonAvatarTooltip.js";
 import { getAvatarColorFromName } from "#utils/avatarColor.js";
 import { nonEmpty } from "#utils/nonEmpty.js";

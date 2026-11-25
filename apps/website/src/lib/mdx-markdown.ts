@@ -3,7 +3,7 @@ import docs from "@bondery/translations/locales/en/platform/website/WebsiteDocs.
 };
 import type { LLMsOptions } from "fumadocs-core/mdx-plugins/remark-llms";
 
-const MARKDOWN_HEADING_WITH_ANCHOR_RE = /^#{1,6}\s+(.+?)(?:\s+\[#[^\]]*\])?\s*$/m;
+const MARKDOWN_HEADING_WITH_ANCHOR_RE = /^#{1,6}\s+(?<group1>.+?)(?:\s+\[#[^\]]*\])?\s*$/mu;
 /**
  * Compile-time Markdown forms for docs MDX components, used by the
  * `includeProcessedMarkdown` option in `src/lib/collections.ts`.
@@ -87,7 +87,7 @@ function attributeText(node: JsxNode, name: string): string | undefined {
 function flow(state: State, info: Info, children: unknown[]): string {
   return state
     .containerFlow({ children, type: "root" } as Parameters<State["containerFlow"]>[0], info)
-    .replace(/\n{3,}/g, "\n\n")
+    .replace(/\n{3,}/gu, "\n\n")
     .trim();
 }
 
@@ -133,7 +133,7 @@ function cardMarkdown(node: JsxNode, state: State, info: Info): string | undefin
 
 /** `<Step>` without a `<Steps>` parent still reads as one numbered item. */
 function stepMarkdown(node: JsxNode, state: State, info: Info): string {
-  const body = stepBody(state, info, node.children ?? []).replace(/\n(?!\n)/g, "\n   ");
+  const body = stepBody(state, info, node.children ?? []).replace(/\n(?!\n)/gu, "\n   ");
   return `\n1. ${body}\n`;
 }
 
@@ -146,7 +146,7 @@ function stepsMarkdown(node: JsxNode, state: State, info: Info): string {
     if (step?.name !== "Step") {
       continue;
     }
-    const body = stepBody(state, info, step.children ?? []).replace(/\n(?!\n)/g, "\n   ");
+    const body = stepBody(state, info, step.children ?? []).replace(/\n(?!\n)/gu, "\n   ");
     items.push(`${index + 1}. ${body}`);
   }
 
@@ -215,7 +215,7 @@ const MIN_CODE_FENCE_LENGTH = 3;
 
 /** Fences code for Markdown, widening the fence past any backtick run inside it. */
 function fencedBlock(code: string, language: string): string {
-  const runs = [...code.matchAll(/`+/g)].map((match) => match[0].length);
+  const runs = [...code.matchAll(/`+/gu)].map((match) => match[0].length);
   const marker = "`".repeat(Math.max(MIN_CODE_FENCE_LENGTH, ...runs.map((length) => length + 1)));
   return `${marker}${language}\n${code}\n${marker}`;
 }

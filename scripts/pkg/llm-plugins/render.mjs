@@ -4,7 +4,7 @@ import { claudeManifest, claudeMcp, openAiManifest, openAiMcp } from "./manifest
 import { repoRoot } from "./paths.mjs";
 import { requireVersion, validateConfig } from "./validate-config.mjs";
 
-const CONNECT_BLOCK = /<!-- llm-plugin-connect -->[\s\S]*?<!-- \/llm-plugin-connect -->/;
+const CONNECT_BLOCK = /<!-- llm-plugin-connect -->[\s\S]*?<!-- \/llm-plugin-connect -->/u;
 
 function toBuffer(value) {
   if (Buffer.isBuffer(value)) {
@@ -44,7 +44,7 @@ function applyConnectBlock(source, replacement) {
   if (replacement.includes("llm-plugin-connect")) {
     throw new Error("Connect text must not contain a marker.");
   }
-  const openings = source.match(/<!-- llm-plugin-connect -->/g);
+  const openings = source.match(/<!-- llm-plugin-connect -->/gu);
   if (openings?.length !== 1 || !CONNECT_BLOCK.test(source)) {
     throw new Error("Connect block is missing.");
   }

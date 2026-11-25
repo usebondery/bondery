@@ -4,7 +4,7 @@
  */
 import { execSync } from "node:child_process";
 
-const PATTERN_5C723F5C6E_RE = /\r?\n/;
+const PATTERN_5C723F5C6E_RE = /\r?\n/u;
 
 export {
   compareVersions,

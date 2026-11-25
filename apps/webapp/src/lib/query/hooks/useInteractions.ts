@@ -1,6 +1,6 @@
 "use client";
 
-import type { Activity, UpdateInteractionInput } from "@bondery/schemas";
+import type { UpdateInteractionInput } from "@bondery/schemas";
 import type { InfiniteData, UseInfiniteQueryResult } from "@tanstack/react-query";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -26,7 +26,7 @@ import { throwIfPageCannotRender } from "@/lib/query/pageLoadFailure";
 import { nextPaginatedOffset } from "@/lib/query/paginatedInfiniteQuery";
 import { INTERACTIONS_TIMELINE } from "@/lib/query/sharedListParams";
 
-export type { InteractionsListParams };
+export type { InteractionsListParams } from "@/lib/api/domains/interactions";
 
 export const INTERACTIONS_PAGE_SIZE = INTERACTIONS_TIMELINE.limit;
 
@@ -114,4 +114,4 @@ export function useDeleteInteractionMutation(contactId?: string) {
   });
 }
 
-export type { Activity };
+export type { Activity } from "@bondery/schemas";

@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "./check-report.mjs";
 
-const TSX_JSX_RE = /\.(tsx?|jsx?)$/;
+const TSX_JSX_RE = /\.(?<group1>tsx?|jsx?)$/u;
 
 const check = createCheck("check-docs-links");
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -20,9 +20,9 @@ const SCAN_DIRS = [
 ];
 
 const BANNED_PATTERNS = [
-  { label: "$" + "{HELP_DOCS_URL}/…", pattern: /\$\{HELP_DOCS_URL\}\// },
-  { label: "$" + "{WEBSITE_URL}/docs/…", pattern: /\$\{WEBSITE_URL\}\/docs\// },
-  { label: '"/docs/concepts/…"', pattern: /\/docs\/concepts\// },
+  { label: "$" + "{HELP_DOCS_URL}/…", pattern: /\$\{HELP_DOCS_URL\}\//u },
+  { label: "$" + "{WEBSITE_URL}/docs/…", pattern: /\$\{WEBSITE_URL\}\/docs\//u },
+  { label: '"/docs/concepts/…"', pattern: /\/docs\/concepts\//u },
 ];
 
 function walk(dir, acc = []) {
@@ -43,7 +43,8 @@ function walk(dir, acc = []) {
 function loadRegistry() {
   const source = readFileSync(GENERATED_FILE, "utf8");
   const entries = new Map();
-  const lineRe = /^\s+"([^"]+)":\s*\{\s*path:\s*"([^"]*)"(?:,\s*hash:\s*"([^"]*)")?\s*\},?\s*$/gm;
+  const lineRe =
+    /^\s+"(?<group1>[^"]+)":\s*\{\s*path:\s*"(?<group2>[^"]*)"(?:,\s*hash:\s*"(?<group3>[^"]*)")?\s*\},?\s*$/gmu;
   let match = lineRe.exec(source);
   while (match !== null) {
     entries.set(match[1], { hash: match[3], path: match[2] });
@@ -101,21 +102,21 @@ function main() {
       }
     }
 
-    for (const match of content.matchAll(/\bdoc="([^"]+)"/g)) {
+    for (const match of content.matchAll(/\bdoc="(?<group1>[^"]+)"/gu)) {
       usedIds.add(match[1]);
     }
-    for (const match of content.matchAll(/\bhelpDoc="([^"]+)"/g)) {
+    for (const match of content.matchAll(/\bhelpDoc="(?<group1>[^"]+)"/gu)) {
       usedIds.add(match[1]);
     }
-    for (const match of content.matchAll(/\bhelpDoc=\{([^}]+)\}/g)) {
+    for (const match of content.matchAll(/\bhelpDoc=\{(?<group1>[^}]+)\}/gu)) {
       const [, expr] = match;
-      for (const idMatch of expr.matchAll(/"([^"]+)"/g)) {
+      for (const idMatch of expr.matchAll(/"(?<group1>[^"]+)"/gu)) {
         if (idMatch[1].includes(".")) {
           usedIds.add(idMatch[1]);
         }
       }
     }
-    for (const match of content.matchAll(/\bdocHref\(\s*"([^"]+)"\s*\)/g)) {
+    for (const match of content.matchAll(/\bdocHref\(\s*"(?<group1>[^"]+)"\s*\)/gu)) {
       usedIds.add(match[1]);
     }
   }

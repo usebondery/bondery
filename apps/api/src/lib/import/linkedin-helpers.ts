@@ -13,9 +13,9 @@ import logger from "../platform/logger.js";
 import { getStorage, LINKEDIN_LOGOS_BUCKET } from "../storage/get-storage.js";
 import { LINKEDIN_LOGO_MAX_EDGE, normalizeImageToJpeg } from "../storage/normalize-image.js";
 
-const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
-const YEAR_MONTH_PATTERN = /^\d{4}-\d{2}$/;
-const YEAR_PATTERN = /^\d{4}$/;
+const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/u;
+const YEAR_MONTH_PATTERN = /^\d{4}-\d{2}$/u;
+const YEAR_PATTERN = /^\d{4}$/u;
 
 function parseOptionalDate(value: string | null | undefined): Date | null {
   const normalized = toPostgresDate(value);

@@ -1,5 +1,5 @@
-const BP_PERSON_LINK_RE = /\[([^\]]+)\]\(bp:\/\/person\/([^)]+)\)/g;
-const BP_PERSON_TOKEN_RE = /\[\[bp:person:([^\]]+)\]\]/g;
+const BP_PERSON_LINK_RE = /\[(?<group1>[^\]]+)\]\(bp:\/\/person\/(?<group2>[^)]+)\)/gu;
+const BP_PERSON_TOKEN_RE = /\[\[bp:person:(?<group1>[^\]]+)\]\]/gu;
 
 /** URL scheme used by the mobile markdown editor for person mentions. */
 export const BP_PERSON_URL_PREFIX = "bp://person/";

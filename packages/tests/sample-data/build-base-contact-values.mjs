@@ -26,8 +26,9 @@ const EXPORT_DIR = path.join(HERE, "bondery", "export-files");
 const OUTPUT_PATH = path.join(HERE, "base-contact-values.json");
 
 const INDENT = 2;
-const REGION_PREFIX = /^(state|province|federal state|constituent state|autonomous region) /;
-const INTERACTION_COUNTER = /\s*\(\d+\)$/;
+const REGION_PREFIX =
+  /^(?<group1>state|province|federal state|constituent state|autonomous region) /u;
+const INTERACTION_COUNTER = /\s*\(\d+\)$/u;
 const FIRST_SYNTHETIC_BIRTH_YEAR = 1970;
 const BIRTH_YEAR_SPAN = 35;
 const BIRTH_MONTHS = 12;
@@ -330,7 +331,7 @@ function slugName(firstName, lastName) {
     .toLowerCase()
     .normalize("NFD")
     .replace(/\p{M}/gu, "")
-    .replace(/[^a-z0-9]+/g, ".");
+    .replace(/[^a-z0-9]+/gu, ".");
 }
 
 function phoneFromIndex(index, used) {

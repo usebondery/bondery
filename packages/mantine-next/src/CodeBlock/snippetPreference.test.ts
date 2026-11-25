@@ -80,7 +80,7 @@ describe("setCodeBlockSnippet", () => {
 
     setCodeBlockSnippet("api-sample", "python");
 
-    assert.match(document.cookie, new RegExp(`^${CODE_BLOCK_SNIPPET_COOKIE}=`));
+    assert.match(document.cookie, new RegExp(`^${CODE_BLOCK_SNIPPET_COOKIE}=`, "u"));
     assert.equal(getCodeBlockSnippet("api-sample"), "python");
   });
 

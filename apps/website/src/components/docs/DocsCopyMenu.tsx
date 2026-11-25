@@ -26,7 +26,7 @@ function openInNewTab(url: string) {
 }
 
 function DocsCopyMenu({ githubUrl, markdownUrl, pageUrl }: DocsCopyMenuProps) {
-  const pending = useRef<boolean>(false);
+  const pendingRef = useRef<boolean>(false);
 
   async function copyMarkdownLink() {
     const url = new URL(markdownUrl, location.origin).href;
@@ -49,11 +49,11 @@ function DocsCopyMenu({ githubUrl, markdownUrl, pageUrl }: DocsCopyMenuProps) {
   }
 
   function beginCopy(): boolean {
-    if (pending.current) {
+    if (pendingRef.current) {
       return false;
     }
 
-    pending.current = true;
+    pendingRef.current = true;
     return true;
   }
 
@@ -84,7 +84,7 @@ function DocsCopyMenu({ githubUrl, markdownUrl, pageUrl }: DocsCopyMenuProps) {
         }),
       );
     } finally {
-      pending.current = false;
+      pendingRef.current = false;
     }
   }
 

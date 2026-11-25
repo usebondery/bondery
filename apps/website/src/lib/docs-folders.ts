@@ -1,7 +1,7 @@
 import type * as PageTree from "fumadocs-core/page-tree";
 import type { ReactNode } from "react";
 
-const DOCS_SLASH_PREFIX_RE = /^\/docs\//;
+const DOCS_SLASH_PREFIX_RE = /^\/docs\//u;
 /**
  * A folder that represents its own page. An index page, or a folder path from the tree
  * ref, names the folder itself.

@@ -82,7 +82,7 @@ export function useContactsDragSelection({
   const anchorIndexRef = useRef<number | null>(null);
   const selectInRangeRef = useRef(true);
   const baselineRef = useRef<DragBaseline | null>(null);
-  const lastLocalYRef = useRef(0);
+  const lastDragPointerOffsetRef = useRef(0);
   const dragFrameRef = useRef<number | null>(null);
   const dragFrameLastTimestampRef = useRef<number>(0);
   const isDraggingRef = useRef<boolean>(false);
@@ -198,7 +198,7 @@ export function useContactsDragSelection({
       const deltaSeconds = Math.min(0.05, Math.max(0, (timestamp - previousTimestamp) / 1000));
       dragFrameLastTimestampRef.current = timestamp;
 
-      const speed = getAutoScrollSpeed(lastLocalYRef.current, listViewportHeight);
+      const speed = getAutoScrollSpeed(lastDragPointerOffsetRef.current, listViewportHeight);
 
       if (speed !== 0 && maxScrollOffset > 0) {
         const nextOffset = Math.min(
@@ -208,7 +208,7 @@ export function useContactsDragSelection({
         applyScrollOffset(nextOffset);
       }
 
-      syncRangeAtLocalY(lastLocalYRef.current);
+      syncRangeAtLocalY(lastDragPointerOffsetRef.current);
       dragFrameRef.current = requestAnimationFrame(runDragFrame);
     },
     [applyScrollOffset, listViewportHeight, maxScrollOffset, stopDragFrameLoop, syncRangeAtLocalY],
@@ -254,7 +254,7 @@ export function useContactsDragSelection({
       selectInRangeRef.current = !isAnchorSelected;
       baselineRef.current = cloneDragBaseline(selectionState);
       lastSyncedRangeKeyRef.current = "";
-      lastLocalYRef.current = localY;
+      lastDragPointerOffsetRef.current = localY;
       animatedScrollOffsetRef.current = scrollOffsetRef.current;
       isDraggingRef.current = true;
       setIsDragging(true);
@@ -265,7 +265,7 @@ export function useContactsDragSelection({
   );
 
   const handleDragMove = useCallback((localY: number) => {
-    lastLocalYRef.current = localY;
+    lastDragPointerOffsetRef.current = localY;
   }, []);
 
   const handleDragEnd = useCallback(() => {

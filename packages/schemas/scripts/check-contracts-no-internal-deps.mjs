@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "../../../scripts/check/check-report.mjs";
 
-const TS_TSX_RE = /\.(ts|tsx)$/;
+const TS_TSX_RE = /\.(?<group1>ts|tsx)$/u;
 
 const check = createCheck("check-contracts-no-internal-deps");
 
@@ -15,7 +15,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const packageRoot = join(__dirname, "..");
 const srcRoot = join(packageRoot, "src");
 
-const forbiddenPattern = /@bondery\//;
+const forbiddenPattern = /@bondery\//u;
 
 function collectSourceFiles(dir) {
   const entries = readdirSync(dir);

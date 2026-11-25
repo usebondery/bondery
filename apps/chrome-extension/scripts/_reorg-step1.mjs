@@ -22,18 +22,18 @@ import type { UserSettingsProfile } from "../api/domains/me";
 `;
 
 let typesContent = messagesSrc.replace(
-  /export type ExtensionMessage =/,
+  /export type ExtensionMessage =/u,
   `${userSettingsBlock}\nexport type ExtensionMessage =`,
 );
 typesContent = typesContent.replace(
-  /(\s+\| VersionCheckResponse;)/,
+  /(?<group1>\s+\| VersionCheckResponse;)/u,
   "\n  | UserSettingsRequest\n  | UserSettingsResponse$1",
 );
 // Fix: import should be at top
 typesContent = typesContent.replace(userSettingsBlock.trim(), "");
 typesContent = `import type { UserSettingsProfile } from "../api/domains/me";\n\n${typesContent}`;
 typesContent = typesContent.replace(
-  /export type ExtensionMessage =/,
+  /export type ExtensionMessage =/u,
   `/** Popup -> Service worker: fetch authenticated user settings */
 export interface UserSettingsRequest {
   type: "USER_SETTINGS_REQUEST";
@@ -51,7 +51,7 @@ if (!typesContent.includes("UserSettingsRequest")) {
   throw new Error("failed to add UserSettings types");
 }
 typesContent = typesContent.replace(
-  /\| VersionCheckResponse;/,
+  /\| VersionCheckResponse;/u,
   "| VersionCheckResponse\n  | UserSettingsRequest\n  | UserSettingsResponse;",
 );
 fs.writeFileSync(path.join(root, "lib/messaging/types.ts"), typesContent);
@@ -60,7 +60,7 @@ fs.writeFileSync(path.join(root, "lib/messaging/types.ts"), typesContent);
 let render = fs.readFileSync(path.join(root, "lib/ui/renderInShadowRoot.tsx"), "utf8");
 render = render.replace("./MantineWrapper", "./MantineWrapper");
 if (!render.includes('from "./MantineWrapper"')) {
-  render = render.replace(/from "\.\/MantineWrapper"/, 'from "./MantineWrapper"');
+  render = render.replace(/from "\.\/MantineWrapper"/u, 'from "./MantineWrapper"');
 }
 fs.writeFileSync(path.join(root, "lib/ui/renderInShadowRoot.tsx"), render);
 fs.writeFileSync(

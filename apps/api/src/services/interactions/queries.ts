@@ -16,7 +16,7 @@ type ServiceLog = {
   error: (payload: unknown, message: string) => void;
 };
 
-export type { InteractionsListQuery };
+export type { InteractionsListQuery } from "@bondery/schemas/http";
 
 export async function listInteractions(
   ctx: DomainContext,

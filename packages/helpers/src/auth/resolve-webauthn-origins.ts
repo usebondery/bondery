@@ -1,6 +1,6 @@
-const PATTERN_5E5B302D3941_RE = /^[0-9A-F]+$/;
-const PATTERN_5C2F2B24_RE = /\/+$/;
-const PATTERN_5E5C647B312C_RE = /^\d{1,3}(\.\d{1,3}){3}$/;
+const PATTERN_5E5B302D3941_RE = /^[0-9A-F]+$/u;
+const PATTERN_5C2F2B24_RE = /\/+$/u;
+const PATTERN_5E5C647B312C_RE = /^\d{1,3}(?<group1>\.\d{1,3}){3}$/u;
 
 const SHA256_HEX_LENGTH = 64;
 
@@ -128,6 +128,6 @@ export function normalizeSha256Fingerprint(value: string): string | null {
     return null;
   }
 
-  const pairs = hex.match(/.{2}/g);
+  const pairs = hex.match(/.{2}/gu);
   return pairs ? pairs.join(":") : null;
 }

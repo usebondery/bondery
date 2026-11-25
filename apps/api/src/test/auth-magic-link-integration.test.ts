@@ -17,12 +17,13 @@ import type { MagicLinkSendPayload } from "../lib/auth/send-magic-link.js";
 import { requireRedisCommands, shutdownRedis } from "../lib/data/redis.js";
 import { loadTestEnv } from "./load-test-env.js";
 
-const S_BETTER_AUTH_SESSION_TOKEN_PATTERN = /(?:^|,\s*)(?:better-auth\.)?session_token=([^;]+)/i;
-const TOO_MANY_REQUESTS_PATTERN = /TOO_MANY_REQUESTS/;
-const SESSION_TOKEN_PATTERN = /session_token=([^;]+)/i;
-const ERROR_INVALID_TOKEN_PATTERN = /error=INVALID_TOKEN/;
-const MAGIC_LINK_VERIFY_PATTERN = /\/magic-link\/verify\?/;
-const TOKEN_QUERY_PARAM_PATTERN = /[?&]token=/;
+const S_BETTER_AUTH_SESSION_TOKEN_PATTERN =
+  /(?:^|,\s*)(?:better-auth\.)?session_token=(?<group1>[^;]+)/iu;
+const TOO_MANY_REQUESTS_PATTERN = /TOO_MANY_REQUESTS/u;
+const SESSION_TOKEN_PATTERN = /session_token=(?<group1>[^;]+)/iu;
+const ERROR_INVALID_TOKEN_PATTERN = /error=INVALID_TOKEN/u;
+const MAGIC_LINK_VERIFY_PATTERN = /\/magic-link\/verify\?/u;
+const TOKEN_QUERY_PARAM_PATTERN = /[?&]token=/u;
 
 loadTestEnv();
 
@@ -33,7 +34,7 @@ const { resolveResourceId, provisionWebappClient } = await import(
   "../lib/bootstrap/provision-oauth-clients.js"
 );
 
-const WEBAPP_URL = (process.env["BONDERY_PUBLIC_WEBAPP_URL"] ?? "").replace(/\/+$/, "");
+const WEBAPP_URL = (process.env["BONDERY_PUBLIC_WEBAPP_URL"] ?? "").replace(/\/+$/u, "");
 const CALLBACK_URL = `${WEBAPP_URL}/auth/start`;
 const ERROR_CALLBACK_URL = `${WEBAPP_URL}/login`;
 const CLIENT_ID = process.env["BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID"] as string;
@@ -51,7 +52,7 @@ function generatePkcePair(): { challenge: string; verifier: string } {
 }
 
 function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
 }
 
 function extractSetCookieHeader(header: string | string[] | undefined): string {
@@ -314,7 +315,7 @@ describe("magic-link auth", () => {
       `${BETTER_AUTH_REDIS_KEY_PREFIX}verification:magic-link:${hashed}`,
     );
     assert.ok(stored, "expected hashed verification in Redis");
-    assert.doesNotMatch(stored, new RegExp(escapeRegExp(lastSend.token)));
+    assert.doesNotMatch(stored, new RegExp(escapeRegExp(lastSend.token), "u"));
 
     const dbRows = await prisma.verification.findMany({
       where: { identifier: lastSend.token },

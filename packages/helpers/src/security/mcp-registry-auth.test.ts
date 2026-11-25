@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 
 import { BONDERY_MCP_REGISTRY_AUTH_PROOF } from "./mcp-registry-auth.js";
 
-const MCPV1_ED25519_ZA_Z0_RE = /^v=MCPv1; k=ed25519; p=[A-Za-z0-9+/=]+$/;
+const MCPV1_ED25519_ZA_Z0_RE = /^v=MCPv1; k=ed25519; p=[A-Za-z0-9+/=]+$/u;
 
 describe("bondery mcp registry auth proof", () => {
   it("matches the MCP Registry HTTP/DNS proof record format", () => {

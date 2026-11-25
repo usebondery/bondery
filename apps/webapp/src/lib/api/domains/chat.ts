@@ -14,7 +14,7 @@ import {
   parseChatSessions,
 } from "@/lib/api/resources/chat";
 
-export type { ChatMessageRow };
+export type { ChatMessageRow } from "@/lib/api/resources/chat";
 
 export async function createChatSession(): Promise<string> {
   const { session } = await clientApiJson<{ session?: ChatSession | null }>(

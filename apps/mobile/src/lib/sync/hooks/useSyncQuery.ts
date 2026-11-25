@@ -3,14 +3,13 @@ import { type QueryKey, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getContact,
   getContactGroups,
-  getContactNamesByIds,
   getContactTags,
   getMyselfContact,
   getMyselfContactId,
   listContactIds,
   listContacts,
 } from "../../domains/contacts";
-import { getGroup, listGroups as listAllGroups, listGroupMembers } from "../../domains/groups";
+import { listGroups as listAllGroups } from "../../domains/groups";
 import { listTags as listAllTags } from "../../domains/tags";
 import type { ContactsListParams } from "../../resources/contacts";
 import type { SqliteQueryMeta } from "../refresh-sqlite-views";
@@ -110,19 +109,15 @@ export function readContactsList(params: ContactsListParams) {
 export function readContactIds(params: ContactsListParams) {
   return listContactIds(params);
 }
-
 export {
   getContact,
   getContactGroups,
-  getContactNamesByIds,
   getContactTags,
-  getGroup,
   getMyselfContact,
   getMyselfContactId,
-  listAllGroups as listGroups,
-  listAllTags as listTags,
-  listGroupMembers,
-};
+} from "../../domains/contacts";
+export { listGroups } from "../../domains/groups";
+export { listTags } from "../../domains/tags";
 
 export function useContactsList(params: ContactsListParams) {
   return useSyncQuery({
@@ -164,3 +159,6 @@ export function useContactGroups(contactId: string | undefined) {
     queryKey: sqliteQueryKeys.contacts.groups(contactId ?? "disabled"),
   });
 }
+
+export { getContactNamesByIds } from "../../domains/contacts";
+export { getGroup, listGroupMembers } from "../../domains/groups";

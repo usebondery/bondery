@@ -16,8 +16,8 @@ import {
 } from "./storage-secrets.js";
 import { createCertificateAuthority, DAY_MS, issueServerCertificate } from "./x509.js";
 
-const CERTIFICATE_ALERT_CLOSED_PATTERN = /certificate|alert|closed/i;
-const ALTNAMES_HOSTNAME_PATTERN = /altnames|Hostname/;
+const CERTIFICATE_ALERT_CLOSED_PATTERN = /certificate|alert|closed/iu;
+const ALTNAMES_HOSTNAME_PATTERN = /altnames|Hostname/u;
 
 type Pair = { cert: string; key: string };
 

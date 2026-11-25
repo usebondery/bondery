@@ -54,4 +54,4 @@ export async function preloadExtensionNamespaces(groups: string[]) {
   await i18n.loadNamespaces(namespaces);
 }
 
-export default i18n;
+export { default } from "i18next";

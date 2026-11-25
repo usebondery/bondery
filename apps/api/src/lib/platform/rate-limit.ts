@@ -8,9 +8,9 @@ import type { Redis } from "ioredis";
 import { URLS } from "./config.js";
 import type { AppFastifyInstance } from "./fastify-types.js";
 
-const TIME_WINDOW_PATTERN = /^(\d+) (second|seconds|minute|minutes)$/;
-const DIGITS_ONLY_PATTERN = /^\d+$/;
-const TRAILING_SLASH_PATTERN = /\/$/;
+const TIME_WINDOW_PATTERN = /^(?<group1>\d+) (?<group2>second|seconds|minute|minutes)$/u;
+const DIGITS_ONLY_PATTERN = /^\d+$/u;
+const TRAILING_SLASH_PATTERN = /\/$/u;
 
 const DEFAULT_MAX_REQUESTS = 300;
 const DEFAULT_WINDOW = "60 seconds";
@@ -117,7 +117,7 @@ function timeWindowToSeconds(timeWindow: unknown): number {
 }
 
 function quoteStructuredString(value: string): string {
-  return `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+  return `"${value.replace(/\\/gu, "\\\\").replace(/"/gu, '\\"')}"`;
 }
 
 function formatDraftRateLimitHeaders(input: {

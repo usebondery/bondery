@@ -28,7 +28,7 @@ import {
   useDeleteInteractionMutation,
 } from "@/lib/query/hooks/useInteractions";
 import { PERSON_SELECTABLE_CONTACTS } from "@/lib/query/personPageQueryParams";
-import { openNewActivityModal } from "../../../../interactions/components/NewActivityModal";
+import { openNewActivityModal } from "../../../../interactions/components/openNewActivityModal";
 
 interface PersonInteractionsSectionProps {
   contact: Contact;

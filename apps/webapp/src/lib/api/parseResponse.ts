@@ -1,4 +1,4 @@
-import { ApiError, buildApiErrorFromResponse } from "@bondery/helpers/api";
+import { buildApiErrorFromResponse } from "@bondery/helpers/api";
 
 export async function parseApiJsonResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
@@ -42,4 +42,4 @@ export async function parseApiJsonResponseOrNull<T>(response: Response): Promise
   }
 }
 
-export { ApiError };
+export { ApiError } from "@bondery/helpers/api";

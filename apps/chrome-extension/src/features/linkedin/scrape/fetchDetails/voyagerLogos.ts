@@ -5,7 +5,7 @@
 import type { WorkEntry } from "../workExperience";
 import { type VoyagerEntity, voyagerFetch } from "./voyagerShared";
 
-const DIGITS_ONLY_RE = /^\d+$/;
+const DIGITS_ONLY_RE = /^\d+$/u;
 /** How deep the logo search descends into nested Voyager image objects. */
 const MAX_LOGO_SEARCH_DEPTH = 5;
 

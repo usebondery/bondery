@@ -1,8 +1,8 @@
 "use client";
 
 import type { Contact } from "@bondery/schemas";
-import { openNewActivityModal } from "@/app/(app)/app/(shell)/interactions/components/NewActivityModal";
-import { openAddPeopleToGroupSelectionModal } from "@/app/(app)/app/(shell)/people/components/modals/AddPeopleToGroupSelectionModal";
+import { openNewActivityModal } from "@/app/(app)/app/(shell)/interactions/components/openNewActivityModal";
+import { openAddPeopleToGroupSelectionModal } from "@/app/(app)/app/(shell)/people/components/modals/openAddPeopleToGroupSelectionModal";
 import type { ContactTableRow } from "@/components/contacts/ContactsTableV2";
 
 interface PinRowActionsOptions {

@@ -17,21 +17,21 @@ for (const file of readdirSync(entitiesDir)) {
   const before = src;
 
   src = src.replace(
-    /^import\s+\{[^}]*\}\s+from\s+["']#openapi\/fixtures\/schema-examples\.js["'];\r?\n/gm,
+    /^import\s+\{[^}]*\}\s+from\s+["']#openapi\/fixtures\/schema-examples\.js["'];\r?\n/gmu,
     "",
   );
   src = src.replace(
-    /^import\s+\{[^}]*\}\s+from\s+["']#openapi\/fixtures\/requests\.js["'];\r?\n/gm,
+    /^import\s+\{[^}]*\}\s+from\s+["']#openapi\/fixtures\/requests\.js["'];\r?\n/gmu,
     "",
   );
   src = src.replace(
-    /^import\s+\{[^}]*\}\s+from\s+["']#openapi\/fixtures\/errors\.js["'];\r?\n/gm,
+    /^import\s+\{[^}]*\}\s+from\s+["']#openapi\/fixtures\/errors\.js["'];\r?\n/gmu,
     "",
   );
-  src = src.replace(/\.meta\(\{\s*example:\s*EXAMPLE_[A-Z0-9_]+,?\s*\}\)/g, "");
-  src = src.replace(/\.meta\(\{\s*example:\s*EXAMPLE_[A-Z0-9_]+\s*\}\)/g, "");
-  src = src.replace(/,\s*example:\s*EXAMPLE_[A-Z0-9_]+/g, "");
-  src = src.replace(/example:\s*EXAMPLE_[A-Z0-9_]+,?\s*/g, "");
+  src = src.replace(/\.meta\(\{\s*example:\s*EXAMPLE_[A-Z0-9_]+,?\s*\}\)/gu, "");
+  src = src.replace(/\.meta\(\{\s*example:\s*EXAMPLE_[A-Z0-9_]+\s*\}\)/gu, "");
+  src = src.replace(/,\s*example:\s*EXAMPLE_[A-Z0-9_]+/gu, "");
+  src = src.replace(/example:\s*EXAMPLE_[A-Z0-9_]+,?\s*/gu, "");
 
   if (src !== before) {
     writeFileSync(path, src);

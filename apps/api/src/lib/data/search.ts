@@ -6,7 +6,7 @@ import {
   searchPeopleIdsWithDb,
 } from "./search-prisma.js";
 
-export type { RankedPerson };
+export type { RankedPerson } from "./search-prisma.js";
 
 /**
  * Performs fuzzy name search via the `search_people_ids` RPC (pg_trgm).

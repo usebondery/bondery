@@ -3,7 +3,7 @@ import { WEBAPP_ROUTES } from "@bondery/helpers";
 import type { SupportedLocale } from "@bondery/schemas/locale/supported-locale";
 import { loadEmailNamespace, readCopyString } from "./email-i18n.js";
 
-const TRAILING_SLASHES_PATTERN = /\/+$/;
+const TRAILING_SLASHES_PATTERN = /\/+$/u;
 
 const PRODUCTION_WEBAPP = "https://app.usebondery.com";
 const PRODUCTION_WEBSITE = "https://usebondery.com";

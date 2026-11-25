@@ -43,17 +43,17 @@ const MARKS: ReadonlyArray<{ background: string; name: string; svg: string }> = 
  */
 function encodeSvg(svg: string): string {
   const minified = svg
-    .replace(/<\?xml[^>]*\?>/g, "")
-    .replace(/<title>[\s\S]*?<\/title>/g, "")
-    .replace(/\s+/g, " ")
-    .replace(/>\s+</g, "><")
+    .replace(/<\?xml[^>]*\?>/gu, "")
+    .replace(/<title>[\s\S]*?<\/title>/gu, "")
+    .replace(/\s+/gu, " ")
+    .replace(/>\s+</gu, "><")
     .trim();
 
   const escaped = minified
-    .replace(/%/g, "%25")
-    .replace(/"/g, "'")
-    .replace(/#/g, "%23")
-    .replace(/\n/g, " ");
+    .replace(/%/gu, "%25")
+    .replace(/"/gu, "'")
+    .replace(/#/gu, "%23")
+    .replace(/\n/gu, " ");
 
   return `data:image/svg+xml;utf8,${escaped}`;
 }

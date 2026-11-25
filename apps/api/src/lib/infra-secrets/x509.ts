@@ -14,7 +14,7 @@ import { randomBytes } from "node:crypto";
 import "reflect-metadata";
 import * as x509 from "@peculiar/x509";
 
-const A_F_PATTERN = /^[89a-f]/;
+const A_F_PATTERN = /^[89a-f]/u;
 
 const ECDSA_KEY: EcKeyGenParams = { name: "ECDSA", namedCurve: "P-256" };
 const ECDSA_SIGNING: EcdsaParams = { hash: "SHA-256", name: "ECDSA" };
@@ -61,8 +61,8 @@ async function exportPrivateKey(keys: CryptoKeyPair): Promise<string> {
 async function importPrivateKey(privateKeyPem: string): Promise<CryptoKey> {
   selectWebCryptoProvider();
   const base64 = privateKeyPem
-    .replace(/-----(BEGIN|END) PRIVATE KEY-----/g, "")
-    .replace(/\s+/g, "");
+    .replace(/-----(?<group1>BEGIN|END) PRIVATE KEY-----/gu, "")
+    .replace(/\s+/gu, "");
   return globalThis.crypto.subtle.importKey(
     "pkcs8",
     Buffer.from(base64, "base64"),
@@ -106,7 +106,7 @@ export const DAY_MS = 24 * 60 * 60 * 1000;
 
 export function toPem(label: string, der: ArrayBuffer): string {
   const base64 = Buffer.from(der).toString("base64");
-  const lines = base64.match(/.{1,64}/g) ?? [];
+  const lines = base64.match(/.{1,64}/gu) ?? [];
   return `-----BEGIN ${label}-----\n${lines.join("\n")}\n-----END ${label}-----\n`;
 }
 

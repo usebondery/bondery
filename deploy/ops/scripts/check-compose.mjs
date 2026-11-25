@@ -12,23 +12,23 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const SERVICE_BLOCK_NEXT_RE = /^ {2}[a-zA-Z0-9_-]+:\s*$/m;
-const ENV_FILE_RE = /^\s*env_file:/m;
-const TRAEFIK_ENABLE_RE = /traefik\.enable=true/;
-const HARDCODED_WEBSITE_ROUTER_RE = /traefik\.http\.routers\.bondery-website/;
-const WEBSITE_NETWORK_ALIAS_RE = /BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-website/;
-const PUBLIC_API_URL_RE = /BONDERY_PUBLIC_API_URL:\s*https:\/\/\$\{BONDERY_INFRA_API_DOMAIN/;
+const SERVICE_BLOCK_NEXT_RE = /^ {2}[a-zA-Z0-9_-]+:\s*$/mu;
+const ENV_FILE_RE = /^\s*env_file:/mu;
+const TRAEFIK_ENABLE_RE = /traefik\.enable=true/u;
+const HARDCODED_WEBSITE_ROUTER_RE = /traefik\.http\.routers\.bondery-website/u;
+const WEBSITE_NETWORK_ALIAS_RE = /BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-website/u;
+const PUBLIC_API_URL_RE = /BONDERY_PUBLIC_API_URL:\s*https:\/\/\$\{BONDERY_INFRA_API_DOMAIN/u;
 const PUBLIC_WEBAPP_URL_RE =
-  /BONDERY_PUBLIC_WEBAPP_URL:\s*https:\/\/\$\{BONDERY_INFRA_WEBAPP_DOMAIN/;
+  /BONDERY_PUBLIC_WEBAPP_URL:\s*https:\/\/\$\{BONDERY_INFRA_WEBAPP_DOMAIN/u;
 const PUBLIC_WEBSITE_URL_RE =
-  /BONDERY_PUBLIC_WEBSITE_URL:\s*https:\/\/\$\{BONDERY_INFRA_WEBSITE_DOMAIN/;
+  /BONDERY_PUBLIC_WEBSITE_URL:\s*https:\/\/\$\{BONDERY_INFRA_WEBSITE_DOMAIN/u;
 const PUBLIC_PLAUSIBLE_DOMAIN_RE =
-  /BONDERY_PUBLIC_PLAUSIBLE_DOMAIN:\s*\$\{BONDERY_INFRA_WEBSITE_DOMAIN/;
+  /BONDERY_PUBLIC_PLAUSIBLE_DOMAIN:\s*\$\{BONDERY_INFRA_WEBSITE_DOMAIN/u;
 const PUBLIC_PLAUSIBLE_HOST_RE =
-  /BONDERY_PUBLIC_PLAUSIBLE_HOST:\s*https:\/\/\$\{BONDERY_INFRA_PLAUSIBLE_DOMAIN/;
+  /BONDERY_PUBLIC_PLAUSIBLE_HOST:\s*https:\/\/\$\{BONDERY_INFRA_PLAUSIBLE_DOMAIN/u;
 const WEBSITE_IMAGE_TAG_RE =
-  /image:\s*ghcr\.io\/usebondery\/website:\$\{BONDERY_INFRA_WEBSITE_IMAGE_TAG:-production\}/;
-const DOKPLOY_NETWORK_RE = /dokploy-network/;
+  /image:\s*ghcr\.io\/usebondery\/website:\$\{BONDERY_INFRA_WEBSITE_IMAGE_TAG:-production\}/u;
+const DOKPLOY_NETWORK_RE = /dokploy-network/u;
 
 function main() {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -39,7 +39,7 @@ function main() {
 
   /** Slice a top-level service block by name (YAML indentation-aware). */
   function serviceBlock(name) {
-    const start = text.search(new RegExp(`^  ${name}:\\s*$`, "m"));
+    const start = text.search(new RegExp(`^  ${name}:\\s*$`, "mu"));
     if (start === -1) {
       errors.push(`Missing service "${name}"`);
       return "";
@@ -55,7 +55,7 @@ function main() {
     if (ENV_FILE_RE.test(website)) {
       errors.push("website must not use env_file");
     }
-    const privateHits = [...website.matchAll(/\b(?:BONDERY_)?PRIVATE_[A-Z0-9_]+\b/g)].map(
+    const privateHits = [...website.matchAll(/\b(?:BONDERY_)?PRIVATE_[A-Z0-9_]+\b/gu)].map(
       (m) => m[0],
     );
     if (privateHits.length > 0) {
@@ -107,7 +107,7 @@ function main() {
     }
     if (!WEBSITE_IMAGE_TAG_RE.test(website)) {
       errors.push(
-        `website image must use ghcr.io/usebondery/website:\${BONDERY_INFRA_WEBSITE_IMAGE_TAG:-production}`,
+        "website image must use ghcr.io/usebondery/website:${BONDERY_INFRA_WEBSITE_IMAGE_TAG:-production}",
       );
     }
     if (!DOKPLOY_NETWORK_RE.test(website)) {

@@ -2,7 +2,7 @@
 
 import { Button, type ButtonProps } from "@mantine/core";
 import type { ReactElement, ReactNode } from "react";
-import Link, { type AppHref } from "#nextjs/NextLink.js";
+import Link, { type AppHref } from "#nextjs/nextLink.js";
 
 export type ButtonLinkProps = Omit<ButtonProps, "component" | "href" | "children"> & {
   href: AppHref;

@@ -11,7 +11,7 @@ import {
 } from "@mantine/core";
 import { IconChevronDown, IconX } from "@tabler/icons-react";
 import { type ReactElement, type ReactNode, useEffect, useRef } from "react";
-import Link, { hrefAssert } from "#nextjs/NextLink.js";
+import Link, { hrefAssert } from "#nextjs/nextLink.js";
 import { PersonAvatarTooltip } from "#nextjs/PersonAvatar/PersonAvatarTooltip.js";
 import { PEOPLE_PICKER_DROPDOWN_WIDTH } from "#peoplePicker/constants.js";
 import { PeoplePickerDropdownBody } from "#peoplePicker/PeoplePickerDropdownBody.js";

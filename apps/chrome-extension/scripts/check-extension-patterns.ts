@@ -8,11 +8,11 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "../../../scripts/check/check-report.mjs";
 
-const FROM_SHARED_IMPORT_RE = /\bfrom\s+["'][./]*(?:src\/)?shared\//;
-const FROM_LIB_API_IMPORT_RE = /\bfrom\s+["'][^"']*lib\/api\//;
-const FROM_MANTINE_NEXT_IMPORT_RE = /\bfrom\s+["']@bondery\/mantine-next["']/;
-const FROM_UTILS_IMPORT_RE = /\bfrom\s+["'][./]*(?:src\/)?utils\//;
-const SOURCE_FILE_EXT_RE = /\.(tsx?|jsx?)$/;
+const FROM_SHARED_IMPORT_RE = /\bfrom\s+["'][./]*(?:src\/)?shared\//u;
+const FROM_LIB_API_IMPORT_RE = /\bfrom\s+["'][^"']*lib\/api\//u;
+const FROM_MANTINE_NEXT_IMPORT_RE = /\bfrom\s+["']@bondery\/mantine-next["']/u;
+const FROM_UTILS_IMPORT_RE = /\bfrom\s+["'][./]*(?:src\/)?utils\//u;
+const SOURCE_FILE_EXT_RE = /\.(?<group1>tsx?|jsx?)$/u;
 const report = createCheck("check-extension-patterns");
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -36,12 +36,12 @@ function walk(dir: string, acc: string[] = []): string[] {
 }
 
 function isApiAllowed(rel: string): boolean {
-  const n = rel.replace(/\\/g, "/");
+  const n = rel.replace(/\\/gu, "/");
   return n.startsWith("lib/api/") || n.startsWith("features/background/");
 }
 
 function checkFile(abs: string): Violation[] {
-  const rel = relative(SRC, abs).replace(/\\/g, "/");
+  const rel = relative(SRC, abs).replace(/\\/gu, "/");
   const text = readFileSync(abs, "utf8");
   const violations: Violation[] = [];
 

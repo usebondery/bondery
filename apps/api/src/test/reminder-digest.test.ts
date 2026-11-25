@@ -8,9 +8,9 @@ import {
 } from "../lib/notifications/transporter.js";
 import { loadTestEnv } from "./load-test-env.js";
 
-const ISO_DATE_2026_07_29_PATTERN = /2026-07-29/;
-const YEAR_2026_PATTERN = /2026/;
-const SMTP_DOWN_PATTERN = /smtp down/;
+const ISO_DATE_2026_07_29_PATTERN = /2026-07-29/u;
+const YEAR_2026_PATTERN = /2026/u;
+const SMTP_DOWN_PATTERN = /smtp down/u;
 
 loadTestEnv();
 

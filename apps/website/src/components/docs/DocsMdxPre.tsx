@@ -1,7 +1,7 @@
 import { isValidElement, type ReactNode } from "react";
 import { DocsCodeBlock } from "@/components/docs/DocsCodeBlock";
 
-const LANGUAGE_CLASS_RE = /language-([\w-]+)/;
+const LANGUAGE_CLASS_RE = /language-(?<group1>[\w-]+)/u;
 function nodeText(node: ReactNode): string {
   const parts: string[] = [];
   const pending: ReactNode[] = [node];

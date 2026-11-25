@@ -25,7 +25,7 @@ import type {
 const isoDateSchema = z
   .string()
   .trim()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, { error: "Date must be YYYY-MM-DD" });
+  .regex(/^\d{4}-\d{2}-\d{2}$/u, { error: "Date must be YYYY-MM-DD" });
 
 const importantDateTypeSchema = z.enum(IMPORTANT_DATE_TYPES) satisfies z.ZodType<ImportantDateType>;
 

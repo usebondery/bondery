@@ -1,6 +1,6 @@
 import type { ConfigContext, ExpoConfig } from "expo/config";
 
-const IPV4_HOSTNAME_RE = /^\d{1,3}(\.\d{1,3}){3}$/;
+const IPV4_HOSTNAME_RE = /^\d{1,3}(?<group1>\.\d{1,3}){3}$/u;
 
 /**
  * Associated-domain host for passkeys and App Links. Skip localhost and IP

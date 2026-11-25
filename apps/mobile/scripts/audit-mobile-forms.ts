@@ -18,7 +18,7 @@ const SUBMIT_FORM_FILES = [
   "src/features/contacts/ContactNotesEditor.tsx",
 ] as const;
 
-const SCHEMA_IMPORT_PATTERN = /from\s+"@bondery\/schemas"/;
+const SCHEMA_IMPORT_PATTERN = /from\s+"@bondery\/schemas"/u;
 const FORBIDDEN_PATTERNS = [
   "unknown as z.ZodType",
   "zodResolver(schema as any)",

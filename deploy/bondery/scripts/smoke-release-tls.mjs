@@ -18,16 +18,17 @@ const GRPC_NODES = [
   "seaweedfs-filer:18888",
   "seaweedfs-s3:18333",
 ];
-const INLINE_PEM_CERT_RE = / {10}-----BEGIN CERTIFICATE-----[\s\S]+? {10}-----END CERTIFICATE-----/;
-const LEADING_TEN_SPACES_RE = /^ {10}/;
+const INLINE_PEM_CERT_RE =
+  / {10}-----BEGIN CERTIFICATE-----[\s\S]+? {10}-----END CERTIFICATE-----/u;
+const LEADING_TEN_SPACES_RE = /^ {10}/u;
 /** Transport file structure: the client certificate block and its inline private key. */
-const TRANSPORT_CLIENT_CERTS_RE = /^ {6}certificates:$/m;
-const TRANSPORT_CLIENT_KEY_RE = /^ {10}key: \|$/m;
-const TRANSPORT_PRIVATE_KEY_RE = /-----BEGIN PRIVATE KEY-----/;
-const TRANSPORT_ROOT_CAS_RE = /^ {6}rootCAs:$/m;
-const API_TRANSPORT_FILE_RE = /-api-transport\.yml$/;
-const POSTGRES_NO_ENCRYPTION_RE = /no encryption/;
-const POSTGRES_CERT_VERIFY_FAILED_RE = /certificate verify failed/i;
+const TRANSPORT_CLIENT_CERTS_RE = /^ {6}certificates:$/mu;
+const TRANSPORT_CLIENT_KEY_RE = /^ {10}key: \|$/mu;
+const TRANSPORT_PRIVATE_KEY_RE = /-----BEGIN PRIVATE KEY-----/u;
+const TRANSPORT_ROOT_CAS_RE = /^ {6}rootCAs:$/mu;
+const API_TRANSPORT_FILE_RE = /-api-transport\.yml$/u;
+const POSTGRES_NO_ENCRYPTION_RE = /no encryption/u;
+const POSTGRES_CERT_VERIFY_FAILED_RE = /certificate verify failed/iu;
 
 /**
  * @param {unknown} value
@@ -364,7 +365,11 @@ export function apiHttpsOnlyFailures(results) {
 export function assertApiHttpsOnly({ compose, fail }) {
   let health = apiHealth(compose);
   // The healthcheck runs every 30 s after a 45 s start period.
-  for (let attempt = 0; attempt < 30 && health !== "healthy" && health !== "unhealthy"; attempt++) {
+  for (
+    let attempt = 0;
+    attempt < 30 && health !== "healthy" && health !== "unhealthy";
+    attempt += 1
+  ) {
     pause(3000);
     health = apiHealth(compose);
   }
@@ -410,10 +415,10 @@ export const TRAEFIK_TRANSPORTS = {
  */
 export function traefikTransportFailures(yaml, name, check = {}) {
   const failures = [];
-  if (!new RegExp(`^ {4}${name}:$`, "m").test(yaml)) {
+  if (!new RegExp(`^ {4}${name}:$`, "mu").test(yaml)) {
     failures.push(`no serversTransport named ${name}`);
   }
-  if (!new RegExp(`^ {6}serverName: ${name}$`, "m").test(yaml)) {
+  if (!new RegExp(`^ {6}serverName: ${name}$`, "mu").test(yaml)) {
     failures.push(`serverName is not ${name}`);
   }
   if (check.clientCertificate) {

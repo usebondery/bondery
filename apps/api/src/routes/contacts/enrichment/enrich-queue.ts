@@ -59,11 +59,11 @@ export function registerEnrichQueueRoutes(fastify: AppFastifyInstance): void {
       const counts = { completed: 0, failed: 0, pending: 0 };
       for (const row of rows) {
         if (row.status === "pending" || row.status === "processing") {
-          counts.pending++;
+          counts.pending += 1;
         } else if (row.status === "completed") {
-          counts.completed++;
+          counts.completed += 1;
         } else if (row.status === "failed") {
-          counts.failed++;
+          counts.failed += 1;
         }
       }
 

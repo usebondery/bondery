@@ -16,9 +16,9 @@ import {
   toNpm,
 } from "./calver.js";
 
-const INVALID_CALVER_RE = /Invalid CalVer/;
-const NO_PREVIOUS_RE = /No previous/;
-const NO_NAMED_RC_RE = /No named RC/;
+const INVALID_CALVER_RE = /Invalid CalVer/u;
+const NO_PREVIOUS_RE = /No previous/u;
+const NO_NAMED_RC_RE = /No named RC/u;
 
 describe("parseCalver", () => {
   it("parses production CalVer", () => {

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { assertDistinctFirstPartyOAuthClientIds } from "./oauth-client-ids.js";
 
-const MUST_BE_DISTINCT_RE = /must be distinct/;
+const MUST_BE_DISTINCT_RE = /must be distinct/u;
 
 describe("assertDistinctFirstPartyOAuthClientIds", () => {
   it("allows distinct ids", () => {

@@ -6,24 +6,24 @@ export type {
 export {
   type ErrorNotificationTemplateProps,
   errorNotificationTemplate,
-} from "#Notifications/ErrorNotificationTemplate.js";
+} from "#Notifications/errorNotificationTemplate.js";
 export {
   type InformationNotificationTemplateProps,
   informationNotificationTemplate,
-} from "#Notifications/InformationNotificationTemplate.js";
+} from "#Notifications/informationNotificationTemplate.js";
 export {
   type LoadingNotificationTemplateProps,
   loadingNotificationTemplate,
-} from "#Notifications/LoadingNotificationTemplate.js";
+} from "#Notifications/loadingNotificationTemplate.js";
 export {
   type StatusNotificationTemplateProps,
   statusNotificationTemplate,
-} from "#Notifications/StatusNotificationTemplate.js";
+} from "#Notifications/statusNotificationTemplate.js";
 export {
   type SuccessNotificationTemplateProps,
   successNotificationTemplate,
-} from "#Notifications/SuccessNotificationTemplate.js";
+} from "#Notifications/successNotificationTemplate.js";
 export {
   type WarningNotificationTemplateProps,
   warningNotificationTemplate,
-} from "#Notifications/WarningNotificationTemplate.js";
+} from "#Notifications/warningNotificationTemplate.js";

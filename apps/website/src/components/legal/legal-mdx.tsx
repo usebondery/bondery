@@ -4,7 +4,7 @@ import type { MDXComponents } from "mdx/types";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { MdxTable } from "@/components/mdx-table";
 
-const EXTERNAL_HREF = /^https?:\/\//;
+const EXTERNAL_HREF = /^https?:\/\//u;
 
 function LegalLink({ href = "", children }: ComponentPropsWithoutRef<"a">) {
   return (

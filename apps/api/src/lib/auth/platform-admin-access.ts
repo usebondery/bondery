@@ -22,4 +22,4 @@ export const platformAdminRoles = {
 } as const;
 
 /** Re-export for tests that assert the statement surface stays stable. */
-export { defaultStatements };
+export { defaultStatements } from "better-auth/plugins/admin/access";

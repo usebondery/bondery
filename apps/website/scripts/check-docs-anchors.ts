@@ -22,8 +22,8 @@ async function main() {
     const seen = new Set<string>();
     const text = readFileSync(file, "utf8");
 
-    for (const match of text.matchAll(/^#{1,6}\s+(.+)$/gm)) {
-      const heading = match[1]?.replace(/[*_`[\]]/g, "").trim() ?? "";
+    for (const match of text.matchAll(/^#{1,6}\s+(?<group1>.+)$/gmu)) {
+      const heading = match[1]?.replace(/[*_`[\]]/gu, "").trim() ?? "";
       const id = slugger.slug(heading);
       if (seen.has(id)) {
         duplicates += 1;

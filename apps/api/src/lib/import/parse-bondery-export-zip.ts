@@ -22,8 +22,8 @@ import type { FastifyBaseLogger } from "fastify";
 import { BYTES_PER_MIB, validateImageMagicBytes } from "../platform/config.js";
 import { badRequest } from "../platform/errors/http-errors.js";
 
-const A_ZA_Z_PATTERN = /^[a-zA-Z]:/;
-const TRAILING_SLASH_PATTERN = /\/$/;
+const A_ZA_Z_PATTERN = /^[a-zA-Z]:/u;
+const TRAILING_SLASH_PATTERN = /\/$/u;
 
 const MAX_NON_PHOTO_ZIP_ENTRIES = 32;
 const MAX_PHOTO_ZIP_FILES = 10_000;
@@ -31,7 +31,7 @@ const MAX_UNCOMPRESSED_MIB = 200;
 const MAX_UNCOMPRESSED_BYTES = MAX_UNCOMPRESSED_MIB * BYTES_PER_MIB;
 const MAX_PHOTO_BYTES = AVATAR_UPLOAD.maxFileSizeBytes;
 
-const FOLLOWERS_JSON_PATTERN = /^followers(?:_\d+)?\.json$/;
+const FOLLOWERS_JSON_PATTERN = /^followers(?:_\d+)?\.json$/u;
 
 const REQUIRED_ROOT_FILES = new Set<string>([
   "manifest.json",

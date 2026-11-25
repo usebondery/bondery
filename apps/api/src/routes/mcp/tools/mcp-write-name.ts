@@ -7,7 +7,7 @@
  * report a broken read tool, so this name skips the `mcp:write` gate.
  */
 
-const CREATE_UPDATE_DELETE_PATTERN = /^(create|update|delete)_/;
+const CREATE_UPDATE_DELETE_PATTERN = /^(?<group1>create|update|delete)_/u;
 const NON_MUTATING_CREATE_TOOLS = new Set(["create_agent_feedback"]);
 
 export function isMcpWriteToolName(name: string): boolean {

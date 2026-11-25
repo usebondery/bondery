@@ -27,10 +27,10 @@ import {
 } from "@/lib/query/hooks/useGroups";
 import { isPageLoadFailure } from "@/lib/query/pageLoadFailure";
 import { nonEmpty } from "@/lib/shared/nonEmpty";
-import { openAddGroupModal } from "./components/AddGroupModal";
-import { openAddPeopleToGroupModal } from "./components/AddPeopleToGroupModal";
-import { openEditGroupModal } from "./components/EditGroupModal";
 import { GroupCard } from "./components/GroupCard";
+import { openAddGroupModal } from "./components/openAddGroupModal";
+import { openAddPeopleToGroupModal } from "./components/openAddPeopleToGroupModal";
+import { openEditGroupModal } from "./components/openEditGroupModal";
 import { SortMenu, type SortOption } from "./components/SortMenu";
 
 const LIST_PARAMS = { previewLimit: 3 };

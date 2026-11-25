@@ -10,8 +10,8 @@ import { fileURLToPath } from "node:url";
 import { createCheck } from "../../../scripts/check/check-report.mjs";
 import { ALL_LOCALES as LOCALES, localesForNamespace } from "./lib/namespace-locales.mjs";
 
-const TSX_JSX_RE = /\.(tsx?|jsx?)$/;
-const FEW_MANY_ZERO_TWO_RE = /_(few|many|zero|two)$/;
+const TSX_JSX_RE = /\.(?<group1>tsx?|jsx?)$/u;
+const FEW_MANY_ZERO_TWO_RE = /_(?<group1>few|many|zero|two)$/u;
 
 const check = createCheck("check-i18n-usage");
 
@@ -131,13 +131,15 @@ for (const [name, entry] of Object.entries(manifest.namespaces)) {
 }
 
 const hookBindingRes = [
-  /const\s+(\w+)\s*=\s*use([A-Za-z]+)Translations\(\s*(?:["']([^"']+)["'])?/g,
-  /const\s+(\w+)\s*=\s*await\s+get([A-Za-z]+)Translations\(\s*(?:["']([^"']+)["'])?/g,
+  /const\s+(?<group1>\w+)\s*=\s*use(?<group2>[A-Za-z]+)Translations\(\s*(?:["'](?<group3>[^"']+)["'])?/gu,
+  /const\s+(?<group1>\w+)\s*=\s*await\s+get(?<group2>[A-Za-z]+)Translations\(\s*(?:["'](?<group3>[^"']+)["'])?/gu,
 ];
-const tWithNsRe = /\b(\w+)\(\s*["']([^"']+)["']\s*,\s*\{[^}]*\bns:\s*["']([^"']+)["']/g;
-const tCallRe = /\b(\w+)\(\s*["']([^"']+)["'](?!\s*,\s*\{[^}]*\bns:)/g;
-const transI18nKeyFirstRe = /\bi18nKey=\{?"([^"']+)"\}?[\s\S]{0,1200}?\bt=\{(\w+)\}/g;
-const transTFirstRe = /\bt=\{(\w+)\}[\s\S]{0,1200}?\bi18nKey=\{?"([^"']+)"\}?/g;
+const tWithNsRe =
+  /\b(?<group1>\w+)\(\s*["'](?<group2>[^"']+)["']\s*,\s*\{[^}]*\bns:\s*["'](?<group3>[^"']+)["']/gu;
+const tCallRe = /\b(?<group1>\w+)\(\s*["'](?<group2>[^"']+)["'](?!\s*,\s*\{[^}]*\bns:)/gu;
+const transI18nKeyFirstRe =
+  /\bi18nKey=\{?"(?<group1>[^"']+)"\}?[\s\S]{0,1200}?\bt=\{(?<group2>\w+)\}/gu;
+const transTFirstRe = /\bt=\{(?<group1>\w+)\}[\s\S]{0,1200}?\bi18nKey=\{?"(?<group2>[^"']+)"\}?/gu;
 
 const usedKeys = new Map();
 const discovered = new Set();

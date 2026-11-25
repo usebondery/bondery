@@ -13,7 +13,7 @@ import { StepImport } from "./components/StepImport";
 import { StepIntent } from "./components/StepIntent";
 import { StepLoading } from "./components/StepLoading";
 import { StepWelcome } from "./components/StepWelcome";
-import { OnboardingProvider } from "./hooks/OnboardingContext";
+import { OnboardingProvider } from "./hooks/onboardingProvider";
 
 const STEP_PROGRESS: Record<number, number> = {
   0: 10,

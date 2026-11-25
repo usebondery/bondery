@@ -1,14 +1,14 @@
-const TRAILING_SLASHES_PATTERN = /\/+$/;
-const LOCAL_DEV_ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
-const CHROME_EXTENSION_ID = /^[a-p]{32}$/;
+const TRAILING_SLASHES_PATTERN = /\/+$/u;
+const LOCAL_DEV_ORIGIN = /^https?:\/\/(?<group1>localhost|127\.0\.0\.1)(?<group2>:\d+)?$/u;
+const CHROME_EXTENSION_ID = /^[a-p]{32}$/u;
 
 function originMatchesWildcard(origin: string, pattern: string): boolean {
   if (!pattern.includes("*")) {
     return origin === pattern;
   }
 
-  const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*");
-  return new RegExp(`^${escaped}$`).test(origin);
+  const escaped = pattern.replace(/[.+?^${}()|[\]\\]/gu, "\\$&").replace(/\*/gu, ".*");
+  return new RegExp(`^${escaped}$`, "u").test(origin);
 }
 
 export function chromeExtensionOrigin(extensionId: string | undefined): string | undefined {

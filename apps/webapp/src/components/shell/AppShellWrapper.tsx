@@ -19,7 +19,7 @@ import { useDisclosure, useDrag, useHotkeys, useMediaQuery } from "@mantine/hook
 import { IconMenu2, IconX } from "@tabler/icons-react";
 import { usePathname } from "next/navigation";
 import { type MouseEvent, useEffect, useRef, useState } from "react";
-import { ChatSessionsProvider } from "@/lib/chat/ChatSessionsContext";
+import { ChatSessionsProvider } from "@/lib/chat/chatSessionsProvider";
 import { setClientCookie } from "@/lib/cookies/client";
 import {
   SIDEBAR_LAST_EXPANDED_COOKIE_NAME,
@@ -38,7 +38,7 @@ import {
 } from "@/lib/shell/sidebarWidth";
 import { AppShellMainScrollArea } from "./AppShellMainScrollArea";
 import { CommandPalette, spotlight } from "./CommandPalette";
-import { NavigationSidebarContent } from "./NavigationSidebar";
+import { NavigationSidebarContent } from "./navigationSidebar";
 import { PeopleSearchSpotlight } from "./PeopleSearchSpotlight";
 import { ShellMainFooterHost, ShellMainFooterProvider } from "./ShellMainFooter";
 
@@ -226,7 +226,7 @@ export function AppShellWrapper({
         spotlight.open();
       } else {
         const menuButton = document
-          .getElementById(APP_SHELL_MENU_BUTTON_ID)
+          .querySelector(`#${CSS.escape(APP_SHELL_MENU_BUTTON_ID)}`)
           ?.querySelector("button");
         menuButton?.focus();
       }

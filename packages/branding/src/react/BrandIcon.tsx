@@ -5,7 +5,7 @@ import {
   type BrandIconName,
 } from "../brandIcons.generated.js";
 
-export type { BrandIconName };
+export type { BrandIconName } from "../brandIcons.generated.js";
 
 export interface BrandIconProps {
   /** Paint the glyph this colour. Defaults to white, which reads on every brand colour. */

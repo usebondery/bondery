@@ -1,7 +1,7 @@
 import { getTimeZones } from "@vvo/tzdb";
 
-const ZA_RE = /^[A-Za-z]{2}$/;
-const PATTERN_5E5C647B337D_RE = /^\d{3}$/;
+const ZA_RE = /^[A-Za-z]{2}$/u;
+const PATTERN_5E5C647B337D_RE = /^\d{3}$/u;
 
 const regionNamesByLocale = new Map<string, Intl.DisplayNames>();
 /** `null` records a locale whose runtime rejects `type: "timeZone"`, so the throw happens once. */

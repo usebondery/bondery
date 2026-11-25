@@ -10,7 +10,7 @@ import { useOs } from "@mantine/hooks";
 import type { ReactElement } from "react";
 import { resolveShortcutKeyLabel, type ShortcutKeyToken } from "#Kbd/resolveShortcutKeyLabel.js";
 
-export type { ShortcutKeyToken };
+export type { ShortcutKeyToken } from "#Kbd/resolveShortcutKeyLabel.js";
 
 export interface KbdProps extends Omit<MantineKbdProps, "children"> {
   /** Gap between key chips when rendering multiple keys. Defaults to `4`. */

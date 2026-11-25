@@ -1,13 +1,13 @@
-const WHITESPACE_RUN_RE = /\s+/g;
-const LEADING_WHITESPACE_RE = /^\s+/;
-const TRAILING_WHITESPACE_RE = /\s+$/;
-const WHITESPACE_AT_END_RE = /\s$/;
-const WHITESPACE_AT_START_RE = /^\s/;
-const SENTENCE_END_RE = /[.!?…\n]\s*$/;
+const WHITESPACE_RUN_RE = /\s+/gu;
+const LEADING_WHITESPACE_RE = /^\s+/u;
+const TRAILING_WHITESPACE_RE = /\s+$/u;
+const WHITESPACE_AT_END_RE = /\s$/u;
+const WHITESPACE_AT_START_RE = /^\s/u;
+const SENTENCE_END_RE = /[.!?…\n]\s*$/u;
 /** Start of the field, or any sentence boundary. Leading space is allowed. */
-const SENTENCE_START_LETTER_RE = /(^[\s]*|[.!?…\n]\s*)(\p{L})/gu;
+const SENTENCE_START_LETTER_RE = /(?<group1>^[\s]*|[.!?…\n]\s*)(?<group2>\p{L})/gu;
 /** A sentence boundary inside the text only. The first letter stays as spoken. */
-const INNER_SENTENCE_LETTER_RE = /([.!?…\n]\s*)(\p{L})/gu;
+const INNER_SENTENCE_LETTER_RE = /(?<group1>[.!?…\n]\s*)(?<group2>\p{L})/gu;
 
 /**
  * Joins the two spoken parts.

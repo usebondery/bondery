@@ -1,6 +1,6 @@
 import type { VCardParameter, VCardProperty } from "#model.js";
 
-const FA_RE = /^[0-9A-Fa-f]{2}$/;
+const FA_RE = /^[0-9A-Fa-f]{2}$/u;
 
 /** Checks whether a content line has ENCODING=QUOTED-PRINTABLE in the property parameters. */
 function isQuotedPrintableLine(line: string): boolean {
@@ -119,7 +119,7 @@ function parseParameters(tokens: string[]): VCardParameter[] {
 
     const name = token.slice(0, equalsIndex).trim().toUpperCase();
     const rawValue = token.slice(equalsIndex + 1).trim();
-    const values = splitCommaTokens(rawValue).map((value) => value.replace(/^"|"$/g, ""));
+    const values = splitCommaTokens(rawValue).map((value) => value.replace(/^"|"$/gu, ""));
     parameters.push({ name, values });
   }
 
@@ -127,7 +127,7 @@ function parseParameters(tokens: string[]): VCardParameter[] {
 }
 
 export function unfoldLines(input: string): string[] {
-  const normalized = input.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+  const normalized = input.replace(/\r\n/gu, "\n").replace(/\r/gu, "\n");
   const physicalLines = normalized.split("\n");
   const logicalLines: string[] = [];
 

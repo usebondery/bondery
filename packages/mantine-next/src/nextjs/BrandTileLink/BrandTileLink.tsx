@@ -3,7 +3,7 @@
 import NextImage from "next/image.js";
 import type { CSSProperties, ReactElement } from "react";
 import { ActionIconLink, type ActionIconLinkProps } from "#nextjs/ActionIconLink/ActionIconLink.js";
-import { hrefAssert } from "#nextjs/NextLink.js";
+import { hrefAssert } from "#nextjs/nextLink.js";
 
 /**
  * How a brand mark is drawn on its tile.

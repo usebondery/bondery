@@ -8,7 +8,7 @@ import { after, beforeEach, describe, it } from "node:test";
 
 import { apiCertificateNames, apiSecretPaths, ensureApiSecrets } from "./api-secrets.js";
 
-const ALTNAMES_HOSTNAME_PATTERN = /altnames|Hostname/;
+const ALTNAMES_HOSTNAME_PATTERN = /altnames|Hostname/u;
 
 /** An HTTPS request that trusts only `ca`, as the webapp does, to `servername`. */
 async function requestWithCa(paths: ReturnType<typeof apiSecretPaths>, servername: string) {

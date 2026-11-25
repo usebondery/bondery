@@ -6,9 +6,9 @@ import {
 } from "@bondery/schemas";
 import { strFromU8, unzipSync } from "fflate";
 
-const PATTERN = /\/$/;
+const PATTERN = /\/$/u;
 
-const FOLLOWERS_JSON_PATTERN = /^followers(?:_\d+)?\.json$/;
+const FOLLOWERS_JSON_PATTERN = /^followers(?:_\d+)?\.json$/u;
 
 function normalizeZipPath(entryName: string): string {
   return entryName.replaceAll("\\", "/");

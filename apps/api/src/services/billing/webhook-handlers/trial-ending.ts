@@ -8,7 +8,7 @@ import {
   markTrialEndingEmailSent,
 } from "../subscription.js";
 
-const UUID_PATTERN = /^[0-9a-f-]{36}$/i;
+const UUID_PATTERN = /^[0-9a-f-]{36}$/iu;
 
 async function resolveUserEmail(userId: string): Promise<string | null> {
   const user = await prisma.user.findUnique({

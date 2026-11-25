@@ -30,15 +30,15 @@ const API_PORT = "26631";
 
 const API_LINES = [
   [
-    new RegExp(`^\\s+API_PORT: "${API_PORT}"\\s*$`, "m"),
+    new RegExp(`^\\s+API_PORT: "${API_PORT}"\\s*$`, "mu"),
     `api must set API_PORT: "${API_PORT}" (its only listener, HTTPS)`,
   ],
   [
-    /^\s+BONDERY_PRIVATE_API_TLS_CERT_FILE: \/bondery-api\/server\/tls\.crt\s*$/m,
+    /^\s+BONDERY_PRIVATE_API_TLS_CERT_FILE: \/bondery-api\/server\/tls\.crt\s*$/mu,
     "api must serve HTTPS with BONDERY_PRIVATE_API_TLS_CERT_FILE: /bondery-api/server/tls.crt",
   ],
   [
-    /^\s+BONDERY_PRIVATE_API_TLS_KEY_FILE: \/bondery-api\/server\/tls\.key\s*$/m,
+    /^\s+BONDERY_PRIVATE_API_TLS_KEY_FILE: \/bondery-api\/server\/tls\.key\s*$/mu,
     "api must serve HTTPS with BONDERY_PRIVATE_API_TLS_KEY_FILE: /bondery-api/server/tls.key",
   ],
 ];
@@ -46,36 +46,37 @@ const API_LINES = [
 /** The healthcheck uses the HTTPS listener too, and verifies it against the API CA. */
 const API_HEALTHCHECK = new RegExp(
   String.raw`require\('node:https'\)\.get\(\{ca:require\('node:fs'\)\.readFileSync\('\/bondery-api\/client\/ca\.crt'\),host:'127\.0\.0\.1',path:'\/health\/live',port:${API_PORT}\}`,
+  "u",
 );
 
 const WEBAPP_LINES = [
   [
     new RegExp(
       String.raw`^\s+BONDERY_INFRA_INTERNAL_API_URL: https:\/\/\$\{BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-api:${API_PORT}\s*$`,
-      "m",
+      "mu",
     ),
     `webapp BONDERY_INFRA_INTERNAL_API_URL must be the internal HTTPS listener: https:// + the BONDERY_INFRA_TRAEFIK_PREFIX api alias + :${API_PORT}`,
   ],
   [
-    /^\s+BONDERY_INFRA_INTERNAL_API_CA_FILE: \/bondery-api\/client\/ca\.crt\s*$/m,
+    /^\s+BONDERY_INFRA_INTERNAL_API_CA_FILE: \/bondery-api\/client\/ca\.crt\s*$/mu,
     "webapp must trust the API CA: BONDERY_INFRA_INTERNAL_API_CA_FILE: /bondery-api/client/ca.crt",
   ],
 ];
 
-const API_TLS_CA_VOLUME_RE = /api-tls-ca:/;
+const API_TLS_CA_VOLUME_RE = /api-tls-ca:/u;
 /**
  * The API serves HTTPS only: the retired plaintext listener used `API_TLS_PORT` and a loopback
  * `http://` healthcheck. The port number itself is now the HTTPS listener.
  */
-const API_PLAIN_HTTP_RE = /API_TLS_PORT|http:\/\/127\.0\.0\.1/;
+const API_PLAIN_HTTP_RE = /API_TLS_PORT|http:\/\/127\.0\.0\.1/u;
 const STACK_SECRETS_COMPLETED_RE =
-  /stack-secrets:\s*\n\s*condition:\s*service_completed_successfully/;
-const API_TLS_CA_OR_SERVER_VOLUME_RE = /api-tls-(?:ca|server):/;
-const VOLUMES_RESET_RE = /volumes: !reset \[\]/;
-const PREFIX_CHARSET_RE = /\*\[!a-z0-9-\]\*/;
-const API_OR_STORAGE_CASE_RE = /^\s+api \| storage\) ;;$/m;
-const TRANSPORT_TARGET_RE = /target="\$DYNAMIC_DIR\/\$name-transport\.yml"/;
-const ATOMIC_MV_RE = /mv -f "\$staging" "\$target"/;
+  /stack-secrets:\s*\n\s*condition:\s*service_completed_successfully/u;
+const API_TLS_CA_OR_SERVER_VOLUME_RE = /api-tls-(?:ca|server):/u;
+const VOLUMES_RESET_RE = /volumes: !reset \[\]/u;
+const PREFIX_CHARSET_RE = /\*\[!a-z0-9-\]\*/u;
+const API_OR_STORAGE_CASE_RE = /^\s+api \| storage\) ;;$/mu;
+const TRANSPORT_TARGET_RE = /target="\$DYNAMIC_DIR\/\$name-transport\.yml"/u;
+const ATOMIC_MV_RE = /mv -f "\$staging" "\$target"/u;
 
 /**
  * The job that publishes the API and storage serversTransports writes into Traefik's dynamic
@@ -83,36 +84,36 @@ const ATOMIC_MV_RE = /mv -f "\$staging" "\$target"/;
  */
 const TRANSPORT_JOB_RULES = [
   [
-    /^\s+image: busybox:\d/m,
+    /^\s+image: busybox:\d/mu,
     "traefik-transport must run a pinned busybox image, not the API image",
   ],
-  [/^\s+network_mode: none\s*$/m, "traefik-transport must run without a network"],
-  [/^\s+read_only: true\s*$/m, "traefik-transport must have a read-only root filesystem"],
-  [/cap_drop:\s*\n\s*- ALL/, "traefik-transport must drop all capabilities"],
-  [/no-new-privileges:true/, "traefik-transport must set no-new-privileges"],
+  [/^\s+network_mode: none\s*$/mu, "traefik-transport must run without a network"],
+  [/^\s+read_only: true\s*$/mu, "traefik-transport must have a read-only root filesystem"],
+  [/cap_drop:\s*\n\s*- ALL/u, "traefik-transport must drop all capabilities"],
+  [/no-new-privileges:true/u, "traefik-transport must set no-new-privileges"],
   [
-    /^\s+- api-tls-client:\/bondery-api\/client:ro\s*$/m,
+    /^\s+- api-tls-client:\/bondery-api\/client:ro\s*$/mu,
     "traefik-transport must mount api-tls-client read-only",
   ],
   [
-    /^\s+- storage-tls-traefik:\/bondery-storage\/traefik:ro\s*$/m,
+    /^\s+- storage-tls-traefik:\/bondery-storage\/traefik:ro\s*$/mu,
     "traefik-transport must mount storage-tls-traefik read-only (its own client certificate)",
   ],
   [
-    /^\s+- storage-tls-client:\/bondery-storage\/client:ro\s*$/m,
+    /^\s+- storage-tls-client:\/bondery-storage\/client:ro\s*$/mu,
     "traefik-transport must not mount the API's storage client volume",
     false,
   ],
   [
-    /^\s+- \.\/traefik\/publish-transports\.sh:\/bondery\/publish-transports\.sh:ro\s*$/m,
+    /^\s+- \.\/traefik\/publish-transports\.sh:\/bondery\/publish-transports\.sh:ro\s*$/mu,
     "traefik-transport must run deploy/bondery/traefik/publish-transports.sh, mounted read-only",
   ],
   [
-    /source: \$\{BONDERY_INFRA_TRAEFIK_DYNAMIC_DIR:-\/etc\/dokploy\/traefik\/dynamic\}\s*\n\s*target: \/traefik-dynamic\s*\n\s*bind:\s*\n\s*create_host_path: false/,
+    /source: \$\{BONDERY_INFRA_TRAEFIK_DYNAMIC_DIR:-\/etc\/dokploy\/traefik\/dynamic\}\s*\n\s*target: \/traefik-dynamic\s*\n\s*bind:\s*\n\s*create_host_path: false/u,
     "traefik-transport must bind ${BONDERY_INFRA_TRAEFIK_DYNAMIC_DIR:-/etc/dokploy/traefik/dynamic} at /traefik-dynamic with create_host_path: false (fail, never create it)",
   ],
   [
-    /(?:api|storage)-tls-(?:ca|server|cluster):|docker\.sock/,
+    /(?:api|storage)-tls-(?:ca|server|cluster):|docker\.sock/u,
     "traefik-transport must not mount keys or the Docker socket",
     false,
   ],
@@ -125,26 +126,26 @@ const TRANSPORT_JOB_RULES = [
 /** Traefik forwards to the HTTPS listener and verifies it with the published transport. */
 const API_LABEL_RULES = [
   [
-    new RegExp(`-api\\.loadbalancer\\.server\\.port=${API_PORT}"`),
+    new RegExp(`-api\\.loadbalancer\\.server\\.port=${API_PORT}"`, "u"),
     `api Traefik service must forward to the HTTPS listener (loadbalancer.server.port=${API_PORT})`,
   ],
   [
-    /-api\.loadbalancer\.server\.scheme=https"/,
+    /-api\.loadbalancer\.server\.scheme=https"/u,
     "api Traefik service must use loadbalancer.server.scheme=https",
   ],
   [
-    /-api\.loadbalancer\.serverstransport=\$\{BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-api@file"/,
+    /-api\.loadbalancer\.serverstransport=\$\{BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-api@file"/u,
     "api Traefik service must use the published serversTransport (<prefix>-api@file)",
   ],
   [
     // Traefik speaks TLS to the API only. A second scheme or a plaintext backend URL would
     // reintroduce the hop this design removed.
-    /loadbalancer\.server\.scheme=http"/,
+    /loadbalancer\.server\.scheme=http"/u,
     "api Traefik service must not forward over plaintext http",
     false,
   ],
   [
-    /traefik-transport:\s*\n\s*condition:\s*service_completed_successfully/,
+    /traefik-transport:\s*\n\s*condition:\s*service_completed_successfully/u,
     "api must depends_on traefik-transport with condition: service_completed_successfully",
   ],
 ];
@@ -248,7 +249,7 @@ export function checkApiTls({ root, serviceBlock }) {
   if (!(overrideBlock && VOLUMES_RESET_RE.test(overrideBlock))) {
     errors.push(`${overrideLabel}: traefik-transport must drop its volumes (volumes: !reset [])`);
   }
-  for (const [, mapping] of overrideText.matchAll(/^\s+- "([^"]+:\d+)"\s*$/gm)) {
+  for (const [, mapping] of overrideText.matchAll(/^\s+- "(?<group1>[^"]+:\d+)"\s*$/gmu)) {
     if (!mapping.startsWith("127.0.0.1:")) {
       errors.push(
         `${overrideLabel}: publish ${mapping} on 127.0.0.1 only; a reverse proxy serves it`,

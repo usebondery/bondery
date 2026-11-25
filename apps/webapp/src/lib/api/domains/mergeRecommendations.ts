@@ -13,7 +13,7 @@ import {
   parseMergeRecommendationsCount,
 } from "@/lib/api/resources/mergeRecommendations";
 
-export type { MergeRecommendationsParams };
+export type { MergeRecommendationsParams } from "@/lib/api/resources/mergeRecommendations";
 
 export async function getMergeRecommendations(
   params?: MergeRecommendationsParams,

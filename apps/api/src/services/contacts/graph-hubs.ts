@@ -122,7 +122,7 @@ export const RELATIONSHIP_GRAPH_GROUP_HULL_CAP = 8;
 export function normalizeHubName(raw: string): string | null {
   const stripped = raw.trim().normalize("NFD").replace(COMBINING_MARKS, "");
   const lowered = stripped.toLowerCase().replaceAll("&", " ");
-  const collapsed = lowered.replace(NOT_NAME_CHAR, "").replace(/\s+/g, " ").trim();
+  const collapsed = lowered.replace(NOT_NAME_CHAR, "").replace(/\s+/gu, " ").trim();
   if (!collapsed) {
     return null;
   }

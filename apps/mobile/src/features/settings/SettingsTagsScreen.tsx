@@ -7,8 +7,8 @@ import { ScrollView } from "react-native";
 import { StackNavBar } from "../../components/chrome";
 import { ActionIcon } from "../../components/ui/ActionIcon";
 import { InputWrapper } from "../../components/ui/InputWrapper";
-import { Select } from "../../components/ui/Select";
 import { Stack } from "../../components/ui/Stack";
+import { Select } from "../../components/ui/select";
 import { updateSettings } from "../../lib/api/client";
 import {
   useMobileSettingsTranslations,
@@ -26,8 +26,8 @@ import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { ContactsTagsHeader } from "../contacts/components/ContactsTagsHeader";
 import { TagEditSheet } from "../contacts/components/TagEditSheet";
 import { sortTags } from "../contacts/tagSort";
-import { SettingsAsyncState } from "./components/SettingsAsyncState";
 import { SettingsPreviewSection } from "./components/SettingsPreviewSection";
+import { SettingsAsyncState } from "./components/settingsAsyncState";
 
 export function SettingsTagsScreen() {
   const tMobileSettings = useMobileSettingsTranslations();

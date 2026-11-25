@@ -36,7 +36,7 @@ const swipeActionPreferenceSchema: z.ZodType<SwipeActionPreference> = z
 const reminderSendHourSchema = z
   .string()
   .trim()
-  .regex(/^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/, {
+  .regex(/^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/u, {
     error: "Reminder time must be in HH:MM or HH:MM:SS format",
   })
   .describe("Local time of day to send reminder emails, as `HH:MM` or `HH:MM:SS`");
@@ -51,7 +51,7 @@ const isoCountryCodeStringSchema = z
   .string()
   .trim()
   .length(2, { error: "Country code must be 2 letters" })
-  .regex(/^[A-Za-z]{2}$/, { error: "Country code must be ISO-3166 alpha-2" });
+  .regex(/^[A-Za-z]{2}$/u, { error: "Country code must be ISO-3166 alpha-2" });
 
 /** Response/OpenAPI wire shape — no transform (Fastify serialization). */
 const isoCountryCodeSchema = isoCountryCodeStringSchema.describe("ISO 3166-1 alpha-2 country code");

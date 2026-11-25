@@ -4,11 +4,11 @@ import type { S3Client } from "@aws-sdk/client-s3";
 
 import { loadTestEnv } from "./load-test-env.js";
 
-const DATABASE_URL_MUST_BE_SET_PATTERN = /DATABASE_URL must be set/;
-const POSTGRES_VERIFY_FAILED_PATTERN = /Postgres verify failed/;
-const BONDERY_PRIVATE_S3_MUST_BE_SET_PATTERN = /BONDERY_PRIVATE_S3_\* must be set/;
-const OBJECT_STORAGE_VERIFY_FAILED_PATTERN = /Object storage verify failed/;
-const BONDERY_PRIVATE_REDIS_URL_MUST_BE_SET_PATTERN = /BONDERY_PRIVATE_REDIS_URL must be set/;
+const DATABASE_URL_MUST_BE_SET_PATTERN = /DATABASE_URL must be set/u;
+const POSTGRES_VERIFY_FAILED_PATTERN = /Postgres verify failed/u;
+const BONDERY_PRIVATE_S3_MUST_BE_SET_PATTERN = /BONDERY_PRIVATE_S3_\* must be set/u;
+const OBJECT_STORAGE_VERIFY_FAILED_PATTERN = /Object storage verify failed/u;
+const BONDERY_PRIVATE_REDIS_URL_MUST_BE_SET_PATTERN = /BONDERY_PRIVATE_REDIS_URL must be set/u;
 
 loadTestEnv();
 

@@ -78,4 +78,5 @@ function useMentionableContacts({
   };
 }
 
-export { filterMentionContacts, MAX_MENTION_RESULTS, useMentionableContacts };
+export { filterMentionContacts, MAX_MENTION_RESULTS } from "./filterMentionContacts";
+export { useMentionableContacts };

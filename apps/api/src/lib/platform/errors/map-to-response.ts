@@ -6,7 +6,7 @@ import { SyncConflictError } from "../../sync/conflict.js";
 import { type ErrorCode, getErrorDefinition } from "./codes.js";
 import { buildApiErrorBody, toApiErrorResponse } from "./to-api-error-response.js";
 
-const FIRST_TOKEN_PATTERN = /^([^\s]+)\s+/;
+const FIRST_TOKEN_PATTERN = /^(?<group1>[^\s]+)\s+/u;
 
 interface MappedErrorResponse {
   body: ApiErrorResponse;

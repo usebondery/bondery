@@ -3,14 +3,14 @@ import { describe, it } from "node:test";
 import { buildChatSystemPrompt } from "./system-prompt.js";
 
 const YOUR_CONTACT_CARD_ID_IS_PATTERN =
-  /Your contact card id is 11111111-1111-4111-8111-111111111111/;
-const GET_CONTACT_LINKEDIN_PATTERN = /get_contact_linkedin/;
-const UPDATE_INTERACTION_PATTERN = /update_interaction/;
-const CREATE_INTERACTION_PATTERN = /create_interaction/;
-const BP_ACTION_SHARE_CONTACT_UUID_PATTERN = /\[\[bp:action:share-contact\|UUID\]\]/;
-const ERROR_CODE_MESSAGE_DOC_URL_PATTERN = /error: \{ code, message, doc_url \}/;
-const LOG_INTERACTION_PATTERN = /log_interaction/;
-const GET_MYSELF_DETAILS_PATTERN = /get_myself_details/;
+  /Your contact card id is 11111111-1111-4111-8111-111111111111/u;
+const GET_CONTACT_LINKEDIN_PATTERN = /get_contact_linkedin/u;
+const UPDATE_INTERACTION_PATTERN = /update_interaction/u;
+const CREATE_INTERACTION_PATTERN = /create_interaction/u;
+const BP_ACTION_SHARE_CONTACT_UUID_PATTERN = /\[\[bp:action:share-contact\|UUID\]\]/u;
+const ERROR_CODE_MESSAGE_DOC_URL_PATTERN = /error: \{ code, message, doc_url \}/u;
+const LOG_INTERACTION_PATTERN = /log_interaction/u;
+const GET_MYSELF_DETAILS_PATTERN = /get_myself_details/u;
 
 describe("buildChatSystemPrompt", () => {
   it("injects the myself contact id and canonical tool names", () => {

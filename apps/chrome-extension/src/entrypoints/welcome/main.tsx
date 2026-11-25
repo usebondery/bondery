@@ -8,7 +8,7 @@ import WelcomeApp from "../../features/welcome/WelcomeApp";
 import { I18nProvider } from "../../lib/i18n/I18nProvider";
 import { MantineWrapper } from "../../lib/ui";
 
-const root = document.getElementById("welcome-root");
+const root = document.querySelector("#welcome-root");
 
 if (root) {
   ReactDOM.createRoot(root).render(

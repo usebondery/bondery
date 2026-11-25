@@ -3,7 +3,7 @@ import { afterEach, describe, it } from "node:test";
 
 import { loadTestEnv } from "./load-test-env.js";
 
-const D_D_D_T_PATTERN = /^\d{4}-\d{2}-\d{2}T/;
+const D_D_D_T_PATTERN = /^\d{4}-\d{2}-\d{2}T/u;
 
 describe("gET /health/live", () => {
   const originalVersion = process.env["BONDERY_INFRA_VERSION"];

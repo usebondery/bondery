@@ -19,26 +19,26 @@ const STACK_FILES = [
 
 /** The db TLS wrapper, in either flow-sequence spacing a YAML formatter may produce. */
 const TLS_WRAPPER_ENTRYPOINT =
-  /entrypoint:\s*\[\s*"\/bin\/sh",\s*"\/etc\/bondery\/entrypoint\.sh"\s*\]/;
-const DATABASE_SSL_MODE_VERIFY_FULL_RE = /^\s+DATABASE_SSL_MODE: verify-full\s*$/m;
+  /entrypoint:\s*\[\s*"\/bin\/sh",\s*"\/etc\/bondery\/entrypoint\.sh"\s*\]/u;
+const DATABASE_SSL_MODE_VERIFY_FULL_RE = /^\s+DATABASE_SSL_MODE: verify-full\s*$/mu;
 const DATABASE_SSL_ROOT_CERT_FILE_RE =
-  /^\s+DATABASE_SSL_ROOT_CERT_FILE: \/bondery-postgres\/client\/ca\.crt\s*$/m;
-const POSTGRES_TLS_CA_OR_SERVER_VOLUME_RE = /- postgres-tls-(?:ca|server):/;
-const DATABASE_URL_SSLMODE_RE = /DATABASE_URL:[^\n]*sslmode/;
+  /^\s+DATABASE_SSL_ROOT_CERT_FILE: \/bondery-postgres\/client\/ca\.crt\s*$/mu;
+const POSTGRES_TLS_CA_OR_SERVER_VOLUME_RE = /- postgres-tls-(?:ca|server):/u;
+const DATABASE_URL_SSLMODE_RE = /DATABASE_URL:[^\n]*sslmode/u;
 const STACK_SECRETS_COMPLETED_RE =
-  /stack-secrets:\s*\n\s*condition:\s*service_completed_successfully/;
-const POSTGRES_TMPFS_RE = /tmpfs:\s*\n\s*- \/run\/bondery-postgres/;
-const POSTGRES_SSL_ON_RE = /-c ssl=on/;
-const POSTGRES_HBA_FILE_RE = /hba_file=\/etc\/bondery\/pg_hba\.conf/;
-const POSTGRES_SSL_MIN_PROTOCOL_RE = /ssl_min_protocol_version=TLSv1\.[23]/;
-const POSTGRES_KEY_INSTALL_RE = /install -o postgres -g postgres -m 0600 [^\n]*tls\.key/;
-const POSTGRES_TLS_CA_OR_CLIENT_VOLUME_RE = /- postgres-tls-(?:ca|client):/;
-const HASH_COMMENT_RE = /#.*/;
-const WHITESPACE_SPLIT_RE = /\s+/;
-const DEV_DB_LOOPBACK_PORT_RE = /- "127\.0\.0\.1:54322:5432"/;
-const PUBLIC_POSTGRES_PORT_RE = /- "(?:0\.0\.0\.0:)?\d+:5432"/;
-const EXTERNAL_DATABASE_SSL_MODE_RE = /DATABASE_SSL_MODE: \$\{DATABASE_SSL_MODE:-verify-full\}/;
-const BUNDLED_POSTGRES_PROFILE_RE = /profiles:\s*\[\s*"bundled-postgres"\s*\]/;
+  /stack-secrets:\s*\n\s*condition:\s*service_completed_successfully/u;
+const POSTGRES_TMPFS_RE = /tmpfs:\s*\n\s*- \/run\/bondery-postgres/u;
+const POSTGRES_SSL_ON_RE = /-c ssl=on/u;
+const POSTGRES_HBA_FILE_RE = /hba_file=\/etc\/bondery\/pg_hba\.conf/u;
+const POSTGRES_SSL_MIN_PROTOCOL_RE = /ssl_min_protocol_version=TLSv1\.[23]/u;
+const POSTGRES_KEY_INSTALL_RE = /install -o postgres -g postgres -m 0600 [^\n]*tls\.key/u;
+const POSTGRES_TLS_CA_OR_CLIENT_VOLUME_RE = /- postgres-tls-(?:ca|client):/u;
+const HASH_COMMENT_RE = /#.*/u;
+const WHITESPACE_SPLIT_RE = /\s+/u;
+const DEV_DB_LOOPBACK_PORT_RE = /- "127\.0\.0\.1:54322:5432"/u;
+const PUBLIC_POSTGRES_PORT_RE = /- "(?:0\.0\.0\.0:)?\d+:5432"/u;
+const EXTERNAL_DATABASE_SSL_MODE_RE = /DATABASE_SSL_MODE: \$\{DATABASE_SSL_MODE:-verify-full\}/u;
+const BUNDLED_POSTGRES_PROFILE_RE = /profiles:\s*\[\s*"bundled-postgres"\s*\]/u;
 
 /**
  * @param {{ postgresText: string; root: string; serviceBlock: (name: string, source: string) => string }} context

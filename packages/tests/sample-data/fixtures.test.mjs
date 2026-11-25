@@ -14,9 +14,9 @@ const VERIFY = path.join(HERE, "verify-structure.mjs");
 const ANONYMIZE = path.join(HERE, "anonymize.mjs");
 
 /** A UID this script generates: a zero UUID, optionally behind the exporter prefix. */
-const SYNTHETIC_UID = /^UID:(?:urn:uuid:|[\w.-]+-)0{8}-0000-4000-8000-\d{12}$/;
-const STRUCTURE_PRESERVED = /structure preserved/;
-const LINE_BREAK = /\r?\n/;
+const SYNTHETIC_UID = /^UID:(?:urn:uuid:|[\w.-]+-)0{8}-0000-4000-8000-\d{12}$/u;
+const STRUCTURE_PRESERVED = /structure preserved/u;
+const LINE_BREAK = /\r?\n/u;
 
 /** Property names whose value must never read as a programming-language null. */
 const PERSONAL_PROPERTIES = new Set([

@@ -1,8 +1,8 @@
 import { normalizeMobileUrlForDevice, STORAGE_URL } from "../config";
 import { toCacheBustToken } from "./avatar-clock";
 
-const TRAILING_SLASHES_RE = /\/+$/;
-const LEADING_SLASHES_RE = /^\/+/;
+const TRAILING_SLASHES_RE = /\/+$/u;
+const LEADING_SLASHES_RE = /^\/+/u;
 
 export { parseAvatarUpdatedAtFromUrl } from "./avatar-clock";
 

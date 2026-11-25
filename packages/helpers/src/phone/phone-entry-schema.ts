@@ -28,7 +28,7 @@ export function createPhoneEntrySchema(
           preferred: entry.preferred ?? false,
           prefix: entry.prefix.trim(),
           type: entry.type,
-          value: entry.value.replace(/\D/g, ""),
+          value: entry.value.replace(/\D/gu, ""),
         };
       }
 

@@ -9,9 +9,9 @@ import {
 import { DEFAULT_LOCALE } from "@bondery/translations";
 import { IconLanguage } from "@tabler/icons-react";
 import type { ReactNode } from "react";
-import { SearchableComboboxPickerOption } from "@/components/shared/SearchableComboboxItem";
 import { SearchableComboboxPicker } from "@/components/shared/SearchableComboboxPicker";
-import { useCurrentLocale } from "@/components/shell/UserLocaleProvider";
+import { SearchableComboboxPickerOption } from "@/components/shared/searchableComboboxItem";
+import { useCurrentLocale } from "@/components/shell/localeProvider";
 import { useLanguagesTranslations, useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { nonEmpty } from "@/lib/shared/nonEmpty";
 

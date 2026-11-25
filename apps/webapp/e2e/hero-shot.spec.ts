@@ -42,7 +42,7 @@ import { expect, type Page, test } from "@playwright/test";
 import { completeOnboardingIfNeeded } from "./complete-onboarding";
 import { loginWithEmail } from "./email-login";
 
-const APP_HOME_URL = /\/app\/home(?:[/?#]|$)/;
+const APP_HOME_URL = /\/app\/home(?:[/?#]|$)/u;
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const sampleZipPath = join(

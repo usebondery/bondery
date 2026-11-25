@@ -5,7 +5,7 @@ import type { OAuthProvidersBitmap } from "@bondery/schemas/oauth-providers";
 import { Stack, Text } from "@mantine/core";
 import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { nonEmpty } from "@/lib/shared/nonEmpty";
-import { BrowserExtensionTile, DesktopAppTile, McpTile } from "./AppTiles";
+import { BrowserExtensionTile, DesktopAppTile, McpTile } from "./appTiles";
 import { ConnectedAccountTiles } from "./ConnectedAccountTiles";
 import type { UserIdentity } from "./socialSignInActions";
 

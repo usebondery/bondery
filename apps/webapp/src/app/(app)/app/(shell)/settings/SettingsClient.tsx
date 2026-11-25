@@ -21,7 +21,7 @@ import { ProfileCard } from "./components/cards/ProfileCard";
 import { SubscriptionCard } from "./components/cards/SubscriptionCard";
 import { SupportCard } from "./components/cards/SupportCard";
 import { TagsSection } from "./components/cards/TagsSection";
-import { SettingsCardsSkeleton } from "./components/chrome/SettingsSkeletons";
+import { SettingsCardsSkeleton } from "./components/chrome/settingsSkeletons";
 import { ReconfirmResume } from "./ReconfirmResume";
 
 type McpHashGate = {

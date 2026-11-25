@@ -6,8 +6,8 @@ import { AVATAR_UPLOAD, UPLOAD_LIMITS } from "../lib/platform/config.js";
 import { mapErrorToResponse } from "../lib/platform/errors/map-to-response.js";
 import { readUploadedFile } from "../lib/platform/uploads.js";
 
-const MB_PATTERN = /5MB/;
-const FILE_TOO_LARGE_MAXIMUM_SIZE_IS_PATTERN = /File too large\. Maximum size is/;
+const MB_PATTERN = /5MB/u;
+const FILE_TOO_LARGE_MAXIMUM_SIZE_IS_PATTERN = /File too large\. Maximum size is/u;
 
 const SMALL_CAP = 1024;
 

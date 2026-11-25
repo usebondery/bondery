@@ -1,7 +1,7 @@
 import { z } from "zod";
 import type { WebappRuntimeConfig } from "./runtime-config.types.js";
 
-export type { WebappRuntimeConfig };
+export type { WebappRuntimeConfig } from "./runtime-config.types.js";
 
 /**
  * Public runtime configuration for the webapp.

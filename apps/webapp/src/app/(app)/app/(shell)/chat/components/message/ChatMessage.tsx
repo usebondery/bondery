@@ -48,20 +48,25 @@ interface ChatMessageProps {
  */
 function renderBoldSegments(text: string, keyPrefix: string): ReactNode[] {
   const nodes: ReactNode[] = [];
-  const re = /\*\*([^*]+)\*\*/g;
+  const re = /\*\*(?<group1>[^*]+)\*\*/gu;
   let lastIndex = 0;
   let i = 0;
   let match: RegExpExecArray | null = re.exec(text);
   while (match !== null) {
     if (match.index > lastIndex) {
-      nodes.push(<span key={`${keyPrefix}-t${i++}`}>{text.slice(lastIndex, match.index)}</span>);
+      const textKey = `${keyPrefix}-t${i}`;
+      i += 1;
+      nodes.push(<span key={textKey}>{text.slice(lastIndex, match.index)}</span>);
     }
-    nodes.push(<strong key={`${keyPrefix}-b${i++}`}>{match[1]}</strong>);
+    const boldKey = `${keyPrefix}-b${i}`;
+    i += 1;
+    nodes.push(<strong key={boldKey}>{match[1]}</strong>);
     lastIndex = match.index + match[0].length;
     match = re.exec(text);
   }
   if (lastIndex < text.length) {
-    nodes.push(<span key={`${keyPrefix}-t${i++}`}>{text.slice(lastIndex)}</span>);
+    const tailKey = `${keyPrefix}-t${i}`;
+    nodes.push(<span key={tailKey}>{text.slice(lastIndex)}</span>);
   }
   return nodes;
 }

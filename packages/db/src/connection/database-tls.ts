@@ -70,7 +70,7 @@ function parseUrl(databaseUrl: string): URL {
 }
 
 function normalizeInlinePem(value: string): string {
-  return value.replace(/\\n/g, "\n").trim();
+  return value.replace(/\\n/gu, "\n").trim();
 }
 
 function caFromEnv(env: DatabaseTlsEnv): DatabaseCaSource | null {

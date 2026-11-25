@@ -8,7 +8,7 @@ import {
   parseKeepInTouchCount,
 } from "@/lib/api/resources/keepInTouch";
 
-export type { KeepInTouchResult };
+export type { KeepInTouchResult } from "@/lib/api/resources/keepInTouch";
 
 export async function getKeepInTouchContacts(): Promise<KeepInTouchResult> {
   const raw = await clientApiJson<KeepInTouchApiResponse>(buildKeepInTouchPath());

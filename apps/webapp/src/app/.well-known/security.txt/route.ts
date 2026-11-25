@@ -1,7 +1,7 @@
 import { permanentRedirectExternal } from "@/lib/navigation/redirect/external";
 import { buildWebappRuntimeConfigFromEnv } from "@/lib/platform/runtimeConfig.server";
 
-const TRAILING_SLASHES = /\/+$/;
+const TRAILING_SLASHES = /\/+$/u;
 
 export function GET() {
   const origin = buildWebappRuntimeConfigFromEnv().websiteUrl.replace(TRAILING_SLASHES, "");

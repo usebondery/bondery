@@ -20,13 +20,13 @@ import {
 } from "../../utils/instagram-import-helpers";
 import { ImportFinishedStep } from "../import/ImportFinishedStep";
 import { ImportIntroStep } from "../import/ImportIntroStep";
-import { ImportProcessingStep, ImportProgressStep } from "../import/ImportModalProcessingSteps";
 import { IMPORT_ZIP_ACCEPT, ImportZipUploadStep } from "../import/ImportZipUploadStep";
 import { InstagramImportInstructionsStep } from "../import/InstagramImportInstructionsStep";
 import { InstagramImportPreviewStep } from "../import/InstagramImportPreviewStep";
 import { InstagramImportStrategyStep } from "../import/InstagramImportStrategyStep";
+import { ImportProcessingStep, ImportProgressStep } from "../import/importModalProcessingSteps";
 
-export type { InstagramImportStep };
+export type { InstagramImportStep } from "../../utils/instagram-import-helpers";
 
 export function InstagramImportModal({
   modalId,

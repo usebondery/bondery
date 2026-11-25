@@ -41,7 +41,7 @@ export function FixClient() {
   const [showDeclined, setShowDeclined] = useState(false);
   const [restoringIds, setRestoringIds] = useState<Set<string>>(new Set());
   const queryClient = useQueryClient();
-  const didBootstrapRefresh = useRef<boolean>(false);
+  const didBootstrapRefreshRef = useRef<boolean>(false);
 
   const { data: recommendations, isFetching: isListFetching } =
     useMergeRecommendationsQuery(showDeclined);
@@ -52,7 +52,7 @@ export function FixClient() {
 
   useEffect(() => {
     if (
-      didBootstrapRefresh.current ||
+      didBootstrapRefreshRef.current ||
       showDeclined ||
       isListFetching ||
       recommendations === null ||
@@ -61,10 +61,10 @@ export function FixClient() {
       return;
     }
     if (recommendations.length > 0) {
-      didBootstrapRefresh.current = true;
+      didBootstrapRefreshRef.current = true;
       return;
     }
-    didBootstrapRefresh.current = true;
+    didBootstrapRefreshRef.current = true;
     detachPromise(syncMergeRecommendationsAfterChange(queryClient, { requestRefresh: true }));
   }, [isListFetching, queryClient, recommendations, showDeclined]);
 

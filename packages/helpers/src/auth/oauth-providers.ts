@@ -1,11 +1,10 @@
 import {
   type OAuthProviderId,
   type OAuthProvidersBitmap,
-  type OAuthProvidersResponse,
   oauthProvidersResponseSchema,
 } from "@bondery/schemas/oauth-providers";
 
-export type { OAuthProviderId, OAuthProvidersBitmap, OAuthProvidersResponse };
+export type { OAuthProviderId, OAuthProvidersBitmap } from "@bondery/schemas/oauth-providers";
 
 /**
  * Parse `GET /oauth-providers`. Returns null when the payload is missing or
@@ -44,3 +43,5 @@ export function areAllOAuthProvidersDisabled(
 ): boolean {
   return !isOAuthProviderEnabled(bitmap, "github") && !isOAuthProviderEnabled(bitmap, "linkedin");
 }
+
+export type { OAuthProvidersResponse } from "@bondery/schemas/oauth-providers";

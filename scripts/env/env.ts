@@ -320,7 +320,7 @@ function _upsertEnvFile(path, updates) {
   let content = readFileSync(path, "utf-8");
   for (const [key, value] of Object.entries(updates)) {
     const line = `${key}=${quoteEnvValue(value)}`;
-    const re = new RegExp(`^${key}=.*$`, "m");
+    const re = new RegExp(`^${key}=.*$`, "mu");
     if (re.test(content)) {
       content = content.replace(re, line);
     } else {

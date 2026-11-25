@@ -27,7 +27,7 @@ export const docs = defineDocs({
        */
       last_updated: z
         .string()
-        .regex(/^\d{4}-\d{2}-\d{2}$/, "last_updated must be a YYYY-MM-DD date")
+        .regex(/^\d{4}-\d{2}-\d{2}$/u, "last_updated must be a YYYY-MM-DD date")
         .optional(),
     }),
   },

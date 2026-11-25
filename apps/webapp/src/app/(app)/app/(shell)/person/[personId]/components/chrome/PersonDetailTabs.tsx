@@ -27,7 +27,7 @@ import { DatePickerWithPresets } from "@/components/interactions/DatePickerWithP
 import { datePickerValueToIsoDateTime } from "@/lib/dates/toIsoDateTime";
 import { routeGroup } from "@/lib/navigation/route/group";
 import { GroupCard } from "../../../../groups/components/GroupCard";
-import { openNewActivityModal } from "../../../../interactions/components/NewActivityModal";
+import { openNewActivityModal } from "../../../../interactions/components/openNewActivityModal";
 import type { ContactAddressSavePayload } from "../../utils/contactAddressUtils";
 import type { PersonTabValue } from "../../utils/personTabConstants";
 import { ContactAddressSection } from "../info/ContactAddressSection";

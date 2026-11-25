@@ -19,9 +19,9 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "./check-report.mjs";
 
-const PATTERN_5C723F5C6E_RE = /\r?\n/;
-const LAST_UPDATED_RE = /^last_updated\s*:\s*(.*)$/;
-const PATTERN_5E5C647B347D_RE = /^\d{4}-\d{2}-\d{2}$/;
+const PATTERN_5C723F5C6E_RE = /\r?\n/u;
+const LAST_UPDATED_RE = /^last_updated\s*:\s*(?<group1>.*)$/u;
+const PATTERN_5E5C647B347D_RE = /^\d{4}-\d{2}-\d{2}$/u;
 
 const check = createCheck("check-docs-frontmatter");
 
@@ -65,7 +65,7 @@ function readLastUpdated(content) {
   for (const line of lines.slice(1, endIndex)) {
     const match = LAST_UPDATED_RE.exec(line);
     if (match) {
-      return { frontmatter: true, value: match[1].trim().replace(/^["']|["']$/g, "") };
+      return { frontmatter: true, value: match[1].trim().replace(/^["']|["']$/gu, "") };
     }
   }
 

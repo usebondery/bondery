@@ -61,13 +61,13 @@ const DATA_ATTRIBUTES = [
   "data-type",
 ];
 
-const HEX_COLOR = /^#[0-9a-f]{3,8}$/i;
+const HEX_COLOR = /^#[0-9a-f]{3,8}$/iu;
 const RGB_COLOR =
-  /^rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*(?:,\s*(?:0|1|0?\.\d+)\s*)?\)$/i;
+  /^rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*(?:,\s*(?:0|1|0?\.\d+)\s*)?\)$/iu;
 const CSS_COLOR = [HEX_COLOR, RGB_COLOR];
 
 /** Only these URL schemes survive. `javascript:`, `data:`, and `vbscript:` never match. */
-const ABSOLUTE_LINK = /^(?:https?:\/\/|mailto:|tel:)/i;
+const ABSOLUTE_LINK = /^(?:https?:\/\/|mailto:|tel:)/iu;
 
 const OPTIONS: IOptions = {
   allowedAttributes: {

@@ -1,9 +1,3 @@
-import {
-  DEFAULT_LOCALE,
-  intlTagForLocale,
-  SUPPORTED_LOCALES,
-  type SupportedLocale,
-} from "@bondery/schemas/locale/supported-locale";
 import manifestJson from "../manifest.json" with { type: "json" };
 
 const UI_GROUP_PREFIXES = ["web.", "mobile.", "extension."] as const;
@@ -31,8 +25,7 @@ export interface TranslationManifest {
 }
 
 export const manifest = manifestJson as TranslationManifest;
-
-export { DEFAULT_LOCALE, intlTagForLocale, SUPPORTED_LOCALES, type SupportedLocale };
+export type { SupportedLocale } from "@bondery/schemas/locale/supported-locale";
 
 export const ALL_NAMESPACE_NAMES: string[] = Object.keys(manifest.namespaces);
 
@@ -76,3 +69,9 @@ export function preloadGroup(group: string): string[] {
 export function namespaceFilePath(namespace: string): string | undefined {
   return manifest.namespaces[namespace]?.path;
 }
+
+export {
+  DEFAULT_LOCALE,
+  intlTagForLocale,
+  SUPPORTED_LOCALES,
+} from "@bondery/schemas/locale/supported-locale";

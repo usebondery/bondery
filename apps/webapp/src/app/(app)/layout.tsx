@@ -3,7 +3,7 @@ import { CodeHighlightProvider } from "@bondery/mantine-next";
 import { ModalsProvider } from "@mantine/modals";
 import { headers } from "next/headers";
 import { getT, initServerI18next } from "next-i18next/server";
-import { LocaleProvider } from "@/components/shell/UserLocaleProvider";
+import { LocaleProvider } from "@/components/shell/localeProvider";
 import i18nConfig from "@/i18n.config";
 import { getRouteResources } from "@/lib/i18n/getRouteResources.server";
 import { preloadAllWebNamespaces, preloadWebNamespaces } from "@/lib/i18n/preloadNamespaces.server";

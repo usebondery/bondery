@@ -16,10 +16,10 @@ import {
   voyagerFetch,
 } from "./voyagerShared";
 
-const EDUCATION_WORD_RE = /education/i;
-const SCHOOL_WORD_RE = /school/i;
-const COLLECTION_WORD_RE = /collection/i;
-const SETTING_WORD_RE = /setting/i;
+const EDUCATION_WORD_RE = /education/iu;
+const SCHOOL_WORD_RE = /school/iu;
+const COLLECTION_WORD_RE = /collection/iu;
+const SETTING_WORD_RE = /setting/iu;
 /**
  * Resolves a school name from a schoolUrn or companyUrn via the Voyager API.
  * Returns the school name string or null if resolution fails.
@@ -300,7 +300,7 @@ export async function fetchFullEducation(
       extLog.debug(`[linkedin][fetchDetails] API education entities: ${apiEducation.length}`);
       if (apiEducation.length > 0) {
         extLog.debug(
-          `[linkedin][fetchDetails] Sample education (API):`,
+          "[linkedin][fetchDetails] Sample education (API):",
           JSON.stringify(apiEducation[0], null, 2),
         );
       }
@@ -320,7 +320,7 @@ export async function fetchFullEducation(
       extLog.warn(`[linkedin][fetchDetails] All education API endpoints failed for ${username}`);
     }
   } else {
-    extLog.warn(`[linkedin][fetchDetails] No profileUrn — cannot call dash API for education`);
+    extLog.warn("[linkedin][fetchDetails] No profileUrn — cannot call dash API for education");
   }
 
   // ── Step 3: Fall back to live page education entities ──
@@ -341,7 +341,7 @@ export async function fetchFullEducation(
 
   if (educationEntities.length > 0) {
     extLog.debug(
-      `[linkedin][fetchDetails] Sample education (live):`,
+      "[linkedin][fetchDetails] Sample education (live):",
       JSON.stringify(educationEntities[0], null, 2),
     );
 

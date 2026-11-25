@@ -1,6 +1,6 @@
 "use client";
 
-import { analyzeSocialFieldInput, resolveContactSocialFieldCommit } from "@bondery/helpers";
+import { analyzeSocialFieldInput } from "@bondery/helpers";
 import { detachPromise } from "@bondery/helpers/async";
 import {
   isSavableSocialField,
@@ -150,4 +150,4 @@ export function useSocialFieldEditorInteractions({
   };
 }
 
-export { resolveContactSocialFieldCommit };
+export { resolveContactSocialFieldCommit } from "@bondery/helpers";

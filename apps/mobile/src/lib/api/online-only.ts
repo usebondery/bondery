@@ -14,7 +14,7 @@ import { apiRequest, getBearerHeaders, mobileFetch, throwApiResponseError } from
 import { throwTransportUnavailableError } from "./transport-unavailable-error";
 
 const CONTENT_DISPOSITION_FILENAME_RE =
-  /filename\*=UTF-8''([^;]+)|filename="([^"]+)"|filename=([^;]+)/i;
+  /filename\*=UTF-8''(?<group1>[^;]+)|filename="(?<group2>[^"]+)"|filename=(?<group3>[^;]+)/iu;
 const ALL_SHAREABLE_FIELDS: ShareableField[] = [
   "name",
   "avatar",
@@ -56,8 +56,8 @@ function parseContentDispositionFilename(header: string | null): string | null {
 
 function sanitizeVCardFilename(filename: string): string {
   const base = filename
-    .replace(/[/\\]/g, "")
-    .replace(/[^\w.\- ]/g, "_")
+    .replace(/[/\\]/gu, "")
+    .replace(/[^\w.\- ]/gu, "_")
     .trim();
 
   if (!base) {

@@ -22,7 +22,7 @@ import {
 } from "./index.js";
 import { verifyBonderyAccessJwt } from "./verify-access-jwt.js";
 
-const TRAILING_SLASH_PATTERN = /\/$/;
+const TRAILING_SLASH_PATTERN = /\/$/u;
 
 export const MCP_CHALLENGE_SCOPES = [MCP_READ_SCOPE, MCP_WRITE_SCOPE] as const;
 

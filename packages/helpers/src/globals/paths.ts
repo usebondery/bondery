@@ -1,5 +1,5 @@
 /** Better Auth mount path on the API host (`api.example.com/auth/*`). */
-const PATTERN_5C2F2B24_RE = /\/+$/;
+const PATTERN_5C2F2B24_RE = /\/+$/u;
 
 const OAUTH_AUTHORIZATION_SERVER_WELL_KNOWN_PATH =
   "/.well-known/oauth-authorization-server" as const;

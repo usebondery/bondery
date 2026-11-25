@@ -59,7 +59,7 @@ function teardownCheckout(checkout: StripeEmbeddedCheckout | null): void {
 
 async function waitForMountNode(id: string): Promise<HTMLElement | null> {
   for (let frame = 0; frame < MOUNT_WAIT_FRAMES; frame += 1) {
-    const node = document.getElementById(id);
+    const node = document.querySelector<HTMLElement>(`#${CSS.escape(id)}`);
     if (node) {
       return node;
     }
@@ -67,7 +67,7 @@ async function waitForMountNode(id: string): Promise<HTMLElement | null> {
       requestAnimationFrame(() => resolve());
     });
   }
-  return document.getElementById(id);
+  return document.querySelector<HTMLElement>(`#${CSS.escape(id)}`);
 }
 
 export function useEmbeddedCheckout({

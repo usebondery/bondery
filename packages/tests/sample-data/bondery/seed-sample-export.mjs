@@ -43,8 +43,8 @@ function slugName(firstName, lastName) {
     .toLowerCase()
     .normalize("NFD")
     .replace(/\p{M}/gu, "")
-    .replace(/[^a-z0-9]+/g, ".")
-    .replace(/^\.+|\.+$/g, "");
+    .replace(/[^a-z0-9]+/gu, ".")
+    .replace(/^\.+|\.+$/gu, "");
 }
 
 function emailFor(firstName, lastName, suffix = "") {

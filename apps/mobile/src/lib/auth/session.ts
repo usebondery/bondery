@@ -1,4 +1,4 @@
-const PCT_ENCODED_RE = /%[0-9a-fA-F]{2}/;
+const PCT_ENCODED_RE = /%[0-9a-fA-F]{2}/u;
 type AuthRequiredReason = "missing_local_session" | "session_revoked";
 
 type EndLocalSessionReason = "account_deleted" | "session_expired" | "user_initiated";

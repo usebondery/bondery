@@ -2,12 +2,18 @@
 title: "Biome lint rule decisions"
 description: Biome lint rules that Bondery leaves off or has not yet reviewed, plus the non-library framework and runtime rules outside the repository's stack.
 hidden: true
-last_updated: 2026-11-22
+last_updated: 2026-11-25
 ---
 
 # Biome lint rule decisions
 
 These rules are not enabled in [`biome.json`](../../biome.json). This page records the status for rules that are not part of the enabled baseline, separately from the rules already documented in the coding standards.
+
+## `useFilenamingConvention`
+
+The rule is **error** with **`strictCase`: true** in [`biome.json`](../../biome.json). Filenames must be camelCase, kebab-case, snake_case, or match a top-level export name.
+
+Biome has no option to allow only acronym segments such as `OAuth` inside camelCase. The choice is global `strictCase: false` or per-path overrides. We keep strict casing and disable the rule for paths matching `**/*OAuth*.ts` and `**/*OAuth*.tsx` so names such as `loginOAuth.ts` and `signedOAuthQuery.ts` stay aligned with the domain term OAuth without weakening the rule for the rest of the tree.
 
 ## Explicitly off
 

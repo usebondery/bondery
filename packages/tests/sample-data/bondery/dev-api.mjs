@@ -10,7 +10,7 @@ import path from "node:path";
 import { getCACertificates, setDefaultCACertificates } from "node:tls";
 import { fileURLToPath } from "node:url";
 
-const PATTERN_5C2F2B24_RE = /\/+$/;
+const PATTERN_5C2F2B24_RE = /\/+$/u;
 
 const LOCAL_API_URL = "https://127.0.0.1:26631";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../..");

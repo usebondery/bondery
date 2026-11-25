@@ -2,20 +2,20 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { sanitizeNotesHtml } from "./sanitize-notes-html.js";
 
-const REL_NOOPENER_NOREFERRER_PATTERN = /rel="noopener noreferrer"/;
-const HREF_PATTERN = /href="/;
-const HREF_TEL_PATTERN = /href="tel:/;
-const URL_POSITION_BACKGROUND_PATTERN = /url\(|position|background/i;
-const EXPRESSION_PATTERN = /expression/;
-const CLASS_LANGUAGE_TS_PATTERN = /class="language-ts"/;
-const SCRIPT_IMG_STYLE_MATH_NOSCRIPT_PATTERN = /<(script|img|style|math|noscript)/i;
-const SON_W_PATTERN = /\son\w+=/i;
-const IMG_IFRAME_SVG_OBJECT_FORM_BUTTON_PATTERN = /<(img|iframe|svg|object|form|button)/i;
-const ONERROR_ONLOAD_PATTERN = /onerror|onload/i;
-const HREF_PATTERN_2 = /href=/i;
-const CLICK_PATTERN = /click/;
-const TARGET_BLANK_PATTERN = /target="_blank"/;
-const SELF_OPENER_PATTERN = /_self|"opener"/;
+const REL_NOOPENER_NOREFERRER_PATTERN = /rel="noopener noreferrer"/u;
+const HREF_PATTERN = /href="/u;
+const HREF_TEL_PATTERN = /href="tel:/u;
+const URL_POSITION_BACKGROUND_PATTERN = /url\(|position|background/iu;
+const EXPRESSION_PATTERN = /expression/u;
+const CLASS_LANGUAGE_TS_PATTERN = /class="language-ts"/u;
+const SCRIPT_IMG_STYLE_MATH_NOSCRIPT_PATTERN = /<(?<group1>script|img|style|math|noscript)/iu;
+const SON_W_PATTERN = /\son\w+=/iu;
+const IMG_IFRAME_SVG_OBJECT_FORM_BUTTON_PATTERN = /<(?<group1>img|iframe|svg|object|form|button)/iu;
+const ONERROR_ONLOAD_PATTERN = /onerror|onload/iu;
+const HREF_PATTERN_2 = /href=/iu;
+const CLICK_PATTERN = /click/u;
+const TARGET_BLANK_PATTERN = /target="_blank"/u;
+const SELF_OPENER_PATTERN = /_self|"opener"/u;
 
 describe("sanitizeNotesHtml", () => {
   it("passes null and undefined through", () => {

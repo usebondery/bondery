@@ -21,7 +21,7 @@ import { extLog } from "../../lib/log";
 import { firstNonEmpty, nonEmpty } from "../../lib/text";
 import { renderInShadowRoot } from "../../lib/ui";
 
-const SINGLE_PATH_SEGMENT_RE = /^\/([^/]+)\/?$/;
+const SINGLE_PATH_SEGMENT_RE = /^\/(?<group1>[^/]+)\/?$/u;
 
 // ─── Network Interceptor Communication ───────────────────────────────────────
 

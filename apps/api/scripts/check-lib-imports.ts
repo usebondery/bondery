@@ -14,7 +14,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const srcRoot = join(__dirname, "..", "src");
 const libRoot = join(srcRoot, "lib");
 
-const FORBIDDEN_IMPORT = /from\s+["'](?:\.\.\/)*(?:routes|services)\//;
+const FORBIDDEN_IMPORT = /from\s+["'](?:\.\.\/)*(?:routes|services)\//u;
 
 function walk(dir: string): string[] {
   const entries = readdirSync(dir);
@@ -33,7 +33,7 @@ function walk(dir: string): string[] {
 const violations: string[] = [];
 
 for (const file of walk(libRoot)) {
-  const rel = relative(srcRoot, file).replace(/\\/g, "/");
+  const rel = relative(srcRoot, file).replace(/\\/gu, "/");
   const content = readFileSync(file, "utf8");
   if (FORBIDDEN_IMPORT.test(content)) {
     violations.push(rel);

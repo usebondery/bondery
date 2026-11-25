@@ -18,11 +18,11 @@ const locales = catalog.supported.map((entry) => entry.code);
 
 /** Paths in this config are relative to the monorepo root (where CI runs i18next-cli). */
 function fromRepo(...segments: string[]) {
-  return join(...segments).replace(/\\/g, "/");
+  return join(...segments).replace(/\\/gu, "/");
 }
 
 function fromPackage(...segments: string[]) {
-  return relative(repoRoot, join(packageRoot, ...segments)).replace(/\\/g, "/");
+  return relative(repoRoot, join(packageRoot, ...segments)).replace(/\\/gu, "/");
 }
 
 const mirrorRoot = fromRepo(".temp/i18next-cli-mirror");

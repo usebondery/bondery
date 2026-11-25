@@ -35,7 +35,7 @@ const TAB_ORDER: readonly DocsSearchTab[] = ["product", "selfhost", "integrate",
 
 /** Removes the `<mark>` wrappers the docs search API puts around hits. */
 function stripTags(value: string): string {
-  return value.replace(/<\/?mark>/g, "");
+  return value.replace(/<\/?mark>/gu, "");
 }
 
 function docsPathname(url: string): string {

@@ -74,7 +74,7 @@ export default defineConfig({
   projects: [
     {
       name: "setup",
-      testMatch: /(?:^|\/)auth\.setup\.ts$/,
+      testMatch: /(?:^|\/)auth\.setup\.ts$/u,
       timeout: 300_000,
       use: {
         headless: false,
@@ -82,7 +82,7 @@ export default defineConfig({
     },
     {
       name: "github-login",
-      testMatch: /login\.github\.spec\.ts/,
+      testMatch: /login\.github\.spec\.ts/u,
       timeout: 300_000,
       use: {
         screenshot: "only-on-failure",
@@ -92,7 +92,7 @@ export default defineConfig({
     },
     {
       name: "email-setup",
-      testMatch: /(?:^|\/)email\.auth\.setup\.ts$/,
+      testMatch: /(?:^|\/)email\.auth\.setup\.ts$/u,
       timeout: 120_000,
       use: {
         headless: true,
@@ -101,7 +101,7 @@ export default defineConfig({
     {
       dependencies: ["email-setup"],
       name: "auth",
-      testMatch: /login\.authenticated\.spec\.ts/,
+      testMatch: /login\.authenticated\.spec\.ts/u,
       timeout: 90_000,
       use: {
         storageState: ".auth/email-user.json",
@@ -109,7 +109,7 @@ export default defineConfig({
     },
     {
       name: "login-email",
-      testMatch: /login\.email\.spec\.ts/,
+      testMatch: /login\.email\.spec\.ts/u,
       timeout: 120_000,
       use: {
         storageState: { cookies: [], origins: [] },
@@ -117,11 +117,11 @@ export default defineConfig({
     },
     {
       name: "unauth",
-      testMatch: /login\.unauth\.spec.ts/,
+      testMatch: /login\.unauth\.spec.ts/u,
     },
     {
       name: "oauth-callback",
-      testMatch: /oauth-callback\.spec\.ts/,
+      testMatch: /oauth-callback\.spec\.ts/u,
     },
   ],
   reporter: [["list"]],

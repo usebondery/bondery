@@ -1,6 +1,6 @@
 "use client";
 
-import type { AddressPin, Contact, MapPin } from "@bondery/schemas";
+import type { AddressPin, MapPin } from "@bondery/schemas";
 import { useMemo } from "react";
 import {
   buildAddressContactRows,
@@ -49,4 +49,4 @@ export function useDerivedMapPins({
   return { addressContactRows, markers, visibleLocationPins };
 }
 
-export type { Contact };
+export type { Contact } from "@bondery/schemas";

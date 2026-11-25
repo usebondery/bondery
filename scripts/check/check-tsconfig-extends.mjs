@@ -35,7 +35,7 @@ const SKIP_DIRS = new Set([
   "generated",
   "node_modules",
 ]);
-const TSCONFIG_NAME = /^tsconfig.*\.json$/;
+const TSCONFIG_NAME = /^tsconfig.*\.json$/u;
 
 const PRESET_PREFIX = "@bondery/typescript-config/";
 const PRESET_SPECIFIERS = new Set([
@@ -227,7 +227,7 @@ function stripJsonc(text) {
     result += char;
     index += 1;
   }
-  return result.replace(/,(\s*[}\]])/g, "$1");
+  return result.replace(/,(?<group1>\s*[}\]])/gu, "$1");
 }
 
 /**

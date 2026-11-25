@@ -19,7 +19,7 @@ import {
   stripeCliFailure,
 } from "./stripe-cli.js";
 
-const STRIPE_LOGIN_RE = /stripe login/i;
+const STRIPE_LOGIN_RE = /stripe login/iu;
 
 const WEBHOOK_SECRET_KEY = "BONDERY_PRIVATE_STRIPE_WEBHOOK_SECRET";
 

@@ -5,10 +5,10 @@
  * Share the printed JSON when reporting location scrape issues.
  */
 
-const LINKEDIN_IN_PATH_RE = /\/in\/([^/]+)/;
-const TOPCARD_URN_RE = /ref(ACo[A-Za-z0-9_-]+?)Topcard/;
-const HTML_COMMENT_WRAPPER_RE = /^<!--(.+)-->$/s;
-const JSESSIONID_COOKIE_RE = /JSESSIONID="?([^";]+)"?/;
+const LINKEDIN_IN_PATH_RE = /\/in\/(?<group1>[^/]+)/u;
+const TOPCARD_URN_RE = /ref(?<group1>ACo[A-Za-z0-9_-]+?)Topcard/u;
+const HTML_COMMENT_WRAPPER_RE = /^<!--(?<group1>.+)-->$/su;
+const JSESSIONID_COOKIE_RE = /JSESSIONID="?(?<group1>[^";]+)"?/u;
 (async () => {
   /**
    * @param {unknown} value
@@ -26,7 +26,7 @@ const JSESSIONID_COOKIE_RE = /JSESSIONID="?([^";]+)"?/;
     ? [...topcard.querySelectorAll("p")].map((p) => ({
         inOrgLink: !!p.closest('a[href*="/company/"], a[href*="/school/"]'),
         linkHref: p.closest("a")?.href ?? null,
-        text: p.textContent?.replace(/\s+/g, " ").trim(),
+        text: p.textContent?.replace(/\s+/gu, " ").trim(),
       }))
     : [];
 

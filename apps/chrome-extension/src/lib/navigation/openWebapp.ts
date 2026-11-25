@@ -6,7 +6,7 @@ import {
   hrefWebappPersonAddInteraction,
 } from "./hrefWebapp";
 
-const ABSOLUTE_HTTP_URL_RE = /^https?:\/\//i;
+const ABSOLUTE_HTTP_URL_RE = /^https?:\/\//iu;
 function resolveWebappUrl(pathOrAbsoluteUrl: string): string {
   if (ABSOLUTE_HTTP_URL_RE.test(pathOrAbsoluteUrl)) {
     return pathOrAbsoluteUrl;

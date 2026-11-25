@@ -2,8 +2,8 @@
  * Name parsing and cleaning utilities shared across import flows and the redirect API.
  */
 
-const PATTERN_2C24_RE = /,$/;
-const PATTERN_5C732B_RE = /\s+/;
+const PATTERN_2C24_RE = /,$/u;
+const PATTERN_5C732B_RE = /\s+/u;
 
 const NAME_TITLE_TOKENS = new Set([
   "doc",
@@ -66,8 +66,8 @@ function normalizeNameToken(token: string): string {
 
 export function stripNameParentheticals(value: string): string {
   return value
-    .replace(/\(([^)]*)\)/g, "$1")
-    .replace(/\s{2,}/g, " ")
+    .replace(/\((?<group1>[^)]*)\)/gu, "$1")
+    .replace(/\s{2,}/gu, " ")
     .trim();
 }
 
@@ -80,8 +80,8 @@ export function stripNameParentheticals(value: string): string {
 export function stripEmojis(value: string): string {
   return value
     .replace(/\p{Regional_Indicator}+/gu, "") // flag emoji (pairs of RI symbols)
-    .replace(/\p{Extended_Pictographic}(\u200D\p{Extended_Pictographic})*/gu, "")
-    .replace(/\s{2,}/g, " ")
+    .replace(/\p{Extended_Pictographic}(?<group1>\u200D\p{Extended_Pictographic})*/gu, "")
+    .replace(/\s{2,}/gu, " ")
     .trim();
 }
 

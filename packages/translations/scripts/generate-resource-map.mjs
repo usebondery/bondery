@@ -14,8 +14,9 @@ let importIndex = 0;
 for (const [namespace, entry] of Object.entries(manifest.namespaces)) {
   const localeEntries = [];
   for (const locale of localesForNamespace(entry)) {
-    const filePath = `../locales/${locale}/${entry.path.replace(/\\/g, "/")}`;
-    const varName = `r${importIndex++}`;
+    const filePath = `../locales/${locale}/${entry.path.replace(/\\/gu, "/")}`;
+    const varName = `r${importIndex}`;
+    importIndex += 1;
     imports.push(`import ${varName} from "${filePath}" with { type: "json" };`);
     localeEntries.push(`    ${locale}: ${varName},`);
   }

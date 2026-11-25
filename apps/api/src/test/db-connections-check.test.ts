@@ -3,9 +3,9 @@ import { describe, it } from "node:test";
 
 import { DATABASE_TLS_MODULE, findDbConnectionViolations } from "../../scripts/db-connections.ts";
 
-const PGCONNECTIONCONFIG_PATTERN = /pgConnectionConfig/;
-const PRISMACLIURL_PATTERN = /prismaCliUrl/;
-const IGNORES_PATTERN = /ignores/;
+const PGCONNECTIONCONFIG_PATTERN = /pgConnectionConfig/u;
+const PRISMACLIURL_PATTERN = /prismaCliUrl/u;
+const IGNORES_PATTERN = /ignores/u;
 
 const PG_IMPORT = 'import { Pool, Client } from "pg";\n';
 

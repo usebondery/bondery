@@ -7,7 +7,7 @@ import { unauthorized } from "../lib/platform/errors/http-errors.js";
 import { mapErrorToResponse } from "../lib/platform/errors/map-to-response.js";
 import { SyncConflictError } from "../lib/sync/conflict.js";
 
-const DOCS_API_ERRORS_CONTACT_NOT_FOUND_PATTERN = /\/docs\/api\/errors\/contact_not_found$/;
+const DOCS_API_ERRORS_CONTACT_NOT_FOUND_PATTERN = /\/docs\/api\/errors\/contact_not_found$/u;
 
 function mockRequest(id = "test-req-id"): FastifyRequest {
   return {

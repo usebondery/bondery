@@ -77,7 +77,7 @@ function tokenRequestBody(
   return body;
 }
 
-export const WEBAPP_URL = (process.env["BONDERY_PUBLIC_WEBAPP_URL"] ?? "").replace(/\/+$/, "");
+export const WEBAPP_URL = (process.env["BONDERY_PUBLIC_WEBAPP_URL"] ?? "").replace(/\/+$/u, "");
 export const REDIRECT_URI = `${WEBAPP_URL}/auth/oauth-callback`;
 export const CLIENT_ID = process.env["BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID"] as string;
 export const CLIENT_SECRET = process.env["BONDERY_PRIVATE_WEBAPP_OAUTH_CLIENT_SECRET"] as string;

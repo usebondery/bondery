@@ -15,24 +15,24 @@ const STACK_FILES = [
   "docker-compose.self-hosted.yml",
 ];
 
-const REDIS_PLAINTEXT_PORT_RE = /- --port\s*\n\s*- "0"/;
-const REDIS_TLS_PORT_RE = /- --tls-port\s*\n\s*- "6379"/;
-const REDIS_REQUIREPASS_OR_UNPROTECTED_RE = /requirepass|--protected-mode\s*\n\s*- "?no/;
+const REDIS_PLAINTEXT_PORT_RE = /- --port\s*\n\s*- "0"/u;
+const REDIS_TLS_PORT_RE = /- --tls-port\s*\n\s*- "6379"/u;
+const REDIS_REQUIREPASS_OR_UNPROTECTED_RE = /requirepass|--protected-mode\s*\n\s*- "?no/u;
 const STACK_SECRETS_COMPLETED_RE =
-  /stack-secrets:\s*\n\s*condition:\s*service_completed_successfully/;
-const REDIS_CLI_MTLS_RE = /redis-cli --tls[\s\S]*--cert[\s\S]*--key[\s\S]*--cacert/;
-const REDIS_TLS_AUTH_CLIENTS_YES_RE = /- --tls-auth-clients\s*\n\s*- "yes"/;
-const REDIS_TLS_AUTH_CLIENTS_BAD_RE = /- --tls-auth-clients\s*\n\s*- "(?:no|optional)"/;
-const REDIS_TLS_PROTOCOLS_V13_RE = /- --tls-protocols\s*\n\s*- TLSv1\.3/;
-const REDIS_TLS_CA_OR_CLIENT_MOUNT_RE = /- redis-tls-(?:ca|client):/;
-const REDIS_TLS_CA_OR_SERVER_MOUNT_RE = /- redis-tls-(?:ca|server):/;
-const NETWORK_MODE_NONE_RE = /network_mode:\s*none/;
+  /stack-secrets:\s*\n\s*condition:\s*service_completed_successfully/u;
+const REDIS_CLI_MTLS_RE = /redis-cli --tls[\s\S]*--cert[\s\S]*--key[\s\S]*--cacert/u;
+const REDIS_TLS_AUTH_CLIENTS_YES_RE = /- --tls-auth-clients\s*\n\s*- "yes"/u;
+const REDIS_TLS_AUTH_CLIENTS_BAD_RE = /- --tls-auth-clients\s*\n\s*- "(?:no|optional)"/u;
+const REDIS_TLS_PROTOCOLS_V13_RE = /- --tls-protocols\s*\n\s*- TLSv1\.3/u;
+const REDIS_TLS_CA_OR_CLIENT_MOUNT_RE = /- redis-tls-(?:ca|client):/u;
+const REDIS_TLS_CA_OR_SERVER_MOUNT_RE = /- redis-tls-(?:ca|server):/u;
+const NETWORK_MODE_NONE_RE = /network_mode:\s*none/u;
 const REDIS_URL_REDISS_RE =
-  /BONDERY_PRIVATE_REDIS_URL: rediss:\/\/\$\{BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-redis:6379\s*$/m;
-const DEV_REDIS_SERVER_BIND_RE = /source: \.\.\/\.\.\/\.temp\/redis-secrets\/server/;
-const DEV_REDIS_PARENT_BIND_RE = /source: \.\.\/\.\.\/\.temp\/redis-secrets\s*$/m;
-const DEV_REDIS_LOOPBACK_PORT_RE = /- "127\.0\.0\.1:26636:6379"/;
-const PUBLIC_REDIS_PORT_RE = /- "(?:0\.0\.0\.0:)?\d+:6379"/;
+  /BONDERY_PRIVATE_REDIS_URL: rediss:\/\/\$\{BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-redis:6379\s*$/mu;
+const DEV_REDIS_SERVER_BIND_RE = /source: \.\.\/\.\.\/\.temp\/redis-secrets\/server/u;
+const DEV_REDIS_PARENT_BIND_RE = /source: \.\.\/\.\.\/\.temp\/redis-secrets\s*$/mu;
+const DEV_REDIS_LOOPBACK_PORT_RE = /- "127\.0\.0\.1:26636:6379"/u;
+const PUBLIC_REDIS_PORT_RE = /- "(?:0\.0\.0\.0:)?\d+:6379"/u;
 const REDIS_SERVER_MTLS_FLAGS = [
   "--tls-cert-file",
   "--tls-key-file",

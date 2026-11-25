@@ -69,7 +69,7 @@ export function AppsCard({ apiBaseUrl, suppressMcpHashOpen }: AppsCardProps) {
     }
 
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    document.getElementById("apps")?.scrollIntoView({
+    document.querySelector("#apps")?.scrollIntoView({
       behavior: reduceMotion ? "auto" : "smooth",
       block: "start",
     });

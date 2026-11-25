@@ -17,8 +17,8 @@ import { fileURLToPath } from "node:url";
 import { parseCalver, previousProductionCalver, readGitTags, toCoreCalver } from "./calver.mjs";
 import { formatWrittenFiles, writeFormattedJson } from "./write-formatted-json.mjs";
 
-const VERSION_RE = /version:\s*"[^"]*"/;
-const VERSIONNAME_RE = /versionName\s+"[^"]*"/;
+const VERSION_RE = /version:\s*"[^"]*"/u;
+const VERSIONNAME_RE = /versionName\s+"[^"]*"/u;
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const checkOnly = process.argv.includes("--check");
@@ -43,7 +43,7 @@ const PACKAGE_JSON_PATHS = [
   "packages/vcard/package.json",
 ];
 
-const MIN_EXTENSION_VERSION_RE = /export const MIN_EXTENSION_VERSION: string = "[^"]*";/;
+const MIN_EXTENSION_VERSION_RE = /export const MIN_EXTENSION_VERSION: string = "[^"]*";/u;
 
 function readRootVersion() {
   const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));

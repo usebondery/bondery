@@ -18,7 +18,7 @@ import {
  * HOW sentence per code. Prefer a named tool and a named argument, because
  * that is what the model can act on without another lookup.
  */
-const PATTERN_5B2E213F5D24_RE = /[.!?]$/;
+const PATTERN_5B2E213F5D24_RE = /[.!?]$/u;
 
 const AGENT_RECOVERY_HINTS: Partial<Record<ApiErrorCode, string>> = {
   auth_required: "Reconnect the client and approve access, then retry the call.",

@@ -3,16 +3,16 @@ import { markdownToHtml } from "./markdownToHtml";
 
 /** Patterns that suggest the pasted text is Markdown. */
 const MARKDOWN_SIGNALS: RegExp[] = [
-  /^#{1,6}\s?\S/m, // headings — with or without space after #
-  /\*\*[^*]+\*\*/, // bold
-  /~~[^~]+~~/, // strikethrough
-  /^[-*+]\s?\S/m, // bullet list — with or without space after -
-  /^\d+\.\s/m, // ordered list
-  /^>\s?\S/m, // blockquote
-  /^-\s?\[\s?[\sxX]?\s?\]\s?/m, // task list (lenient)
-  /\[.+\]\(.+\)/, // link
-  /`[^`]+`/, // inline code
-  /[=]=.+==/, // highlight
+  /^#{1,6}\s?\S/mu, // headings — with or without space after #
+  /\*\*[^*]+\*\*/u, // bold
+  /~~[^~]+~~/u, // strikethrough
+  /^[-*+]\s?\S/mu, // bullet list — with or without space after -
+  /^\d+\.\s/mu, // ordered list
+  /^>\s?\S/mu, // blockquote
+  /^-\s?\[\s?[\sxX]?\s?\]\s?/mu, // task list (lenient)
+  /\[.+\]\(.+\)/u, // link
+  /`[^`]+`/u, // inline code
+  /[=]=.+==/u, // highlight
 ];
 
 export function looksLikeMarkdown(text: string): boolean {

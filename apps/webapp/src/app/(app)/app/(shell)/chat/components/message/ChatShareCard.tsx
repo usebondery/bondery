@@ -4,7 +4,7 @@ import { Button, Skeleton } from "@mantine/core";
 import { IconShare } from "@tabler/icons-react";
 import { useShareContactModalTranslations } from "@/lib/i18n/generated/hooks";
 import { useChatContactQuery } from "@/lib/query/hooks/useChat";
-import { openShareContactModal } from "../../../people/components/modals/ShareContactModal";
+import { openShareContactModal } from "../../../people/components/modals/openShareContactModal";
 
 interface ChatShareCardProps {
   /** UUID of the contact to share. */

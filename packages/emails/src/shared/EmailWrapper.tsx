@@ -30,7 +30,7 @@ import {
 } from "#shared/email-styles.js";
 import { interpolateNamedLinks } from "#shared/interpolate-named-links.js";
 
-const PATTERN_5C2F2B24_RE = /\/+$/;
+const PATTERN_5C2F2B24_RE = /\/+$/u;
 
 function joinUrl(origin: string, path: string): string {
   return `${origin.replace(PATTERN_5C2F2B24_RE, "")}${path}`;

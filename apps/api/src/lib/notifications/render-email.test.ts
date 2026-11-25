@@ -4,13 +4,13 @@ import { EMAIL_PREVIEW_MAX_CHARS, MagicLinkEmail, ReminderDigestEmail } from "@b
 import { defaultMagicLinkCopy } from "@bondery/emails/fixtures/default-copy";
 import { renderEmailParts } from "./render-email.js";
 
-const SIGN_IN_TO_BONDERY_PATTERN = /Sign in to Bondery/;
-const SVEETECH_PATTERN = /Sveetech/;
-const NINETY_ONE_X_PATTERN = /x{91}/;
-const MANAGE_THESE_NOTIFICATIONS_IN_BONDERY_PATTERN = /Manage these notifications in Bondery/;
-const EXPIRES_IN_MINUTES_PATTERN = /Expires in 15 minutes/;
-const MANAGE_THESE_NOTIFICATIONS_PATTERN = /Manage these notifications/;
-const SECRET_TOKEN_PATTERN = /secret-token/;
+const SIGN_IN_TO_BONDERY_PATTERN = /Sign in to Bondery/u;
+const SVEETECH_PATTERN = /Sveetech/u;
+const NINETY_ONE_X_PATTERN = /x{91}/u;
+const MANAGE_THESE_NOTIFICATIONS_IN_BONDERY_PATTERN = /Manage these notifications in Bondery/u;
+const EXPIRES_IN_MINUTES_PATTERN = /Expires in 15 minutes/u;
+const MANAGE_THESE_NOTIFICATIONS_PATTERN = /Manage these notifications/u;
+const SECRET_TOKEN_PATTERN = /secret-token/u;
 
 describe("renderEmailParts", () => {
   it("sends HTML plus plaintext without legal identity on transactional mail", async () => {
@@ -40,7 +40,7 @@ describe("renderEmailParts", () => {
     );
 
     assert.doesNotMatch(html, NINETY_ONE_X_PATTERN);
-    assert.match(html, new RegExp(`x{${EMAIL_PREVIEW_MAX_CHARS - 1}}…`));
+    assert.match(html, new RegExp(`x{${EMAIL_PREVIEW_MAX_CHARS - 1}}…`, "u"));
   });
 
   it("keeps manage-notifications on reminder digest and still hides legal identity", async () => {

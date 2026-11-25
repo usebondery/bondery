@@ -9,8 +9,8 @@ import {
 } from "./intl-format.js";
 import { APP_LOCALE_METADATA, dirForLocale } from "./supported-locale/schema.js";
 
-const PATTERN_2D752D2E2A2D_RE = /-u-.*-u-/;
-const YU_GOTHIC_RE = /Yu Gothic/;
+const PATTERN_2D752D2E2A2D_RE = /-u-.*-u-/u;
+const YU_GOTHIC_RE = /Yu Gothic/u;
 
 describe("dirForLocale", () => {
   it("returns ltr for every shipped catalog locale", () => {

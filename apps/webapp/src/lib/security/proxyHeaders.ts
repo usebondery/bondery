@@ -1,14 +1,13 @@
 import {
   buildCsp,
   buildSecurityHeaders,
-  CSP_REPORT_GROUP,
   createNonce,
   resolveCspReportEndpoint,
   WEBAPP_TRUSTED_TYPES_POLICIES,
 } from "@bondery/helpers/security";
 
-const HTTP = /^http:/;
-const HTTPS = /^https:/;
+const HTTP = /^http:/u;
+const HTTPS = /^https:/u;
 
 /**
  * Third-party origins the webapp actually contacts. Each entry names the file
@@ -140,4 +139,5 @@ export function buildWebappProxyHeaders(
 }
 
 /** Report group name re-exported for tests and docs that assert the header. */
-export { CSP_REPORT_GROUP };
+
+export { CSP_REPORT_GROUP } from "@bondery/helpers/security";

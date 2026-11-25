@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "./check-report.mjs";
 
-const TS_TSX_RE = /\.(ts|tsx)$/;
+const TS_TSX_RE = /\.(?<group1>ts|tsx)$/u;
 
 const check = createCheck("check-package-imports");
 
@@ -23,9 +23,9 @@ const PACKAGE_SRC_DIRS = [
   "translations",
 ].map((name) => join(ROOT, "packages", name, "src"));
 
-const EXTENSIONLESS_RELATIVE = /from\s+["'](\.\.?\/[^"']+)["']/g;
-const EXTENSIONLESS_DYNAMIC = /import\s*\(\s*["'](\.\.?\/[^"']+)["']\s*\)/g;
-const ASSET_EXTENSIONS = /\.(json|css|svg|png|jpg|jpeg|gif|webp|woff2?)$/i;
+const EXTENSIONLESS_RELATIVE = /from\s+["'](?<group1>\.\.?\/[^"']+)["']/gu;
+const EXTENSIONLESS_DYNAMIC = /import\s*\(\s*["'](?<group1>\.\.?\/[^"']+)["']\s*\)/gu;
+const ASSET_EXTENSIONS = /\.(?<group1>json|css|svg|png|jpg|jpeg|gif|webp|woff2?)$/iu;
 
 function isAssetImport(specifier) {
   return ASSET_EXTENSIONS.test(specifier);

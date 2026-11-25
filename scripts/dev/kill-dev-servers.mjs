@@ -13,8 +13,8 @@
 import { execSync } from "node:child_process";
 import { killDevPort } from "./kill-dev-port.mjs";
 
-const PATTERN_5C723F5C6E_RE = /\r?\n/;
-const PATTERN_5E5C642B24_RE = /^\d+$/;
+const PATTERN_5C723F5C6E_RE = /\r?\n/u;
+const PATTERN_5E5C642B24_RE = /^\d+$/u;
 
 const IS_WINDOWS = process.platform === "win32";
 
@@ -71,7 +71,7 @@ function findPids(fragment) {
       .filter((line) => PATTERN_5E5C642B24_RE.test(line));
   }
 
-  const out = run(`pgrep -f '${fragment.replace(/'/g, "'\\''")}'`);
+  const out = run(`pgrep -f '${fragment.replace(/'/gu, "'\\''")}'`);
   return out
     .split("\n")
     .map((line) => line.trim())

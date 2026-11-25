@@ -7,9 +7,9 @@ import { after, describe, it } from "node:test";
 import { findDrift, prepareClaudeMcp, prepareCursorMcp } from "../dev/sync-agent-files.mjs";
 
 const PLANE_WRAPPER = "scripts/dev/plane-mcp-stdio.mjs";
-const MISSING_MISSING_MD_RE = /missing .*missing\.md/;
-const CHANGED_KEEP_MD_RE = /changed .*keep\.md/;
-const EXTRA_EXTRA_MD_RE = /extra .*extra\.md/;
+const MISSING_MISSING_MD_RE = /missing .*missing\.md/u;
+const CHANGED_KEEP_MD_RE = /changed .*keep\.md/u;
+const EXTRA_EXTRA_MD_RE = /extra .*extra\.md/u;
 
 const root = mkdtempSync(join(tmpdir(), "agent-files-"));
 after(() => rmSync(root, { force: true, recursive: true }));

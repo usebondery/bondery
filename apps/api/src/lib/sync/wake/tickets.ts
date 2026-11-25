@@ -7,7 +7,8 @@ export interface SyncWsTicketStore {
   issue: (userId: string) => Promise<{ ticket: string; expiresAt: number }>;
 }
 
-export { InMemorySyncWsTicketStore, RedisSyncWsTicketStore };
+export { InMemorySyncWsTicketStore } from "./in-memory-ticket-store.js";
+export { RedisSyncWsTicketStore } from "./redis-ticket-store.js";
 
 export function createSyncWsTicketStore(commands?: Redis): SyncWsTicketStore {
   if (!commands) {

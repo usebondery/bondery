@@ -29,8 +29,8 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "./check-report.mjs";
 
-const PATTERN_5C723F5C6E_RE = /\r?\n/;
-const PATTERN_5C2F2B24_RE = /\/+$/;
+const PATTERN_5C723F5C6E_RE = /\r?\n/u;
+const PATTERN_5C2F2B24_RE = /\/+$/u;
 
 const check = createCheck("check-injected-packages");
 
@@ -184,7 +184,7 @@ function checkIgnoredPathsOnDisk() {
     if (raw.length === 0) {
       continue;
     }
-    const repoPath = raw.replace(/\\/g, "/").replace(PATTERN_5C2F2B24_RE, "");
+    const repoPath = raw.replace(/\\/gu, "/").replace(PATTERN_5C2F2B24_RE, "");
     const parts = repoPath.split("/");
     if (parts[0] !== "packages" || parts.length < 3) {
       check.add(`${repoPath} is gitignored inside packages/. ${HINT}`);

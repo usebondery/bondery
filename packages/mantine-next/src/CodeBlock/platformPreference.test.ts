@@ -10,7 +10,7 @@ import {
   subscribeCodeBlockPlatform,
 } from "#CodeBlock/platformPreference.js";
 
-const BONDERY_CODE_PLATFORM_LINUX_RE = /^bondery_code_platform=linux\b/;
+const BONDERY_CODE_PLATFORM_LINUX_RE = /^bondery_code_platform=linux\b/u;
 
 type FakeDocument = { cookie: string };
 

@@ -24,7 +24,7 @@ import { notifications } from "@mantine/notifications";
 import { IconCalendarPlus, IconCheck, IconClock, IconHeartHandshake } from "@tabler/icons-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { openNewActivityModal } from "@/app/(app)/app/(shell)/interactions/components/NewActivityModal";
+import { openNewActivityModal } from "@/app/(app)/app/(shell)/interactions/components/openNewActivityModal";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { useKeepInTouchTranslations } from "@/lib/i18n/generated/hooks";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";

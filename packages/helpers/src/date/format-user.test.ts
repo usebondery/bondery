@@ -12,10 +12,10 @@ import {
   formatUserTime,
 } from "./format-user.js";
 
-const PATTERN_31317C3133_RE = /11|13/;
-const PATTERN_5E5C647B347D_RE = /^\d{4}-\d{2}-\d{2}$/;
-const PATTERN_32303236_RE = /2026/;
-const NOVEMBER_LISTOPAD_LISTOPADU_RE = /November|listopad|listopadu/i;
+const PATTERN_31317C3133_RE = /11|13/u;
+const PATTERN_5E5C647B347D_RE = /^\d{4}-\d{2}-\d{2}$/u;
+const PATTERN_32303236_RE = /2026/u;
+const NOVEMBER_LISTOPAD_LISTOPADU_RE = /November|listopad|listopadu/iu;
 
 const SAMPLE = new Date(Date.UTC(2026, 10, 13, 15, 30, 45));
 const EARLY = new Date(Date.UTC(2026, 10, 13, 8, 5, 0));

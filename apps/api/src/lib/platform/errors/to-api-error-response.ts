@@ -11,7 +11,7 @@ import { DomainError } from "../../../domains/_shared/context.js";
 import { URLS } from "../config.js";
 import { type ErrorCode, GENERIC_500_MESSAGE } from "./codes.js";
 
-const TRAILING_SLASH_PATTERN = /\/$/;
+const TRAILING_SLASH_PATTERN = /\/$/u;
 
 function isServerError(statusCode: number): boolean {
   return statusCode >= 500;

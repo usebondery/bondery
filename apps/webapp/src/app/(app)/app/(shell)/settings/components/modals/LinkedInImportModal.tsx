@@ -32,8 +32,8 @@ import {
 } from "../../utils/linkedin-import-helpers";
 import { ImportFinishedStep } from "../import/ImportFinishedStep";
 import { ImportIntroStep } from "../import/ImportIntroStep";
-import { ImportProcessingStep, ImportProgressStep } from "../import/ImportModalProcessingSteps";
 import { ImportZipUploadStep } from "../import/ImportZipUploadStep";
+import { ImportProcessingStep, ImportProgressStep } from "../import/importModalProcessingSteps";
 import { LinkedInImportInstructionsStep } from "../import/LinkedInImportInstructionsStep";
 import { LinkedInImportPreviewStep } from "../import/LinkedInImportPreviewStep";
 
@@ -50,7 +50,7 @@ const LINKEDIN_UPLOAD_ACCEPT = {
   "text/plain": [".csv"],
 };
 
-export type { LinkedInImportStep };
+export type { LinkedInImportStep } from "../../utils/linkedin-import-helpers";
 
 export function LinkedInImportModal({
   modalId,

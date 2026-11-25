@@ -24,7 +24,7 @@ type UserDateField = "monthShort" | "monthLong" | "yearNumeric" | "dayTwoDigit";
 
 type NumericDateOrder = "mdy" | "dmy" | "ymd";
 
-const CLOCK_PATTERN = /^(\d{1,2}):([0-5]\d)(?::([0-5]\d))?$/;
+const CLOCK_PATTERN = /^(?<group1>\d{1,2}):(?<group2>[0-5]\d)(?::(?<group3>[0-5]\d))?$/u;
 const LAST_HOUR_OF_DAY = 23;
 
 /** Fixed sample dates. Only the clock or the field order is read from them, never the day itself. */
@@ -337,5 +337,6 @@ export function formatUserDateField(
   }).format(date);
 }
 
-export type { DateFormatPreference, TimeFormatPreference };
-export { cachedDateTimeFormat, formatOrderedDate };
+export type { DateFormatPreference, TimeFormatPreference } from "@bondery/schemas";
+export { formatOrderedDate } from "@bondery/schemas/locale";
+export { cachedDateTimeFormat };

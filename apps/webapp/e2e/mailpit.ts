@@ -7,7 +7,7 @@
 
 import { expect } from "@playwright/test";
 
-const PATTERN = /[\s"'<>]/;
+const PATTERN = /[\s"'<>]/u;
 
 const MAILPIT_BASE_URL = "http://127.0.0.1:26641";
 const VERIFY_PATH = "/auth/magic-link/verify";

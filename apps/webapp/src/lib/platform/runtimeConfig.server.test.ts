@@ -16,7 +16,7 @@ import {
   validateWebappRuntimeConfigAtStartup,
 } from "./runtimeConfig.server.js";
 
-const INVALID_WEBAPP_RUNTIME_CONFIG = /Invalid webapp runtime config/;
+const INVALID_WEBAPP_RUNTIME_CONFIG = /Invalid webapp runtime config/u;
 
 describe("webapp runtime config", () => {
   it("builds a strict allowlisted config from env", () => {

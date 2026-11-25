@@ -10,7 +10,7 @@ import * as WebBrowser from "expo-web-browser";
 import { Platform } from "react-native";
 import { API_URL, HAS_MOBILE_CONFIG } from "../config";
 import { resolveExpoLastLoginMethod } from "./last-login-method";
-import { AUTH_SCHEME, nativeAuthDeepLink } from "./native-auth-deep-link";
+import { AUTH_SCHEME } from "./native-auth-deep-link";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -85,15 +85,14 @@ const authClient = HAS_MOBILE_CONFIG
     })
   : null;
 
+export { AUTH_SCHEME, nativeAuthDeepLink } from "./native-auth-deep-link";
 export {
   AUTH_COOKIE_STORAGE_KEY,
   AUTH_NATIVE_STORAGE,
-  AUTH_SCHEME,
   AUTH_STORAGE_PREFIX,
   authClient,
   hydrateLastLoginMethod,
   LAST_LOGIN_METHOD_STORAGE_KEY,
   lastLoginStorage,
-  nativeAuthDeepLink,
   rememberLastLoginMethod,
 };

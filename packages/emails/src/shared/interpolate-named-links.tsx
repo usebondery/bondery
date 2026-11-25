@@ -1,9 +1,9 @@
 import type { CSSProperties, ReactNode } from "react";
 import { Link } from "react-email";
 
-const PATTERN_5E5C7B5C7B28_RE = /^\{\{(\w+)\}\}$/;
+const PATTERN_5E5C7B5C7B28_RE = /^\{\{(?<group1>\w+)\}\}$/u;
 
-const PLACEHOLDER = /(\{\{\w+\}\})/g;
+const PLACEHOLDER = /(?<group1>\{\{\w+\}\})/gu;
 
 export function interpolateNamedLinks(
   template: string,

@@ -61,7 +61,7 @@ export function DocsSearchSpotlight() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<DocsSearchResult[]>([]);
-  const requestId = useRef(0);
+  const requestIdRef = useRef(0);
   const abortRef = useRef<AbortController | null>(null);
 
   const search = useDebouncedCallback((term: string) => {
@@ -76,8 +76,8 @@ export function DocsSearchSpotlight() {
 
     const controller = new AbortController();
     abortRef.current = controller;
-    const id = requestId.current + 1;
-    requestId.current = id;
+    const id = requestIdRef.current + 1;
+    requestIdRef.current = id;
     setResults([]);
     setLoading(true);
 
@@ -91,7 +91,7 @@ export function DocsSearchSpotlight() {
           }
 
           const body: unknown = await response.json();
-          if (requestId.current !== id) {
+          if (requestIdRef.current !== id) {
             return;
           }
 
@@ -103,14 +103,14 @@ export function DocsSearchSpotlight() {
           setResults(body.filter(isDocsSearchResult));
         })
         .catch((error: unknown) => {
-          if (isAbortError(error) || requestId.current !== id) {
+          if (isAbortError(error) || requestIdRef.current !== id) {
             return;
           }
 
           setResults([]);
         })
         .finally(() => {
-          if (requestId.current === id) {
+          if (requestIdRef.current === id) {
             setLoading(false);
           }
         }),
@@ -122,7 +122,7 @@ export function DocsSearchSpotlight() {
     if (next.trim().length === 0) {
       search.cancel();
       abortRef.current?.abort();
-      requestId.current += 1;
+      requestIdRef.current += 1;
       setLoading(false);
       setResults([]);
       return;

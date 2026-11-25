@@ -6,7 +6,7 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const ZA_ZA_Z0_RE = /^[A-Za-z_][A-Za-z0-9_]*$/;
+const ZA_ZA_Z0_RE = /^[A-Za-z_][A-Za-z0-9_]*$/u;
 
 const packageRoot = dirname(fileURLToPath(import.meta.url));
 const localesEnRoot = join(packageRoot, "../src/locales/en");

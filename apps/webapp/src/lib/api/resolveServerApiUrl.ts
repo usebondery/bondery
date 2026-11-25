@@ -1,7 +1,7 @@
 import { WEBAPP_INTERNAL_API_URL_ENV, WEBAPP_RUNTIME_ENV } from "@/lib/platform/runtimeConfig.env";
 
-const TRAILING_SLASHES = /\/+$/;
-const API_PATH_SUFFIX = /\/api$/;
+const TRAILING_SLASHES = /\/+$/u;
+const API_PATH_SUFFIX = /\/api$/u;
 
 /**
  * Normalize API base URL to origin-only format.

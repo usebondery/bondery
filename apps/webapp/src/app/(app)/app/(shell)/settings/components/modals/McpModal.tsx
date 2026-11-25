@@ -31,7 +31,7 @@ import {
   SettingsCredentialIconImg,
 } from "../cards/SettingsCredentialIconImg";
 
-const TRAILING_SLASHES = /\/+$/;
+const TRAILING_SLASHES = /\/+$/u;
 
 const PERMISSION_SELECT_WIDTH = 172;
 

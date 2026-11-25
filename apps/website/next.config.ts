@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { createMDX as createFumadocsMDX } from "fumadocs-mdx/next";
 import type { NextConfig } from "next";
 
-const PNPM_STORE_PATH_RE = /[/\\]store[/\\]v\d+/i;
+const PNPM_STORE_PATH_RE = /[/\\]store[/\\]v\d+/iu;
 const appDir = path.dirname(fileURLToPath(import.meta.url));
 const monorepoRoot = path.join(appDir, "../..");
 

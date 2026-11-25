@@ -27,7 +27,7 @@ import { DEV_PORTS } from "@bondery/schemas/constants/dev-ports";
 
 import { upsertEnvAssignments } from "../env/env-upsert.js";
 
-const PATTERN_5C2E24_RE = /\.$/;
+const PATTERN_5C2E24_RE = /\.$/u;
 
 const log = createCliLogger("dev:mobile-api");
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");

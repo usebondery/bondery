@@ -23,10 +23,10 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { createCheck } from "./check-report.mjs";
 
-const PATTERN_5E5C642B285C_RE = /^\d+(\.\d+)?$/;
-const REGISTER_MULTIPART_RE = /register\(\s*multipart\s*,\s*\{([\s\S]*?)\}\s*\)/;
-const FILESIZE_UPLOAD_LIMITS_DEFAULT_RE = /fileSize\s*:\s*UPLOAD_LIMITS\.default\b/;
-const BDEFAULT_RE = /\bdefault\s*:\s*([\w\s*]+?)\s*,/;
+const PATTERN_5E5C642B285C_RE = /^\d+(?<group1>\.\d+)?$/u;
+const REGISTER_MULTIPART_RE = /register\(\s*multipart\s*,\s*\{(?<group1>[\s\S]*?)\}\s*\)/u;
+const FILESIZE_UPLOAD_LIMITS_DEFAULT_RE = /fileSize\s*:\s*UPLOAD_LIMITS\.default\b/u;
+const BDEFAULT_RE = /\bdefault\s*:\s*(?<group1>[\w\s*]+?)\s*,/u;
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(__dirname, "../..");
@@ -36,13 +36,13 @@ const MAX_DEFAULT_UPLOAD_BYTES = 10 * 1024 * 1024;
 
 /** A Prisma write on the people table. */
 const PEOPLE_WRITE =
-  /\b(?:people|person)\s*\.\s*(?:create|createMany|createManyAndReturn|update|updateMany|upsert)\s*\(/;
+  /\b(?:people|person)\s*\.\s*(?:create|createMany|createManyAndReturn|update|updateMany|upsert)\s*\(/u;
 
 /** `notes:` or `notes =` that sets a value. `notes: true` is a select, not a write. */
-const NOTES_ASSIGNMENT = /\bnotes\s*[:=]\s*(?!true\b|false\b)/;
+const NOTES_ASSIGNMENT = /\bnotes\s*[:=]\s*(?!true\b|false\b)/u;
 
 /** Raw SQL that sets the notes column. */
-const NOTES_RAW_SQL = /\bSET\b[^;`]*\bnotes\b\s*=/i;
+const NOTES_RAW_SQL = /\bSET\b[^;`]*\bnotes\b\s*=/iu;
 
 const SANITIZER = "sanitizeNotesHtml";
 
@@ -55,7 +55,9 @@ const SANITIZER = "sanitizeNotesHtml";
  */
 function readNumericConstants(text) {
   const constants = new Map();
-  for (const match of text.matchAll(/^(?:export\s+)?const\s+(\w+)\s*=\s*([\w\s*]+?);/gm)) {
+  for (const match of text.matchAll(
+    /^(?:export\s+)?const\s+(?<group1>\w+)\s*=\s*(?<group2>[\w\s*]+?);/gmu,
+  )) {
     constants.set(match[1], match[2]);
   }
   return constants;

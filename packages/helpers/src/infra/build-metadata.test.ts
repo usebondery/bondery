@@ -8,7 +8,7 @@ import {
   readRuntimeProductVersion,
 } from "./build-metadata.js";
 
-const PATTERN_5E5C647B347D_RE = /^\d{4}-\d{2}-\d{2}T/;
+const PATTERN_5E5C647B347D_RE = /^\d{4}-\d{2}-\d{2}T/u;
 
 const originalVersion = process.env["BONDERY_INFRA_VERSION"];
 const originalGitSha = process.env["BONDERY_INFRA_GIT_SHA"];

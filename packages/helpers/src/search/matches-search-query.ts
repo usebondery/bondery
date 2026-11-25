@@ -1,4 +1,4 @@
-const PATTERN_5C732B_RE = /\s+/;
+const PATTERN_5C732B_RE = /\s+/u;
 
 function levenshtein(a: string, b: string): number {
   if (a === b) {
@@ -17,15 +17,15 @@ function levenshtein(a: string, b: string): number {
   // Every index read below lies inside the rows * cols matrix, so the fallback never applies.
   const cell = (row: number, col: number): number => matrix[row * cols + col] ?? 0;
 
-  for (let i = 0; i < rows; i++) {
+  for (let i = 0; i < rows; i += 1) {
     matrix[i * cols] = i;
   }
-  for (let j = 0; j < cols; j++) {
+  for (let j = 0; j < cols; j += 1) {
     matrix[j] = j;
   }
 
-  for (let i = 1; i < rows; i++) {
-    for (let j = 1; j < cols; j++) {
+  for (let i = 1; i < rows; i += 1) {
+    for (let j = 1; j < cols; j += 1) {
       const cost = a[i - 1] === b[j - 1] ? 0 : 1;
       const deletion = cell(i - 1, j) + 1;
       const insertion = cell(i, j - 1) + 1;

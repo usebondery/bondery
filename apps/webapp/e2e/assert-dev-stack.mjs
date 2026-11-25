@@ -32,12 +32,12 @@ export async function assertDevStackReady() {
 
   if (!api.reachable || !webappBff.reachable || !api.ok || !webappBff.ok) {
     throw new Error(
-      `E2E requires a running Mailpit + API + webapp stack.\n` +
+      "E2E requires a running Mailpit + API + webapp stack.\n" +
         `  ${formatProbe("API", apiHealth, api)}\n` +
         `  ${formatProbe("Webapp BFF", webappHealth, webappBff)}\n\n` +
-        `Start the stack, then retry:\n` +
-        `  pnpm run start:mailpit\n` +
-        `  pnpm run dev:webapp-api`,
+        "Start the stack, then retry:\n" +
+        "  pnpm run start:mailpit\n" +
+        "  pnpm run dev:webapp-api",
     );
   }
 

@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { folderUrl } from "@/lib/docs-folders";
 import { source } from "@/lib/source";
 
-const DOCS_PREFIX_RE = /^\/docs\/?/;
+const DOCS_PREFIX_RE = /^\/docs\/?/u;
 function nodeTitle(name: ReactNode): string {
   return typeof name === "string" ? name : "Page";
 }

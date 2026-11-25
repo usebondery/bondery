@@ -1,4 +1,4 @@
-import { PeoplePageSkeleton } from "./components/chrome/PeopleSkeletons";
+import { PeoplePageSkeleton } from "./components/chrome/peopleSkeletons";
 
 /**
  * Route-level loading UI for the People page.

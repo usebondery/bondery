@@ -10,11 +10,11 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { writeFormattedJson } from "./write-formatted-json.mjs";
 
-const TSX_RE_2 = /\.tsx?$/;
-const SRC_RE = /^\.\/src\//;
-const TSX_RE = /\.tsx$/;
-const TS_RE = /\.ts$/;
-const PACKAGE_JSON_RE = /package\.json$/;
+const TSX_RE_2 = /\.tsx?$/u;
+const SRC_RE = /^\.\/src\//u;
+const TSX_RE = /\.tsx$/u;
+const TS_RE = /\.ts$/u;
+const PACKAGE_JSON_RE = /package\.json$/u;
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -74,7 +74,7 @@ async function collectModuleSubpaths(srcDir) {
       if (entry.name === "index.ts" || entry.name === "index.tsx") {
         continue;
       }
-      const subpath = `./${rel.replace(/\\/g, "/").replace(TSX_RE_2, "")}`;
+      const subpath = `./${rel.replace(/\\/gu, "/").replace(TSX_RE_2, "")}`;
       modules.add(subpath);
     }
   }
@@ -97,7 +97,7 @@ async function collectBarrelSubpaths(srcDir) {
       const full = join(dir, entry.name);
       const children = await readdir(full);
       if (children.includes("index.ts") || children.includes("index.tsx")) {
-        barrels.add(`./${rel.replace(/\\/g, "/")}`);
+        barrels.add(`./${rel.replace(/\\/gu, "/")}`);
       }
       await walk(full, rel);
     }

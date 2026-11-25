@@ -1,4 +1,4 @@
-const PATTERN_5E5C647B312C_RE = /^\d{1,3}(\.\d{1,3}){3}$/;
+const PATTERN_5E5C647B312C_RE = /^\d{1,3}(?<group1>\.\d{1,3}){3}$/u;
 
 function isIpHostname(hostname: string): boolean {
   if (hostname.includes(":")) {

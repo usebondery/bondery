@@ -2,10 +2,10 @@ import path from "node:path";
 import { GITHUB_BLOB_BASE } from "@bondery/helpers";
 import type { Link, List, ListItem, Parent, Root, RootContent } from "mdast";
 
-const INDEX_SUFFIX_RE = /\/index$/;
-const MD_OR_MDX_EXT_RE = /\.mdx?$/;
-const RELATED_HEADING_RE = /^related\b/i;
-const LEADING_SEPARATOR_RE = /^[\s—–\-:|=]+/;
+const INDEX_SUFFIX_RE = /\/index$/u;
+const MD_OR_MDX_EXT_RE = /\.mdx?$/u;
+const RELATED_HEADING_RE = /^related\b/iu;
+const LEADING_SEPARATOR_RE = /^[\s—–\-:|=]+/u;
 type MdxAttribute = {
   name: string;
   type: "mdxJsxAttribute";
@@ -98,11 +98,11 @@ function docsHref(href: string, filePath: string | undefined): string {
   const outsideDocs =
     relative === ".." || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative);
   if (outsideDocs) {
-    const fromRepo = path.relative(path.dirname(docsRoot), target).replace(/\\/g, "/");
+    const fromRepo = path.relative(path.dirname(docsRoot), target).replace(/\\/gu, "/");
     return `${GITHUB_BLOB}/${fromRepo}`;
   }
   const urlPath = relative
-    .replace(/\\/g, "/")
+    .replace(/\\/gu, "/")
     .replace(MD_OR_MDX_EXT_RE, "")
     .replace(INDEX_SUFFIX_RE, "");
   if (urlPath.length === 0) {

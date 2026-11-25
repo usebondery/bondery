@@ -4,9 +4,12 @@ import type { LooseTranslateFn, NamespaceKey, TranslateFn } from "@bondery/trans
  * Returns a pluralized translation fragment when count > 0, otherwise an empty string.
  * Use as an interpolation value (e.g. `{skippedDetails}`) inside a parent sentence key.
  */
-export function optionalPluralFragment<NS extends NamespaceKey, Prefix extends string | undefined>(
-  t: TranslateFn<NS, Prefix>,
-  key: Parameters<TranslateFn<NS, Prefix>>[0],
+export function optionalPluralFragment<
+  Namespace extends NamespaceKey,
+  Prefix extends string | undefined,
+>(
+  t: TranslateFn<Namespace, Prefix>,
+  key: Parameters<TranslateFn<Namespace, Prefix>>[0],
   count: number,
   extra?: Record<string, unknown>,
 ): string {

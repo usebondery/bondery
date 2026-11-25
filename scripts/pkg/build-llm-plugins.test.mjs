@@ -13,13 +13,13 @@ import {
   renderOpenAiTree,
 } from "./build-llm-plugins.mjs";
 
-const CATCH_UP_RE = /`catch-up`/;
-const SHARE_PERSON_RE = /`share-person`/;
+const CATCH_UP_RE = /`catch-up`/u;
+const SHARE_PERSON_RE = /`share-person`/u;
 const CONNECT_THE_BONDERY_PLUGIN_IN_CHATGPT_RE =
-  /connect the Bondery plugin in ChatGPT or Codex and sign in/;
-const SIGNED_OUT_RE = /- \*\*Signed out:\*\*/;
-const INSTALL_THE_BONDERY_PLUGIN_IN_CHATGPT_RE = /Install the Bondery plugin in ChatGPT or Codex/;
-const THE_BONDERY_MCP_SERVER_IS_NOT_RE = /the Bondery MCP server is not connected/;
+  /connect the Bondery plugin in ChatGPT or Codex and sign in/u;
+const SIGNED_OUT_RE = /- \*\*Signed out:\*\*/u;
+const INSTALL_THE_BONDERY_PLUGIN_IN_CHATGPT_RE = /Install the Bondery plugin in ChatGPT or Codex/u;
+const THE_BONDERY_MCP_SERVER_IS_NOT_RE = /the Bondery MCP server is not connected/u;
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const FIXTURE_VERSION = "0.0.0-fixture";

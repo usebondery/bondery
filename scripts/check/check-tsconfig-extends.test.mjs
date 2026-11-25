@@ -11,9 +11,9 @@ import { findViolations } from "./check-tsconfig-extends.mjs";
  * @param {string} rel
  * @param {unknown} value
  */
-const BONDERY_TYPESCRIPT_CONFIG_BASE_JSON_RE = /@bondery\/typescript-config\/base\.json/;
-const ALLOWJS_RE = /allowJs/;
-const BASE_JSON_RE = /base\.json/;
+const BONDERY_TYPESCRIPT_CONFIG_BASE_JSON_RE = /@bondery\/typescript-config\/base\.json/u;
+const ALLOWJS_RE = /allowJs/u;
+const BASE_JSON_RE = /base\.json/u;
 
 function writeJson(root, rel, value) {
   const filePath = join(root, rel);

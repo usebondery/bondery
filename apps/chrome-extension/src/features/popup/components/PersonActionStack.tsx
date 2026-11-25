@@ -1,7 +1,7 @@
 import { Button, Stack, Text } from "@mantine/core";
 import { IconCalendarPlus, IconExternalLink, IconUserPlus } from "@tabler/icons-react";
 import { useExtensionPopupTranslations } from "../../../lib/i18n/generated/hooks";
-import { PersonChip } from "./PersonChip";
+import { PersonChip } from "./personChip";
 
 interface PersonActionStackProps {
   avatar?: string | null;

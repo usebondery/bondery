@@ -12,10 +12,10 @@ import { parseInstagramExportUpload } from "../../routes/import/instagram/parser
 import { parseLinkedInCsvUpload } from "../../routes/import/linkedin/parser.js";
 import { loadBaseValues, loadUpload } from "./fixtures.js";
 
-const CSV_NEEDS_QUOTING = /[",\n]/;
-const INSTAGRAM_URL_PREFIX = /^https:\/\/www\.instagram\.com\//;
-const CLOSE_FRIENDS_ERROR = /close_friends\.json has invalid JSON structure/;
-const LINKEDIN_HEADER_ERROR = /Invalid LinkedIn CSV format/;
+const CSV_NEEDS_QUOTING = /[",\n]/u;
+const INSTAGRAM_URL_PREFIX = /^https:\/\/www\.instagram\.com\//u;
+const CLOSE_FRIENDS_ERROR = /close_friends\.json has invalid JSON structure/u;
+const LINKEDIN_HEADER_ERROR = /Invalid LinkedIn CSV format/u;
 
 /** The header the LinkedIn exporter writes, in the order the parser requires. */
 const LINKEDIN_HEADER = "First Name,Last Name,URL,Email Address,Company,Position,Connected On";

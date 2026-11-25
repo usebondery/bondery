@@ -7,7 +7,7 @@ import { isValidUuid } from "@bondery/helpers/ids";
 import { AVATARS_BUCKET, deleteStorageObjects, getStorage } from "../storage/get-storage.js";
 import { AVATAR_IMAGE_MAX_EDGE, normalizeImageToJpeg } from "../storage/normalize-image.js";
 
-const LEADING_SLASHES_PATTERN = /^\/+/;
+const LEADING_SLASHES_PATTERN = /^\/+/u;
 
 export function getContactAvatarStoragePath(userId: string, contactId: string): string {
   return `${userId}/${contactId}.jpg`;

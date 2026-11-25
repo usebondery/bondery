@@ -25,7 +25,7 @@ import { isApiKeyBearerToken } from "./api-keys.js";
 import { resolveOAuthBearerUser, resolveRequestAuthUser } from "./resolve-request-auth.js";
 import { createVerifyServiceSecret } from "./service-secret.js";
 
-const TRAILING_SLASHES_PATTERN = /\/+$/;
+const TRAILING_SLASHES_PATTERN = /\/+$/u;
 
 // ── Type augmentation ────────────────────────────────────────────────────────
 

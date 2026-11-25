@@ -52,7 +52,7 @@ async function writeZip(outputPath, files) {
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const BASE_DATA_PATH = path.join(HERE, "base-contact-values.json");
 
-const LINE_BREAK = /\r?\n/;
+const LINE_BREAK = /\r?\n/u;
 const CRLF = "\r\n";
 
 /** The newline the source file uses. A CRLF file stays CRLF. An LF file stays LF. */
@@ -64,7 +64,7 @@ function sourceLineEnding(text) {
   }
   return "\n";
 }
-const BYTE_ORDER_MARK = /^\uFEFF/;
+const BYTE_ORDER_MARK = /^\uFEFF/u;
 
 /** The Android exporter folds at 74 octets plus the leading space, so a folded line is 75. */
 const FOLD_WIDTH = 74;
@@ -139,9 +139,9 @@ function categoryFor(index, baseData) {
   return labels[index % labels.length];
 }
 
-const QUOTED_PRINTABLE = /ENCODING=QUOTED-PRINTABLE/i;
-const UID_PREFIX = /^([\w.-]+-)[0-9a-fA-F-]{36}$/;
-const QUOTED_PRINTABLE_PARAM = /ENCODING=QUOTED-PRINTABLE/i;
+const QUOTED_PRINTABLE = /ENCODING=QUOTED-PRINTABLE/iu;
+const UID_PREFIX = /^(?<group1>[\w.-]+-)[0-9a-fA-F-]{36}$/u;
+const QUOTED_PRINTABLE_PARAM = /ENCODING=QUOTED-PRINTABLE/iu;
 
 /**
  * Encodes a value as vCard 2.1 quoted-printable.
@@ -478,7 +478,7 @@ function anonymizeVCardBlock({ baseData, block, index, lineEnding, random }) {
 
 async function anonymizeVcf(inputPath, outputPath, baseData) {
   const text = await readFile(inputPath, "utf8");
-  const blocks = text.match(/BEGIN:VCARD[\s\S]*?END:VCARD/gi) ?? [];
+  const blocks = text.match(/BEGIN:VCARD[\s\S]*?END:VCARD/giu) ?? [];
   if (blocks.length === 0) {
     throw new Error("No vCard records found");
   }

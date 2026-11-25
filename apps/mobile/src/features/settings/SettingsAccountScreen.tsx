@@ -24,10 +24,10 @@ import { useMyselfContact } from "../../lib/sync/hooks/useSyncQuery";
 import { MOBILE_LAYOUT } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { SettingsAccountProfileCard } from "./components/SettingsAccountProfileCard";
-import { SettingsAsyncState } from "./components/SettingsAsyncState";
+import { SettingsAsyncState } from "./components/settingsAsyncState";
 
 function plainTextFromHtml(value: string): string {
-  return value.replace(/<[^>]+>/g, "");
+  return value.replace(/<[^>]+>/gu, "");
 }
 
 export function SettingsAccountScreen() {

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { SelectLeftSectionView } from "./SelectLeftSection";
 import { isSelectLeftSectionConfig } from "./selectLeftSectionConfig";
+import { SelectLeftSectionView } from "./selectLeftSectionView";
 import type { SelectDataItem } from "./types";
 
 export { isSelectLeftSectionConfig } from "./selectLeftSectionConfig";

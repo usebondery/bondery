@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 import type { S3Client } from "@aws-sdk/client-s3";
 import { ensureStorageBuckets } from "../lib/storage/ensure-buckets.js";
 
-const ENSURESTORAGEBUCKETS_FAILED_FOR_AVATARS_PATTERN = /ensureStorageBuckets failed for: avatars/;
+const ENSURESTORAGEBUCKETS_FAILED_FOR_AVATARS_PATTERN = /ensureStorageBuckets failed for: avatars/u;
 
 const RETRY_OPTIONS = { maxAttempts: 5, retryDelayMs: 0 } as const;
 

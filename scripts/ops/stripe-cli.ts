@@ -8,12 +8,12 @@ import { fileURLToPath } from "node:url";
 import { API_ROUTES } from "../../packages/helpers/src/globals/paths.ts";
 import { DEV_URLS } from "../../packages/schemas/src/constants/dev-ports.ts";
 
-const STRIPE_LOGIN_RE = /stripe login/i;
-const ACCOUNT_RE = /Account:/i;
+const STRIPE_LOGIN_RE = /stripe login/iu;
+const ACCOUNT_RE = /Account:/iu;
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const WEBHOOK_SECRET_RE = /\bwhsec_[A-Za-z0-9_]+/;
+const WEBHOOK_SECRET_RE = /\bwhsec_[A-Za-z0-9_]+/u;
 
 type StripeCommand = {
   command: string;

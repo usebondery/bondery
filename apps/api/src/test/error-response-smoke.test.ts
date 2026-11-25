@@ -3,9 +3,9 @@ import { describe, it } from "node:test";
 import { API_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers";
 import { loadTestEnv } from "./load-test-env.js";
 
-const DOCS_API_ERRORS_AUTH_REQUIRED_PATTERN = /\/docs\/api\/errors\/auth_required$/;
-const TRAILING_SLASHES_PATTERN = /\/+$/;
-const MCP_PATTERN = /\/mcp$/;
+const DOCS_API_ERRORS_AUTH_REQUIRED_PATTERN = /\/docs\/api\/errors\/auth_required$/u;
+const TRAILING_SLASHES_PATTERN = /\/+$/u;
+const MCP_PATTERN = /\/mcp$/u;
 
 describe("error response smoke", () => {
   it("returns 401 with auth_required for unauthenticated session route", async () => {

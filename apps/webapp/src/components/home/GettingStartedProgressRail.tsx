@@ -6,8 +6,8 @@ import type { ContactSelectable, UserSettings } from "@bondery/schemas";
 import { Group, Paper, Progress, Stack, Text, Title } from "@mantine/core";
 import { IconX } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
-import { openNewActivityModal } from "@/app/(app)/app/(shell)/interactions/components/NewActivityModal";
-import { openAddContactModal } from "@/app/(app)/app/(shell)/people/components/modals/AddContactModal";
+import { openNewActivityModal } from "@/app/(app)/app/(shell)/interactions/components/openNewActivityModal";
+import { openAddContactModal } from "@/app/(app)/app/(shell)/people/components/modals/openAddContactModal";
 import {
   buildGettingStartedState,
   type GettingStartedTaskId,

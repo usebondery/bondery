@@ -1,4 +1,4 @@
-const HTTP_AVATAR_URI_PATTERN = /^https?:\/\//i;
+const HTTP_AVATAR_URI_PATTERN = /^https?:\/\//iu;
 
 export function isHttpAvatarUri(uri: string): boolean {
   return HTTP_AVATAR_URI_PATTERN.test(uri);

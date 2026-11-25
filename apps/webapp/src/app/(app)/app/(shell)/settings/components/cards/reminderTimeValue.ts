@@ -1,8 +1,8 @@
 import { firstZodErrorMessage, reminderSendHourSchema } from "@bondery/schemas";
 
-const TIME_24H = /^([01]?\d|2[0-3]):([0-5]\d)$/;
-const TIME_12H = /^(\d{1,2}):([0-5]\d)\s*(AM|PM)$/i;
-const TIME_24H_OPTIONAL_SECONDS = /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/;
+const TIME_24H = /^(?<group1>[01]?\d|2[0-3]):(?<group2>[0-5]\d)$/u;
+const TIME_12H = /^(?<group1>\d{1,2}):(?<group2>[0-5]\d)\s*(?<group3>AM|PM)$/iu;
+const TIME_24H_OPTIONAL_SECONDS = /^(?<group1>[01]\d|2[0-3]):[0-5]\d(?<group2>:[0-5]\d)?$/u;
 
 function isValidTimeValue(value: string): boolean {
   return TIME_24H_OPTIONAL_SECONDS.test(value.trim());

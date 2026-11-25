@@ -8,7 +8,7 @@ import PopupApp from "../../features/popup/PopupApp";
 import { I18nProvider } from "../../lib/i18n/I18nProvider";
 import { MantineWrapper } from "../../lib/ui";
 
-const root = document.getElementById("popup-root");
+const root = document.querySelector("#popup-root");
 
 if (root) {
   ReactDOM.createRoot(root).render(

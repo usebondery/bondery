@@ -1,5 +1,5 @@
 /** Average adult reading speed in words per minute. */
-const PATTERN_5C732B_RE = /\s+/;
+const PATTERN_5C732B_RE = /\s+/u;
 
 const WORDS_PER_MINUTE = 238;
 
@@ -18,31 +18,31 @@ export function getReadingTime(text: string): { minutes: number; words: number }
 
   const cleaned = text
     // Remove fenced code blocks (``` ... ```)
-    .replace(/```[\s\S]*?```/g, "")
+    .replace(/```[\s\S]*?```/gu, "")
     // Remove inline code
-    .replace(/`[^`]*`/g, "")
+    .replace(/`[^`]*`/gu, "")
     // Remove images ![alt](url)
-    .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
+    .replace(/!\[[^\]]*\]\([^)]*\)/gu, "")
     // Convert links [text](url) → keep text only
-    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/\[(?<group1>[^\]]*)\]\([^)]*\)/gu, "$1")
     // Remove HTML / JSX tags
-    .replace(/<[^>]*>/g, "")
+    .replace(/<[^>]*>/gu, "")
     // Remove single-line import / export statements
-    .replace(/^(import|export)\b.*$/gm, "")
+    .replace(/^(?<group1>import|export)\b.*$/gmu, "")
     // Remove multi-line MDX export blocks: export const foo = { ... };
-    .replace(/export\s+(?:const|let|var)\s+\w+\s*=\s*\{[\s\S]*?\};?/g, "")
+    .replace(/export\s+(?:const|let|var)\s+\w+\s*=\s*\{[\s\S]*?\};?/gu, "")
     // Remove heading markers
-    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/^#{1,6}\s+/gmu, "")
     // Remove emphasis / bold / strikethrough markers
-    .replace(/[*_~]{1,3}/g, "")
+    .replace(/[*_~]{1,3}/gu, "")
     // Remove blockquote markers
-    .replace(/^>\s?/gm, "")
+    .replace(/^>\s?/gmu, "")
     // Remove horizontal rules
-    .replace(/^[-*_]{3,}\s*$/gm, "")
+    .replace(/^[-*_]{3,}\s*$/gmu, "")
     // Remove unordered list markers
-    .replace(/^[-*+]\s/gm, "")
+    .replace(/^[-*+]\s/gmu, "")
     // Remove ordered list markers
-    .replace(/^\d+\.\s/gm, "");
+    .replace(/^\d+\.\s/gmu, "");
 
   const words = cleaned.split(PATTERN_5C732B_RE).filter(Boolean);
   const wordCount = words.length;

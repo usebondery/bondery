@@ -8,15 +8,15 @@ import {
 } from "../lib/notifications/transporter.js";
 import { sendMagicLinkEmail } from "../services/notifications/magic-link.js";
 
-const SECRET_TOKEN_PATTERN = /secret-token/;
-const ASKED_TO_SIGN_IN_PATTERN = /asked to sign in/;
-const SVEETECH_S_R_O_PATTERN = /Sveetech s\.r\.o\./;
-const CONTACT_PATTERN = /\/contact/;
-const DOCS_PATTERN = /\/docs/;
-const SVEETECH_PATTERN = /Sveetech/;
-const PERSON_EXAMPLE_TEST_PATTERN = /person@example\.test/;
-const MAGIC_LINK_VERIFY_PATTERN = /magic-link\/verify/;
-const EMAIL_SERVICE_NOT_CONFIGURED_PATTERN = /email_service_not_configured/;
+const SECRET_TOKEN_PATTERN = /secret-token/u;
+const ASKED_TO_SIGN_IN_PATTERN = /asked to sign in/u;
+const SVEETECH_S_R_O_PATTERN = /Sveetech s\.r\.o\./u;
+const CONTACT_PATTERN = /\/contact/u;
+const DOCS_PATTERN = /\/docs/u;
+const SVEETECH_PATTERN = /Sveetech/u;
+const PERSON_EXAMPLE_TEST_PATTERN = /person@example\.test/u;
+const MAGIC_LINK_VERIFY_PATTERN = /magic-link\/verify/u;
+const EMAIL_SERVICE_NOT_CONFIGURED_PATTERN = /email_service_not_configured/u;
 
 const SMTP_ENV_KEYS = [
   "BONDERY_PRIVATE_EMAIL_HOST",

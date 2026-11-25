@@ -55,7 +55,7 @@ async function resolveRedisPassword(
   return { password, passwordGenerated: true };
 }
 
-export { API_CONTAINER_UID };
+export { API_CONTAINER_UID } from "../infra-secrets/ownership.js";
 
 /** `redis` user in the official `redis` image. */
 export const REDIS_CONTAINER_UID = 999;

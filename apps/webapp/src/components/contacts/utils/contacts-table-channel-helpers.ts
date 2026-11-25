@@ -23,7 +23,7 @@ export function formatPhoneForDisplay(prefix: string, value: string): string {
   }
 
   const mask = getTelephoneReactMaskExpression(prefix);
-  const digits = value.replace(/\D/g, "");
+  const digits = value.replace(/\D/gu, "");
 
   let formatted = "";
   let digitIndex = 0;
@@ -31,7 +31,7 @@ export function formatPhoneForDisplay(prefix: string, value: string): string {
   for (const char of mask) {
     if (char === "0" && digitIndex < digits.length) {
       formatted += digits[digitIndex];
-      digitIndex++;
+      digitIndex += 1;
     } else if (char !== "0") {
       formatted += char;
     }

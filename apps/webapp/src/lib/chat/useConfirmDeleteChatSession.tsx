@@ -15,7 +15,7 @@ import { openStandardConfirmModal } from "@/components/modals/openStandardConfir
 import { useChatPageTranslations, useCommonTranslations } from "@/lib/i18n/generated/hooks";
 import { routeAssert } from "@/lib/navigation/route/assert";
 import { useDeleteChatSessionMutation } from "@/lib/query/hooks/useChat";
-import { useChatSessions } from "./ChatSessionsContext";
+import { useChatSessions } from "./chatSessionsProvider";
 
 export function useConfirmDeleteChatSession() {
   const t = useChatPageTranslations();

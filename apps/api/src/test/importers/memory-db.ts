@@ -157,7 +157,11 @@ function createImportDb(seed: { people?: Row[] } = {}): ImportDb & Record<string
   let rawCalls = 0;
   let nextId = 1;
 
-  const mintId = () => `${DEFAULT_ID_PREFIX}${String(nextId++).padStart(2, "0")}`;
+  const mintId = () => {
+    const id = nextId;
+    nextId += 1;
+    return `${DEFAULT_ID_PREFIX}${String(id).padStart(2, "0")}`;
+  };
   const onWrite = () => {
     writes += 1;
   };

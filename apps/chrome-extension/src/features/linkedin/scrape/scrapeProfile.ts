@@ -24,7 +24,7 @@ import {
 } from "./sduiProfile";
 import type { WorkEntry } from "./workExperience";
 
-const JSESSIONID_COOKIE_PRESENT_RE = /(?:^|;\s*)JSESSIONID=/;
+const JSESSIONID_COOKIE_PRESENT_RE = /(?:^|;\s*)JSESSIONID=/u;
 interface CachedProfile {
   educationHistory: EducationEntry[];
   firstName?: string;

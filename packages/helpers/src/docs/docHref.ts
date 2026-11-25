@@ -11,4 +11,5 @@ export function docHref(id: DocId): string {
   return hash ? `${base}#${hash}` : base;
 }
 
-export { DOC_LINKS, type DocId };
+export type { DocId } from "#docs/doc-links.generated.js";
+export { DOC_LINKS } from "#docs/doc-links.generated.js";

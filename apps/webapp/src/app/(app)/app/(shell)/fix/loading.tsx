@@ -1,4 +1,4 @@
-import { FixPageSkeleton } from "./components/FixSkeletons";
+import { FixPageSkeleton } from "./components/fixSkeletons";
 
 export default function FixLoading() {
   return <FixPageSkeleton />;

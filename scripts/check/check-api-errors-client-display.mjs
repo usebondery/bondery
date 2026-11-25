@@ -10,7 +10,7 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "./check-report.mjs";
 
-const TSX_TS_RE = /\.(tsx|ts)$/;
+const TSX_TS_RE = /\.(?<group1>tsx|ts)$/u;
 
 const check = createCheck("check-api-errors-client-display");
 
@@ -19,17 +19,17 @@ const repoRoot = join(__dirname, "../..");
 const targets = [join(repoRoot, "apps", "webapp", "src"), join(repoRoot, "apps", "mobile", "src")];
 
 const sharedBanned = [
-  /error instanceof Error \? error\.message/,
-  /\berror\.message\b.*(?:description|title|Alert|notification|toast|showNotification)/i,
-  /description:\s*error\.message/,
+  /error instanceof Error \? error\.message/u,
+  /\berror\.message\b.*(?:description|title|Alert|notification|toast|showNotification)/iu,
+  /description:\s*error\.message/u,
 ];
 
 const mobileAliasBanned = [
-  /\berr instanceof Error \? err\.message/,
-  /\bloadError instanceof Error \? loadError\.message/,
-  /\bcreateError instanceof Error(?: && createError\.message|\s*\? createError\.message)/,
-  /\b(?:err|loadError|createError|deleteError|logoutError)\.message\b.*(?:description|title|Alert|notification|toast|showNotification|errorDescription)/i,
-  /description:\s*(?:err|loadError|createError|deleteError|logoutError)\.message/,
+  /\berr instanceof Error \? err\.message/u,
+  /\bloadError instanceof Error \? loadError\.message/u,
+  /\bcreateError instanceof Error(?: && createError\.message|\s*\? createError\.message)/u,
+  /\b(?:err|loadError|createError|deleteError|logoutError)\.message\b.*(?:description|title|Alert|notification|toast|showNotification|errorDescription)/iu,
+  /description:\s*(?:err|loadError|createError|deleteError|logoutError)\.message/u,
 ];
 
 function collectFiles(dir) {
@@ -49,7 +49,7 @@ function collectFiles(dir) {
 
 for (const root of targets) {
   for (const file of collectFiles(root)) {
-    const rel = relative(repoRoot, file).replace(/\\/g, "/");
+    const rel = relative(repoRoot, file).replace(/\\/gu, "/");
     if (
       rel.includes("/lib/api/") ||
       rel.includes("getUserFacingError") ||
@@ -60,7 +60,7 @@ for (const root of targets) {
     }
 
     const lines = readFileSync(file, "utf8").split("\n");
-    for (let i = 0; i < lines.length; i++) {
+    for (let i = 0; i < lines.length; i += 1) {
       const line = lines[i];
       if (
         line.includes("getUserFacingError") ||

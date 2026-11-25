@@ -29,7 +29,7 @@ import { buildSignedOAuthQuery } from "@/lib/auth/signedOAuthQuery";
 import { useOAuthConsentTranslations } from "@/lib/i18n/generated/hooks";
 import { useWebappRuntimeConfig } from "@/lib/platform/runtimeConfig.client";
 
-const TRAILING_SLASHES = /\/+$/;
+const TRAILING_SLASHES = /\/+$/u;
 
 type OAuthConsentRedirectPayload = {
   redirect_to?: string;

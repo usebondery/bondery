@@ -74,7 +74,7 @@ function collectTsFiles(dir, acc = []) {
  * `Content-Security-Policy` value. The builder returns one, so an assignment
  * anywhere except through the shared builder is a hand-written policy.
  */
-const HAND_WRITTEN_POLICY = /["'`]\s*(?:default-src|script-src)\b/;
+const HAND_WRITTEN_POLICY = /["'`]\s*(?:default-src|script-src)\b/u;
 
 /** Proxy files that exist for an app. */
 function proxyPath(app) {
@@ -93,14 +93,14 @@ for (const app of EXPECTED_APPS) {
   const source = readFileSync(proxyFile, "utf8");
   const at = repoPath(proxyFile);
 
-  if (/export\s+const\s+proxyConfig\b/.test(source)) {
+  if (/export\s+const\s+proxyConfig\b/u.test(source)) {
     check.add(
       `${at}: exports proxyConfig. Next.js reads \`export const config\`, so the matcher` +
         " is silently ignored and the proxy runs on every path.",
     );
   }
 
-  if (!/export\s+const\s+config\b/.test(source)) {
+  if (!/export\s+const\s+config\b/u.test(source)) {
     check.add(
       `${at}: has no \`export const config\`. Without it the proxy runs on _next/static too.`,
     );
@@ -140,7 +140,7 @@ for (const app of EXPECTED_APPS) {
   // An enforced script-src that allows inline script defeats the nonce.
   for (const file of delegates) {
     const content = readFileSync(file, "utf8");
-    const enforcedScriptSrc = /scriptSrc\s*:\s*\[[^\]]*'unsafe-inline'/s.test(content);
+    const enforcedScriptSrc = /scriptSrc\s*:\s*\[[^\]]*'unsafe-inline'/su.test(content);
     if (enforcedScriptSrc) {
       check.add(
         `${repoPath(file)}: scriptSrc allows 'unsafe-inline'. Remove it, so the nonce is the only way an inline script runs.`,

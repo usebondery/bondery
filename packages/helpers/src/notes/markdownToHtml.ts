@@ -1,11 +1,11 @@
-const PATTERN_5E40_RE = /^@/;
-const PATTERN_5E282D2D2D2B_RE = /^(---+|\*\*\*+|___+)$/;
-const PATTERN_5E28237B312C_RE = /^(#{1,3})\s*(.+)$/;
-const PATTERN_5E3E5C733F28_RE = /^>\s?(.*)$/;
-const XX_RE_2 = /^[-*]\s*\[([\s\t]*[xX]?[\s\t]*)\]\s*(.*)$/;
-const XX_RE = /[xX]/;
-const PATTERN_5E5B2D2A2B5D_RE = /^[-*+]\s*(.+)$/;
-const PATTERN_5E5C642B5C2E_RE = /^\d+\. (.+)$/;
+const PATTERN_5E40_RE = /^@/u;
+const PATTERN_5E282D2D2D2B_RE = /^(?<group1>---+|\*\*\*+|___+)$/u;
+const PATTERN_5E28237B312C_RE = /^(?<group1>#{1,3})\s*(?<group2>.+)$/u;
+const PATTERN_5E3E5C733F28_RE = /^>\s?(?<group1>.*)$/u;
+const XX_RE_2 = /^[-*]\s*\[(?<group1>[\s\t]*[xX]?[\s\t]*)\]\s*(?<group2>.*)$/u;
+const XX_RE = /[xX]/u;
+const PATTERN_5E5B2D2A2B5D_RE = /^[-*+]\s*(?<group1>.+)$/u;
+const PATTERN_5E5C642B5C2E_RE = /^\d+\. (?<group1>.+)$/u;
 
 const HTML_ESCAPES: Record<string, string> = {
   "'": "&#39;",
@@ -17,11 +17,11 @@ const HTML_ESCAPES: Record<string, string> = {
 
 /** Escape text so it can sit in element content or a double-quoted attribute. */
 function escapeHtml(text: string): string {
-  return text.replace(/[&<>"']/g, (char) => HTML_ESCAPES[char] ?? char);
+  return text.replace(/[&<>"']/gu, (char) => HTML_ESCAPES[char] ?? char);
 }
 
 /** Link targets a note may hold. Anything else renders as plain text, never as an `href`. */
-const SAFE_LINK_URL = /^(?:https?:\/\/|mailto:|tel:)/i;
+const SAFE_LINK_URL = /^(?:https?:\/\/|mailto:|tel:)/iu;
 
 /**
  * Converts a Markdown string to Tiptap-compatible HTML.
@@ -48,7 +48,7 @@ export function markdownToHtml(markdown: string): string {
     return "";
   }
 
-  const lines = markdown.replace(/\r\n?/g, "\n").split("\n");
+  const lines = markdown.replace(/\r\n?/gu, "\n").split("\n");
   let html = "";
   let listType: "ul" | "ol" | "taskList" | null = null;
   let inBlockquote = false;
@@ -72,41 +72,47 @@ export function markdownToHtml(markdown: string): string {
   const inline = (rawText: string): string =>
     escapeHtml(rawText)
       // bold: **…** or __…__
-      .replace(/\*\*(.+?)\*\*|__(.+?)__/g, (_, a, b) => `<strong>${a ?? b}</strong>`)
+      .replace(
+        /\*\*(?<group1>.+?)\*\*|__(?<group2>.+?)__/gu,
+        (_, a, b) => `<strong>${a ?? b}</strong>`,
+      )
       // italic: *…* or _…_ (not touching bold markers)
       .replace(
-        /(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)|(?<!_)_(?!_)(.+?)(?<!_)_(?!_)/g,
+        /(?<!\*)\*(?!\*)(?<group1>.+?)(?<!\*)\*(?!\*)|(?<!_)_(?!_)(?<group2>.+?)(?<!_)_(?!_)/gu,
         (_, a, b) => `<em>${a ?? b}</em>`,
       )
       // strikethrough: ~~…~~
-      .replace(/~~(.+?)~~/g, (_, a) => `<s>${a}</s>`)
+      .replace(/~~(?<group1>.+?)~~/gu, (_, a) => `<s>${a}</s>`)
       // highlight: ==…==
-      .replace(/[=]=(.+?)==/g, (_, a) => `<mark>${a}</mark>`)
+      .replace(/[=]=(?<group1>.+?)==/gu, (_, a) => `<mark>${a}</mark>`)
       // inline code: `…`
-      .replace(/`([^`]+)`/g, (_, a) => `<code>${a}</code>`)
+      .replace(/`(?<group1>[^`]+)`/gu, (_, a) => `<code>${a}</code>`)
       // Person mention links must run before generic markdown links.
-      .replace(/\[(@[^\]]*)\]\(bp:\/\/person\/([^)]+)\)/g, (_, rawLabel: string, id: string) => {
-        const label = rawLabel.replace(PATTERN_5E40_RE, "").trim();
-        const text = label.length > 0 ? `@${label}` : "@";
-        return `<span data-type="mention" data-id="${id}" data-label="${label}">${text}</span>`;
-      })
+      .replace(
+        /\[(?<group1>@[^\]]*)\]\(bp:\/\/person\/(?<group2>[^)]+)\)/gu,
+        (_, rawLabel: string, id: string) => {
+          const label = rawLabel.replace(PATTERN_5E40_RE, "").trim();
+          const text = label.length > 0 ? `@${label}` : "@";
+          return `<span data-type="mention" data-id="${id}" data-label="${label}">${text}</span>`;
+        },
+      )
       // bp tokens: [[bp:person:UUID]], [[bp:date:ISO]], etc.
       .replace(
-        /\[\[bp:person:([^\]]+)\]\]/g,
+        /\[\[bp:person:(?<group1>[^\]]+)\]\]/gu,
         (_, id) => `<span data-type="mention" data-id="${id}" data-label="">@</span>`,
       )
       .replace(
-        /\[\[bp:date:([^\]]+)\]\]/g,
+        /\[\[bp:date:(?<group1>[^\]]+)\]\]/gu,
         (_, ts) => `<span data-type="inline-date" data-timestamp="${ts}"></span>`,
       )
       // link: [text](url). A target outside the allowlist keeps its text and loses the link.
-      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, t: string, url: string) =>
+      .replace(/\[(?<group1>[^\]]+)\]\((?<group2>[^)]+)\)/gu, (_, t: string, url: string) =>
         SAFE_LINK_URL.test(url.trim())
           ? `<a href="${url.trim()}" target="_blank" rel="noopener noreferrer">${t}</a>`
           : t,
       )
       // underline: the only raw tag htmlToMarkdown writes (it has no Markdown syntax)
-      .replace(/&lt;u&gt;(.+?)&lt;\/u&gt;/g, (_, a) => `<u>${a}</u>`);
+      .replace(/&lt;u&gt;(?<group1>.+?)&lt;\/u&gt;/gu, (_, a) => `<u>${a}</u>`);
 
   for (const line of lines) {
     const trimmed = line.trim();

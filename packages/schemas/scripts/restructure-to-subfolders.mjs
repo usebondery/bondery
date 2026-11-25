@@ -134,40 +134,40 @@ function applyImportRewrites(source) {
 
   // Sibling relative imports: ./module.schema.js → ../module/schema.js
   for (const name of ALL_MODULE_NAMES) {
-    const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const escaped = name.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
     content = content
       .replace(
-        new RegExp(`from "\\./${escaped}\\.schema\\.js"`, "g"),
+        new RegExp(`from "\\./${escaped}\\.schema\\.js"`, "gu"),
         `from "../${name}/schema.js"`,
       )
       .replace(
-        new RegExp(`from '\\./${escaped}\\.schema\\.js'`, "g"),
+        new RegExp(`from '\\./${escaped}\\.schema\\.js'`, "gu"),
         `from '../${name}/schema.js'`,
       )
-      .replace(new RegExp(`from "\\./${escaped}\\.types\\.js"`, "g"), `from "../${name}/types.js"`)
-      .replace(new RegExp(`from '\\./${escaped}\\.types\\.js'`, "g"), `from '../${name}/types.js'`)
+      .replace(new RegExp(`from "\\./${escaped}\\.types\\.js"`, "gu"), `from "../${name}/types.js"`)
+      .replace(new RegExp(`from '\\./${escaped}\\.types\\.js'`, "gu"), `from '../${name}/types.js'`)
       .replace(
-        new RegExp(`from "\\./${escaped}\\.contract\\.js"`, "g"),
+        new RegExp(`from "\\./${escaped}\\.contract\\.js"`, "gu"),
         `from "../${name}/contract.js"`,
       )
       .replace(
-        new RegExp(`from '\\./${escaped}\\.contract\\.js'`, "g"),
+        new RegExp(`from '\\./${escaped}\\.contract\\.js'`, "gu"),
         `from '../${name}/contract.js'`,
       )
-      .replace(new RegExp(`from "\\./${escaped}\\.js"`, "g"), `from "../${name}/index.js"`)
-      .replace(new RegExp(`from '\\./${escaped}\\.js'`, "g"), `from '../${name}/index.js'`);
+      .replace(new RegExp(`from "\\./${escaped}\\.js"`, "gu"), `from "../${name}/index.js"`)
+      .replace(new RegExp(`from '\\./${escaped}\\.js'`, "gu"), `from '../${name}/index.js'`);
   }
 
   // Inside a module folder: ./module.types.js → ./types.js
   for (const name of ALL_MODULE_NAMES) {
-    const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const escaped = name.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
     content = content
-      .replace(new RegExp(`from "\\./${escaped}\\.types\\.js"`, "g"), 'from "./types.js"')
-      .replace(new RegExp(`from '\\./${escaped}\\.types\\.js'`, "g"), "from './types.js'")
-      .replace(new RegExp(`from "\\./${escaped}\\.schema\\.js"`, "g"), 'from "./schema.js"')
-      .replace(new RegExp(`from '\\./${escaped}\\.schema\\.js'`, "g"), "from './schema.js'")
-      .replace(new RegExp(`from "\\./${escaped}\\.contract\\.js"`, "g"), 'from "./contract.js"')
-      .replace(new RegExp(`from '\\./${escaped}\\.contract\\.js'`, "g"), "from './contract.js'");
+      .replace(new RegExp(`from "\\./${escaped}\\.types\\.js"`, "gu"), 'from "./types.js"')
+      .replace(new RegExp(`from '\\./${escaped}\\.types\\.js'`, "gu"), "from './types.js'")
+      .replace(new RegExp(`from "\\./${escaped}\\.schema\\.js"`, "gu"), 'from "./schema.js"')
+      .replace(new RegExp(`from '\\./${escaped}\\.schema\\.js'`, "gu"), "from './schema.js'")
+      .replace(new RegExp(`from "\\./${escaped}\\.contract\\.js"`, "gu"), 'from "./contract.js"')
+      .replace(new RegExp(`from '\\./${escaped}\\.contract\\.js'`, "gu"), "from './contract.js'");
   }
 
   // Fix accidental double replacements
@@ -201,7 +201,7 @@ for (const root of rootsToFix) {
     const content = applyImportRewrites(original);
     if (content !== original) {
       writeFileSync(file, content);
-      filesUpdated++;
+      filesUpdated += 1;
     }
   }
 }

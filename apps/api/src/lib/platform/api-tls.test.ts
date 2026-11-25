@@ -23,14 +23,14 @@ import {
   resolveListenAddress,
 } from "./api-tls.js";
 
-const HTTPS_ONLY_API_SECRETS_PATTERN = /HTTPS only.*api:secrets/;
-const HTTPS_ONLY_PATTERN = /HTTPS only/;
+const HTTPS_ONLY_API_SECRETS_PATTERN = /HTTPS only.*api:secrets/u;
+const HTTPS_ONLY_PATTERN = /HTTPS only/u;
 const BONDERY_PRIVATE_API_TLS_CERT_FILE_POINTS_TO_A_FILE_THE_API_C_PATTERN =
-  /BONDERY_PRIVATE_API_TLS_CERT_FILE points to a file the API cannot read.*api:secrets/;
-const NO_PEM_DATA_PATTERN = /no PEM data/;
-const HELLO_OVER_WSS_PATTERN = /hello over wss/;
-const CERTIFICATE_PATTERN = /certificate/i;
-const VERSION_PROTOCOL_ALERT_PATTERN = /version|protocol|alert/i;
+  /BONDERY_PRIVATE_API_TLS_CERT_FILE points to a file the API cannot read.*api:secrets/u;
+const NO_PEM_DATA_PATTERN = /no PEM data/u;
+const HELLO_OVER_WSS_PATTERN = /hello over wss/u;
+const CERTIFICATE_PATTERN = /certificate/iu;
+const VERSION_PROTOCOL_ALERT_PATTERN = /version|protocol|alert/iu;
 
 type Reply = { body: string; headers: Record<string, unknown>; status: number };
 

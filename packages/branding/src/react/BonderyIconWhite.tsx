@@ -2,7 +2,7 @@ import type { ReactElement, SVGProps } from "react";
 import * as React from "react";
 
 function BonderyIconWhite(props: SVGProps<SVGSVGElement>): ReactElement {
-  const uniqueId = React.useId().replace(/:/g, "");
+  const uniqueId = React.useId().replace(/:/gu, "");
 
   return (
     <svg

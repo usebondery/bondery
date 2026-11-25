@@ -71,7 +71,7 @@ export function loadEmailNamespace(
 }
 
 export function interpolateCopy(template: string, values: EmailCopyValues): string {
-  return template.replace(/\{\{(\w+)\}\}/g, (_, key: string) => {
+  return template.replace(/\{\{(?<group1>\w+)\}\}/gu, (_, key: string) => {
     const value = values[key];
     return value === undefined || value === null ? "" : String(value);
   });

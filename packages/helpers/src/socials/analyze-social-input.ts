@@ -7,12 +7,12 @@ import {
   resolveContactSocialFieldCommit,
 } from "#socials/socials-helpers.js";
 
-const INSTAGRAM_COM_INSTAGR_AM_RE = /instagram\.com|instagr\.am/i;
-const FACEBOOK_COM_FB_COM_FACEBOOK_COM_RE = /facebook\.com|fb\.com|m\.facebook\.com/i;
-const LINKEDIN_COM_RE = /linkedin\.com/i;
-const WA_ME_API_WHATSAPP_COM_RE = /wa\.me|api\.whatsapp\.com/i;
-const SIGNAL_ME_RE = /signal\.me/i;
-const HTTPS_RE = /^https?:\/\//i;
+const INSTAGRAM_COM_INSTAGR_AM_RE = /instagram\.com|instagr\.am/iu;
+const FACEBOOK_COM_FB_COM_FACEBOOK_COM_RE = /facebook\.com|fb\.com|m\.facebook\.com/iu;
+const LINKEDIN_COM_RE = /linkedin\.com/iu;
+const WA_ME_API_WHATSAPP_COM_RE = /wa\.me|api\.whatsapp\.com/iu;
+const SIGNAL_ME_RE = /signal\.me/iu;
+const HTTPS_RE = /^https?:\/\//iu;
 
 type SocialInputRerouteReason = "wrong_platform" | "looks_like_phone" | "looks_like_website";
 
@@ -75,7 +75,7 @@ function looksLikePhone(input: string): boolean {
     return false;
   }
 
-  const digits = trimmed.replace(/\D/g, "");
+  const digits = trimmed.replace(/\D/gu, "");
   if (digits.length < MIN_PHONE_DIGITS) {
     return false;
   }
@@ -84,8 +84,8 @@ function looksLikePhone(input: string): boolean {
     return true;
   }
 
-  const nonSpace = trimmed.replace(/\s/g, "");
-  const nonDigitChars = nonSpace.replace(/\d/g, "").length;
+  const nonSpace = trimmed.replace(/\s/gu, "");
+  const nonDigitChars = nonSpace.replace(/\d/gu, "").length;
   return nonDigitChars <= 2;
 }
 

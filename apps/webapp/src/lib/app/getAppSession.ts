@@ -2,7 +2,7 @@ import { cache } from "react";
 import type { MeSessionData } from "@/lib/api/resources/meSession";
 import { getRequestSession } from "@/lib/auth/getRequestSession";
 
-export type { MeSessionData };
+export type { MeSessionData } from "@/lib/api/resources/meSession";
 
 export type AppSessionResult =
   | { status: "ok"; session: MeSessionData }

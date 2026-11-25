@@ -1,7 +1,7 @@
 import { NEXT_ACTIONS, routePersonWithNextAction, WEBAPP_ROUTES } from "@bondery/helpers";
 import { config } from "../../config";
 
-const TRAILING_SLASH_RE = /\/$/;
+const TRAILING_SLASH_RE = /\/$/u;
 /** Absolute webapp URL for an in-app path (must start with `/`). */
 export function hrefWebapp(path: string): string {
   const base = config.appUrl.replace(TRAILING_SLASH_RE, "");

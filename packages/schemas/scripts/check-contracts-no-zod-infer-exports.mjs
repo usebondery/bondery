@@ -12,7 +12,7 @@ import { createCheck } from "../../../scripts/check/check-report.mjs";
 const check = createCheck("check-contracts-no-zod-infer-exports");
 
 const root = join(fileURLToPath(import.meta.url), "..", "..", "src");
-const forbidden = /export\s+type\s+\w+\s*=\s*z\.(infer|input|output)\s*</;
+const forbidden = /export\s+type\s+\w+\s*=\s*z\.(?<group1>infer|input|output)\s*</u;
 
 function walk(dir, acc = []) {
   for (const entry of readdirSync(dir)) {

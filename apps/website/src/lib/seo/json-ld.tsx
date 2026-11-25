@@ -1,7 +1,7 @@
 import type { Thing, WithContext } from "schema-dts";
 
 export function serializeJsonLd(data: WithContext<Thing>): string {
-  return JSON.stringify(data).replace(/</g, "\\u003c");
+  return JSON.stringify(data).replace(/</gu, "\\u003c");
 }
 
 export function JsonLd({

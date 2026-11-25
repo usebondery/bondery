@@ -161,7 +161,7 @@ export function DataTable<TRow, TSortKey extends string = string>({
     if (options?.shiftKey && lastSelectedIndexRef.current !== null) {
       const start = Math.min(lastSelectedIndexRef.current, rowIndex);
       const end = Math.max(lastSelectedIndexRef.current, rowIndex);
-      for (let i = start; i <= end; i++) {
+      for (let i = start; i <= end; i += 1) {
         const rangeRow = dataRef.current[i];
         if (rangeRow === undefined) {
           continue;

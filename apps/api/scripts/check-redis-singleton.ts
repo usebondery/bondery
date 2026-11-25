@@ -15,7 +15,7 @@ const srcRoot = join(__dirname, "..", "src");
 
 const ALLOWLIST = new Set(["lib/data/redis.ts", "lib/health/probes.ts"]);
 
-const REDIS_PATTERN = /\bnew\s+Redis\s*\(/;
+const REDIS_PATTERN = /\bnew\s+Redis\s*\(/u;
 
 function walk(dir: string): string[] {
   const entries = readdirSync(dir);
@@ -34,7 +34,7 @@ function walk(dir: string): string[] {
 const violations: string[] = [];
 
 for (const file of walk(srcRoot)) {
-  const rel = relative(srcRoot, file).replace(/\\/g, "/");
+  const rel = relative(srcRoot, file).replace(/\\/gu, "/");
   if (ALLOWLIST.has(rel)) {
     continue;
   }

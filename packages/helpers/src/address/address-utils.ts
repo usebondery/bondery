@@ -31,8 +31,8 @@ function getCountryNameToCodeMap(): Map<string, string> {
   const names = new Intl.DisplayNames(["en"], { type: "region" });
 
   // Iterate all known ISO 3166-1 alpha-2 codes (A–Z × A–Z)
-  for (let i = 65; i <= 90; i++) {
-    for (let j = 65; j <= 90; j++) {
+  for (let i = 65; i <= 90; i += 1) {
+    for (let j = 65; j <= 90; j += 1) {
       const code = String.fromCharCode(i) + String.fromCharCode(j);
       try {
         const name = names.of(code);

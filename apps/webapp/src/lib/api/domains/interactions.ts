@@ -10,7 +10,10 @@ import {
   parseInteractionsList,
 } from "@/lib/api/resources/interactions";
 
-export type { InteractionsListParams, InteractionsListResult };
+export type {
+  InteractionsListParams,
+  InteractionsListResult,
+} from "@/lib/api/resources/interactions";
 
 export async function getInteractionsList(
   params: InteractionsListParams = {},

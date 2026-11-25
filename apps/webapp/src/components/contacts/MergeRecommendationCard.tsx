@@ -18,7 +18,7 @@ import { notifications } from "@mantine/notifications";
 import { IconCheck, IconUsers, IconX } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { openMergeWithModal } from "@/app/(app)/app/(shell)/people/components/modals/MergeWithModal";
+import { openMergeWithModal } from "@/app/(app)/app/(shell)/people/components/modals/openMergeWithModal";
 import {
   getAutoLastInteractionChoice,
   listMergeFieldConflicts,

@@ -7,8 +7,8 @@ import { ScrollView } from "react-native";
 import { StackNavBar } from "../../components/chrome";
 import { ActionIcon } from "../../components/ui/ActionIcon";
 import { InputWrapper } from "../../components/ui/InputWrapper";
-import { Select } from "../../components/ui/Select";
 import { Stack } from "../../components/ui/Stack";
+import { Select } from "../../components/ui/select";
 import { updateSettings } from "../../lib/api/client";
 import {
   useMobileGroupsTranslations,
@@ -27,8 +27,8 @@ import { ContactsGroupFilterField } from "../contacts/components/ContactsGroupFi
 import { ContactsGroupsHeader } from "../contacts/components/ContactsGroupsHeader";
 import { GroupEditSheet } from "../contacts/components/GroupEditSheet";
 import { sortGroups } from "../contacts/groupSort";
-import { SettingsAsyncState } from "./components/SettingsAsyncState";
 import { SettingsPreviewSection } from "./components/SettingsPreviewSection";
+import { SettingsAsyncState } from "./components/settingsAsyncState";
 
 export function SettingsGroupsScreen() {
   const tMobileGroups = useMobileGroupsTranslations();

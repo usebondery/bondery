@@ -9,10 +9,10 @@ import {
   syncBrowserDntState,
 } from "./preference";
 
-export { posthog };
+export { default as posthog } from "posthog-js";
 
 /** PostHog event names must use `category:object_action`. */
-export const PRODUCT_EVENT_NAME_PATTERN = /^[a-z][a-z0-9_]*:[a-z][a-z0-9_]*$/;
+export const PRODUCT_EVENT_NAME_PATTERN = /^[a-z][a-z0-9_]*:[a-z][a-z0-9_]*$/u;
 
 /**
  * Applies PostHog opt-in/opt-out based on browser DNT and the user's preference.

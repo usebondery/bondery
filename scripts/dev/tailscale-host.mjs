@@ -20,11 +20,11 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 /** Trailing dot on a Tailscale `DNSName`. */
-const TRAILING_DOT_RE = /\.$/;
+const TRAILING_DOT_RE = /\.$/u;
 /** A Tailscale MagicDNS suffix. Requires a tailnet label before `.ts.net`. */
-const TAILSCALE_MAGICDNS_RE = /^([a-z0-9][a-z0-9-]*)\.([a-z0-9-]+)\.ts\.net$/i;
+const TAILSCALE_MAGICDNS_RE = /^(?<group1>[a-z0-9][a-z0-9-]*)\.(?<group2>[a-z0-9-]+)\.ts\.net$/iu;
 /** A URL scheme prefix. A bare host has none, so the parser needs one added. */
-const URL_SCHEME_RE = /^[a-z][a-z\d+.-]*:\/\//i;
+const URL_SCHEME_RE = /^[a-z][a-z\d+.-]*:\/\//iu;
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -39,7 +39,7 @@ function readEnvAssignment(path, key) {
   if (!existsSync(path)) {
     return;
   }
-  const pattern = new RegExp(`^${key}=(.*)$`, "m");
+  const pattern = new RegExp(`^${key}=(.*)$`, "mu");
   const match = readFileSync(path, "utf-8").match(pattern);
   if (!match) {
     return;

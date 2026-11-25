@@ -49,7 +49,7 @@ const COORDINATES: ReadonlyArray<{ lat: number; lon: number; timezone: string }>
  * decodes again so a query assembled from raw fixture text also matches.
  */
 function decodeQuotedPrintable(text: string): string {
-  return text.replace(/[=]([0-9A-Fa-f]{2})/g, (_, hex) =>
+  return text.replace(/[=](?<group1>[0-9A-Fa-f]{2})/gu, (_, hex) =>
     String.fromCharCode(Number.parseInt(hex, 16)),
   );
 }

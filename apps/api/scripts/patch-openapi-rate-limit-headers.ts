@@ -16,7 +16,7 @@ import {
   retryAfterHeader,
 } from "@bondery/schemas/http/responses";
 
-const THREE_DIGIT_STATUS_PATTERN = /^\d{3}$/;
+const THREE_DIGIT_STATUS_PATTERN = /^\d{3}$/u;
 
 const RATE_LIMIT_REF = "#/components/headers/RateLimit";
 const RATE_LIMIT_POLICY_REF = "#/components/headers/RateLimitPolicy";

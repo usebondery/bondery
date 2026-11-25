@@ -1,7 +1,7 @@
 import { type JsonSchema, sample } from "@fumadocs/json-schema";
 
-const PRODUCTION_WORD_RE = /production/i;
-const TRAILING_SLASHES_RE = /\/+$/;
+const PRODUCTION_WORD_RE = /production/iu;
+const TRAILING_SLASHES_RE = /\/+$/u;
 const DEFAULT_PATH_PLACEHOLDER = "550e8400-e29b-41d4-a716-446655440000";
 
 /**
@@ -154,7 +154,7 @@ function resolveBaseUrl(servers: SampleRequestInput["servers"]): string {
 }
 
 function fillPath(path: string): string {
-  return path.replace(/\{([^{}]+)\}/g, (_match: string, name: string) => {
+  return path.replace(/\{(?<group1>[^{}]+)\}/gu, (_match: string, name: string) => {
     if (name in PATH_PLACEHOLDERS) {
       return PATH_PLACEHOLDERS[name as keyof typeof PATH_PLACEHOLDERS];
     }

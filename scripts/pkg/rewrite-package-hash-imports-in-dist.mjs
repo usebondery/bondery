@@ -14,7 +14,7 @@ import { cp, lstat, readdir, readFile, realpath, stat, writeFile } from "node:fs
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const DIST_RE = /^(.*[/\\]dist)(?:[/\\]|$)/;
+const DIST_RE = /^(?<group1>.*[/\\]dist)(?:[/\\]|$)/u;
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const DEFAULT_PACKAGES = [
@@ -28,13 +28,13 @@ const DEFAULT_PACKAGES = [
 ];
 
 const HASH_IMPORT_RE =
-  /(?<=(?:from|export)\s+["'])#([^"']+)(?=["'])|(?<=import\s*\(\s*["'])#([^"']+)(?=["']\s*\))/g;
+  /(?<=(?:from|export)\s+["'])#(?<group1>[^"']+)(?=["'])|(?<=import\s*\(\s*["'])#(?<group2>[^"']+)(?=["']\s*\))/gu;
 
 function toRelativePath(fromFile, hashSpecifier) {
   const fromDir = dirname(fromFile);
   const distRoot = fromFile.match(DIST_RE)?.[1] ?? join(fromDir, "..");
   const target = join(distRoot, hashSpecifier);
-  let rel = relative(fromDir, target).replace(/\\/g, "/");
+  let rel = relative(fromDir, target).replace(/\\/gu, "/");
   if (!rel.startsWith(".")) {
     rel = `./${rel}`;
   }
@@ -81,7 +81,7 @@ async function rewritePackage(pkgName) {
     const updated = rewriteFile(original, filePath);
     if (updated !== original) {
       await writeFile(filePath, updated);
-      changed++;
+      changed += 1;
     }
   }
   console.log(`rewrote # imports in ${changed} file(s) under packages/${pkgName}/dist`);

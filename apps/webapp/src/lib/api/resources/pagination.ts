@@ -1,6 +1,6 @@
 import type { PaginationMeta } from "@bondery/schemas";
 
-export type { PaginationMeta };
+export type { PaginationMeta } from "@bondery/schemas";
 
 export function normalizePaginatedList<T, K extends string>(
   raw: object,

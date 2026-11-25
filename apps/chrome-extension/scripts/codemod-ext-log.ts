@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const TS_FILE_EXT_RE = /\.(ts|tsx)$/;
+const TS_FILE_EXT_RE = /\.(?<group1>ts|tsx)$/u;
 const root = "apps/chrome-extension/src";
 
 function walk(dir: string, files: string[] = []): string[] {
@@ -18,18 +18,18 @@ function walk(dir: string, files: string[] = []): string[] {
 
 for (const file of walk(root)) {
   let content = fs.readFileSync(file, "utf8");
-  if (!/console\.(log|warn|error)\(/.test(content)) {
+  if (!/console\.(?<group1>log|warn|error)\(/u.test(content)) {
     continue;
   }
 
-  content = content.replace(/console\.log\(/g, "extLog.debug(");
-  content = content.replace(/console\.warn\(/g, "extLog.warn(");
-  content = content.replace(/console\.error\(/g, "extLog.error(");
+  content = content.replace(/console\.log\(/gu, "extLog.debug(");
+  content = content.replace(/console\.warn\(/gu, "extLog.warn(");
+  content = content.replace(/console\.error\(/gu, "extLog.error(");
 
   if (!content.includes("lib/log")) {
-    const rel = path.relative(path.dirname(file), path.join(root, "lib/log")).replace(/\\/g, "/");
+    const rel = path.relative(path.dirname(file), path.join(root, "lib/log")).replace(/\\/gu, "/");
     const importPath = rel.startsWith(".") ? rel : `./${rel}`;
-    const importLine = `import { extLog } from "${importPath.replace(/\.tsx?$/, "")}";\n`;
+    const importLine = `import { extLog } from "${importPath.replace(/\.tsx?$/u, "")}";\n`;
     const lastImportIdx = content.lastIndexOf("import ");
     if (lastImportIdx === -1) {
       content = importLine + content;

@@ -1,7 +1,7 @@
 import { MOBILE_GROUP_ID_PARAM, MOBILE_ROUTES } from "@bondery/helpers";
 import type { Href } from "expo-router";
 
-export { MOBILE_GROUP_ID_PARAM, MOBILE_ROUTES };
+export { MOBILE_GROUP_ID_PARAM, MOBILE_ROUTES } from "@bondery/helpers";
 
 export type ContactsTabParams = {
   [MOBILE_GROUP_ID_PARAM]?: string;

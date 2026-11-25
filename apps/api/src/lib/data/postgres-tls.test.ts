@@ -12,10 +12,10 @@ import {
   warnOnInsecureProductionPostgres,
 } from "./postgres-tls.js";
 
-const TLSV1_PATTERN = /^TLSv1\.[23]$/;
-const NOT_ENCRYPTED_PATTERN = /not encrypted/;
-const FORCE_RECREATE_STACK_SECRETS_DB_API_PATTERN = /--force-recreate stack-secrets db api/;
-const NOT_VERIFIED_PATTERN = /not verified/;
+const TLSV1_PATTERN = /^TLSv1\.[23]$/u;
+const NOT_ENCRYPTED_PATTERN = /not encrypted/u;
+const FORCE_RECREATE_STACK_SECRETS_DB_API_PATTERN = /--force-recreate stack-secrets db api/u;
+const NOT_VERIFIED_PATTERN = /not verified/u;
 
 function recordingLog() {
   const calls: { level: string; message: string }[] = [];

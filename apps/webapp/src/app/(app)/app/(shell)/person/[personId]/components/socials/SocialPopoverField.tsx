@@ -41,7 +41,7 @@ function getExternalHref(field: SocialFieldKey, persistedValue: string): string 
   }
 
   if (field === "signal") {
-    const digits = persistedValue.replace(/\D/g, "");
+    const digits = persistedValue.replace(/\D/gu, "");
     return digits ? `signal://signal.me/#p/${digits}` : undefined;
   }
 

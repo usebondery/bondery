@@ -198,7 +198,7 @@ async function initiateOAuthFlow(): Promise<{ success: boolean; error?: string }
     ) {
       return {
         error:
-          `Authorization page could not be loaded. ` +
+          "Authorization page could not be loaded. " +
           `Verify OAuth client settings: client_id, redirect URI exact match (${redirectUri}), and API reachability.`,
         success: false,
       };

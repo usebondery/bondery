@@ -10,9 +10,9 @@ import type {
 } from "#model.js";
 import { GEO_URI_PREFIX, TEL_URI_PREFIX } from "#uri-schemes.js";
 
-const PATTERN_5E5C2B_RE = /^\+/;
-const PATTERN_5C732B_RE = /\s+/;
-const GEO_RE = /^geo:([^,]+),(.+)$/;
+const PATTERN_5E5C2B_RE = /^\+/u;
+const PATTERN_5C732B_RE = /\s+/u;
+const GEO_RE = /^geo:(?<group1>[^,]+),(?<group2>.+)$/u;
 
 function normalizePreferred(pref?: number): boolean {
   return pref === 1;
@@ -29,7 +29,7 @@ function splitPhoneUri(
   const normalized = uri.startsWith(TEL_URI_PREFIX) ? uri.slice(TEL_URI_PREFIX.length) : uri;
   const parsed = normalizePhoneParts("", normalized, { defaultCountry });
   if ("error" in parsed) {
-    return { prefix: "", value: normalized.replace(/\D/g, "") };
+    return { prefix: "", value: normalized.replace(/\D/gu, "") };
   }
 
   return {

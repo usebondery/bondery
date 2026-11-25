@@ -45,8 +45,8 @@ import {
   useGroupsListQuery,
   useSyncContactGroupMembershipsMutation,
 } from "@/lib/query/hooks/useGroups";
-import { openAddGroupModal } from "../../../groups/components/AddGroupModal";
 import { GROUP_CARD_MAX_WIDTH_BY_VARIANT, GroupCard } from "../../../groups/components/GroupCard";
+import { openAddGroupModal } from "../../../groups/components/openAddGroupModal";
 
 function ignoreGroupCardAction() {
   // no-op: selection uses the wrapper button, not GroupCard actions

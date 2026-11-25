@@ -33,13 +33,13 @@ type InlineToken =
 // ---------------------------------------------------------------------------
 
 /** Matches `[[bp:type:value]]` tokens. */
-const BP_TOKEN_RE: RegExp = /\[\[bp:(\w+):([^\]]+)\]\]/g;
+const BP_TOKEN_RE: RegExp = /\[\[bp:(?<group1>\w+):(?<group2>[^\]]+)\]\]/gu;
 
 /** Matches standard markdown links `[label](url)`. */
-const MD_LINK_RE = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
+const MD_LINK_RE = /\[(?<group1>[^\]]+)\]\((?<group2>https?:\/\/[^\s)]+)\)/gu;
 
 /** Combined regex that matches both bp tokens and markdown links. */
-const COMBINED_RE = new RegExp(`${BP_TOKEN_RE.source}|${MD_LINK_RE.source}`, "g");
+const COMBINED_RE = new RegExp(`${BP_TOKEN_RE.source}|${MD_LINK_RE.source}`, "gu");
 
 /** Valid bp token types. */
 const VALID_TYPES = new Set<InlineTokenType>([
@@ -103,7 +103,7 @@ export { BP_TOKEN_RE };
  */
 export function parseInlineTokens(text: string): InlineToken[] {
   const tokens: InlineToken[] = [];
-  const re = new RegExp(COMBINED_RE.source, "g");
+  const re = new RegExp(COMBINED_RE.source, "gu");
   let lastIndex = 0;
 
   for (const match of text.matchAll(re)) {

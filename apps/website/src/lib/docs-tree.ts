@@ -1,6 +1,6 @@
 import type * as PageTree from "fumadocs-core/page-tree";
 
-const DOCS_SECTION_RE = /^\/docs\/([^/]+)/;
+const DOCS_SECTION_RE = /^\/docs\/(?<group1>[^/]+)/u;
 type TabKey = "product" | "selfhost" | "integrate" | "develop";
 
 const TAB_SLUGS: Record<TabKey, Set<string>> = {

@@ -162,7 +162,7 @@
       "node": "./dist/PeopleMultiPickerInput/index.js",
       "types": "./src/PeopleMultiPickerInput/index.ts"
     },
-    "./PersonChip": {
+    "./personChip": {
       "default": "./dist/PersonChip/index.js",
       "import": "./dist/PersonChip/index.js",
       "node": "./dist/PersonChip/index.js",
@@ -240,7 +240,7 @@
       "node": "./dist/nextjs/PersonCard/index.js",
       "types": "./src/nextjs/PersonCard/index.ts"
     },
-    "./nextjs/PersonChip": {
+    "./nextjs/personChip": {
       "default": "./dist/nextjs/PersonChip/index.js",
       "import": "./dist/nextjs/PersonChip/index.js",
       "node": "./dist/nextjs/PersonChip/index.js",
@@ -498,41 +498,41 @@
       "node": "./dist/Modal/ModalTitle.js",
       "types": "./src/Modal/ModalTitle.tsx"
     },
-    "./Notifications/ErrorNotificationTemplate": {
-      "default": "./dist/Notifications/ErrorNotificationTemplate.js",
-      "import": "./dist/Notifications/ErrorNotificationTemplate.js",
-      "node": "./dist/Notifications/ErrorNotificationTemplate.js",
-      "types": "./src/Notifications/ErrorNotificationTemplate.ts"
+    "./Notifications/errorNotificationTemplate": {
+      "default": "./dist/Notifications/errorNotificationTemplate.js",
+      "import": "./dist/Notifications/errorNotificationTemplate.js",
+      "node": "./dist/Notifications/errorNotificationTemplate.js",
+      "types": "./src/Notifications/errorNotificationTemplate.ts"
     },
-    "./Notifications/InformationNotificationTemplate": {
-      "default": "./dist/Notifications/InformationNotificationTemplate.js",
-      "import": "./dist/Notifications/InformationNotificationTemplate.js",
-      "node": "./dist/Notifications/InformationNotificationTemplate.js",
-      "types": "./src/Notifications/InformationNotificationTemplate.ts"
+    "./Notifications/informationNotificationTemplate": {
+      "default": "./dist/Notifications/informationNotificationTemplate.js",
+      "import": "./dist/Notifications/informationNotificationTemplate.js",
+      "node": "./dist/Notifications/informationNotificationTemplate.js",
+      "types": "./src/Notifications/informationNotificationTemplate.ts"
     },
-    "./Notifications/LoadingNotificationTemplate": {
-      "default": "./dist/Notifications/LoadingNotificationTemplate.js",
-      "import": "./dist/Notifications/LoadingNotificationTemplate.js",
-      "node": "./dist/Notifications/LoadingNotificationTemplate.js",
-      "types": "./src/Notifications/LoadingNotificationTemplate.ts"
+    "./Notifications/loadingNotificationTemplate": {
+      "default": "./dist/Notifications/loadingNotificationTemplate.js",
+      "import": "./dist/Notifications/loadingNotificationTemplate.js",
+      "node": "./dist/Notifications/loadingNotificationTemplate.js",
+      "types": "./src/Notifications/loadingNotificationTemplate.ts"
     },
-    "./Notifications/StatusNotificationTemplate": {
-      "default": "./dist/Notifications/StatusNotificationTemplate.js",
-      "import": "./dist/Notifications/StatusNotificationTemplate.js",
-      "node": "./dist/Notifications/StatusNotificationTemplate.js",
-      "types": "./src/Notifications/StatusNotificationTemplate.ts"
+    "./Notifications/statusNotificationTemplate": {
+      "default": "./dist/Notifications/statusNotificationTemplate.js",
+      "import": "./dist/Notifications/statusNotificationTemplate.js",
+      "node": "./dist/Notifications/statusNotificationTemplate.js",
+      "types": "./src/Notifications/statusNotificationTemplate.ts"
     },
-    "./Notifications/SuccessNotificationTemplate": {
-      "default": "./dist/Notifications/SuccessNotificationTemplate.js",
-      "import": "./dist/Notifications/SuccessNotificationTemplate.js",
-      "node": "./dist/Notifications/SuccessNotificationTemplate.js",
-      "types": "./src/Notifications/SuccessNotificationTemplate.ts"
+    "./Notifications/successNotificationTemplate": {
+      "default": "./dist/Notifications/successNotificationTemplate.js",
+      "import": "./dist/Notifications/successNotificationTemplate.js",
+      "node": "./dist/Notifications/successNotificationTemplate.js",
+      "types": "./src/Notifications/successNotificationTemplate.ts"
     },
-    "./Notifications/WarningNotificationTemplate": {
-      "default": "./dist/Notifications/WarningNotificationTemplate.js",
-      "import": "./dist/Notifications/WarningNotificationTemplate.js",
-      "node": "./dist/Notifications/WarningNotificationTemplate.js",
-      "types": "./src/Notifications/WarningNotificationTemplate.ts"
+    "./Notifications/warningNotificationTemplate": {
+      "default": "./dist/Notifications/warningNotificationTemplate.js",
+      "import": "./dist/Notifications/warningNotificationTemplate.js",
+      "node": "./dist/Notifications/warningNotificationTemplate.js",
+      "types": "./src/Notifications/warningNotificationTemplate.ts"
     },
     "./nextjs/BrandTileLink": {
       "default": "./dist/nextjs/BrandTileLink/index.js",
@@ -552,7 +552,7 @@
       "node": "./dist/PeopleMultiPickerInput/PeopleMultiPickerInput.js",
       "types": "./src/PeopleMultiPickerInput/PeopleMultiPickerInput.tsx"
     },
-    "./PersonChip/PersonChip": {
+    "./PersonChip/personChip": {
       "default": "./dist/PersonChip/PersonChip.js",
       "import": "./dist/PersonChip/PersonChip.js",
       "node": "./dist/PersonChip/PersonChip.js",
@@ -624,11 +624,11 @@
       "node": "./dist/nextjs/ButtonLink/ButtonLink.js",
       "types": "./src/nextjs/ButtonLink/ButtonLink.tsx"
     },
-    "./nextjs/NextLink": {
-      "default": "./dist/nextjs/NextLink.js",
-      "import": "./dist/nextjs/NextLink.js",
-      "node": "./dist/nextjs/NextLink.js",
-      "types": "./src/nextjs/NextLink.tsx"
+    "./nextjs/nextLink": {
+      "default": "./dist/nextjs/nextLink.js",
+      "import": "./dist/nextjs/nextLink.js",
+      "node": "./dist/nextjs/nextLink.js",
+      "types": "./src/nextjs/nextLink.tsx"
     },
     "./nextjs/PersonAvatar/PersonAvatar": {
       "default": "./dist/nextjs/PersonAvatar/PersonAvatar.js",
@@ -654,7 +654,7 @@
       "node": "./dist/nextjs/PersonCard/PersonCard.js",
       "types": "./src/nextjs/PersonCard/PersonCard.tsx"
     },
-    "./nextjs/PersonChip/PersonChip": {
+    "./nextjs/PersonChip/personChip": {
       "default": "./dist/nextjs/PersonChip/PersonChip.js",
       "import": "./dist/nextjs/PersonChip/PersonChip.js",
       "node": "./dist/nextjs/PersonChip/PersonChip.js",

@@ -23008,7 +23008,7 @@ paths:
                         description: True when product analytics collection is on
                       reminderSendHour:
                         type: string
-                        pattern: ^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$
+                        pattern: ^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$
                         description: Local time of day to send reminder emails, as `HH:MM` or `HH:MM:SS`
                       rightSwipeAction:
                         type: string
@@ -23293,7 +23293,7 @@ paths:
                   description: True when product analytics collection is on
                 reminderSendHour:
                   type: string
-                  pattern: ^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$
+                  pattern: ^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$
                   description: Local time of day to send reminder emails, as `HH:MM` or `HH:MM:SS`
                 rightSwipeAction:
                   type: string

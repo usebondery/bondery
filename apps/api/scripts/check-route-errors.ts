@@ -11,12 +11,12 @@ import { API_ERROR_CODES, isApiErrorCode } from "@bondery/schemas/errors";
 
 import { createCheck } from "../../../scripts/check/check-report.mjs";
 
-const REPLY_STATUS_D_D_PATTERN = /reply\.status\(5\d\d\)/;
-const STATUSCODE_S_PATTERN = /statusCode\s*=/;
-const AS_ERROR_PATTERN = /as Error/;
-const NEW_DOMAINERROR_PATTERN = /new DomainError\(([^)]*)\)/;
-const NEW_DOMAINERROR_MESSAGE_S_PATTERN = /new DomainError\([^,]+\.message,\s*500/;
-const HANDLEDOMAINERROR_PATTERN = /handleDomainError/;
+const REPLY_STATUS_D_D_PATTERN = /reply\.status\(5\d\d\)/u;
+const STATUSCODE_S_PATTERN = /statusCode\s*=/u;
+const AS_ERROR_PATTERN = /as Error/u;
+const NEW_DOMAINERROR_PATTERN = /new DomainError\((?<group1>[^)]*)\)/u;
+const NEW_DOMAINERROR_MESSAGE_S_PATTERN = /new DomainError\([^,]+\.message,\s*500/u;
+const HANDLEDOMAINERROR_PATTERN = /handleDomainError/u;
 
 const check = createCheck("check-route-errors");
 
@@ -52,16 +52,16 @@ function collectTsFiles(dir: string): string[] {
 }
 
 function checkCatalogCodes(filePath: string): void {
-  const rel = relative(apiSrc, filePath).replace(/\\/g, "/");
+  const rel = relative(apiSrc, filePath).replace(/\\/gu, "/");
   const content = readFileSync(filePath, "utf8");
   const lines = content.split("\n");
 
-  for (let i = 0; i < lines.length; i++) {
+  for (let i = 0; i < lines.length; i += 1) {
     const line = lines[i];
     const loc = `${rel}:${i + 1}`;
 
     for (const match of line.matchAll(
-      /(?:internal|badRequest|notFound|forbidden|conflict|unauthorized)\([^)]*?,\s*"([a-z][a-z0-9_]+)"/g,
+      /(?:internal|badRequest|notFound|forbidden|conflict|unauthorized)\([^)]*?,\s*"(?<group1>[a-z][a-z0-9_]+)"/gu,
     )) {
       if (!isApiErrorCode(match[1])) {
         violations.push(`${loc}: unknown API error code "${match[1]}"`);
@@ -69,14 +69,16 @@ function checkCatalogCodes(filePath: string): void {
     }
 
     for (const match of line.matchAll(
-      /(?:internal|badRequest|notFound|forbidden|conflict|unauthorized)\(\s*"([a-z][a-z0-9_]+)"/g,
+      /(?:internal|badRequest|notFound|forbidden|conflict|unauthorized)\(\s*"(?<group1>[a-z][a-z0-9_]+)"/gu,
     )) {
       if (!isApiErrorCode(match[1])) {
         violations.push(`${loc}: unknown API error code "${match[1]}"`);
       }
     }
 
-    for (const match of line.matchAll(/new DomainError\([^)]*?,\s*"([a-z][a-z0-9_]+)"/g)) {
+    for (const match of line.matchAll(
+      /new DomainError\([^)]*?,\s*"(?<group1>[a-z][a-z0-9_]+)"/gu,
+    )) {
       if (!isApiErrorCode(match[1])) {
         violations.push(`${loc}: unknown API error code "${match[1]}"`);
       }
@@ -94,11 +96,11 @@ function checkFile(
     banDomainError500Leak?: boolean;
   },
 ): void {
-  const rel = relative(apiSrc, filePath).replace(/\\/g, "/");
+  const rel = relative(apiSrc, filePath).replace(/\\/gu, "/");
   const content = readFileSync(filePath, "utf8");
   const lines = content.split("\n");
 
-  for (let i = 0; i < lines.length; i++) {
+  for (let i = 0; i < lines.length; i += 1) {
     const line = lines[i];
     const loc = `${rel}:${i + 1}`;
 

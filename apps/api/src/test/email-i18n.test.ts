@@ -9,11 +9,11 @@ import {
   readCopyString,
 } from "../lib/notifications/email-i18n.js";
 
-const SUPPORT_PATTERN = /\{\{support\}\}/;
-const DOCUMENTATION_PATTERN = /\{\{documentation\}\}/;
-const YEAR_2026_PATTERN = /2026/;
-const YEAR_2026_PREFIX_PATTERN = /^2026/;
-const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const SUPPORT_PATTERN = /\{\{support\}\}/u;
+const DOCUMENTATION_PATTERN = /\{\{documentation\}\}/u;
+const YEAR_2026_PATTERN = /2026/u;
+const YEAR_2026_PREFIX_PATTERN = /^2026/u;
+const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/u;
 
 describe("email-i18n", () => {
   it("loads TrialEndingEmail copy for Czech", () => {

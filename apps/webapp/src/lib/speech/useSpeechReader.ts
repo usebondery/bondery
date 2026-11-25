@@ -120,7 +120,8 @@ export function useSpeechReader(messageId: string, prepare: SpeechPrepare): UseS
   const isOwner = snapshot.messageId === messageId;
 
   const start = useCallback(async () => {
-    const token = ++prepareToken;
+    prepareToken += 1;
+    const token = prepareToken;
     setState({ error: null, messageId, status: "preparing" });
 
     let prepared: { lang: string; text: string };

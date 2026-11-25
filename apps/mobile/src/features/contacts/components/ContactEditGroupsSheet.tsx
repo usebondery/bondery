@@ -2,7 +2,7 @@ import { detachPromise } from "@bondery/helpers/async";
 import type { Group, GroupWithCount } from "@bondery/schemas";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
-import { SelectOptionRow, SelectSheet } from "@/components/ui/Select";
+import { SelectOptionRow, SelectSheet } from "@/components/ui/select";
 import { Text } from "@/components/ui/Text";
 import {
   useCommonTranslations,

@@ -14,9 +14,9 @@ import { glob } from "tinyglobby";
 
 import { createCheck } from "../../../scripts/check/check-report.mjs";
 
-const MDX_EXT_RE = /\.mdx$/;
-const MARKDOWN_HEADING_RE = /^#{1,6}\s+(.+?)\s*$/;
-const DOCS_URL_RE = /^\/docs(?:\/|$)/;
+const MDX_EXT_RE = /\.mdx$/u;
+const MARKDOWN_HEADING_RE = /^#{1,6}\s+(?<group1>.+?)\s*$/u;
+const DOCS_URL_RE = /^\/docs(?:\/|$)/u;
 const report = createCheck("check-docs-mdx");
 
 const DOCS_DIR = join(process.cwd(), "../../docs");
@@ -81,7 +81,7 @@ function getHeadingsFromRaw(content: string): string[] {
   const headings = new Set<string>();
 
   for (const line of content.split("\n")) {
-    for (const match of line.matchAll(/\{#([^}]+)\}/g)) {
+    for (const match of line.matchAll(/\{#(?<group1>[^}]+)\}/gu)) {
       const [, id] = match;
       if (id !== undefined) {
         headings.add(id);
@@ -93,7 +93,7 @@ function getHeadingsFromRaw(content: string): string[] {
       continue;
     }
 
-    const text = (heading[1] ?? "").replace(/\s*\{#[^}]+\}\s*/g, "").trim();
+    const text = (heading[1] ?? "").replace(/\s*\{#[^}]+\}\s*/gu, "").trim();
     if (text) {
       headings.add(slugger.slug(text));
     }

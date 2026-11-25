@@ -20,15 +20,15 @@ import { createRequire } from "node:module";
 import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
-const AGENTS_CLAUDE_CURSOR_RE = /^\.(?:agents|claude|cursor)\//;
-const TSCONFIG_JSON_RE = /(?:^|\/)tsconfig[^/]*\.json$/;
+const AGENTS_CLAUDE_CURSOR_RE = /^\.(?:agents|claude|cursor)\//u;
+const TSCONFIG_JSON_RE = /(?:^|\/)tsconfig[^/]*\.json$/u;
 
 const ROOT = join(fileURLToPath(new URL(".", import.meta.url)), "../..");
 const require = createRequire(import.meta.url);
 const IS_WINDOWS = process.platform === "win32";
 
-const BIOME_FILES = /\.(?:ts|tsx|js|jsx|mjs|cjs|mts|cts|json|jsonc|css|html)$/;
-const CODE_AREAS = /^(?:apps|packages)\//;
+const BIOME_FILES = /\.(?:ts|tsx|js|jsx|mjs|cjs|mts|cts|json|jsonc|css|html)$/u;
+const CODE_AREAS = /^(?:apps|packages)\//u;
 
 /**
  * Check table. `when` decides from the changed paths whether the check applies. Order is the

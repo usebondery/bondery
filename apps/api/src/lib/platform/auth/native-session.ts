@@ -10,7 +10,7 @@ import { isSessionCreatedAtFresh } from "../../auth/session-freshness.js";
 import { forbidden, unauthorized } from "../errors/http-errors.js";
 import type { AppFastifyInstance } from "../fastify-types.js";
 
-const SESSION_COOKIE_RE = /(?:^|;\s*)(?:__Secure-)?(?:better-auth\.)?session_token=/;
+const SESSION_COOKIE_RE = /(?:^|;\s*)(?:__Secure-)?(?:better-auth\.)?session_token=/u;
 
 function hasBetterAuthSessionCookie(request: FastifyRequest): boolean {
   const raw = request.headers.cookie;

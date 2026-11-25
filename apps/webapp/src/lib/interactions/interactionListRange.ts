@@ -1,4 +1,4 @@
-const CALENDAR_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
+const CALENDAR_DATE = /^(?<group1>\d{4})-(?<group2>\d{2})-(?<group3>\d{2})$/u;
 
 /**
  * True when `value` is a real calendar day in `YYYY-MM-DD`.

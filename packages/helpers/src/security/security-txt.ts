@@ -1,7 +1,7 @@
 import { SUPPORT_EMAIL, WEBSITE_ROUTES } from "#globals/paths.js";
 
 /** RFC 9116 recommends Expires no more than one year out; 364 days stays under that. */
-const PATTERN_5C2F2B24_RE = /\/+$/;
+const PATTERN_5C2F2B24_RE = /\/+$/u;
 
 const SECURITY_TXT_MAX_AGE_MS = 364 * 24 * 60 * 60 * 1000;
 
@@ -20,7 +20,7 @@ export function buildSecurityTxt({
     `Expires: ${expires}`,
     `Encryption: ${origin}/.well-known/pgp-key.txt`,
     `Acknowledgments: ${origin}${WEBSITE_ROUTES.SECURITY}`,
-    `Preferred-Languages: en`,
+    "Preferred-Languages: en",
     `Canonical: ${origin}/.well-known/security.txt`,
     `Policy: ${origin}${WEBSITE_ROUTES.SECURITY}`,
   ].join("\n")}\n`;

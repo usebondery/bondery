@@ -2,7 +2,7 @@ import "../../docs.css";
 import "../../marketing.css";
 import dynamic from "next/dynamic";
 import type { ReactNode } from "react";
-import { DocsChromeProvider } from "@/components/docs/DocsChrome";
+import { DocsChromeProvider } from "@/components/docs/docsChromeProvider";
 import { getDocsLayoutTabs } from "@/lib/docs-tabs";
 import { getFilteredPageTree } from "@/lib/source";
 

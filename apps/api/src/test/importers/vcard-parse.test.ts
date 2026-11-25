@@ -16,11 +16,11 @@ import { parseVCardUpload } from "../../routes/import/vcard/parser.js";
 import { contactNamed, emailValuesOf, loadUpload, phoneNumbersOf } from "./fixtures.js";
 import { createMemoryGeocoder, createOfflineGeocoder, knownPlaces } from "./geocoder.js";
 
-const HEADLINE_PATTERN = /^@\S/;
-const E164_PATTERN = /^\+\d{7,15}$/;
-const EMAIL_PATTERN = /^[^@\s]+@[^@\s]+\.[a-z]+$/i;
-const NON_BLANK = /\S/;
-const ISO_COUNTRY = /^[A-Z]{2}$/;
+const HEADLINE_PATTERN = /^@\S/u;
+const E164_PATTERN = /^\+\d{7,15}$/u;
+const EMAIL_PATTERN = /^[^@\s]+@[^@\s]+\.[a-z]+$/iu;
+const NON_BLANK = /\S/u;
+const ISO_COUNTRY = /^[A-Z]{2}$/u;
 
 let corpusGeocoder: Awaited<ReturnType<typeof createMemoryGeocoder>>;
 

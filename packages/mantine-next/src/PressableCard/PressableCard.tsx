@@ -1,6 +1,6 @@
 import { Card } from "@mantine/core";
 import type { ReactElement, ReactNode } from "react";
-import Link, { hrefAssert } from "#nextjs/NextLink.js";
+import Link, { hrefAssert } from "#nextjs/nextLink.js";
 
 function isExternalHref(href: string, external: boolean): boolean {
   return external || href.startsWith("http://") || href.startsWith("https://");

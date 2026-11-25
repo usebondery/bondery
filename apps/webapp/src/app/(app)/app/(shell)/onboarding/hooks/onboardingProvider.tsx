@@ -8,7 +8,7 @@ interface OnboardingContextValue {
   setIntent: (intent: OnboardingIntent) => void;
 }
 
-const OnboardingCtx = createContext<OnboardingContextValue | null>(null);
+const OnboardingContext = createContext<OnboardingContextValue | null>(null);
 
 export type OnboardingIntent = "personal" | "professional" | "both" | null;
 
@@ -21,11 +21,11 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
   const value = { intent, setIntent };
 
-  return <OnboardingCtx.Provider value={value}>{children}</OnboardingCtx.Provider>;
+  return <OnboardingContext.Provider value={value}>{children}</OnboardingContext.Provider>;
 }
 
 export function useOnboardingContext(): OnboardingContextValue {
-  const ctx = useContext(OnboardingCtx);
+  const ctx = useContext(OnboardingContext);
   if (!ctx) {
     throw new Error("useOnboardingContext must be used within OnboardingProvider");
   }

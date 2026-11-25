@@ -33,7 +33,7 @@ for (const file of walk(root)) {
   }
 
   content = content.replace(
-    /error instanceof Error \? error\.message : [^,\n]+/g,
+    /error instanceof Error \? error\.message : [^,\n]+/gu,
     "getUserFacingError(error, tCommon)",
   );
 
@@ -73,9 +73,9 @@ for (const file of walk(root)) {
   }
 
   if (!content.includes("const tCommon = useCommonTranslations()")) {
-    content = content.replace(/(export default function [^{]+\{)/, `$1\n${hookLine}`);
-    content = content.replace(/(export function [^{]+\{)/, `$1\n${hookLine}`);
-    content = content.replace(/(function [A-Z][A-Za-z]+[^{]*\{)/, `$1\n${hookLine}`);
+    content = content.replace(/(?<group1>export default function [^{]+\{)/u, `$1\n${hookLine}`);
+    content = content.replace(/(?<group1>export function [^{]+\{)/u, `$1\n${hookLine}`);
+    content = content.replace(/(?<group1>function [A-Z][A-Za-z]+[^{]*\{)/u, `$1\n${hookLine}`);
   }
 
   writeFileSync(file, content, "utf8");

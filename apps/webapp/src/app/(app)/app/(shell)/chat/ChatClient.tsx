@@ -16,7 +16,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { useUserSession } from "@/components/shell/UserSessionProvider";
 import { type ChatHydratedMessage, messageSentAt } from "@/lib/api/resources/chat";
-import { useChatSessions } from "@/lib/chat/ChatSessionsContext";
 import {
   findPendingApproval,
   isToolPart,
@@ -28,6 +27,7 @@ import {
   readChatModelPreference,
   writeChatModelPreference,
 } from "@/lib/chat/chatModelPreference";
+import { useChatSessions } from "@/lib/chat/chatSessionsProvider";
 import { pickRandomItems } from "@/lib/chat/pickRandomItems";
 import {
   NEW_CHAT_VISIBLE_PROMPT_COUNT,

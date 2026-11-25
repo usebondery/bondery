@@ -12,15 +12,15 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const SCRIPT = path.join(HERE, "build-base-contact-values.mjs");
 const BASE_PATH = path.join(HERE, "base-contact-values.json");
 
-const E164_PHONE = /^\+\d{7,15}$/;
-const SUBSTITUTE_EMAIL = /^[^@\s]+@[^@\s]+\.(test|com)$/;
-const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
-const NON_BLANK = /\S/;
-const ISO_COUNTRY_CODE = /^[A-Z]{2}$/;
-const INSTAGRAM_HANDLE = /^[\w.]+$/;
-const STALE_CHECK_FAILURE = /is stale/;
-const TAMPERED_VERSION = /"version": 999/;
-const IS_CURRENT = /is current/;
+const E164_PHONE = /^\+\d{7,15}$/u;
+const SUBSTITUTE_EMAIL = /^[^@\s]+@[^@\s]+\.(?<group1>test|com)$/u;
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/u;
+const NON_BLANK = /\S/u;
+const ISO_COUNTRY_CODE = /^[A-Z]{2}$/u;
+const INSTAGRAM_HANDLE = /^[\w.]+$/u;
+const STALE_CHECK_FAILURE = /is stale/u;
+const TAMPERED_VERSION = /"version": 999/u;
+const IS_CURRENT = /is current/u;
 
 /**
  * Narrows a `JSON.parse` result to `unknown`, because Biome rejects returning `any`.

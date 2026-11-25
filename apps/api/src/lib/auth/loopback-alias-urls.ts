@@ -1,5 +1,5 @@
-const DIGITS_ONLY_PATTERN = /^\d+$/;
-const TRAILING_SLASHES_PATTERN = /\/+$/;
+const DIGITS_ONLY_PATTERN = /^\d+$/u;
+const TRAILING_SLASHES_PATTERN = /\/+$/u;
 const IPV4_OCTET_COUNT = 4;
 
 export function isLoopbackHostname(hostname: string): boolean {

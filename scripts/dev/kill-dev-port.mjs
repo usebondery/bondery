@@ -6,10 +6,10 @@
  */
 import { execSync } from "node:child_process";
 
-const PATTERN_5C723F5C6E_RE = /\r?\n/;
-const LISTENING_RE_2 = /LISTENING/i;
-const PATTERN_5C732B_RE = /\s+/;
-const LISTENING_RE = /LISTENING\s+(\d+)\s*$/i;
+const PATTERN_5C723F5C6E_RE = /\r?\n/u;
+const LISTENING_RE_2 = /LISTENING/iu;
+const PATTERN_5C732B_RE = /\s+/u;
+const LISTENING_RE = /LISTENING\s+(?<group1>\d+)\s*$/iu;
 
 const IS_WINDOWS = process.platform === "win32";
 

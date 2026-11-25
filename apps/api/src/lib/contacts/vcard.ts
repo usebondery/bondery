@@ -7,8 +7,8 @@ import type { Contact } from "@bondery/schemas";
 import { attachMedia, contactToVCard, serializeVCard } from "@bondery/vcard";
 import logger from "../platform/logger.js";
 
-const D_D_D_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
-const EIGHT_DIGIT_DATE_PATTERN = /^\d{8}$/;
+const D_D_D_PATTERN = /^(?<group1>\d{4})-(?<group2>\d{2})-(?<group3>\d{2})$/u;
+const EIGHT_DIGIT_DATE_PATTERN = /^\d{8}$/u;
 
 type VCardExportImportantDate = {
   type: "birthday" | "anniversary" | "nameday" | "graduation" | "other";

@@ -24,37 +24,37 @@ import { checkPostgresTls } from "./check-compose-postgres-tls.mjs";
 import { checkRedisTls } from "./check-compose-redis-tls.mjs";
 import { checkStorageTls } from "./check-compose-storage-tls.mjs";
 
-const COMPOSE_VERSION_RE = /v?(\d+)\.(\d+)\.(\d+)/;
-const INCLUDE_KEY_RE = /^\s*include:\s*$/m;
-const S3_STATUS_PROBE_RE = /8333\/status/;
-const S3_ACCESS_KEY_ID_RE = /BONDERY_PRIVATE_S3_ACCESS_KEY_ID/;
-const HARDCODED_STORAGE_ROUTER_RE = /traefik\.http\.routers\.bondery-storage/;
-const SERVICE_BLOCK_NEXT_RE = /^ {2}[a-zA-Z0-9_-]+:\s*$/m;
-const ENV_FILE_RE = /^\s*env_file:/m;
-const TRAEFIK_ENABLE_RE = /traefik\.enable=true/;
-const HARDCODED_WEBAPP_ROUTER_RE = /traefik\.http\.routers\.bondery-webapp/;
+const COMPOSE_VERSION_RE = /v?(?<group1>\d+)\.(?<group2>\d+)\.(?<group3>\d+)/u;
+const INCLUDE_KEY_RE = /^\s*include:\s*$/mu;
+const S3_STATUS_PROBE_RE = /8333\/status/u;
+const S3_ACCESS_KEY_ID_RE = /BONDERY_PRIVATE_S3_ACCESS_KEY_ID/u;
+const HARDCODED_STORAGE_ROUTER_RE = /traefik\.http\.routers\.bondery-storage/u;
+const SERVICE_BLOCK_NEXT_RE = /^ {2}[a-zA-Z0-9_-]+:\s*$/mu;
+const ENV_FILE_RE = /^\s*env_file:/mu;
+const TRAEFIK_ENABLE_RE = /traefik\.enable=true/u;
+const HARDCODED_WEBAPP_ROUTER_RE = /traefik\.http\.routers\.bondery-webapp/u;
 const INTERNAL_API_URL_PREFIX_RE =
-  /BONDERY_INFRA_INTERNAL_API_URL:\s*https:\/\/\$\{BONDERY_INFRA_TRAEFIK_PREFIX/;
-const WEBAPP_NETWORK_ALIAS_RE = /BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-webapp/;
-const PUBLIC_API_URL_RE = /BONDERY_PUBLIC_API_URL:\s*https:\/\/\$\{BONDERY_INFRA_API_DOMAIN/;
-const HARDCODED_API_ROUTER_RE = /traefik\.http\.routers\.bondery-api/;
-const DOKPLOY_NETWORK_RE = /dokploy-network/;
-const INTERNAL_NETWORK_RE = /internal/;
-const API_NETWORK_ALIAS_RE = /BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-api/;
+  /BONDERY_INFRA_INTERNAL_API_URL:\s*https:\/\/\$\{BONDERY_INFRA_TRAEFIK_PREFIX/u;
+const WEBAPP_NETWORK_ALIAS_RE = /BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-webapp/u;
+const PUBLIC_API_URL_RE = /BONDERY_PUBLIC_API_URL:\s*https:\/\/\$\{BONDERY_INFRA_API_DOMAIN/u;
+const HARDCODED_API_ROUTER_RE = /traefik\.http\.routers\.bondery-api/u;
+const DOKPLOY_NETWORK_RE = /dokploy-network/u;
+const INTERNAL_NETWORK_RE = /internal/u;
+const API_NETWORK_ALIAS_RE = /BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-api/u;
 const S3_ENDPOINT_PREFIX_RE =
-  /BONDERY_PRIVATE_S3_ENDPOINT:\s*https:\/\/\$\{BONDERY_INFRA_TRAEFIK_PREFIX/;
-const DATABASE_URL_PREFIX_RE = /DATABASE_URL:.*\$\{BONDERY_INFRA_TRAEFIK_PREFIX/;
-const DB_HEALTHY_RE = /db:\s*\n\s*condition:\s*service_healthy/;
-const KONG_HEALTHY_RE = /kong:\s*\n\s*condition:\s*service_healthy/;
-const PRE_START_RE = /pre_start:/m;
-const TRAEFIK_LABEL_RE = /traefik\./;
-const REDIS_NETWORK_ALIAS_RE = /BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-redis/;
-const HEALTHCHECK_RE = /healthcheck:/m;
-const DB_NETWORK_ALIAS_RE = /BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-db/;
-const POSTGRES_HOST_PORT_RE = /127\.0\.0\.1:\$\{BONDERY_INFRA_POSTGRES_HOST_PORT:-5432\}:5432/;
-const PUBLIC_POSTGRES_BIND_RE = /ports:[\s\S]*["']0\.0\.0\.0:/;
-const WILDCARD_POSTGRES_BIND_RE = /ports:[\s\S]*["']\*:/;
-const STORAGE_NETWORK_ALIAS_RE = /BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-storage/;
+  /BONDERY_PRIVATE_S3_ENDPOINT:\s*https:\/\/\$\{BONDERY_INFRA_TRAEFIK_PREFIX/u;
+const DATABASE_URL_PREFIX_RE = /DATABASE_URL:.*\$\{BONDERY_INFRA_TRAEFIK_PREFIX/u;
+const DB_HEALTHY_RE = /db:\s*\n\s*condition:\s*service_healthy/u;
+const KONG_HEALTHY_RE = /kong:\s*\n\s*condition:\s*service_healthy/u;
+const PRE_START_RE = /pre_start:/mu;
+const TRAEFIK_LABEL_RE = /traefik\./u;
+const REDIS_NETWORK_ALIAS_RE = /BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-redis/u;
+const HEALTHCHECK_RE = /healthcheck:/mu;
+const DB_NETWORK_ALIAS_RE = /BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-db/u;
+const POSTGRES_HOST_PORT_RE = /127\.0\.0\.1:\$\{BONDERY_INFRA_POSTGRES_HOST_PORT:-5432\}:5432/u;
+const PUBLIC_POSTGRES_BIND_RE = /ports:[\s\S]*["']0\.0\.0\.0:/u;
+const WILDCARD_POSTGRES_BIND_RE = /ports:[\s\S]*["']\*:/u;
+const STORAGE_NETWORK_ALIAS_RE = /BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-storage/u;
 
 function main() {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -77,7 +77,7 @@ function main() {
   }
 
   function isComposeVersionAtLeast(version, minimum) {
-    for (let index = 0; index < minimum.length; index++) {
+    for (let index = 0; index < minimum.length; index += 1) {
       const current = version[index] ?? 0;
       const min = minimum[index] ?? 0;
       if (current > min) {
@@ -155,7 +155,7 @@ function main() {
 
   /** Slice a top-level service block by name (YAML indentation-aware). */
   function serviceBlock(name, source = text) {
-    const start = source.search(new RegExp(`^  ${name}:\\s*$`, "m"));
+    const start = source.search(new RegExp(`^  ${name}:\\s*$`, "mu"));
     if (start === -1) {
       errors.push(`Missing service "${name}"`);
       return "";
@@ -182,7 +182,7 @@ function main() {
         "webapp must not use env_file (would load API PRIVATE_* / BONDERY_PRIVATE_* secrets)",
       );
     }
-    const privateHits = [...webapp.matchAll(/\b(?:BONDERY_)?PRIVATE_[A-Z0-9_]+\b/g)]
+    const privateHits = [...webapp.matchAll(/\b(?:BONDERY_)?PRIVATE_[A-Z0-9_]+\b/gu)]
       .map((m) => m[0])
       .filter((name) => !WEBAPP_ALLOWED_PRIVATE.has(name));
     if (privateHits.length > 0) {
@@ -346,7 +346,7 @@ function main() {
   }
 
   for (const name of ["seaweedfs-master", "seaweedfs-volume", "seaweedfs-filer"]) {
-    if (!new RegExp(`BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\\}-${name}`).test(seaweedText)) {
+    if (!new RegExp(`BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\\}-${name}`, "u").test(seaweedText)) {
       errors.push(`${name} must publish a unique internal alias from BONDERY_INFRA_TRAEFIK_PREFIX`);
     }
   }

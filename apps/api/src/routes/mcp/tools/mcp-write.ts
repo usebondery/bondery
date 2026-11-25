@@ -3,13 +3,10 @@ import type { JWTPayload } from "jose";
 import type { DomainContext } from "../../../domains/_shared/context.js";
 import { MCP_WRITE_SCOPE } from "../../../lib/auth/index.js";
 import { type McpToolRunResult, runMcpTool } from "./json.js";
-import { isMcpWriteToolName } from "./mcp-write-name.js";
 
 function grantedScopes(claims: JWTPayload): string[] {
   return typeof claims["scope"] === "string" ? claims["scope"].split(" ").filter(Boolean) : [];
 }
-
-export { isMcpWriteToolName };
 
 export function assertMcpWrite(claims: JWTPayload): void {
   if (!grantedScopes(claims).includes(MCP_WRITE_SCOPE)) {
@@ -25,3 +22,5 @@ export async function runMcpWriteTool(
   assertMcpWrite(claims);
   return runMcpTool(ctx, run);
 }
+
+export { isMcpWriteToolName } from "./mcp-write-name.js";

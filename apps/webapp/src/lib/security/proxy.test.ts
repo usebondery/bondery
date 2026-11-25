@@ -4,8 +4,8 @@ import { NextRequest } from "next/server";
 import { config, proxy } from "../../proxy.js";
 import { buildWebappProxyHeaders } from "./proxyHeaders.js";
 
-const PATTERN = /\s+/;
-const NONCE = /'nonce-([^']+)'/;
+const PATTERN = /\s+/u;
+const NONCE = /'nonce-(?<group1>[^']+)'/u;
 
 function requestFor(pathname: string): NextRequest {
   return new NextRequest(new URL(pathname, "https://app.example.test"));

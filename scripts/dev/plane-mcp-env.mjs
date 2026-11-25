@@ -8,12 +8,12 @@ import { fileURLToPath } from "node:url";
 
 const PLANE_MCP_ENV_REL = ".agents/mcp/plane.env.local";
 
-const RE_PLANE_API_KEY = /^PLANE_API_KEY=(.*)$/m;
-const RE_PLANE_PAT = /^PLANE_PAT=(.*)$/m;
-const RE_PLANE_WORKSPACE_SLUG = /^PLANE_WORKSPACE_SLUG=(.*)$/m;
-const RE_PLANE_API_KEY_EMPTY = /^PLANE_API_KEY=\s*$/m;
-const RE_PLANE_WORKSPACE_SLUG_EMPTY = /^PLANE_WORKSPACE_SLUG=\s*$/m;
-const RE_PLANE_WORKSPACE_SLUG_LINE = /^PLANE_WORKSPACE_SLUG=.*$/m;
+const RE_PLANE_API_KEY = /^PLANE_API_KEY=(?<group1>.*)$/mu;
+const RE_PLANE_PAT = /^PLANE_PAT=(?<group1>.*)$/mu;
+const RE_PLANE_WORKSPACE_SLUG = /^PLANE_WORKSPACE_SLUG=(?<group1>.*)$/mu;
+const RE_PLANE_API_KEY_EMPTY = /^PLANE_API_KEY=\s*$/mu;
+const RE_PLANE_WORKSPACE_SLUG_EMPTY = /^PLANE_WORKSPACE_SLUG=\s*$/mu;
+const RE_PLANE_WORKSPACE_SLUG_LINE = /^PLANE_WORKSPACE_SLUG=.*$/mu;
 
 /**
  * @param {string} line

@@ -5,7 +5,7 @@ import { useMounted } from "@mantine/hooks";
 import { useEffect, useEffectEvent, useRef } from "react";
 import { useCommonTranslations } from "@/lib/i18n/generated/hooks";
 import { resolveLoadMoreBranch } from "./resolveLoadMoreBranch";
-import { useShellScrollViewport } from "./ShellScrollViewportContext";
+import { useShellScrollViewport } from "./shellScrollViewportProvider";
 import { shouldRequestNextPage } from "./shouldRequestNextPage";
 
 /** Fetch the next page before the sentinel is 240px below the shell viewport. */

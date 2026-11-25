@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-const LOGIN_PATH = /\/login/;
+const LOGIN_PATH = /\/login/u;
 
 test.describe("unauthenticated login", () => {
   test("renders /login with GitHub button on desktop", async ({ page }) => {

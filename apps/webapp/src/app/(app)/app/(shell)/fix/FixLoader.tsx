@@ -1,4 +1,3 @@
-import type { MergeRecommendation } from "@bondery/schemas";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { getQueryClient } from "@/lib/query/client";
 
@@ -25,4 +24,4 @@ export async function FixLoader() {
   );
 }
 
-export type { MergeRecommendation };
+export type { MergeRecommendation } from "@bondery/schemas";

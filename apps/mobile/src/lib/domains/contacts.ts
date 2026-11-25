@@ -33,7 +33,7 @@ function optionalBaseUpdatedAt(value?: string | null) {
   return normalized ? { baseUpdatedAt: normalized } : {};
 }
 
-export type { ContactsListParams };
+export type { ContactsListParams } from "../resources/contacts";
 
 export function listContacts(params: ContactsListParams): {
   contacts: Contact[];

@@ -1,6 +1,6 @@
 import { type Control, Controller, type FieldPath, type FieldValues } from "react-hook-form";
 import type { StyleProp, ViewStyle } from "react-native";
-import { Select, type SelectItem, type SelectSearchable } from "../ui/Select";
+import { Select, type SelectItem, type SelectSearchable } from "../ui/select";
 
 type SheetSelectFieldProps<TFieldValues extends FieldValues, TValue extends string> = {
   accessibilityLabel?: string;

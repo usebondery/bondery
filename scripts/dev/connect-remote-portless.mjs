@@ -20,9 +20,9 @@ import { pathToFileURL } from "node:url";
 
 import { DEV_URLS } from "@bondery/schemas/constants/dev-ports";
 
-const PATTERN_5C2E24_RE = /\.$/;
-const ZA_Z0_RE = /[^A-Za-z0-9]+/;
-const WSL_RE = /wsl/i;
+const PATTERN_5C2E24_RE = /\.$/u;
+const ZA_Z0_RE = /[^A-Za-z0-9]+/u;
+const WSL_RE = /wsl/iu;
 
 const TLD = "test";
 

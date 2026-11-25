@@ -6,7 +6,7 @@
  * without changing case.
  */
 
-const WHITESPACE_PATTERN = /\s+/;
+const WHITESPACE_PATTERN = /\s+/u;
 export function firstNameFromEmail(email: string): string {
   const trimmed = email.trim();
   const at = trimmed.indexOf("@");

@@ -3,7 +3,7 @@ import Mention, { type MentionOptions } from "@tiptap/extension-mention";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import { MentionNodeView, type PersonMentionAttrs } from "../components/notes/MentionNodeView";
 
-const PATTERN = /^@/;
+const PATTERN = /^@/u;
 
 function optionalDataAttr(name: string, value: unknown): Record<string, string> {
   if (typeof value !== "string" || value.length === 0) {

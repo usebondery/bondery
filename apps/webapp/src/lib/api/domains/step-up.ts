@@ -2,7 +2,7 @@ import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { parseApiJsonResponse } from "@/lib/api/parseResponse";
 import { getWebappRuntimeConfigSync } from "@/lib/platform/runtimeConfig.client";
 
-const TRAILING_SLASHES = /\/+$/;
+const TRAILING_SLASHES = /\/+$/u;
 
 /** POST /me/step-up on the API origin with the Better Auth cookie. Never BFF. */
 export async function mintStepUpNonce(): Promise<string> {

@@ -30,9 +30,9 @@ import {
   useRemoveContactsFromGroupMutation,
 } from "@/lib/query/hooks/useGroups";
 import { nonEmpty } from "@/lib/shared/nonEmpty";
-import { openEditGroupModal } from "../../../groups/components/EditGroupModal";
-import { openAddPeopleToGroupSelectionModal } from "../../../people/components/modals/AddPeopleToGroupSelectionModal";
-import { openMergeWithModal } from "../../../people/components/modals/MergeWithModal";
+import { openEditGroupModal } from "../../../groups/components/openEditGroupModal";
+import { openAddPeopleToGroupSelectionModal } from "../../../people/components/modals/openAddPeopleToGroupSelectionModal";
+import { openMergeWithModal } from "../../../people/components/modals/openMergeWithModal";
 
 interface UseGroupDetailActionsParams {
   cardPreviewContacts: Contact[];

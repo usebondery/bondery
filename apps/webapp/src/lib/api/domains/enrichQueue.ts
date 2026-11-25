@@ -21,7 +21,7 @@ import {
   parseEnrichQueueStatus,
 } from "@/lib/api/resources/enrichQueue";
 
-export type { EnrichQueueStatus };
+export type { EnrichQueueStatus } from "@/lib/api/resources/enrichQueue";
 
 export async function getEnrichQueueCount(): Promise<number> {
   const raw = await clientApiJson<{ eligibleCount: number }>(ENRICH_QUEUE_COUNT_PATH);

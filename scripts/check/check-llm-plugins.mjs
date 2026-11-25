@@ -13,9 +13,9 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "./check-report.mjs";
 
-const FA_RE = /^#[0-9a-fA-F]{6}$/;
-const PATTERN_5C723F5C6E_RE = /\r?\n/;
-const CM_JT_RE = /\.[cm]?[jt]s$/;
+const FA_RE = /^#[0-9a-fA-F]{6}$/u;
+const PATTERN_5C723F5C6E_RE = /\r?\n/u;
+const CM_JT_RE = /\.[cm]?[jt]s$/u;
 
 const check = createCheck("check-llm-plugins");
 
@@ -73,9 +73,9 @@ const FORBIDDEN_NAMES = new Set([
   "node_modules",
 ]);
 
-const FORBIDDEN_ENV_FILE = /^\.env/;
-const PRIVATE_KEY_BLOCK = /-----BEGIN [A-Z ]*PRIVATE KEY-----/;
-const BEARER_TOKEN = /\bBearer\s+[A-Za-z0-9._~+/-]{20,}=*/;
+const FORBIDDEN_ENV_FILE = /^\.env/u;
+const PRIVATE_KEY_BLOCK = /-----BEGIN [A-Z ]*PRIVATE KEY-----/u;
+const BEARER_TOKEN = /\bBearer\s+[A-Za-z0-9._~+/-]{20,}=*/u;
 const OPENAI_FORBIDDEN = [".mcp.json", ".codex-plugin", ".app.json", "hooks"];
 
 function pluginDir(host) {
@@ -343,9 +343,9 @@ function readFrontmatterField(source, field) {
     return null;
   }
   for (const line of lines.slice(1, end)) {
-    const match = new RegExp(`^${field}\\s*:\\s*(.*)$`).exec(line);
+    const match = new RegExp(`^${field}\\s*:\\s*(.*)$`, "u").exec(line);
     if (match) {
-      return match[1].trim().replace(/^["']|["']$/g, "");
+      return match[1].trim().replace(/^["']|["']$/gu, "");
     }
   }
   return null;
@@ -460,7 +460,7 @@ function checkTree(host) {
       check.add(`${rel} contains a bearer token. Remove the token.`);
     }
     if (source.includes("../")) {
-      for (const match of source.matchAll(/["'(]\.\.\/[^"')\s]*/g)) {
+      for (const match of source.matchAll(/["'(]\.\.\/[^"')\s]*/gu)) {
         check.add(
           `${rel} references a path outside the folder: ${match[0].slice(1)}. Point it inside the plugin.`,
         );

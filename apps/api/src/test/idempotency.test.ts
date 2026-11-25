@@ -25,7 +25,7 @@ import {
   waitFor,
 } from "./idempotency-test-helpers.js";
 
-const TRAILING_SLASH_PATTERN = /\/$/;
+const TRAILING_SLASH_PATTERN = /\/$/u;
 
 describe("idempotency hook", { concurrency: false }, () => {
   before(() => {

@@ -17,12 +17,12 @@ type DocsHeadingLinkProps = {
 /** Hash link for a section. Visible on hover. The tooltip reports the copy. */
 export function DocsHeadingLink({ id }: DocsHeadingLinkProps) {
   const [copied, setCopied] = useState(false);
-  const resetTimer = useRef<number | null>(null);
+  const resetTimerRef = useRef<number | null>(null);
 
   useEffect(
     () => () => {
-      if (resetTimer.current !== null) {
-        window.clearTimeout(resetTimer.current);
+      if (resetTimerRef.current !== null) {
+        window.clearTimeout(resetTimerRef.current);
       }
     },
     [],
@@ -33,12 +33,12 @@ export function DocsHeadingLink({ id }: DocsHeadingLinkProps) {
     detachPromise(
       navigator.clipboard.writeText(url).then(() => {
         setCopied(true);
-        if (resetTimer.current !== null) {
-          window.clearTimeout(resetTimer.current);
+        if (resetTimerRef.current !== null) {
+          window.clearTimeout(resetTimerRef.current);
         }
-        resetTimer.current = window.setTimeout(() => {
+        resetTimerRef.current = window.setTimeout(() => {
           setCopied(false);
-          resetTimer.current = null;
+          resetTimerRef.current = null;
         }, COPIED_MS);
       }),
     );

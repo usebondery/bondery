@@ -1,7 +1,7 @@
 import { z } from "zod";
 import type { HexColor } from "./types.js";
 
-const HEX_COLOR_PATTERN = /^#?[0-9a-fA-F]{6}$/;
+const HEX_COLOR_PATTERN = /^#?[0-9a-fA-F]{6}$/u;
 
 export const hexColorSchema = z
   .string()

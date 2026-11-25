@@ -2,13 +2,13 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { formatTimezoneLabel, getGroupedTimezones, TIMEZONES_DATA } from "./timezones.js";
 
-const PRAG_RE = /Prag/;
-const TSCHECHIEN_RE = /Tschechien/;
-const PRAHA_RE = /Praha/;
-const ESKO_ESK_RE = /Česko|Česká/;
-const PRAGUE_RE_2 = /Prague/;
-const PRAGUE_RE = /prague/;
-const EUROPE_PRAGUE_RE = /europe\/prague/;
+const PRAG_RE = /Prag/u;
+const TSCHECHIEN_RE = /Tschechien/u;
+const PRAHA_RE = /Praha/u;
+const ESKO_ESK_RE = /Česko|Česká/u;
+const PRAGUE_RE_2 = /Prague/u;
+const PRAGUE_RE = /prague/u;
+const EUROPE_PRAGUE_RE = /europe\/prague/u;
 
 function supportsTimeZoneDisplayNames(): boolean {
   try {

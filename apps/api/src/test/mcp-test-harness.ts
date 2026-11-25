@@ -33,7 +33,7 @@ function extractCode(location: string): string {
   return code;
 }
 
-export const WEBAPP_URL = (process.env["BONDERY_PUBLIC_WEBAPP_URL"] ?? "").replace(/\/+$/, "");
+export const WEBAPP_URL = (process.env["BONDERY_PUBLIC_WEBAPP_URL"] ?? "").replace(/\/+$/u, "");
 export const REDIRECT_URI = `${WEBAPP_URL}/auth/oauth-callback`;
 export const MCP_RESOURCE = resolveMcpResourceIdentifier();
 export const MCP_SCOPE = "openid profile email offline_access mcp:read mcp:write";

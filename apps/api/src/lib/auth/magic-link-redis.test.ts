@@ -5,9 +5,9 @@ import { describe, it } from "node:test";
 import { pathToFileURL } from "node:url";
 import { hashMagicLinkEmail, hashMagicLinkStoredIdentifier } from "./magic-link-redis.js";
 
-const USER_EXAMPLE_PATTERN = /user|example/i;
-const PLAINTEXT_PATTERN = /plaintext/;
-const EQUALS_SIGN_PATTERN = /[=]/;
+const USER_EXAMPLE_PATTERN = /user|example/iu;
+const PLAINTEXT_PATTERN = /plaintext/u;
+const EQUALS_SIGN_PATTERN = /[=]/u;
 
 const require = createRequire(import.meta.url);
 

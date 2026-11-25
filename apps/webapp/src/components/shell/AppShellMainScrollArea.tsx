@@ -3,7 +3,7 @@
 import { ScrollArea } from "@mantine/core";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ShellScrollViewportProvider } from "./ShellScrollViewportContext";
+import { ShellScrollViewportProvider } from "./shellScrollViewportProvider";
 
 /** Settings (and any hashed page) may paint the target after the route effect. */
 const HASH_TARGET_RETRY_MS = 2000;
@@ -24,7 +24,7 @@ function applyShellLocationScroll(viewport: HTMLDivElement, behavior: ScrollBeha
     viewport.scrollTo({ top: 0 });
     return true;
   }
-  const target = document.getElementById(hash);
+  const target = document.querySelector(`#${CSS.escape(hash)}`);
   if (!target) {
     return false;
   }

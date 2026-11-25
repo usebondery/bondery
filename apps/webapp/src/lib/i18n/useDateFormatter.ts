@@ -13,7 +13,7 @@ import {
   type UserDateStyle,
 } from "@bondery/helpers/date";
 import { buildIntlLocaleTag } from "@bondery/schemas/locale";
-import { useUserLocale } from "@/components/shell/UserLocaleProvider";
+import { useUserLocale } from "@/components/shell/localeProvider";
 import {
   type DateFormatterLike,
   formatLastUsedAt,

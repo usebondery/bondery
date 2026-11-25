@@ -8,16 +8,16 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "../../../scripts/check/check-report.mjs";
 
-const JS_TS_EXTENSION = /\.(tsx?|jsx?)$/;
-const USE_CLIENT_DIRECTIVE = /^["']use client["'];?\s*$/m;
-const SERVERAPIFETCH = /\bserverApiFetch\b/;
-const BFFPROXYFETCH = /\bbffProxyFetch\b/;
-const TRANSPORTPOLICY_FALSE = /transportPolicy:\s*false/;
+const JS_TS_EXTENSION = /\.(?<group1>tsx?|jsx?)$/u;
+const USE_CLIENT_DIRECTIVE = /^["']use client["'];?\s*$/mu;
+const SERVERAPIFETCH = /\bserverApiFetch\b/u;
+const BFFPROXYFETCH = /\bbffProxyFetch\b/u;
+const TRANSPORTPOLICY_FALSE = /transportPolicy:\s*false/u;
 const IMPORT_API_URL_FROM_LIB_PLATFORM_CONFIG =
-  /import\s*\{[^}]*\bAPI_URL\b[^}]*\}\s*from\s*["']@\/lib\/platform\/config["']/;
-const FETCH_API_URL = /\bfetch\s*\(\s*[`'"]\s*\$\{\s*API_URL/;
-const FETCH_API_ROUTES = /\bfetch\s*\(\s*[`'"]\s*\$\{\s*API_ROUTES/;
-const FETCH_API_ROUTES_2 = /\bfetch\s*\(\s*API_ROUTES\./;
+  /import\s*\{[^}]*\bAPI_URL\b[^}]*\}\s*from\s*["']@\/lib\/platform\/config["']/u;
+const FETCH_API_URL = /\bfetch\s*\(\s*[`'"]\s*\$\{\s*API_URL/u;
+const FETCH_API_ROUTES = /\bfetch\s*\(\s*[`'"]\s*\$\{\s*API_ROUTES/u;
+const FETCH_API_ROUTES_2 = /\bfetch\s*\(\s*API_ROUTES\./u;
 
 const check = createCheck("check-api-fetch");
 
@@ -46,12 +46,12 @@ function isClientFile(content: string): boolean {
 }
 
 function isAllowedClientFetchFile(rel: string): boolean {
-  const normalized = rel.replace(/\\/g, "/");
+  const normalized = rel.replace(/\\/gu, "/");
   return normalized.startsWith("lib/api/") || normalized === "lib/sync/sync-wake-client.ts";
 }
 
 function isApiRouteFile(rel: string): boolean {
-  const normalized = rel.replace(/\\/g, "/");
+  const normalized = rel.replace(/\\/gu, "/");
   return normalized.startsWith("app/api/");
 }
 

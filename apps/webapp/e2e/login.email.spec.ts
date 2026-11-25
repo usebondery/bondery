@@ -2,9 +2,9 @@ import { expect, test } from "@playwright/test";
 import { completeOnboardingIfNeeded } from "./complete-onboarding";
 import { loginWithEmail } from "./email-login";
 
-const APP_HOME_URL = /\/app\/home(?:[/?#]|$)/;
-const LOGIN_PATH = /\/login/;
-const SIGN_OUT_I = /sign out/i;
+const APP_HOME_URL = /\/app\/home(?:[/?#]|$)/u;
+const LOGIN_PATH = /\/login/u;
+const SIGN_OUT_I = /sign out/iu;
 
 const HOME = "/app/home";
 const SETTINGS = "/app/settings";

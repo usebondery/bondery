@@ -8,21 +8,23 @@ import { markdownToHtml } from "./markdownToHtml.js";
  * `onmouseover` inside a quoted `href` value, or in escaped text, is correctly not counted, while
  * an injected quote that ends the value early is.
  */
-const ON_RE = /^on/i;
-const SCRIPT_IMG_SVG_IFRAME_SPAN_RE = /<(script|img|svg|iframe|a|span)\b/i;
-const LT_RE = /&lt;/;
-const IMG_SCRIPT_RE = /<(img|script|b|i)\b/i;
-const HREF_RE = /href=/i;
-const CLICK_RE = /click/;
-const HREF_MAILTO_TEST_RE = /href="mailto:a@b\.test"/;
-const HREF_TEL_RE = /href="tel:\+420123456789"/;
-const SCRIPT_RE = /<script/i;
-const LT_SCRIPT_GT_RE = /&lt;script&gt;/;
+const ON_RE = /^on/iu;
+const SCRIPT_IMG_SVG_IFRAME_SPAN_RE = /<(?<group1>script|img|svg|iframe|a|span)\b/iu;
+const LT_RE = /&lt;/u;
+const IMG_SCRIPT_RE = /<(?<group1>img|script|b|i)\b/iu;
+const HREF_RE = /href=/iu;
+const CLICK_RE = /click/u;
+const HREF_MAILTO_TEST_RE = /href="mailto:a@b\.test"/u;
+const HREF_TEL_RE = /href="tel:\+420123456789"/u;
+const SCRIPT_RE = /<script/iu;
+const LT_SCRIPT_GT_RE = /&lt;script&gt;/u;
 
 function eventHandlerAttributes(html: string): string[] {
   const names: string[] = [];
-  for (const tag of html.matchAll(/<[a-z][^\s>/]*((?:\s+[^\s=>/]+(?:="[^"]*")?)*)\s*\/?>/gi)) {
-    for (const attribute of (tag[1] ?? "").matchAll(/\s+([^\s=>/]+)(?:="[^"]*")?/g)) {
+  for (const tag of html.matchAll(
+    /<[a-z][^\s>/]*(?<group1>(?:\s+[^\s=>/]+(?:="[^"]*")?)*)\s*\/?>/giu,
+  )) {
+    for (const attribute of (tag[1] ?? "").matchAll(/\s+(?<group1>[^\s=>/]+)(?:="[^"]*")?/gu)) {
       const name = attribute[1] ?? "";
       if (ON_RE.test(name)) {
         names.push(name);

@@ -1,9 +1,9 @@
 import { COMMON_PERSON_NAME_TOKEN_SET } from "#name/common-person-name-tokens.js";
 
-const PATTERN_285B272D5D29_RE = /(['-])/;
-const PATTERN_5E282E295C31_RE = /^(.)\1+$/u;
-const PATTERN_5B5C732E2F5F_RE = /[\s./_+|\\-]+/;
-const PATTERN_5B2E5F2D5D2B_RE = /[._-]+/;
+const PATTERN_285B272D5D29_RE = /(?<group1>['-])/u;
+const PATTERN_5E282E295C31_RE = /^(?<group1>.)\1+$/u;
+const PATTERN_5B5C732E2F5F_RE = /[\s./_+|\\-]+/u;
+const PATTERN_5B2E5F2D5D2B_RE = /[._-]+/u;
 
 interface ParsedInstagramName {
   firstName: string;
@@ -70,9 +70,9 @@ function normalizeDisplayName(displayName: string): string {
     .replace(/[\u2018\u2019\u201A\u201B\u2032\u2035\u0060\u00B4\u02BC\u02BB\uFF07]/gu, "'");
 
   return normalized
-    .replace(/[./_+|\\]+/g, " ")
+    .replace(/[./_+|\\]+/gu, " ")
     .replace(/[^\p{L}\p{M}\s'-]/gu, " ")
-    .replace(/\s+/g, " ")
+    .replace(/\s+/gu, " ")
     .normalize("NFC")
     .trim();
 }
@@ -204,8 +204,8 @@ function parseFromDisplayName(displayName?: string | null): ParsedInstagramName 
 }
 
 function parseFromUsername(username: string): ParsedInstagramName {
-  const stripped = username.trim().replace(/^_+|_+$/g, "");
-  const noNumbers = stripped.replace(/\d+/g, "");
+  const stripped = username.trim().replace(/^_+|_+$/gu, "");
+  const noNumbers = stripped.replace(/\d+/gu, "");
 
   const tokens = noNumbers
     .split(PATTERN_5B2E5F2D5D2B_RE)

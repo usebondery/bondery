@@ -16,8 +16,8 @@ import {
   buildWebsiteSchema,
 } from "@/lib/seo/schemas/site";
 
-const TRAILING_SLASHES_RE = /\/+$/;
-const TRAILING_SLASH_RE = /\/$/;
+const TRAILING_SLASHES_RE = /\/+$/u;
+const TRAILING_SLASH_RE = /\/$/u;
 const metadata: Metadata = {
   description: SITE_DESCRIPTION,
   metadataBase: new URL(WEBSITE_URL),

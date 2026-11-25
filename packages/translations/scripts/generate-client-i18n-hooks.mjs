@@ -69,13 +69,13 @@ function generateClientHookFunction(ns) {
       `export function ${useName}<P extends ${prefixType}>(keyPrefix: P): import("@bondery/translations").TranslateFn<${JSON.stringify(ns)}, P>;`,
       `export function ${useName}(keyPrefix?: ${prefixType}) {`,
       `  return createNamespaceHook(${JSON.stringify(ns)}, keyPrefix);`,
-      `}`,
+      "}",
     );
   } else {
     lines.push(
       `export function ${useName}() {`,
       `  return createNamespaceHook(${JSON.stringify(ns)});`,
-      `}`,
+      "}",
     );
   }
 
@@ -95,13 +95,13 @@ function generateServerHookFunction(ns) {
       `export function ${getName}<P extends ${prefixType}>(keyPrefix: P): Promise<import("@bondery/translations").TranslateFn<${JSON.stringify(ns)}, P>>;`,
       `export async function ${getName}(keyPrefix?: ${prefixType}) {`,
       `  return createServerNamespaceHook(${JSON.stringify(ns)}, keyPrefix);`,
-      `}`,
+      "}",
     );
   } else {
     lines.push(
       `export async function ${getName}() {`,
       `  return createServerNamespaceHook(${JSON.stringify(ns)});`,
-      `}`,
+      "}",
     );
   }
 

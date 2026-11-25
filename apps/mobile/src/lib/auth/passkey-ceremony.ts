@@ -1,5 +1,5 @@
-const TIMEOUT_MESSAGE_RE = /\btimed?\s*out\b/i;
-const NOT_ALLOWED_MESSAGE_RE = /not allowed/i;
+const TIMEOUT_MESSAGE_RE = /\btimed?\s*out\b/iu;
+const NOT_ALLOWED_MESSAGE_RE = /not allowed/iu;
 type PasskeyCeremonyKind =
   | "cancel"
   | "fail"

@@ -1,6 +1,6 @@
 import type { StorageAdapter, StoragePutOptions } from "../lib/storage/adapter.js";
 
-const LEADING_SLASHES_PATTERN = /^\/+/;
+const LEADING_SLASHES_PATTERN = /^\/+/u;
 
 function storageKey(bucket: string, key: string): string {
   return `${bucket}/${key.replace(LEADING_SLASHES_PATTERN, "")}`;
@@ -29,7 +29,7 @@ export function createMemoryStorage(options?: {
       if (options?.listKeys) {
         return options.listKeys(bucket, prefix);
       }
-      const normalized = prefix.replace(/^\/+|\/+$/g, "");
+      const normalized = prefix.replace(/^\/+|\/+$/gu, "");
       const listPrefix = normalized ? `${bucket}/${normalized}/` : `${bucket}/`;
       const keys: string[] = [];
       for (const objectKey of objects.keys()) {

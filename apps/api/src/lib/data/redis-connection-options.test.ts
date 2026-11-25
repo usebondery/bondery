@@ -10,10 +10,10 @@ import {
   resolveRedisConnectionOptions,
 } from "./redis-connection-options.js";
 
-const REDISS_PATTERN = /rediss:\/\//;
-const NOT_BOTH_PATTERN = /not both/;
-const EMPTY_FILE_PATTERN = /empty file/;
-const BOTH_CERT_FILES_PATTERN = /Set both/;
+const REDISS_PATTERN = /rediss:\/\//u;
+const NOT_BOTH_PATTERN = /not both/u;
+const EMPTY_FILE_PATTERN = /empty file/u;
+const BOTH_CERT_FILES_PATTERN = /Set both/u;
 
 const FILES: Record<string, string> = {
   "/secrets/ca.crt": "-----BEGIN CERTIFICATE-----\nabc\n-----END CERTIFICATE-----\n",
@@ -140,7 +140,7 @@ describe("resolveRedisConnectionOptions", () => {
           { [REDIS_PASSWORD_FILE_ENV]: "/secrets/missing" },
           readFake,
         ),
-      new RegExp(REDIS_PASSWORD_FILE_ENV),
+      new RegExp(REDIS_PASSWORD_FILE_ENV, "u"),
     );
     assert.throws(
       () =>

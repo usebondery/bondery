@@ -20,13 +20,13 @@ import {
 } from "@bondery/helpers/env";
 import { parseEnvContent } from "@bondery/helpers/env/check-env";
 
-const ENV_VALUE_NEEDS_QUOTES_RE = /[\s#"'$\\]/;
-const TRAILING_SLASH_RE = /\/$/;
+const ENV_VALUE_NEEDS_QUOTES_RE = /[\s#"'$\\]/u;
+const TRAILING_SLASH_RE = /\/$/u;
 
 /** @see scripts/env/env-file-format.ts */
 function quoteEnvValue(value) {
   if (ENV_VALUE_NEEDS_QUOTES_RE.test(value) || value === "") {
-    return `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+    return `"${value.replace(/\\/gu, "\\\\").replace(/"/gu, '\\"')}"`;
   }
   return value;
 }
@@ -265,7 +265,7 @@ function parseArgs(argv) {
   let redeploy = false;
   let target = "";
 
-  for (let i = 0; i < argv.length; i++) {
+  for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
     if (arg === "--dry-run") {
       dryRun = true;

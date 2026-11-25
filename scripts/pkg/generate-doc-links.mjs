@@ -4,8 +4,8 @@ import { dirname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
 
-const PATTERN_5E2D2D2D5C72_RE = /^---\r?\n([\s\S]*?)\r?\n---/;
-const MDX_RE = /\.mdx$/;
+const PATTERN_5E2D2D2D5C72_RE = /^---\r?\n(?<group1>[\s\S]*?)\r?\n---/u;
+const MDX_RE = /\.mdx$/u;
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(__dirname, "../..");

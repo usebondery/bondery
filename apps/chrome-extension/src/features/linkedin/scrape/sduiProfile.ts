@@ -9,29 +9,30 @@ import { pollUntil } from "../pollUntil";
 import type { EducationEntry } from "./education";
 import { parseDateRange, type WorkEntry } from "./workExperience";
 
-const HEX_ID_SEGMENT_RE = /^[a-f0-9]{8,12}$/i;
-const TRAILING_LOGO_RE = /\s+logo\s*$/i;
-const YEAR_TOKEN_RE = /\b(19[7-9]\d|20[0-3]\d)\b/;
-const DASH_SEPARATOR_RE = /[–—·-]/;
-const YEAR_ONLY_LINE_RE = /^\s*(19|20)\d{2}\s*$/;
-const LINKEDIN_SCHOOL_URL_RE = /linkedin\.com\/school\/([^/?#]+)/i;
-const LINKEDIN_ORG_URL_RE = /linkedin\.com\/(?:company|school|organization|showcase)\/([^/?#]+)/i;
-const ANY_WHITESPACE_CHAR_RE = /\s/;
+const HEX_ID_SEGMENT_RE = /^[a-f0-9]{8,12}$/iu;
+const TRAILING_LOGO_RE = /\s+logo\s*$/iu;
+const YEAR_TOKEN_RE = /\b(?<group1>19[7-9]\d|20[0-3]\d)\b/u;
+const DASH_SEPARATOR_RE = /[–—·-]/u;
+const YEAR_ONLY_LINE_RE = /^\s*(?<group1>19|20)\d{2}\s*$/u;
+const LINKEDIN_SCHOOL_URL_RE = /linkedin\.com\/school\/(?<group1>[^/?#]+)/iu;
+const LINKEDIN_ORG_URL_RE =
+  /linkedin\.com\/(?:company|school|organization|showcase)\/(?<group1>[^/?#]+)/iu;
+const ANY_WHITESPACE_CHAR_RE = /\s/u;
 const SDUI_PROFILE_REF_RE =
-  /ref(ACo[A-Za-z0-9_-]+?)(?:Topcard|About|Experience|Education|Featured|Services|$)/;
-const FSD_PROFILE_URN_RE = /urn:li:fsd_profile:(ACo[A-Za-z0-9_-]+)/;
-const ACO_ID_RE = /(ACo[A-Za-z0-9_-]{20,})/;
-const DIGIT_CHAR_RE = /\d/;
-const TRAILING_HEX_SUFFIX_RE = /-[a-f0-9]{8,12}$/i;
-const WHITESPACE_RE = /\s+/;
-const COMMA_CHAR_RE = /,/;
-const PROFILE_PHOTO_URL_RE = /profile|displayphoto|shrink/i;
-const BULLET_META_LINE_RE = /^[\w\s]+•[\w\s]+•/;
-const SHOW_ALL_EDUCATIONS_RE = /show all \d+ educations/i;
+  /ref(?<group1>ACo[A-Za-z0-9_-]+?)(?:Topcard|About|Experience|Education|Featured|Services|$)/u;
+const FSD_PROFILE_URN_RE = /urn:li:fsd_profile:(?<group1>ACo[A-Za-z0-9_-]+)/u;
+const ACO_ID_RE = /(?<group1>ACo[A-Za-z0-9_-]{20,})/u;
+const DIGIT_CHAR_RE = /\d/u;
+const TRAILING_HEX_SUFFIX_RE = /-[a-f0-9]{8,12}$/iu;
+const WHITESPACE_RE = /\s+/u;
+const COMMA_CHAR_RE = /,/u;
+const PROFILE_PHOTO_URL_RE = /profile|displayphoto|shrink/iu;
+const BULLET_META_LINE_RE = /^[\w\s]+•[\w\s]+•/u;
+const SHOW_ALL_EDUCATIONS_RE = /show all \d+ educations/iu;
 const MONTH_YEAR_RANGE_RE =
-  /((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+)?\d{4}\s*[–—-]\s*(?:Present|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+)?\d{0,4}/i;
-const LEADING_COMMA_RE = /^,\s*/;
-const FOUR_DIGIT_YEAR_RE = /\d{4}/;
+  /(?<group1>(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+)?\d{4}\s*[–—-]\s*(?:Present|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+)?\d{0,4}/iu;
+const LEADING_COMMA_RE = /^,\s*/u;
+const FOUR_DIGIT_YEAR_RE = /\d{4}/u;
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 interface SduiIdentity {
@@ -56,12 +57,12 @@ const EMPLOYMENT_TYPES = new Set([
   "Seasonal",
 ]);
 
-const CONNECTION_BADGE = /^·\s*[\d.]+\s*(st|nd|rd|th)?\.?$/i;
-const NOISE = /^(…|more|\.{3})$/i;
-const SKILLS_LINE = /\bskills?\b|\+\d+\s+skills/i;
+const CONNECTION_BADGE = /^·\s*[\d.]+\s*(?<group1>st|nd|rd|th)?\.?$/iu;
+const NOISE = /^(?<group1>…|more|\.{3})$/iu;
+const SKILLS_LINE = /\bskills?\b|\+\d+\s+skills/iu;
 const MUTUAL_CONNECTIONS =
-  /\bmutual connections?\b|vzájemn(á|é|ých)? spojení|společn(ých|é) spojení|\band \d+ other\b/i;
-const SOCIAL_PROOF_LINE = /followers|connections|sledujících|spojení|sledující/i;
+  /\bmutual connections?\b|vzájemn(?<group1>á|é|ých)? spojení|společn(?<group2>ých|é) spojení|\band \d+ other\b/iu;
+const SOCIAL_PROOF_LINE = /followers|connections|sledujících|spojení|sledující/iu;
 /** Shortest text taken as a profile headline; shorter lines are badges or separators. */
 const MIN_HEADLINE_LENGTH = 3;
 /** Shortest text taken as an About section body. */
@@ -74,7 +75,7 @@ function getDoc(doc?: Document): Document {
 }
 
 function text(el: Element | null | undefined): string {
-  return (el?.textContent ?? "").replace(/\s+/g, " ").trim();
+  return (el?.textContent ?? "").replace(/\s+/gu, " ").trim();
 }
 
 function stripLogo(s: string): string {

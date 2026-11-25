@@ -8,7 +8,7 @@ import { AVATARS_BUCKET, LINKEDIN_LOGOS_BUCKET } from "./get-storage.js";
 import { createS3Client } from "./s3-client.js";
 
 const TIMEOUT_ECONNREFUSED_ENOTFOUND_ECONNRESET_ETIMEDOUT_FETCH_FA_PATTERN =
-  /timeout|ECONNREFUSED|ENOTFOUND|ECONNRESET|ETIMEDOUT|fetch failed/i;
+  /timeout|ECONNREFUSED|ENOTFOUND|ECONNRESET|ETIMEDOUT|fetch failed/iu;
 
 const DEFAULT_MAX_ATTEMPTS = 10;
 const DEFAULT_RETRY_DELAY_MS = 2000;
@@ -164,7 +164,7 @@ async function waitForHeadBucket(
 ): Promise<"exists" | "missing"> {
   let lastError: unknown;
 
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     try {
       await client.send(new HeadBucketCommand({ Bucket: bucket }));
       return "exists";

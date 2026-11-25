@@ -1,7 +1,7 @@
-const PATTERN_5E5B412D5A5D_RE = /^[A-Z]{2}$/;
-const PRICE_PRICING_TRIAL_CHECKOUT_RE = /\b(price|pricing|trial|checkout)\b/i;
-const SKILLS_Z0_SKILL_MD_RE = /^\.\/skills\/[a-z0-9-]+\/SKILL\.md$/;
-const PATTERN_5E5B5E5C7340_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PATTERN_5E5B412D5A5D_RE = /^[A-Z]{2}$/u;
+const PRICE_PRICING_TRIAL_CHECKOUT_RE = /\b(?<group1>price|pricing|trial|checkout)\b/iu;
+const SKILLS_Z0_SKILL_MD_RE = /^\.\/skills\/[a-z0-9-]+\/SKILL\.md$/u;
+const PATTERN_5E5B5E5C7340_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/u;
 
 /** Shape rules for `llm-plugins/src/plugin.config.json`. */
 

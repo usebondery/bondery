@@ -11,7 +11,7 @@ import { getApiUrl, getWebappUrl, getWebsiteUrl, requireEnv } from "@/lib/env";
  * `robots.ts` and `sitemap.ts`, which await `connection()`.
  */
 
-const TRAILING_SLASHES = /\/+$/;
+const TRAILING_SLASHES = /\/+$/u;
 
 /** Public API origin (`BONDERY_PUBLIC_API_URL`). No trailing slash. */
 export const API_URL = requireEnv("BONDERY_PUBLIC_API_URL", getApiUrl()).replace(

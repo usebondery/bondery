@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 
-const SLASH_TOKEN_RE = /(^|\s)\/([^\s]*)$/;
+const SLASH_TOKEN_RE = /(?<group1>^|\s)\/(?<group2>[^\s]*)$/u;
 
 export interface SlashCommandState {
   isActive: boolean;

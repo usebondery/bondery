@@ -11,7 +11,7 @@ const SENSITIVE_KEYS = new Set([
   "token",
 ]);
 
-const EMAIL_PATTERN = /[a-z0-9._%+-]+@[a-z0-9-]+(?:\.[a-z0-9-]+)+/gi;
+const EMAIL_PATTERN = /[a-z0-9._%+-]+@[a-z0-9-]+(?:\.[a-z0-9-]+)+/giu;
 
 const MAX_DEPTH = 6;
 /**

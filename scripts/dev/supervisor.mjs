@@ -30,7 +30,7 @@ import { killDevPort } from "./kill-dev-port.mjs";
  * @param {unknown} value
  * @returns {unknown}
  */
-const PATTERN_5E5B5C774023_RE = /^[\w@#./:=+-]+$/;
+const PATTERN_5E5B5C774023_RE = /^[\w@#./:=+-]+$/u;
 
 function asUnknown(value) {
   return value;

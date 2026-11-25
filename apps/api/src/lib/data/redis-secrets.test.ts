@@ -17,8 +17,8 @@ import {
   redisSecretPaths,
 } from "./redis-secrets.js";
 
-const ALTNAMES_HOSTNAME_PATTERN = /altnames|Hostname/i;
-const CERTIFICATE_ALERT_CLOSED_PATTERN = /certificate|alert|closed/i;
+const ALTNAMES_HOSTNAME_PATTERN = /altnames|Hostname/iu;
+const CERTIFICATE_ALERT_CLOSED_PATTERN = /certificate|alert|closed/iu;
 
 type Pair = { cert: string; key: string };
 

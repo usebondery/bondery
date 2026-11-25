@@ -26,10 +26,10 @@ import { pathToFileURL } from "node:url";
 /** Properties that identify the exporting application, not the person. */
 const UNCHANGED_PROPERTIES = new Set(["BEGIN", "END", "PRODID", "VERSION"]);
 
-const LINE_BREAK = /\r?\n/;
+const LINE_BREAK = /\r?\n/u;
 const CRLF = "\r\n";
-const QUOTED_PRINTABLE = /ENCODING=QUOTED-PRINTABLE/i;
-const QUOTED_PRINTABLE_ESCAPE = /[=]([0-9A-Fa-f]{2})/g;
+const QUOTED_PRINTABLE = /ENCODING=QUOTED-PRINTABLE/iu;
+const QUOTED_PRINTABLE_ESCAPE = /[=](?<group1>[0-9A-Fa-f]{2})/gu;
 const SORT_SEPARATOR = ",";
 const PARAM_SEPARATOR = ";";
 

@@ -12,7 +12,7 @@ import {
 } from "./navigationGateState.ts";
 import { serializeHref } from "./serializeHref.ts";
 
-const CONTACTS_PATH_RE = /\/contacts/;
+const CONTACTS_PATH_RE = /\/contacts/u;
 function resetGate(): void {
   setNavigationTransitioning(false);
   recordNavigationKey("", 0);

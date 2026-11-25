@@ -7,7 +7,7 @@ import { createHash } from "node:crypto";
 import { Readable } from "node:stream";
 import { API_ROUTES, BETTER_AUTH_BASE_PATH } from "@bondery/helpers/globals/paths";
 
-const PRINTABLE_ASCII_KEY = /^[\x21-\x7E]{1,255}$/;
+const PRINTABLE_ASCII_KEY = /^[\x21-\x7E]{1,255}$/u;
 
 type IdempotencyCompletion = "release" | "store";
 

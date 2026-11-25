@@ -8,9 +8,9 @@ import type {
   VCardTextValue,
 } from "#model.js";
 
-const PATTERN_5B3A2C3B5D_RE = /[:,;]/;
-const PATTERN_5E5C737C5C73_RE = /^\s|\s$/;
-const DATA_BASE64_RE = /^data:([^;]+);base64,(.+)$/s;
+const PATTERN_5B3A2C3B5D_RE = /[:,;]/u;
+const PATTERN_5E5C737C5C73_RE = /^\s|\s$/u;
+const DATA_BASE64_RE = /^data:(?<group1>[^;]+);base64,(?<group2>.+)$/su;
 
 const UTF8_ENCODER = new TextEncoder();
 
@@ -20,10 +20,10 @@ function getUtf8ByteLength(value: string): number {
 
 function escapeText(value: string): string {
   return value
-    .replace(/\\/g, "\\\\")
-    .replace(/\n/g, "\\n")
-    .replace(/,/g, "\\,")
-    .replace(/;/g, "\\;");
+    .replace(/\\/gu, "\\\\")
+    .replace(/\n/gu, "\\n")
+    .replace(/,/gu, "\\,")
+    .replace(/;/gu, "\\;");
 }
 
 function escapeTextList(values: string[]): string {

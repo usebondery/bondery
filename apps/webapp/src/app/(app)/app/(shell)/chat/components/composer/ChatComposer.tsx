@@ -5,7 +5,7 @@ import type { ChatModelId } from "@bondery/schemas";
 import { Box, Group, Textarea, Tooltip } from "@mantine/core";
 import { IconArrowUp, IconPlayerStop } from "@tabler/icons-react";
 import type { FormEvent, KeyboardEvent, RefObject } from "react";
-import { useCurrentLocale } from "@/components/shell/UserLocaleProvider";
+import { useCurrentLocale } from "@/components/shell/localeProvider";
 import { useChatPageTranslations } from "@/lib/i18n/generated/hooks";
 import { HOTKEYS } from "@/lib/platform/config";
 import { dictationLanguageTag } from "@/lib/speech/dictation/dictationLanguage";

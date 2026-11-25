@@ -9,7 +9,7 @@ import { peopleSearchActions } from "@/components/shell/PeopleSearchSpotlight";
 import { usePeoplePageTranslations } from "@/lib/i18n/generated/hooks";
 import { routeSettings } from "@/lib/navigation/route/settings";
 import { HOTKEYS } from "@/lib/platform/config";
-import { openAddContactModal } from "../modals/AddContactModal";
+import { openAddContactModal } from "../modals/openAddContactModal";
 
 /**
  * Client component for the People page header.

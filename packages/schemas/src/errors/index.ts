@@ -1,4 +1,4 @@
-const PATTERN_5C2F24_RE = /\/$/;
+const PATTERN_5C2F24_RE = /\/$/u;
 
 export { agentRecoveryHint, buildAgentMessage } from "./agent-messages.js";
 export {

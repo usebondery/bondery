@@ -5,7 +5,7 @@ import {
   WEBAPP_RUNTIME_ENV,
 } from "@/lib/platform/runtimeConfig.env";
 
-const LOCALHOST_OR_LOOPBACK = /localhost|127\.0\.0\.1/i;
+const LOCALHOST_OR_LOOPBACK = /localhost|127\.0\.0\.1/iu;
 
 /**
  * Read env at runtime. Never use literal `process.env.NEXT_PUBLIC_*` — Next.js inlines those at build time.

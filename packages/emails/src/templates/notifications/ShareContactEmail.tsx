@@ -7,7 +7,7 @@ import { EmailBody } from "#shared/EmailBody.js";
 import { EmailWrapper } from "#shared/EmailWrapper.js";
 import { EMAIL_MUTED, EMAIL_TEXT } from "#shared/email-styles.js";
 
-const PATTERN_5C732B_RE = /\s+/;
+const PATTERN_5C732B_RE = /\s+/u;
 
 interface ShareContactEmailPhone {
   prefix?: string;
@@ -76,7 +76,7 @@ function AvatarDisplay({ avatarUrl, name }: { avatarUrl?: string; name: string }
 }
 
 function toTelHref(prefix: string | undefined, value: string): string {
-  const dialable = `${prefix ?? ""}${value}`.replace(/[^\d+]/g, "");
+  const dialable = `${prefix ?? ""}${value}`.replace(/[^\d+]/gu, "");
   return `tel:${dialable}`;
 }
 

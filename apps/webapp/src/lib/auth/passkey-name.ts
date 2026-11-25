@@ -1,24 +1,24 @@
-const IOS_UA = /iPhone|iPad|iPod/i;
-const EDGE_UA = /Edg\//i;
-const OPERA_UA = /OPR\/|Opera\//i;
-const FIREFOX_UA = /Firefox\//i;
-const CHROME_UA = /Chrome\//i;
-const SAFARI_UA = /Safari\//i;
-const WINDOWS_UA = /Windows NT/i;
-const CHROME_OS_UA = /CrOS/i;
-const ANDROID_UA = /Android/i;
-const MAC_UA = /Mac OS X|Macintosh/i;
-const LINUX_UA = /Linux/i;
-const CHROME_BRAND = /chrome/i;
-const EDGE_BRAND = /edge/i;
-const FIREFOX_BRAND = /firefox/i;
-const SAFARI_BRAND = /safari/i;
-const OPERA_BRAND = /opera/i;
+const IOS_UA = /iPhone|iPad|iPod/iu;
+const EDGE_UA = /Edg\//iu;
+const OPERA_UA = /OPR\/|Opera\//iu;
+const FIREFOX_UA = /Firefox\//iu;
+const CHROME_UA = /Chrome\//iu;
+const SAFARI_UA = /Safari\//iu;
+const WINDOWS_UA = /Windows NT/iu;
+const CHROME_OS_UA = /CrOS/iu;
+const ANDROID_UA = /Android/iu;
+const MAC_UA = /Mac OS X|Macintosh/iu;
+const LINUX_UA = /Linux/iu;
+const CHROME_BRAND = /chrome/iu;
+const EDGE_BRAND = /edge/iu;
+const FIREFOX_BRAND = /firefox/iu;
+const SAFARI_BRAND = /safari/iu;
+const OPERA_BRAND = /opera/iu;
 
 type NavigatorBrands = ReadonlyArray<{ brand: string }>;
 
 /** Chromium GREASE brands: `Not` + punctuation + `A` + punctuation + `Brand`. */
-const CHROMIUM_GREASE_BRAND = /^Not\W+A\W+Brand$/i;
+const CHROMIUM_GREASE_BRAND = /^Not\W+A\W+Brand$/iu;
 
 type NavigatorUserAgentData = {
   brands?: NavigatorBrands;

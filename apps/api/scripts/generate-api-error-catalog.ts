@@ -42,30 +42,30 @@ function walk(dir: string) {
     }
     const content = readFileSync(path, "utf8");
 
-    for (const m of content.matchAll(new RegExp(`badRequest\\([^)]*?,\\s*"(${CODE})"`, "g"))) {
+    for (const m of content.matchAll(new RegExp(`badRequest\\([^)]*?,\\s*"(${CODE})"`, "gu"))) {
       addCode(m[1], 400, "badRequest");
     }
-    for (const m of content.matchAll(new RegExp(`notFound\\([^)]*?,\\s*"(${CODE})"`, "g"))) {
+    for (const m of content.matchAll(new RegExp(`notFound\\([^)]*?,\\s*"(${CODE})"`, "gu"))) {
       addCode(m[1], 404, "notFound");
     }
-    for (const m of content.matchAll(new RegExp(`forbidden\\([^)]*?,\\s*"(${CODE})"`, "g"))) {
+    for (const m of content.matchAll(new RegExp(`forbidden\\([^)]*?,\\s*"(${CODE})"`, "gu"))) {
       addCode(m[1], 403, "forbidden");
     }
-    for (const m of content.matchAll(new RegExp(`unauthorized\\([^)]*?,\\s*"(${CODE})"`, "g"))) {
+    for (const m of content.matchAll(new RegExp(`unauthorized\\([^)]*?,\\s*"(${CODE})"`, "gu"))) {
       addCode(m[1], 401, "unauthorized");
     }
-    for (const m of content.matchAll(new RegExp(`conflict\\([^)]*?,\\s*"(${CODE})"`, "g"))) {
+    for (const m of content.matchAll(new RegExp(`conflict\\([^)]*?,\\s*"(${CODE})"`, "gu"))) {
       addCode(m[1], 409, "conflict");
     }
     for (const m of content.matchAll(
-      new RegExp(`new DomainError\\([\\s\\S]*?,\\s*(\\d+),\\s*"(${CODE})"`, "g"),
+      new RegExp(`new DomainError\\([\\s\\S]*?,\\s*(\\d+),\\s*"(${CODE})"`, "gu"),
     )) {
       addCode(m[2], Number(m[1]), "DomainError");
     }
-    for (const m of content.matchAll(new RegExp(`internal\\(\\s*"(${CODE})"`, "g"))) {
+    for (const m of content.matchAll(new RegExp(`internal\\(\\s*"(${CODE})"`, "gu"))) {
       addCode(m[1], 500, "internal");
     }
-    for (const m of content.matchAll(new RegExp(`code:\\s*"(${CODE})"`, "g"))) {
+    for (const m of content.matchAll(new RegExp(`code:\\s*"(${CODE})"`, "gu"))) {
       const [, code] = m;
       if (code === "rate_limit_exceeded") {
         addCode(code, 429, "rateLimit");
@@ -110,14 +110,14 @@ function extractAllCodes(dir: string): Set<string> {
       const patterns = [
         new RegExp(
           `(?:internal|badRequest|notFound|forbidden|conflict|unauthorized)\\([^)]*?,\\s*"(${CODE})"`,
-          "g",
+          "gu",
         ),
         new RegExp(
           `(?:internal|badRequest|notFound|forbidden|conflict|unauthorized)\\(\\s*"(${CODE})"`,
-          "g",
+          "gu",
         ),
-        new RegExp(`new DomainError\\([\\s\\S]*?,\\s*"(${CODE})"`, "g"),
-        new RegExp(`code:\\s*"(${CODE})"`, "g"),
+        new RegExp(`new DomainError\\([\\s\\S]*?,\\s*"(${CODE})"`, "gu"),
+        new RegExp(`code:\\s*"(${CODE})"`, "gu"),
       ];
       for (const pattern of patterns) {
         for (const match of content.matchAll(pattern)) {

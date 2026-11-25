@@ -40,7 +40,7 @@ import { swaggerOpenApiConfig } from "./openapi/swagger-config.js";
 import { registerAllRoutes } from "./routes/register-all.js";
 import { captureServerException } from "./services/analytics/capture-server-exception.js";
 
-const LEADING_SLASH_PATTERN = /^\//;
+const LEADING_SLASH_PATTERN = /^\//u;
 
 const require = createRequire(import.meta.url);
 
@@ -114,7 +114,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<AppFastif
   fastify.setSchemaErrorFormatter((errors, dataVar) => {
     const [first] = errors;
     const field = first?.instancePath
-      ? first.instancePath.replace(LEADING_SLASH_PATTERN, "").replace(/\//g, ".")
+      ? first.instancePath.replace(LEADING_SLASH_PATTERN, "").replace(/\//gu, ".")
       : dataVar;
     const message = first?.message ?? "Invalid value";
     return new Error(`${field} ${message}`);

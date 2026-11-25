@@ -30,8 +30,8 @@ import { useImportBonderyExportMutation } from "@/lib/query/hooks/useImports";
 import { useSettingsQuery } from "@/lib/query/hooks/useSettings";
 import { useImporterNavigationProgress } from "../../hooks/useImporterNavigationProgress";
 import { ImportIntroStep } from "../import/ImportIntroStep";
-import { ImportProcessingStep } from "../import/ImportModalProcessingSteps";
 import { IMPORT_ZIP_ACCEPT, ImportZipUploadStep } from "../import/ImportZipUploadStep";
+import { ImportProcessingStep } from "../import/importModalProcessingSteps";
 
 const IMPORT_CLIENT_TIMEOUT_MS = 180_000;
 const IMPORT_MAX_ZIP_BYTES = 100 * 1024 * 1024;

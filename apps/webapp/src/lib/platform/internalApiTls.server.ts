@@ -16,7 +16,7 @@ import { getCACertificates, setDefaultCACertificates } from "node:tls";
 
 import { WEBAPP_INTERNAL_API_URL_ENV } from "@/lib/platform/runtimeConfig.env";
 
-const PEM_CERTIFICATE = /-----BEGIN CERTIFICATE-----[\s\S]+?-----END CERTIFICATE-----/g;
+const PEM_CERTIFICATE = /-----BEGIN CERTIFICATE-----[\s\S]+?-----END CERTIFICATE-----/gu;
 
 type TrustStore = {
   getCACertificates: (type?: "default") => string[];

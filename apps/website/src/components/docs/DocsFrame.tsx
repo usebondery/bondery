@@ -3,7 +3,7 @@
 import { Box } from "@mantine/core";
 import type { ReactNode } from "react";
 import { SiteShell } from "@/components/site-shell";
-import { useDocsChrome } from "./DocsChrome";
+import { useDocsChrome } from "./docsChromeProvider";
 
 interface DocsFrameProps {
   children: ReactNode;

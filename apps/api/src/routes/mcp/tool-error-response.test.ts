@@ -6,13 +6,13 @@ import {
   rewriteToolErrorText,
 } from "./tool-error-response.js";
 
-const CORRECT_THOSE_ARGUMENTS_PATTERN = /correct those arguments/;
-const DOCS_API_ERRORS_VALIDATION_ERROR_PATTERN = /\/docs\/api\/errors\/validation_error$/;
-const RETRY_THE_CALL_ONCE_PATTERN = /Retry the call once/;
-const VALIDATION_ERROR_PATTERN = /"validation_error"/;
-const DOC_URL_PATTERN = /doc_url/;
-const VALIDATION_ERROR_PATTERN_2 = /validation_error/;
-const SEARCH_CONTACTS_PATTERN = /search_contacts/;
+const CORRECT_THOSE_ARGUMENTS_PATTERN = /correct those arguments/u;
+const DOCS_API_ERRORS_VALIDATION_ERROR_PATTERN = /\/docs\/api\/errors\/validation_error$/u;
+const RETRY_THE_CALL_ONCE_PATTERN = /Retry the call once/u;
+const VALIDATION_ERROR_PATTERN = /"validation_error"/u;
+const DOC_URL_PATTERN = /doc_url/u;
+const VALIDATION_ERROR_PATTERN_2 = /validation_error/u;
+const SEARCH_CONTACTS_PATTERN = /search_contacts/u;
 
 const REQUEST_ID = "req-test-1";
 

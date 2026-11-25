@@ -8,10 +8,10 @@ import type {
   SyncWsServerMessage,
 } from "./types.js";
 
-const API_RE = /\/api$/;
-const PATTERN_5C2F2B24_RE = /\/+$/;
-const HTTP_RE = /^http:/;
-const HTTPS_RE = /^https:/;
+const API_RE = /\/api$/u;
+const PATTERN_5C2F2B24_RE = /\/+$/u;
+const HTTP_RE = /^http:/u;
+const HTTPS_RE = /^https:/u;
 
 export {
   SYNC_WS_PROTOCOL_VERSION,

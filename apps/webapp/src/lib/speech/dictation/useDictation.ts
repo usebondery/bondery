@@ -39,7 +39,7 @@ import type {
   DictationStatus,
   UseDictationOptions,
   UseDictationResult,
-} from "@/lib/speech/dictation/useDictation-types";
+} from "@/lib/speech/dictation/useDictationTypes";
 
 /** A `stop()` that never reports `onend` must not keep the control spinning. */
 const FINALIZE_GUARD_MS = 1500;
@@ -56,7 +56,7 @@ export type {
   DictationStatus,
   UseDictationOptions,
   UseDictationResult,
-} from "@/lib/speech/dictation/useDictation-types";
+} from "@/lib/speech/dictation/useDictationTypes";
 
 /**
  * Dictation session for the chat composer.

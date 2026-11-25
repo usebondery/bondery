@@ -3,8 +3,8 @@
 import { SimpleGrid, Stack, Text, Title, UnstyledButton } from "@mantine/core";
 import { IconBriefcase, IconFriends, IconWorld } from "@tabler/icons-react";
 import { useOnboardingTranslations } from "@/lib/i18n/generated/hooks";
-import type { OnboardingIntent } from "../hooks/OnboardingContext";
-import { useOnboardingContext } from "../hooks/OnboardingContext";
+import type { OnboardingIntent } from "../hooks/onboardingProvider";
+import { useOnboardingContext } from "../hooks/onboardingProvider";
 
 interface StepProps {
   onNext: () => void;

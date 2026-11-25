@@ -35,7 +35,7 @@ export const createTagInputSchema = z.object({
   color: z
     .string()
     .trim()
-    .regex(/^#?[0-9a-fA-F]{6}$/, { error: "Color must be a valid 6-digit hex value" })
+    .regex(/^#?[0-9a-fA-F]{6}$/u, { error: "Color must be a valid 6-digit hex value" })
     .optional()
     .describe("Hex color such as #3B82F6. Omit to let the API pick one."),
   label: z.string().min(1).max(GROUP_LABEL_MAX_LENGTH),
