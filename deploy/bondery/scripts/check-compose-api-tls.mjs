@@ -89,6 +89,10 @@ const TRANSPORT_JOB_RULES = [
   [/^\s+network_mode: none\s*$/m, "traefik-transport must run without a network"],
   [/^\s+read_only: true\s*$/m, "traefik-transport must have a read-only root filesystem"],
   [/cap_drop:\s*\n\s*- ALL/, "traefik-transport must drop all capabilities"],
+  [
+    /cap_add:\s*\n\s*- DAC_OVERRIDE/,
+    "traefik-transport must add DAC_OVERRIDE back: it writes into the host folder Traefik watches, which the container does not own, and fails with Permission denied otherwise",
+  ],
   [/no-new-privileges:true/, "traefik-transport must set no-new-privileges"],
   [
     /^\s+- api-tls-client:\/bondery-api\/client:ro\s*$/m,
