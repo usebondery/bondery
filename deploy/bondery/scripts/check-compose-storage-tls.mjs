@@ -99,7 +99,11 @@ const TRANSPORT_JOB_VIEW_PATH_RE = /(certFile|keyFile): \$DYNAMIC_DIR\//;
 const TRANSPORT_ROOT_CA_INLINE_RE = /inline_pem "\$ca_file" CERTIFICATE/;
 /** An inline client cert or key is the regression this check exists to catch. */
 const TRANSPORT_INLINE_CLIENT_PAIR_FORBIDDEN_RE = /echo "[^"]*-( cert|key): \|"/;
-const TRANSPORT_FILE_MODE_RE = /chmod 0600 "\$staging"/;
+/**
+ * The transport file names the client key but does not contain it, so it stays readable. Traefik
+ * runs as its own user and the release smoke reads the file back, so 0600 blocks both.
+ */
+const TRANSPORT_FILE_MODE_RE = /chmod 0644 "\$staging"/;
 
 /** The example proxy configurations must reach the gateway, which requires a client certificate. */
 const CADDY_CLIENT_CERT_RE =
@@ -409,7 +413,10 @@ export function checkStorageTls({ root, serviceBlock }) {
         TRANSPORT_ROOT_CA_INLINE_RE,
         "must inline the CA under rootCAs: a rootCAs path that Traefik cannot read fails silently",
       ],
-      [TRANSPORT_FILE_MODE_RE, "must write the transport file with mode 0600 (it holds a key)"],
+      [
+        TRANSPORT_FILE_MODE_RE,
+        "must write the transport file with mode 0644 (it names the key but holds no secret, and both Traefik and the release smoke read it)",
+      ],
     ]) {
       if (!pattern.test(script)) {
         errors.push(`${label}: ${message}`);

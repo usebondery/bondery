@@ -142,8 +142,10 @@ publish() { # service ca-file
     inline_pem "$ca_file" CERTIFICATE "          "
   } > "$staging"
 
-  # The transport file does not hold a key, but it names one; keep it owner-only anyway.
-  chmod 0600 "$staging"
+  # The transport file names the client key but does not contain it, and the CA it carries is
+  # public. Keep it readable (0644): Traefik runs as its own user, the smoke reads it back to
+  # assert what was published, and neither holds a secret. The key file itself stays 0600.
+  chmod 0644 "$staging"
 
   if [ -f "$target" ] && cmp -s "$staging" "$target"; then
     rm -f "$staging"
