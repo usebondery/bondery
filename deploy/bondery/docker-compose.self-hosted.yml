@@ -69,9 +69,13 @@ services:
   # ${BONDERY_INFRA_TRAEFIK_PREFIX}-api-transport.yml and -storage-transport.yml (serversTransports
   # with the private CAs) into the folder Traefik's file provider watches; the api and seaweedfs-s3
   # labels reference them. The folder is Dokploy's unless BONDERY_INFRA_TRAEFIK_DYNAMIC_DIR names
-  # another one. A pinned busybox image runs a script from git, with no network, no capabilities,
+  # another one. A pinned busybox image runs a script from git, with no network, one capability,
   # and a read-only root filesystem. Hosts without Traefik: see docker-compose.override.yml.example.
   traefik-transport:
+    # DAC_OVERRIDE lets root write into the host folder Traefik watches, which this container does
+    # not own. Without it the job fails with "Permission denied"; everything else stays dropped.
+    cap_add:
+      - DAC_OVERRIDE
     cap_drop:
       - ALL
     command: [ "/bin/sh", "/bondery/publish-transports.sh" ]
