@@ -196,7 +196,7 @@ describe("publish-transports.sh", requiresSh, () => {
     assert.equal(api.includes("PRIVATE KEY"), false);
   });
 
-  it("writes the transport file with mode 0600 and the key 0600, the cert 0644", {
+  it("writes the transport file readable, and the key 0600, the cert 0644", {
     skip: process.platform === "win32",
   }, async () => {
     const result = run("bondery-beta-mode");
@@ -204,7 +204,9 @@ describe("publish-transports.sh", requiresSh, () => {
     const permissionsOf = async (name) =>
       (await stat(join(dynamicDir, name))).mode.toString(8).match(PERMISSION_BITS_RE)?.[0];
 
-    assert.equal(await permissionsOf("bondery-beta-mode-storage-transport.yml"), "600");
+    // The transport names the key but does not contain it, so it can be world-readable; the smoke
+    // and Traefik both read it as users other than the one that wrote it.
+    assert.equal(await permissionsOf("bondery-beta-mode-storage-transport.yml"), "644");
     assert.equal(await permissionsOf("bondery-beta-mode-storage-client.key"), "600");
     assert.equal(await permissionsOf("bondery-beta-mode-storage-client.crt"), "644");
   });

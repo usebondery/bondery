@@ -21,5 +21,5 @@
   "name": "@bondery/test-fixtures",
   "private": true,
   "type": "module",
-  "version": "1.11.3"
+  "version": "1.11.4-rc.1"
 }
