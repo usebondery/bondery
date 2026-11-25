@@ -127,5 +127,5 @@
     "test:theme": "tsx --test src/lib/theme/theme.test.ts"
   },
   "type": "module",
-  "version": "1.11.3-rc.3"
+  "version": "1.11.3-rc.5"
 }
