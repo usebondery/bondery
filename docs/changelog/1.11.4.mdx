@@ -1,0 +1,16 @@
+---
+title: "1.11.4"
+description: Bondery 1.11.4 fixes the deploy job that publishes Traefik's transport files, which could stop the whole stack from starting on a self-hosted upgrade.
+last_updated: 2026-11-25
+---
+
+## [1.11.4] - 25.11.2026
+
+### 🐛 Fixed
+
+- Self-host and hosted: the `traefik-transport` job now writes its files. It runs with every Linux capability dropped, including `DAC_OVERRIDE`, and it writes into the folder Traefik watches, which the container does not own. The kernel still applied ordinary permission checks, so the job failed with `Permission denied` and exited. Every service in the stack waits for that job, so an upgrade could stop at `stack-secrets` and never start. The job now keeps `DAC_OVERRIDE` and drops everything else: no network, no new privileges, a read-only root filesystem.
+- Self-host and hosted: the published transport file is now readable by other users. It was written owner-only, which only worked because the job runs as root. The file names the client key but does not contain it, and the CA it carries inline is public, so owner-only was never needed. The client key itself stays owner-only and the certificate stays readable.
+
+### 🔄 Changed
+
+- CI: the release smoke now checks that the transport job can actually write its files, and that it writes them readable. Before, nothing exercised that job on a real stack, so both defects reached a production deploy.
