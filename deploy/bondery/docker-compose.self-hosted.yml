@@ -44,7 +44,7 @@ services:
       - apps/api/dist/cli/ensure-stack-secrets.js
     environment:
       BONDERY_INFRA_TRAEFIK_PREFIX: ${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}
-    image: ghcr.io/usebondery/api:${BONDERY_INFRA_VERSION:-1.11.4}
+    image: ghcr.io/usebondery/api:${BONDERY_INFRA_VERSION:-1.11.5}
     network_mode: none
     pull_policy: always
     restart: "no"
@@ -211,7 +211,7 @@ services:
           "require('node:https').get({ca:require('node:fs').readFileSync('/bondery-api/client/ca.crt'),host:'127.0.0.1',path:'/health/live',port:26631},(r)=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))",
         ]
       timeout: 5s
-    image: ghcr.io/usebondery/api:${BONDERY_INFRA_VERSION:-1.11.4}
+    image: ghcr.io/usebondery/api:${BONDERY_INFRA_VERSION:-1.11.5}
     pre_start:
       # Hooks inherit `environment:` but NOT `env_file:` (verified on Compose v5).
       # Anything release-migrate needs from .env must be listed here.
@@ -297,7 +297,7 @@ services:
           "fetch('http://127.0.0.1:26632/health/live').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
         ]
       timeout: 5s
-    image: ghcr.io/usebondery/webapp:${BONDERY_INFRA_VERSION:-1.11.4}
+    image: ghcr.io/usebondery/webapp:${BONDERY_INFRA_VERSION:-1.11.5}
     pull_policy: always
     labels:
       - traefik.enable=true

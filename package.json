@@ -178,5 +178,5 @@
     "update:aaguid-catalog": "node --import tsx scripts/updater/refresh-aaguid-catalog.ts",
     "test:importers": "pnpm --filter api run test:importers"
   },
-  "version": "1.11.5-rc.2"
+  "version": "1.11.5"
 }
