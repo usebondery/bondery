@@ -111,5 +111,5 @@
     "test:navigation": "tsx --test src/lib/navigation/*.test.ts",
     "test:sync": "tsx --test src/lib/sync/**/*.test.ts"
   },
-  "version": "1.11.4"
+  "version": "1.11.5-rc.1"
 }
