@@ -34,6 +34,7 @@ jobs:
       - name: Promote semver tag to production and latest
         run: |
           docker buildx imagetools create \
+            --prefer-index=false \
             -t "${{ inputs.image_name }}:production" \
             -t "${{ inputs.image_name }}:latest" \
             "${{ inputs.image_name }}:${{ inputs.version }}"
