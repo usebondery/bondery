@@ -1,5 +1,9 @@
 name: Shared - Release container
 
+# Makes one component's image available at X.Y.Z (promote the named RC digest, or rebuild). It does
+# NOT smoke and does NOT move :production: a release is one unit, so release.yml smokes api and
+# webapp together and promotes both only after both passed.
+
 on:
   workflow_call:
     inputs:
@@ -12,7 +16,7 @@ on:
         required: true
         type: string
       checkout_ref:
-        description: Git ref for smoke scripts (release tag)
+        description: Git ref to build from when force_rebuild is set (release tag)
         required: true
         type: string
       source_tag:
@@ -21,11 +25,6 @@ on:
         type: string
       force_rebuild:
         description: Rebuild from source instead of promoting source_tag
-        required: false
-        type: boolean
-        default: false
-      use_production_gate:
-        description: Use production-containers environment before promote-production
         required: false
         type: boolean
         default: false
@@ -72,39 +71,3 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo "${{ inputs.service }} image ready at ${{ inputs.version }}"
-
-  smoke:
-    needs: image_ready
-    # always() required: promote/build-push are mutually exclusive (one skipped), which
-    # makes the default success() check false even when image_ready succeeded.
-    if: ${{ always() && needs.image_ready.result == 'success' }}
-    uses: ./.github/workflows/shared-smoke-bondery.yml
-    secrets: inherit
-    with:
-      checkout_ref: ${{ inputs.checkout_ref }}
-      image_name: ghcr.io/usebondery/${{ inputs.service }}
-      image_tag: ${{ inputs.version }}
-      service: ${{ inputs.service }}
-
-  extension_production_gate:
-    needs: smoke
-    if: ${{ needs.smoke.result == 'success' && inputs.use_production_gate }}
-    environment: production-containers
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Extension gate approved — promote to :production"
-
-  promote-production:
-    needs: [ smoke, extension_production_gate ]
-    if: >-
-      always() &&
-      needs.smoke.result == 'success' &&
-      (
-        needs.extension_production_gate.result == 'success' ||
-        needs.extension_production_gate.result == 'skipped'
-      )
-    uses: ./.github/workflows/shared-promote-production.yml
-    secrets: inherit
-    with:
-      image_name: ghcr.io/usebondery/${{ inputs.service }}
-      version: ${{ inputs.version }}

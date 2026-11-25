@@ -47,7 +47,7 @@ Plus Postgres password, Better Auth secrets, and OAuth vars from [`.env.example`
 
 **Important:**
 
-- Image tags: `production` (floating channel) is the default; pin semver when you want a fixed rollback target.
+- Image tags: the release workflow pins `BONDERY_INFRA_VERSION=X.Y.Z` on this app before each production deploy, so api and webapp run exactly that version. The compose file also names that version by default. Do not depend on the floating `production` tag: it moves per component.
 - Set hostnames only (`BONDERY_INFRA_*_DOMAIN`). Compose derives `https://…` URLs and Traefik `Host()` rules.
 - `BONDERY_PRIVATE_BETTER_AUTH_SECRETS` must use format `version:secret` (e.g. `1:<≥32-char secret>`) in `.env`.
 - Webapp never receives raw `BONDERY_PRIVATE_*` secrets except its own session/OAuth client secrets — compose allowlists public vars for the webapp service.
@@ -66,9 +66,17 @@ Plus Postgres password, Better Auth secrets, and OAuth vars from [`.env.example`
 
 Redeploy the **full** Compose app (Dokploy's default) so `api` `pre_start` runs when the API image or init definition changes — don't redeploy `webapp` alone on schema-changing releases.
 
-### CI redeploy webhook
+### CI production deploy
 
-After unified `vX.Y.Z` release tags, GitHub Actions fetches **production Infisical** and POSTs to `BONDERY_OPS_DOKPLOY_SERVICES_DEPLOY_WEBHOOK` with `refs/heads/release`. Set the Dokploy Compose app branch to **`release`**. Leave the webhook unset in Infisical to redeploy manually. Pin `BONDERY_INFRA_VERSION=X.Y.Z` (never an RC). Approve `production-containers` only after the Chrome Web Store listing is live.
+A release is one unit. After a unified `vX.Y.Z` tag, [`release.yml`](../../.github/workflows/release.yml) works in this order:
+
+1. It makes api and webapp available at `X.Y.Z` (promote the named RC digest, or rebuild).
+2. It runs ONE release smoke that starts api and webapp together at `X.Y.Z`, behind a real Traefik. Neither component moves to `:production` unless that smoke passed.
+3. When the extension ships in the release, you approve `production-containers` after the Chrome Web Store listing is live.
+4. It moves `:production` and `:latest` for api and webapp.
+5. Only when every component of the release is ready, `deploy_production` fetches **production Infisical**, sets `BONDERY_INFRA_VERSION=X.Y.Z` on this Compose app through the Dokploy API ([`deploy/scripts/pin-dokploy-version.mjs`](../../deploy/scripts/pin-dokploy-version.mjs), the same API client and `BONDERY_OPS_DOKPLOY_*` keys as the env sync), reads the value back, and POSTs to `BONDERY_OPS_DOKPLOY_SERVICES_DEPLOY_WEBHOOK` with `refs/heads/release`.
+
+Set the Dokploy Compose app branch to **`release`**. Leave the webhook unset in Infisical to redeploy manually: the pin is still saved. The pin is `X.Y.Z`, never an RC. The deploy never follows the floating `:production` tag, so a failed or partial promotion cannot pair a new webapp with an old api.
 
 ### Infisical → Dokploy env sync
 
@@ -101,7 +109,7 @@ Two Compose apps share this file and `dokploy-network`. Traefik router names and
 | Production | `usebondery.com` | `BONDERY_INFRA_WEBSITE_IMAGE_TAG=production` (Infisical production → `website` sync) | `release` |
 | Beta | `beta.usebondery.com` | `BONDERY_INFRA_WEBSITE_IMAGE_TAG=beta` (Infisical staging → `website-beta` sync) | `main` |
 
-**CI:** Path-filtered PRs and pushes to `main` run `website-build` in [`.github/workflows/verify.yml`](../../.github/workflows/verify.yml) (pruned production `next build`). [`stage-images.yml`](../../.github/workflows/stage-images.yml) on `main` always tags `:sha-<short>`; named RC cuts also tag `:beta` + `:X.Y.Z-rc.N` and notify staging website/services webhooks. Everyday main while the package is still an RC does **not** move `:beta`. Push to `release` runs [`.github/workflows/deploy-website.yml`](../../.github/workflows/deploy-website.yml) (Docker build-push → smoke → optional Dokploy webhook from Infisical production); image tags `:production` + `:sha-<short>`. Production CD stays on `deploy-website.yml`. Infisical key `BONDERY_OPS_DOKPLOY_WEBSITE_DEPLOY_WEBHOOK` triggers production redeploy (`refs/heads/release`).
+**CI:** Path-filtered PRs and pushes to `main` run `website-build` in [`.github/workflows/verify.yml`](../../.github/workflows/verify.yml) (pruned production `next build`). [`stage-images.yml`](../../.github/workflows/stage-images.yml) on `main` always tags `:sha-<short>`; a named RC cut builds only `:sha-<short>` for api and webapp, runs the same whole-release smoke on those images, and only then moves `:X.Y.Z-rc.N` and `:beta` and notifies the staging services webhook (the website keeps `:beta` and `:X.Y.Z-rc.N` on the build). A failed smoke leaves `:beta` where it was. Everyday main while the package is still an RC does **not** move `:beta`. Push to `release` runs [`.github/workflows/deploy-website.yml`](../../.github/workflows/deploy-website.yml) (Docker build-push → smoke → optional Dokploy webhook from Infisical production); image tags `:production` + `:sha-<short>`. Production CD stays on `deploy-website.yml`. Infisical key `BONDERY_OPS_DOKPLOY_WEBSITE_DEPLOY_WEBHOOK` triggers production redeploy (`refs/heads/release`).
 
 ```bash
 BONDERY_INFRA_API_DOMAIN=api.usebondery.com

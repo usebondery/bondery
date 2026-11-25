@@ -1,20 +1,25 @@
 name: Shared - Bondery release smoke
 
+# Smokes the whole release: api and webapp at one tag, behind a real Traefik. A release is one
+# unit, so no component is smoked or promoted alone.
+
 on:
   workflow_call:
     inputs:
-      service:
-        description: Service to smoke (webapp or api)
-        required: true
-        type: string
-      image_name:
-        description: GHCR image name (without tag)
-        required: true
-        type: string
       image_tag:
-        description: Semver image tag to pull and test
+        description: Tag of both images to pull and test (X.Y.Z, or sha-<short> for an RC cut)
         required: true
         type: string
+      api_image_name:
+        description: GHCR api image name (without tag)
+        required: false
+        type: string
+        default: ghcr.io/usebondery/api
+      webapp_image_name:
+        description: GHCR webapp image name (without tag)
+        required: false
+        type: string
+        default: ghcr.io/usebondery/webapp
       checkout_ref:
         description: Git ref for compose/scripts at release commit
         required: true
@@ -59,6 +64,6 @@ jobs:
       - name: Run release smoke
         run: |
           node deploy/bondery/scripts/smoke-release.mjs \
-            --service "${{ inputs.service }}" \
             --tag "${{ inputs.image_tag }}" \
-            --image "${{ inputs.image_name }}"
+            --api-image "${{ inputs.api_image_name }}" \
+            --webapp-image "${{ inputs.webapp_image_name }}"

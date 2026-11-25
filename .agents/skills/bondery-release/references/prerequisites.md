@@ -22,15 +22,17 @@ Bump root [`package.json`](../../../../package.json) `version`, then propagate:
 pnpm run sync-version
 ```
 
-This updates all workspace `package.json` files (npm may be `X.Y.Z-rc.N`), keeps **mobile native** fields as 3-part CalVer (`X.Y.Z` — iOS/Android cannot take `-rc.N`), writes `MIN_EXTENSION_VERSION` from the **previous production git tag**, and regenerates env examples. `deploy/bondery/.env.example` `BONDERY_INFRA_VERSION` stays last production `X.Y.Z` (never RC).
+This updates all workspace `package.json` files (npm may be `X.Y.Z-rc.N`), keeps **mobile native** fields as 3-part CalVer (`X.Y.Z` — iOS/Android cannot take `-rc.N`), writes `MIN_EXTENSION_VERSION` from the **live extension record** (`scripts/pkg/live-extension-version.json`), stamps the compose image default tag with the production pin, and regenerates env examples. `deploy/bondery/.env.example` `BONDERY_INFRA_VERSION` stays last production `X.Y.Z` (never RC).
 
-Need tags locally: `git fetch --tags`. Missing production tags fail loudly — do not leave a stale MIN.
+Need tags locally: `git fetch --tags` (the compose stamp and `.env.example` pin read the production tags).
 
 Version math and changelog cut: [`bondery-changelog` versioning](../../bondery-changelog/references/versioning-and-release.md).
 
 ## 2. Minimum extension version
 
-`MIN_EXTENSION_VERSION` in [`packages/helpers/src/globals/paths.ts`](../../../../packages/helpers/src/globals/paths.ts) is **generated** by `sync-version` (previous production `X.Y.Z`). Always 3-part. Do not hand-edit. Never bake Chrome 4-part into the 426 floor.
+`MIN_EXTENSION_VERSION` in [`packages/helpers/src/globals/paths.ts`](../../../../packages/helpers/src/globals/paths.ts) is **generated** by `sync-version` from `scripts/pkg/live-extension-version.json`, the extension version live in the Chrome Web Store. It is never derived from a git tag, because a tag can exist for a release that never shipped (`v1.11.3`): a MIN above the live version answers 426 to every installed extension. Always 3-part. Do not hand-edit. Never bake Chrome 4-part into the 426 floor.
+
+**Invariant:** MIN never exceeds the live store version. `check:versions` fails when MIN is above the record, and `shared-release-validate.yml` fails a release when MIN or the record is above the newest published (non-draft, non-prerelease) GitHub release. After the listing is live, record it with `pnpm run release:record-extension X.Y.Z`, then `pnpm run sync-version`. A stale record is safe: MIN only trails.
 
 The public manifest `latestVersion` is the current **production** CalVer (root version on a production package; previous production while on RC) for a non-blocking update banner. 426 stays on MIN.
 
@@ -76,7 +78,7 @@ Commit prerequisites as one or more logical commits on `main` (often via a `chor
 
 **Cut production `X.Y.Z`**
 
-1. PR: `X.Y.Z-rc.N` → `X.Y.Z`, dated changelog, `sync-version` (MIN = previous prod). Run `pnpm check` before the first push.
+1. PR: `X.Y.Z-rc.N` → `X.Y.Z`, dated changelog, `sync-version` (MIN = live extension record). Run `pnpm check` before the first push.
 2. Merge → `:sha` only (does not move `:beta`; drop-rc is not the GA container).
 3. `git tag vX.Y.Z` → promote last `:X.Y.Z-rc.N` → `:X.Y.Z` then `:production` + `:latest` after smoke/CWS, CWS CRX rebuild, GitHub release without zip.
 4. Approve `production-containers` after CWS is published.
@@ -92,7 +94,7 @@ Production releases use unified `vX.Y.Z` tags only (`release.yml`). RC tags use 
 
 - [ ] `pnpm check` passes before the first push
 - [ ] `pnpm run sync-version` and `pnpm run check:versions` pass
-- [ ] `MIN_EXTENSION_VERSION` is previous production (from `sync-version`), not hand-edited
+- [ ] `MIN_EXTENSION_VERSION` comes from the live extension record (via `sync-version`), is not hand-edited, and is not above the newest published release
 - [ ] Production: `docs/changelog/X.Y.Z.mdx` created; `"X.Y.Z"` prepended to `docs/changelog/meta.json`; fresh `Unreleased` in `unreleased.mdx`
 - [ ] OpenAPI generated and committed
 - [ ] `pnpm run build` (or verification loop) passes

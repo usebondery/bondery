@@ -78,8 +78,8 @@ const DEV_TLS_RESET_RE = /security\.toml:[^\n]*!reset|tls-entrypoint\.sh[^\n]*!r
  */
 const TRANSPORT_STORAGE_CLIENT_CERT_SOURCE_RE = /dirname "\$ca_file"\)\/tls\.crt/;
 const TRANSPORT_CLIENT_CERT_BLOCK_RE = /echo " +certificates:"/;
-const TRANSPORT_CERT_FILE_RE = /echo " +- certFile: \$[A-Z_]*VIEW_DIR\/\$name-client\.crt"/;
-const TRANSPORT_KEY_FILE_RE = /echo " +keyFile: \$[A-Z_]*VIEW_DIR\/\$name-client\.key"/;
+const TRANSPORT_CERT_FILE_RE = /echo " +- certFile: \$TRAEFIK_CERT_DIR\/\$service-client\.crt"/;
+const TRANSPORT_KEY_FILE_RE = /echo " +keyFile: \$TRAEFIK_CERT_DIR\/\$service-client\.key"/;
 const TRANSPORT_COPY_CERT_RE = /copy_pem "\$cert_file" CERTIFICATE/;
 const TRANSPORT_COPY_KEY_RE = /copy_pem "\$key_file" "PRIVATE KEY"/;
 /**
@@ -90,9 +90,16 @@ const TRANSPORT_COPY_KEY_RE = /copy_pem "\$key_file" "PRIVATE KEY"/;
  */
 const TRANSPORT_TRAEFIK_VIEW_DIR_RE =
   /TRAEFIK_VIEW_DIR="\$\{BONDERY_INFRA_TRAEFIK_VIEW_DIR:-\/etc\/dokploy\/traefik\/dynamic\}"/;
-const TRANSPORT_CERT_FILE_USES_VIEW_RE =
-  /echo " +- certFile: \$TRAEFIK_VIEW_DIR\/\$name-client\.crt"/;
-const TRANSPORT_KEY_FILE_USES_VIEW_RE = /echo " +keyFile: \$TRAEFIK_VIEW_DIR\/\$name-client\.key"/;
+/**
+ * Certificate files live in one folder per stack, certificates/<prefix>/, inside the dynamic
+ * folder. The Traefik-side path must derive from the Traefik view, and the job must write to the
+ * same folder through its own mount.
+ */
+const TRANSPORT_TRAEFIK_CERT_DIR_RE =
+  /TRAEFIK_CERT_DIR="\$TRAEFIK_VIEW_DIR\/certificates\/\$PREFIX"/;
+const TRANSPORT_JOB_CERT_DIR_RE = /CERT_DIR="\$DYNAMIC_DIR\/certificates\/\$PREFIX"/;
+/** A flat <prefix>-<service>-client file is the layout this job replaced. */
+const TRANSPORT_FLAT_CLIENT_FILE_RE = /\$name-client\.(crt|key)/;
 /** A client path built from the job's own mount point is the regression this catches. */
 const TRANSPORT_JOB_VIEW_PATH_RE = /(certFile|keyFile): \$DYNAMIC_DIR\//;
 /** The CA is inlined into rootCAs, not copied to a path Traefik might fail to resolve. */
@@ -402,6 +409,14 @@ export function checkStorageTls({ root, serviceBlock }) {
         "must define TRAEFIK_VIEW_DIR, the folder path Traefik sees (it mounts the folder elsewhere than this job)",
       ],
       [
+        TRANSPORT_TRAEFIK_CERT_DIR_RE,
+        "must put the Traefik-side certificate folder at $TRAEFIK_VIEW_DIR/certificates/$PREFIX",
+      ],
+      [
+        TRANSPORT_JOB_CERT_DIR_RE,
+        "must write certificates to $DYNAMIC_DIR/certificates/$PREFIX, the folder the transport names",
+      ],
+      [
         TRANSPORT_COPY_CERT_RE,
         "must copy the client certificate into Traefik's dynamic folder, the only place Traefik reads",
       ],
@@ -425,6 +440,11 @@ export function checkStorageTls({ root, serviceBlock }) {
     if (TRANSPORT_INLINE_CLIENT_PAIR_FORBIDDEN_RE.test(script)) {
       errors.push(
         `${label}: must not inline the client cert or key. A serversTransport has no inline \`cert\` field, so Traefik rejects the file with "field not found, node: cert" and drops the router.`,
+      );
+    }
+    if (TRANSPORT_FLAT_CLIENT_FILE_RE.test(script)) {
+      errors.push(
+        `${label}: must not write <prefix>-<service>-client files into the dynamic folder. Certificates go in certificates/<prefix>/<service>-client.*.`,
       );
     }
     if (TRANSPORT_JOB_VIEW_PATH_RE.test(script)) {

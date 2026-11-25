@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 /**
  * Propagate root package.json version to workspace packages and mobile native fields.
- * Derives MIN_EXTENSION_VERSION from the previous production git tag.
+ * Derives MIN_EXTENSION_VERSION from scripts/pkg/live-extension-version.json, the extension
+ * version live in the Chrome Web Store (never a git tag: a tag can exist for a release that
+ * never shipped). Stamps the compose image default tag with the production pin.
  * Regenerates env examples via env:sync (deploy pin stays last production CalVer).
  * In write mode, run the LLM plugin builder so both generated manifests match.
  * --check does not write.
@@ -14,7 +16,7 @@ import { execSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { parseCalver, previousProductionCalver, readGitTags, toCoreCalver } from "./calver.mjs";
+import { infraPinCalver, parseCalver, readGitTags, toCoreCalver } from "./calver.mjs";
 import { formatWrittenFiles, writeFormattedJson } from "./write-formatted-json.mjs";
 
 const VERSION_RE = /version:\s*"[^"]*"/;
@@ -43,6 +45,15 @@ const PACKAGE_JSON_PATHS = [
   "packages/vcard/package.json",
 ];
 
+const LIVE_EXTENSION_RECORD = "scripts/pkg/live-extension-version.json";
+const COMPOSE_FILES = [
+  "deploy/bondery/docker-compose.yml",
+  "deploy/bondery/docker-compose.production.yml",
+  "deploy/bondery/docker-compose.self-hosted.yml",
+];
+/** `image: ghcr.io/usebondery/(api|webapp):${BONDERY_INFRA_VERSION:-<default>}` */
+const COMPOSE_IMAGE_DEFAULT_RE =
+  /(ghcr\.io\/usebondery\/(?:api|webapp):\$\{BONDERY_INFRA_VERSION:-)[^}]*(\})/g;
 const MIN_EXTENSION_VERSION_RE = /export const MIN_EXTENSION_VERSION: string = "[^"]*";/;
 
 function readRootVersion() {
@@ -137,6 +148,42 @@ function buildLlmPlugins() {
   });
 }
 
+/**
+ * The extension version live in the Chrome Web Store, from the checked-in record. A release that
+ * is tagged but never published does not move it, so MIN_EXTENSION_VERSION never rejects an
+ * extension that users can still install. `pnpm run release:record-extension` updates it.
+ */
+function readLiveExtensionVersion() {
+  const record = JSON.parse(readFileSync(join(root, LIVE_EXTENSION_RECORD), "utf8"));
+  const version = typeof record.version === "string" ? record.version.trim() : "";
+  parseCalver(version);
+  return version;
+}
+
+/**
+ * Compose runs the release images at the production version by default, so a checkout of
+ * vX.Y.Z runs X.Y.Z and never a floating tag that moves on its own schedule.
+ */
+function updateComposeImageDefaults(pin) {
+  const changed = [];
+  for (const rel of COMPOSE_FILES) {
+    const abs = join(root, rel);
+    const content = readFileSync(abs, "utf8");
+    const updated = content.replace(
+      COMPOSE_IMAGE_DEFAULT_RE,
+      (_match, before, after) => `${before}${pin}${after}`,
+    );
+    if (updated === content) {
+      continue;
+    }
+    changed.push(rel);
+    if (!checkOnly) {
+      writeFileSync(abs, updated);
+    }
+  }
+  return changed;
+}
+
 function updateMinExtensionVersion(minVersion) {
   const rel = "packages/helpers/src/globals/paths.ts";
   const abs = join(root, rel);
@@ -158,7 +205,8 @@ function updateMinExtensionVersion(minVersion) {
 function main() {
   const version = readRootVersion();
   const nativeVersion = toCoreCalver(version);
-  const minVersion = previousProductionCalver(readGitTags(root), version);
+  const minVersion = readLiveExtensionVersion();
+  const infraPin = infraPinCalver(version, readGitTags(root));
   const changes = [];
 
   for (const rel of PACKAGE_JSON_PATHS) {
@@ -178,6 +226,7 @@ function main() {
   if (updateServerJsonVersion(version)) {
     changes.push("server.json");
   }
+  changes.push(...updateComposeImageDefaults(infraPin));
 
   if (checkOnly) {
     if (changes.length > 0) {

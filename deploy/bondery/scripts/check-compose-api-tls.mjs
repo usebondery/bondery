@@ -90,8 +90,9 @@ const TRANSPORT_JOB_RULES = [
   [/^\s+read_only: true\s*$/m, "traefik-transport must have a read-only root filesystem"],
   [/cap_drop:\s*\n\s*- ALL/, "traefik-transport must drop all capabilities"],
   [
-    /cap_add:\s*\n\s*- DAC_OVERRIDE/,
-    "traefik-transport must add DAC_OVERRIDE back: it writes into the host folder Traefik watches, which the container does not own, and fails with Permission denied otherwise",
+    /cap_add:/,
+    "traefik-transport must not add capabilities: Traefik's dynamic folder is root-owned, so root with cap_drop ALL can write it",
+    false,
   ],
   [/no-new-privileges:true/, "traefik-transport must set no-new-privileges"],
   [

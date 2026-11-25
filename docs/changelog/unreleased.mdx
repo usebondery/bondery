@@ -5,3 +5,21 @@ last_updated: 2026-11-25
 ---
 
 ## [Unreleased]
+
+### 🐛 Fixed
+
+- Hosted production: a release now deploys as one unit. Before, the production deploy started when either the api or the webapp image was ready, and it followed the floating `production` tag. A half-finished release could pair a new webapp with an old api, and the whole stack, storage included, answered 404. Now the deploy starts only when every part of the release is ready. It sets `BONDERY_INFRA_VERSION` to the release version in Dokploy first, so api and webapp always run the same version.
+- Self-host and hosted: the `traefik-transport` job runs with every Linux capability dropped again. The 1.11.4 fix added `DAC_OVERRIDE` to a job that writes next to Traefik's certificate store. That was not needed: Dokploy's folder belongs to root, so root can write there. The release test used a folder that a normal user owned, which hid the difference.
+- Chrome extension: the oldest extension version that the API accepts can no longer rise above the version in the Chrome Web Store. It came from the newest git tag, and a tag can exist for a release that never shipped. 1.11.3 was tagged but not published, so releasing 1.11.4 would have rejected every installed extension. It now comes from a record of the published version, and a release fails when the value is above the newest published release.
+
+### 🔒 Security
+
+- Self-host and hosted: removing `DAC_OVERRIDE` returns the `traefik-transport` job to no capabilities, no network, and a read-only root filesystem. `check-compose.mjs` now fails when the job adds any capability.
+
+### 🔄 Changed
+
+- Self-host: the compose files now name the production version of their release as the default image tag, for example `1.11.5`, instead of the floating `production` tag. A checkout of a release runs that release. To upgrade, fetch the compose files of the new release, or set `BONDERY_INFRA_VERSION`. The `production` tag is still published.
+- CI: the release test now starts api and webapp together, runs a real Traefik (the version Dokploy runs) on a root-owned folder, and sends requests for the api and storage domains through it. Before, it read the YAML of the transport file and checked a design that the job no longer used. It also stops at the first failed check, and it prints `Release smoke passed` only when it passed.
+- CI: a release candidate now passes the same whole-release test before `:beta` moves and before Dokploy beta redeploys. Beta is a real rehearsal of production.
+
+- Self-host and hosted: the `traefik-transport` job now keeps Traefik's storage client certificate and key in `certificates/<prefix>/` inside the folder Traefik watches, as `storage-client.crt` and `storage-client.key`. Before, they sat next to the transport files as `<prefix>-storage-client.crt` and `.key`. Each stack now has one folder for its certificate files. On the next deploy the job removes the old flat files, so nothing needs your action. Do not edit the folder: the job rewrites it.

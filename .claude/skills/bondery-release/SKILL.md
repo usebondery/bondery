@@ -34,8 +34,10 @@ metadata:
 2. **Product tags name artifacts, they do not rebuild** — [`rc-release.yml`](../../../.github/workflows/rc-release.yml) **verifies** `:sha-<short>`, `:X.Y.Z-rc.N`, and `:beta` share one digest (it does not retag). [`release.yml`](../../../.github/workflows/release.yml) **promotes** the highest named `:X.Y.Z-rc.N` digest to `:X.Y.Z`, then after smoke + CWS gate `:production` and `:latest`. Drop-rc is changelog / `package.json` / CWS — not the container source. Do not use `sha-${GITHUB_SHA}` of the `vX.Y.Z` tag.
 3. **Extension gate (production):** do not approve `production-containers` or update Dokploy until the user confirms the Chrome Web Store listing is live. CWS runs on `vX.Y.Z` only — never on RC tags.
 4. **Website exception:** `git push origin main:release` is **not** extension-gated — marketing CD only ([`deploy-website.yml`](../../../.github/workflows/deploy-website.yml)).
-5. **Pin `BONDERY_INFRA_VERSION`** in Dokploy (and `.env.example` via `sync-version`) to production **`X.Y.Z` only** — never an RC string. Pins **both** api and webapp; redeploy together. RC is not a self-host channel.
-6. **CI truth:** [`.github/workflows/README.md`](../../../.github/workflows/README.md) overrides remembered release folklore.
+5. **Pin `BONDERY_INFRA_VERSION`** to production **`X.Y.Z` only** — never an RC string. `release.yml` sets it in Dokploy through the Dokploy API before it redeploys (`deploy_production`), and `sync-version` stamps it into `.env.example` and the compose image defaults. Pins **both** api and webapp; they deploy together. The floating `:production` tag is never the deploy source. RC is not a self-host channel.
+6. **A release is one unit** — one smoke runs api and webapp together behind a real Traefik. No component moves to `:production`, and nothing deploys, unless the whole release passed. The same smoke gates every RC before `:beta` moves, so beta is a real rehearsal.
+7. **`MIN_EXTENSION_VERSION` never exceeds the live Chrome Web Store version.** It derives from `scripts/pkg/live-extension-version.json`, not from git tags. After the listing is live, run `pnpm run release:record-extension X.Y.Z` and `pnpm run sync-version`.
+8. **CI truth:** [`.github/workflows/README.md`](../../../.github/workflows/README.md) overrides remembered release folklore.
 
 ## Related skills and docs
 
@@ -72,7 +74,8 @@ Full index: [references/README.md](references/README.md).
 - [ ] Changelog dated section cut (`bondery-changelog`) for production only
 - [ ] `vX.Y.Z` tagged; CWS job succeeded; **user confirmed CWS live** before approving `production-containers`
 - [ ] `main:release` pushed when website (or full stack) ready
-- [ ] `BONDERY_INFRA_VERSION` is production `X.Y.Z`; Dokploy updated; api + webapp redeployed together
+- [ ] `deploy_production` succeeded: Dokploy holds `BONDERY_INFRA_VERSION=X.Y.Z` and api + webapp redeployed together
+- [ ] Live extension recorded: `pnpm run release:record-extension X.Y.Z`, then `pnpm run sync-version` (next PR)
 - [ ] Manual smoke: login + one authenticated mutation on product stack
 - [ ] ROADMAP cards updated (Ready for Release → Released) per [`bondery-roadmap`](../bondery-roadmap/SKILL.md)
 - [ ] Post-release comms if monthly release ([post-release.md](references/post-release.md))

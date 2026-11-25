@@ -106,3 +106,12 @@ jobs:
             echo "root package.json version ($ROOT_VERSION) must equal release tag ($VERSION)"
             exit 1
           fi
+
+      # MIN_EXTENSION_VERSION above the live Chrome Web Store version answers 426 to every
+      # installed extension. "Live" is the newest published (non-draft, non-prerelease) release.
+      - name: Ensure MIN_EXTENSION_VERSION is not above the live extension
+        if: inputs.release_mode == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: node scripts/check/check-min-extension-version.mjs

@@ -26,6 +26,8 @@ Do not create a dated version section for every merge. A dated section represent
 
 ## When cutting a release
 
+Steps 1, 3, and 4 are mechanical, and [`scripts/changelog.mjs`](../scripts/changelog.mjs) does them: `next-version` prints `X.Y.Z`, `status` lists what `Unreleased` holds, and `cut X.Y.Z --description "…"` writes the release page, updates `meta.json`, and resets `unreleased.mdx`. Do step 2 first, because `cut` moves the text as it is. Commands are in [SKILL.md](../SKILL.md#helper-script).
+
 1. Calculate `X.Y.Z` from the release year/month and existing releases in that month.
 2. Review all changes since the previous release; add missing notable entries and remove internal noise.
 3. Create [`docs/changelog/X.Y.Z.mdx`](../../../../docs/changelog/) with `title: "X.Y.Z"`, `## [X.Y.Z] - DD.MM.YYYY`, and the accumulated entries; prepend `"X.Y.Z"` to [`docs/changelog/meta.json`](../../../../docs/changelog/meta.json) (newest first).

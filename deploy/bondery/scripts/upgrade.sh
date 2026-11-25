@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Pulls the latest api/webapp images and recreates the stack. When the API
+# Pulls the api/webapp images that docker-compose.yml names (the version of its release) and recreates the stack. When the API
 # image changes, api pre_start runs release-migrate + bucket bootstrap before
 # the main API container starts.
 set -euo pipefail

@@ -9,8 +9,12 @@
 # writes them into the folder that Traefik's file provider watches: one file per service,
 # <prefix>-<service>-transport.yml.
 #
-# The files go into the folder itself, not a subfolder: Traefik reads subfolders but only
-# watches the top folder, so a file in a subfolder would not be picked up on the first deploy.
+# The transport files go into the folder itself: Traefik reads subfolders but only watches the top
+# folder, so a transport in a subfolder would not be picked up on the first deploy. Certificate
+# files go into <folder>/certificates/<prefix>/, one isolated folder per stack, named without the
+# prefix (storage-client.crt, storage-client.key). Traefik reads them only by path, so it needs no
+# watch on them. The job rewrites the transport whenever a certificate file changes, which is the
+# event Traefik reloads on.
 #
 # Certificates: the CA is inlined, the client pair is referenced by path.
 #
@@ -22,6 +26,9 @@
 # The client certificate and key are paths, because a `serversTransport` has no inline `cert`
 # field: inlining the pair makes Traefik reject the whole file with "field not found, node: cert".
 # The job copies those two into the dynamic folder, which Traefik does mount, and points at them.
+#
+# Older versions wrote the pair flat, as <prefix>-storage-client.crt and .key, and a CA copy as
+# <prefix>-<service>-ca.crt. After a transport points at the new paths, the job removes those files.
 #
 # Usage: publish-transports.sh [folder] [service=ca-file ...]
 #   Defaults: /traefik-dynamic, with api=/bondery-api/client/ca.crt and
@@ -35,6 +42,11 @@ DYNAMIC_DIR="${1:-/traefik-dynamic}"
 # host folder at /etc/dokploy/traefik/dynamic, so a path written from the job's point of view
 # points at nothing inside Traefik's container. Every certFile/keyFile below must use this prefix.
 TRAEFIK_VIEW_DIR="${BONDERY_INFRA_TRAEFIK_VIEW_DIR:-/etc/dokploy/traefik/dynamic}"
+# This stack's certificate folder, as this job sees it and as Traefik sees it.
+CERT_DIR="$DYNAMIC_DIR/certificates/$PREFIX"
+TRAEFIK_CERT_DIR="$TRAEFIK_VIEW_DIR/certificates/$PREFIX"
+# Set to 1 when a certificate file was rewritten, so the transport is rewritten too.
+CERT_CHANGED=0
 # The storage transport needs a client certificate next to its CA, because the gateway requires
 # one. The CA and the client certificate therefore live in the same directory.
 if [ "$#" -gt 0 ]; then
@@ -74,6 +86,16 @@ copy_pem() { # file kind target
     return
   fi
   mv -f "$tmp" "$3"
+  CERT_CHANGED=1
+}
+
+# Removes the flat files that older versions of this job wrote, once the transport no longer
+# names them. Only this stack's own file names are touched, never another stack's.
+remove_legacy_files() { # service
+  rm -f "$DYNAMIC_DIR/$PREFIX-$1-ca.crt"
+  if [ "$1" = "storage" ]; then
+    rm -f "$DYNAMIC_DIR/$PREFIX-storage-client.crt" "$DYNAMIC_DIR/$PREFIX-storage-client.key"
+  fi
 }
 
 # Prints one PEM block of `kind` (CERTIFICATE) as a YAML block scalar body, indented for rootCAs.
@@ -115,11 +137,14 @@ publish() { # service ca-file
   staging="$DYNAMIC_DIR/.$name-transport.tmp"
   # The client pair must exist before the transport names it, so a missing file stops the deploy
   # instead of publishing a transport Traefik would quietly drop.
+  CERT_CHANGED=0
   if [ -n "$cert_file" ]; then
-    copy_pem "$cert_file" CERTIFICATE "$DYNAMIC_DIR/$name-client.crt"
-    copy_pem "$key_file" "PRIVATE KEY" "$DYNAMIC_DIR/$name-client.key"
-    chmod 0644 "$DYNAMIC_DIR/$name-client.crt"
-    chmod 0600 "$DYNAMIC_DIR/$name-client.key"
+    mkdir -p "$CERT_DIR"
+    chmod 0755 "$DYNAMIC_DIR/certificates" "$CERT_DIR"
+    copy_pem "$cert_file" CERTIFICATE "$CERT_DIR/$service-client.crt"
+    copy_pem "$key_file" "PRIVATE KEY" "$CERT_DIR/$service-client.key"
+    chmod 0644 "$CERT_DIR/$service-client.crt"
+    chmod 0600 "$CERT_DIR/$service-client.key"
   fi
   {
     echo "# Written by the Bondery stack \"$PREFIX\" (traefik-transport job) on every deploy. Do not edit."
@@ -134,8 +159,8 @@ publish() { # service ca-file
     if [ -n "$cert_file" ]; then
       echo "      # The gateway requires a client certificate (mutual TLS)."
       echo "      certificates:"
-      echo "        - certFile: $TRAEFIK_VIEW_DIR/$name-client.crt"
-      echo "          keyFile: $TRAEFIK_VIEW_DIR/$name-client.key"
+      echo "        - certFile: $TRAEFIK_CERT_DIR/$service-client.crt"
+      echo "          keyFile: $TRAEFIK_CERT_DIR/$service-client.key"
     fi
     echo "      rootCAs:"
     echo "        - |"
@@ -147,13 +172,16 @@ publish() { # service ca-file
   # assert what was published, and neither holds a secret. The key file itself stays 0600.
   chmod 0644 "$staging"
 
-  if [ -f "$target" ] && cmp -s "$staging" "$target"; then
+  # Traefik watches the top folder, not certificates/, so a rotated certificate alone would go
+  # unnoticed. Rewriting the unchanged transport raises the event it reloads on.
+  if [ "$CERT_CHANGED" = 0 ] && [ -f "$target" ] && cmp -s "$staging" "$target"; then
     rm -f "$staging"
     echo "traefik-transport: $target is up to date"
-    return
+  else
+    mv -f "$staging" "$target"
+    echo "traefik-transport: wrote $target"
   fi
-  mv -f "$staging" "$target"
-  echo "traefik-transport: wrote $target"
+  remove_legacy_files "$service"
 }
 
 for arg in "$@"; do

@@ -8,13 +8,13 @@ GitHub requires workflow files to live directly in `.github/workflows/` (no subf
 verify.yml                 PR checks only (contract + path-filtered website-build)
 
 stage/
-  images.yml               -> stage-images.yml    main -> :sha; :beta + named RC only on RC cuts
+  images.yml               -> stage-images.yml    main -> :sha; on RC cuts: whole-release smoke, then :X.Y.Z-rc.N + :beta + Dokploy beta
 
 deploy/
   website.yml              -> deploy-website.yml  release -> promote :sha or build -> :production
 
 release/
-  bondery.yml              -> release.yml           vX.Y.Z unified production (skips -rc)
+  bondery.yml              -> release.yml           vX.Y.Z unified production (skips -rc): stage images -> ONE smoke -> gate -> :production -> pin + deploy
   rc.yml                   -> rc-release.yml        vX.Y.Z-rc.N prerelease + staging zip; no CWS
   mcp-registry.yml         -> publish-mcp-registry.yml  workflow_dispatch or vX.Y.Z (skips -rc)
   claude-plugin.yml        -> publish-claude-plugin.yml  vX.Y.Z fast-forwards `claude-plugin` when the plugin folder changed
@@ -39,7 +39,7 @@ shared/
   release-validate.yml     -> shared-release-validate.yml
   release-container.yml    -> shared-release-container.yml
   release-extension.yml    -> shared-release-extension.yml
-  smoke-bondery.yml        -> shared-smoke-bondery.yml
+  smoke-bondery.yml        -> shared-smoke-bondery.yml  whole release (api + webapp) behind a real Traefik
   promote-production.yml   -> shared-promote-production.yml
 ```
 
@@ -88,19 +88,32 @@ Docker builds also use GHA layer cache (`cache-from: type=gha`). Builder stages 
 
 ## Docker channels
 
-| Channel          | Git trigger                                        | Docker tags                                                                              |
-| ---------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Everyday `main`  | push `main` (not an RC cut)                        | `:sha-<short>` only                                                                      |
-| Named RC cut     | push `main` when package.json becomes `X.Y.Z-rc.N` | `:sha-<short>`, `:X.Y.Z-rc.N`, `:beta`                                                   |
-| RC tag           | `vX.Y.Z-rc.N` (`rc-release.yml`)                   | Verify `:sha-<short>` = `:X.Y.Z-rc.N` = `:beta` (no retag)                               |
-| Production tag   | `vX.Y.Z` (`release.yml`; skips `-rc.`)             | Promote last `:X.Y.Z-rc.N` → `:X.Y.Z`; `:production` + `:latest` after smoke + CWS gate  |
-| Deploy (website) | push to `release`                                  | Promote `:sha-<short>` → `:production` + `:latest` when image exists on main; else build |
+| Channel          | Git trigger                                        | Docker tags                                                                                                                               |
+| ---------------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Everyday `main`  | push `main` (not an RC cut)                        | `:sha-<short>` only                                                                                                                       |
+| Named RC cut     | push `main` when package.json becomes `X.Y.Z-rc.N` | `:sha-<short>`; then, only after the whole-release smoke passed: `:X.Y.Z-rc.N`, `:beta`                                                   |
+| RC tag           | `vX.Y.Z-rc.N` (`rc-release.yml`)                   | Verify `:sha-<short>` = `:X.Y.Z-rc.N` = `:beta` (no retag)                                                                                |
+| Production tag   | `vX.Y.Z` (`release.yml`; skips `-rc.`)             | Promote last `:X.Y.Z-rc.N` → `:X.Y.Z`; `:production` + `:latest` for BOTH components only after ONE smoke of the whole release + CWS gate |
+| Deploy (website) | push to `release`                                  | Promote `:sha-<short>` → `:production` + `:latest` when image exists on main; else build                                                  |
 
-`:sha-<short>` is the **immutable artifact** built on `main`. Named RC cuts also tag `:X.Y.Z-rc.N` and `:beta` (same digest). `:beta` is a floating pointer updated **only on named RC cuts**, not every merge and not on the RC git tag. `vX.Y.Z` promotes that named RC digest; drop-rc is changelog / `package.json` / CWS. `:latest` is an alias of `:production` — pin CalVer (`BONDERY_INFRA_VERSION=X.Y.Z`), never `:latest`. Health `version` follows runtime `BONDERY_INFRA_VERSION` when it is production CalVer — never the word `beta`.
+`:sha-<short>` is the **immutable artifact** built on `main`. Named RC cuts also tag `:X.Y.Z-rc.N` and `:beta` (same digest), but only after `stage-images.yml` smoked the whole release on the `:sha-<short>` images (`smoke_rc`). `:beta` is a floating pointer updated **only on named RC cuts that passed that smoke**, not every merge and not on the RC git tag. Push the `vX.Y.Z-rc.N` git tag after `stage-images.yml` is green: `rc-release.yml` verifies the three tags share one digest. `vX.Y.Z` promotes that named RC digest; drop-rc is changelog / `package.json` / CWS. `:latest` is an alias of `:production` — pin CalVer (`BONDERY_INFRA_VERSION=X.Y.Z`), never `:latest`. Health `version` follows runtime `BONDERY_INFRA_VERSION` when it is production CalVer — never the word `beta`.
 
 Release workflows support `retry-promote` dispatch on `release.yml` with default `source: rc` (last named RC; missing RC fails). Use `source: tag-sha` to promote the tag commit `:sha-*`, or `force_rebuild: true` to rebuild from source.
 
-Self-hosters pin **`BONDERY_INFRA_VERSION=X.Y.Z`** — both api and webapp images. RC is not a self-host channel.
+### Release is one unit
+
+`release.yml` never smokes, promotes, or deploys one component alone:
+
+1. `release_api` and `release_webapp` (`shared-release-container.yml`) only make the image available at `X.Y.Z`.
+2. `smoke_release` (`shared-smoke-bondery.yml`) runs `deploy/bondery/scripts/smoke-release.mjs --tag X.Y.Z`: api and webapp up together, behind a real Traefik (the version Dokploy runs) on a root-owned folder, with requests for the api and storage domains sent through it.
+3. `extension_production_gate` (environment `production-containers`) waits for you when the release includes the extension.
+4. `promote_production_api` and `promote_production_webapp` move `:production` and `:latest`. Neither runs unless `smoke_release` passed.
+5. `deploy_production` runs only when every component is promoted. A component counts as absent only when `detect_changes` says it is unchanged (a `retry-promote` of one component). It pins `BONDERY_INFRA_VERSION=X.Y.Z` on the Dokploy production Compose app through the Dokploy API (`deploy/scripts/pin-dokploy-version.mjs`), then calls the deploy webhook. The deploy never follows the floating `:production` tag.
+6. `github_release_finalize` publishes the GitHub release only when all of the above succeeded.
+
+`shared-release-validate.yml` also fails a release whose `MIN_EXTENSION_VERSION` is above the newest published GitHub release (`scripts/check/check-min-extension-version.mjs`).
+
+Compose names the production version by default (`sync-version` stamps `${BONDERY_INFRA_VERSION:-X.Y.Z}`), so the compose file of `vX.Y.Z` runs `X.Y.Z`. Self-hosters set **`BONDERY_INFRA_VERSION=X.Y.Z`** to override it — both api and webapp images. RC is not a self-host channel.
 
 ## Local Docker builds
 
@@ -170,7 +183,7 @@ Jobs need `permissions.id-token: write`. No GitHub secrets are required for Infi
 
 ```bash
 infisical run --projectId=7395aabc-4cab-4cfe-aef2-a66899da5430 --env=staging --domain=https://eu.infisical.com -- \
-  node deploy/bondery/scripts/smoke-release.mjs --service api --tag 1.8.0
+  node deploy/bondery/scripts/smoke-release.mjs --tag 1.8.0
 ```
 
 Use `defaultEnvironment: development` in `.infisical.json` for `pnpm env:pull`; release smoke uses **`staging`**; Dokploy ops sync uses **`production`**.

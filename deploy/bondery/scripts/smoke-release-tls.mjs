@@ -6,11 +6,8 @@
  * Each assertion takes a context:
  * - compose(args, input?): runs `docker compose <args>` for the smoke stack and returns the
  *   spawnSync result (utf8);
- * - fail(message, output?): reports the failure and exits.
+ * - fail(message, output?): reports the failure and stops the smoke (it throws).
  */
-import { readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
-
 const HTTP_NODES = ["seaweedfs-master:9333", "seaweedfs-volume:8080", "seaweedfs-filer:8888"];
 const GRPC_NODES = [
   "seaweedfs-master:19333",
@@ -18,14 +15,6 @@ const GRPC_NODES = [
   "seaweedfs-filer:18888",
   "seaweedfs-s3:18333",
 ];
-const INLINE_PEM_CERT_RE = / {10}-----BEGIN CERTIFICATE-----[\s\S]+? {10}-----END CERTIFICATE-----/;
-const LEADING_TEN_SPACES_RE = /^ {10}/;
-/** Transport file structure: the client certificate block and its inline private key. */
-const TRANSPORT_CLIENT_CERTS_RE = /^ {6}certificates:$/m;
-const TRANSPORT_CLIENT_KEY_RE = /^ {10}key: \|$/m;
-const TRANSPORT_PRIVATE_KEY_RE = /-----BEGIN PRIVATE KEY-----/;
-const TRANSPORT_ROOT_CAS_RE = /^ {6}rootCAs:$/m;
-const API_TRANSPORT_FILE_RE = /-api-transport\.yml$/;
 const POSTGRES_NO_ENCRYPTION_RE = /no encryption/;
 const POSTGRES_CERT_VERIFY_FAILED_RE = /certificate verify failed/i;
 
@@ -98,34 +87,6 @@ function apiHealth(compose) {
   }
   return "";
 }
-
-/**
- * Runs inside the api container: one HTTPS request that trusts only the given CA, and presents a
- * client certificate when the service requires one.
- */
-const TRANSPORT_CA_PROBE = (host, port, path, ca, client) => `
-import { readFileSync } from "node:fs";
-import { request } from "node:https";
-${
-  client
-    ? `const cert = readFileSync(${JSON.stringify(client.cert)});
-const key = readFileSync(${JSON.stringify(client.key)});`
-    : ""
-}
-const req = request(
-  {
-    ca: ${JSON.stringify(ca)},
-    ...(${client ? "{ cert, key }" : "{}"}),
-    host: ${JSON.stringify(host)},
-    path: ${JSON.stringify(path)},
-    port: ${port},
-    servername: ${JSON.stringify(host)},
-  },
-  (res) => { console.log(\`status \${res.statusCode}\`); res.resume(); },
-);
-req.on("error", (error) => console.log(\`error \${error.code ?? error.message}\`));
-req.end();
-`;
 
 /**
  * Probes run inside the S3 gateway container, which has curl and the cluster certificate.
@@ -379,109 +340,6 @@ export function assertApiHttpsOnly({ compose, fail }) {
     fail(`API HTTPS only: ${failures.join("; ")}`, `${probes.stdout ?? ""}${probes.stderr ?? ""}`);
   }
   console.log("API HTTPS only: healthcheck healthy over HTTPS; plaintext refused on the API port");
-}
-
-/**
- * The services the traefik-transport job publishes a serversTransport for, and how a client that
- * trusts only the published CA proves it verifies that service: the port of its HTTPS listener,
- * a path, and the answers that mean "reached the service". The storage gateway also requires a
- * client certificate, so the probe presents the API's own certificate from its mounted volume.
- */
-export const TRAEFIK_TRANSPORTS = {
-  api: { accepted: ["status 200"], path: "/health/live", port: 26_631 },
-  // Unsigned ListBuckets: 403 with S3 Error XML is the gateway speaking S3.
-  storage: {
-    accepted: ["status 200", "status 403"],
-    clientCertificate: {
-      cert: "/bondery-storage/client/tls.crt",
-      key: "/bondery-storage/client/tls.key",
-    },
-    path: "/",
-    port: 8443,
-  },
-};
-
-/**
- * What a published serversTransport file gets wrong for `name` (<prefix>-<service>). Returns the
- * CA it holds too. A service whose gateway requires a client certificate must carry one.
- * @param {string} yaml
- * @param {string} name
- * @param {{ clientCertificate?: unknown }} [check]
- */
-export function traefikTransportFailures(yaml, name, check = {}) {
-  const failures = [];
-  if (!new RegExp(`^ {4}${name}:$`, "m").test(yaml)) {
-    failures.push(`no serversTransport named ${name}`);
-  }
-  if (!new RegExp(`^ {6}serverName: ${name}$`, "m").test(yaml)) {
-    failures.push(`serverName is not ${name}`);
-  }
-  if (check.clientCertificate) {
-    // Data bytes, not a path: Traefik does not mount the Bondery volumes.
-    if (!TRANSPORT_CLIENT_CERTS_RE.test(yaml)) {
-      failures.push(`${name} transport has no client certificate, but its gateway requires one`);
-    }
-    if (!TRANSPORT_CLIENT_KEY_RE.test(yaml) || !TRANSPORT_PRIVATE_KEY_RE.test(yaml)) {
-      failures.push(`${name} transport has no inline client private key`);
-    }
-  }
-  // The CA is the block after `rootCAs:`. Reading from there keeps it distinct from the client
-  // certificate, which is also an inline PEM block.
-  const rootCas = yaml.split(TRANSPORT_ROOT_CAS_RE)[1] ?? "";
-  const ca = (rootCas.match(INLINE_PEM_CERT_RE) ?? [""])[0]
-    .split("\n")
-    .map((line) => line.replace(LEADING_TEN_SPACES_RE, ""))
-    .join("\n");
-  if (!ca) {
-    failures.push(`no inline CA certificate in rootCAs of ${name}`);
-  }
-  return { ca, failures };
-}
-
-/**
- * The traefik-transport job published a serversTransport per service (docs/deploy/configuration.mdx#internal-api-tls):
- * - `<prefix>-api-transport.yml` and `<prefix>-storage-transport.yml`, each with the stack's
- *   serverName and its CA inline, and nothing else;
- * - each CA verifies that service's HTTPS listener under that name, which is what Traefik checks.
- * @param {{ compose: Function; fail: Function; dynamicDir: string }} context
- */
-export function assertTraefikTransport({ compose, fail, dynamicDir }) {
-  const files = readdirSync(dynamicDir).filter((name) => name.endsWith("-transport.yml"));
-  const apiFile = files.find((name) => name.endsWith("-api-transport.yml"));
-  if (!apiFile || files.length !== Object.keys(TRAEFIK_TRANSPORTS).length) {
-    fail(
-      `Expected the api and storage serversTransport files, found: ${files.join(", ") || "none"}`,
-    );
-    return;
-  }
-  const prefix = apiFile.replace(API_TRANSPORT_FILE_RE, "");
-  for (const [service, check] of Object.entries(TRAEFIK_TRANSPORTS)) {
-    const name = `${prefix}-${service}`;
-    const file = `${name}-transport.yml`;
-    if (!files.includes(file)) {
-      fail(`The traefik-transport job did not publish ${file}`);
-      return;
-    }
-    const yaml = readFileSync(join(dynamicDir, file), "utf8");
-    const { ca, failures } = traefikTransportFailures(yaml, name, check);
-    if (failures.length > 0) {
-      fail(`Traefik serversTransport: ${failures.join("; ")}`, yaml);
-      return;
-    }
-    const probe = compose(
-      "exec -T api node --input-type=module -",
-      TRANSPORT_CA_PROBE(name, check.port, check.path, ca, check.clientCertificate),
-    );
-    const outcome = (probe.stdout ?? "").trim();
-    if (!check.accepted.includes(outcome)) {
-      fail(
-        `The published CA does not verify ${name}'s HTTPS listener (${outcome})`,
-        `${probe.stdout ?? ""}${probe.stderr ?? ""}`,
-      );
-      return;
-    }
-    console.log(`Traefik serversTransport: ${name} verifies its HTTPS listener (${outcome})`);
-  }
 }
 
 /**

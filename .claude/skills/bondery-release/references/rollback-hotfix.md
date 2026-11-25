@@ -15,7 +15,7 @@ Keep hotfixes small. Prefer one logical fix per patch.
 
 ## Production rollback (product stack)
 
-1. Restore the previous `BONDERY_INFRA_VERSION` in Dokploy (e.g. `1.8.2`).
+1. Set `BONDERY_INFRA_VERSION` in Dokploy to the previous production version (e.g. `1.8.2`). Prefer a fix-forward release when the cause is known: it passes the same smoke and pin as any release.
 2. Save env and redeploy **api + webapp together**.
 3. Update [`manifest.ts`](../../../../packages/helpers/src/env/manifest.ts) deploy pin if documenting the rollback in git.
 4. Do **not** rely on floating `:production` as the rollback target in production/self-host configs.

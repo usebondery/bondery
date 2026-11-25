@@ -84,6 +84,7 @@ jobs:
       is_rc: ${{ steps.pkg.outputs.is_rc }}
       is_rc_cut: ${{ steps.pkg.outputs.is_rc_cut }}
       npm_version: ${{ steps.pkg.outputs.npm_version }}
+      short_sha: ${{ steps.pkg.outputs.short_sha }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -97,6 +98,8 @@ jobs:
           NPM_VERSION=$(node -p "require('./package.json').version")
           echo "npm_version=${NPM_VERSION}" >> "$GITHUB_OUTPUT"
           echo "infra_version=${NPM_VERSION}" >> "$GITHUB_OUTPUT"
+          # Same 7 characters that docker/metadata-action puts in :sha-<short>.
+          echo "short_sha=$(git rev-parse --short=7 HEAD)" >> "$GITHUB_OUTPUT"
 
           if echo "$NPM_VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+-rc\.[1-9][0-9]*$'; then
             echo "is_rc=true" >> "$GITHUB_OUTPUT"
@@ -125,8 +128,6 @@ jobs:
       image_name: ghcr.io/usebondery/api
       docker_tags: |
         type=sha,prefix=sha-,format=short
-        type=raw,value=beta,enable=${{ needs.resolve.outputs.is_rc_cut == 'true' }}
-        type=raw,value=${{ needs.resolve.outputs.npm_version }},enable=${{ needs.resolve.outputs.is_rc_cut == 'true' }}
       oci_title: Bondery API
       oci_description: Bondery API server (integration builds from main)
       oci_documentation: https://github.com/usebondery/bondery/blob/main/docs/deploy/api-container.md
@@ -148,8 +149,6 @@ jobs:
       image_name: ghcr.io/usebondery/webapp
       docker_tags: |
         type=sha,prefix=sha-,format=short
-        type=raw,value=beta,enable=${{ needs.resolve.outputs.is_rc_cut == 'true' }}
-        type=raw,value=${{ needs.resolve.outputs.npm_version }},enable=${{ needs.resolve.outputs.is_rc_cut == 'true' }}
       oci_title: Bondery Webapp
       oci_description: Bondery webapp (integration builds from main)
       oci_documentation: https://github.com/usebondery/bondery/blob/main/docs/deploy/dokploy.md
@@ -202,12 +201,50 @@ jobs:
           webhook_url: ${{ env.BONDERY_OPS_DOKPLOY_STAGING_WEBSITE_DEPLOY_WEBHOOK }}
           branch: main
 
-  notify_beta_services:
+  # An RC cut is a rehearsal of production, so it passes the same gate. The RC cut builds only
+  # :sha-<short>. The whole-release smoke runs on those images, and only then do :X.Y.Z-rc.N and
+  # :beta move and Dokploy beta redeploy. A broken RC never reaches :beta.
+  smoke_rc:
     needs: [ resolve, build_api, build_webapp ]
     if: >-
       always() &&
       needs.resolve.outputs.is_rc_cut == 'true' &&
-      (needs.build_api.result == 'success' || needs.build_webapp.result == 'success')
+      needs.build_api.result == 'success' &&
+      needs.build_webapp.result == 'success'
+    uses: ./.github/workflows/shared-smoke-bondery.yml
+    secrets: inherit
+    with:
+      checkout_ref: ${{ github.sha }}
+      image_tag: sha-${{ needs.resolve.outputs.short_sha }}
+
+  promote_rc_api:
+    needs: [ resolve, smoke_rc ]
+    if: always() && needs.smoke_rc.result == 'success'
+    uses: ./.github/workflows/shared-promote-image-tag.yml
+    secrets: inherit
+    with:
+      image_name: ghcr.io/usebondery/api
+      source_tag: sha-${{ needs.resolve.outputs.short_sha }}
+      target_tag: ${{ needs.resolve.outputs.npm_version }}
+      extra_target_tags: beta
+
+  promote_rc_webapp:
+    needs: [ resolve, smoke_rc ]
+    if: always() && needs.smoke_rc.result == 'success'
+    uses: ./.github/workflows/shared-promote-image-tag.yml
+    secrets: inherit
+    with:
+      image_name: ghcr.io/usebondery/webapp
+      source_tag: sha-${{ needs.resolve.outputs.short_sha }}
+      target_tag: ${{ needs.resolve.outputs.npm_version }}
+      extra_target_tags: beta
+
+  notify_beta_services:
+    needs: [ promote_rc_api, promote_rc_webapp ]
+    if: >-
+      always() &&
+      needs.promote_rc_api.result == 'success' &&
+      needs.promote_rc_webapp.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: read
