@@ -68,12 +68,17 @@ export function resolveActionButtonShell(params: {
 
   if (variant === "outline") {
     const useInputChrome = color === "neutral" && !dashed;
+    const resolveBackgroundColor = () => {
+      if (pressed) {
+        return colors.surfacePressed;
+      }
+      if (useInputChrome) {
+        return colors.inputBackground;
+      }
+      return colors.surface;
+    };
     return {
-      backgroundColor: pressed
-        ? colors.surfacePressed
-        : useInputChrome
-          ? colors.inputBackground
-          : colors.surface,
+      backgroundColor: resolveBackgroundColor(),
       borderColor: dashed || useInputChrome ? colors.borderStrong : accent,
       borderStyle: dashed ? "dashed" : "solid",
       borderWidth: 1,

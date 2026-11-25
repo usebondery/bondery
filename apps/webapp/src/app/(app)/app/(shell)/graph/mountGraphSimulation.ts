@@ -82,8 +82,30 @@ export function startGraphSimulation(input: {
       "link",
       forceLink<GraphSimNode, GraphSimLink>(simLinks)
         .id((row) => row.id)
-        .distance((row) => (row.kind === "spoke" ? 150 : row.kind === "self" ? 130 : 96))
-        .strength((row) => (row.kind === "spoke" ? 0.15 : row.kind === "self" ? 0.4 : 1)),
+        .distance((row) => {
+          const resolveValue = () => {
+            if (row.kind === "spoke") {
+              return 150;
+            }
+            if (row.kind === "self") {
+              return 130;
+            }
+            return 96;
+          };
+          return resolveValue();
+        })
+        .strength((row) => {
+          const resolveValue2 = () => {
+            if (row.kind === "spoke") {
+              return 0.15;
+            }
+            if (row.kind === "self") {
+              return 0.4;
+            }
+            return 1;
+          };
+          return resolveValue2();
+        }),
     )
     .force("charge", forceManyBody().strength(-180))
     .force("center", forceCenter(width / 2, height / 2))

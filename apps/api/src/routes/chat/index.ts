@@ -87,12 +87,16 @@ export const chatRoutes: AppRoutePlugin = async (fastify) => {
       // A tool decision is read from the payload, not from a client flag: the
       // SDK resumes the turn as soon as the decision is recorded, so a flag can
       // be one render behind. An explicit intent still wins for a retry.
-      const intent: ChatTurnIntent =
-        request.body.intent === "retry"
-          ? "retry"
-          : hasToolApprovalDecision(messages)
-            ? "approval"
-            : (request.body.intent ?? "message");
+      const resolveIntent = (): ChatTurnIntent => {
+        if (request.body.intent === "retry") {
+          return "retry";
+        }
+        if (hasToolApprovalDecision(messages)) {
+          return "approval";
+        }
+        return request.body.intent ?? "message";
+      };
+      const intent = resolveIntent();
 
       if (!sessionId) {
         throw badRequest("sessionId is required", "bad_request");

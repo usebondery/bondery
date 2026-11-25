@@ -21,7 +21,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 
-const execFileAsync = promisify(execFile);
+const _execFileAsync = promisify(execFile);
 
 /**
  * Extracts a ZIP into `dir`.

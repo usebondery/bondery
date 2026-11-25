@@ -25,16 +25,22 @@ export function ContactChannelBadges({
   const tContactInfo = useContactInfoTranslations();
   const colors = useMobileThemeColors();
 
-  const typeLabel =
-    type === "work"
-      ? typeNamespace === "ContactAddress"
-        ? tContactAddress("TypeWork")
-        : tContactInfo("TypeWork")
-      : type === "other"
-        ? tContactAddress("TypeOther")
-        : typeNamespace === "ContactAddress"
-          ? tContactAddress("TypeHome")
-          : tContactInfo("TypeHome");
+  const resolveTypeLabel = () => {
+    if (type === "work") {
+      if (typeNamespace === "ContactAddress") {
+        return tContactAddress("TypeWork");
+      }
+      return tContactInfo("TypeWork");
+    }
+    if (type === "other") {
+      return tContactAddress("TypeOther");
+    }
+    if (typeNamespace === "ContactAddress") {
+      return tContactAddress("TypeHome");
+    }
+    return tContactInfo("TypeHome");
+  };
+  const typeLabel = resolveTypeLabel();
 
   const typeEmoji =
     typeNamespace === "ContactAddress"

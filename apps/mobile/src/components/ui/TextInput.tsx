@@ -52,7 +52,16 @@ export function TextInput({
   const colors = useMobileThemeColors();
   const [isFocused, setIsFocused] = useState(false);
   const hasError = error === true || Boolean(errorMessage);
-  const borderColor = hasError ? colors.dangerAccent : isFocused ? colors.primary : colors.border;
+  const resolveBorderColor = () => {
+    if (hasError) {
+      return colors.dangerAccent;
+    }
+    if (isFocused) {
+      return colors.primary;
+    }
+    return colors.border;
+  };
+  const borderColor = resolveBorderColor();
   const isSheet = variant === "sheet";
 
   const inputClassName = cn("min-h-touch text-input flex-1", className);

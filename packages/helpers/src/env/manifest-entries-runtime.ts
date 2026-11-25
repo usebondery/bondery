@@ -106,6 +106,7 @@ export const RUNTIME_ENTRIES: EnvVarDef[] = [
   {
     canonical: "BONDERY_INFRA_INTERNAL_API_URL",
     description:
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: the description quotes a literal ${VAR} placeholder.
       "Webapp SSR/BFF API base URL: the API's HTTPS listener (Compose: https://${BONDERY_INFRA_TRAEFIK_PREFIX}-api:26631). Browser clients keep using BONDERY_PUBLIC_API_URL. Local dev: https://127.0.0.1:26631",
     exampleValue: "https://127.0.0.1:26631",
     group: "Infra",

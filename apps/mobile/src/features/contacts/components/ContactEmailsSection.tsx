@@ -111,12 +111,16 @@ export function ContactEmailsSection({ emails, onSaveEmails }: ContactEmailsSect
     persistEmails(applyPreferredEmail(emails, index));
   }
 
-  const sheetEntry =
-    sheet.open && sheet.mode === "edit"
-      ? sheet.entry
-      : sheet.open && sheet.mode === "add"
-        ? createDraftEmail(emails.length === 0)
-        : null;
+  const resolveSheetEntry = () => {
+    if (sheet.open && sheet.mode === "edit") {
+      return sheet.entry;
+    }
+    if (sheet.open && sheet.mode === "add") {
+      return createDraftEmail(emails.length === 0);
+    }
+    return null;
+  };
+  const sheetEntry = resolveSheetEntry();
 
   const copyMessages = {
     errorTitle,

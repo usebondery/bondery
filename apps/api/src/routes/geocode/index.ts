@@ -76,13 +76,19 @@ export const geocodeRoutes: AppRoutePlugin = async (fastify) => {
         }
 
         const payload = await response.json();
-        const rawResults = Array.isArray(payload?.items)
-          ? payload.items
-          : Array.isArray(payload?.result)
-            ? payload.result
-            : Array.isArray(payload?.results)
-              ? payload.results
-              : [];
+        const resolveRawResults = () => {
+          if (Array.isArray(payload?.items)) {
+            return payload.items;
+          }
+          if (Array.isArray(payload?.result)) {
+            return payload.result;
+          }
+          if (Array.isArray(payload?.results)) {
+            return payload.results;
+          }
+          return [];
+        };
+        const rawResults = resolveRawResults();
 
         const addresses = parseMapSuggestions(rawResults).map((item) =>
           mapSuggestionToContactAddress(item, { type: "home" }),

@@ -133,6 +133,7 @@ export function checkStorageTls({ root, serviceBlock }) {
     const endpointLines = apiBlock.split("\n").filter((line) => S3_ENDPOINT_KEY_RE.test(line));
     if (endpointLines.length === 0 || endpointLines.some((line) => !S3_ENDPOINT_LINE.test(line))) {
       fail(
+        // biome-ignore lint/suspicious/noTemplateCurlyInString: the message quotes a literal Compose ${VAR} placeholder.
         "api BONDERY_PRIVATE_S3_ENDPOINT must be https://${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage:8443 (TLS, not overridable from .env)",
       );
     }

@@ -185,6 +185,17 @@ function MobileTextInput({
 
   const { wrapperStyle, innerContainerStyle, fillsWrapper } = splitContainerStyle(containerStyle);
 
+  const resolveValue = () => {
+    if (errorMessage) {
+      return (
+        <Text style={[styles.errorMessage, { color: colors.dangerText }]}>{errorMessage}</Text>
+      );
+    }
+    if (description) {
+      return <Text style={[styles.description, { color: colors.textMuted }]}>{description}</Text>;
+    }
+    return null;
+  };
   return (
     <View style={[styles.wrapper, wrapperStyle as never]}>
       <Animated.View
@@ -220,11 +231,7 @@ function MobileTextInput({
         {trailingContent}
       </Animated.View>
 
-      {errorMessage ? (
-        <Text style={[styles.errorMessage, { color: colors.dangerText }]}>{errorMessage}</Text>
-      ) : description ? (
-        <Text style={[styles.description, { color: colors.textMuted }]}>{description}</Text>
-      ) : null}
+      {resolveValue()}
     </View>
   );
 }

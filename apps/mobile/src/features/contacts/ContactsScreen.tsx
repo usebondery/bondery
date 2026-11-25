@@ -91,6 +91,7 @@ export function ContactsScreen() {
   });
 
   const { selectedGroupId } = screenData;
+  // biome-ignore lint/correctness/useExhaustiveDependencies: The selected group is a trigger: scroll to the top whenever it changes.
   useEffect(() => {
     flashListRef.current?.scrollToOffset({ animated: false, offset: 0 });
   }, [selectedGroupId]);

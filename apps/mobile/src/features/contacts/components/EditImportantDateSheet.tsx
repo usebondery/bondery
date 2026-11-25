@@ -184,16 +184,22 @@ function EditImportantDateSheet({
     };
   });
 
-  const notifyOptions = (["none", "1", "3", "7"] as const).map((value) => ({
-    label:
-      value === "none"
-        ? tContactImportantDates("NotifyNone")
-        : value === "1"
-          ? tContactImportantDates("NotifyDayBefore")
-          : tContactImportantDates("NotifyDaysBefore"),
-    leftSection: <NotifyBellIcon color={colors.iconSecondary} muted={value === "none"} />,
-    value,
-  }));
+  const notifyOptions = (["none", "1", "3", "7"] as const).map((value) => {
+    const resolveLabel = () => {
+      if (value === "none") {
+        return tContactImportantDates("NotifyNone");
+      }
+      if (value === "1") {
+        return tContactImportantDates("NotifyDayBefore");
+      }
+      return tContactImportantDates("NotifyDaysBefore");
+    };
+    return {
+      label: resolveLabel(),
+      leftSection: <NotifyBellIcon color={colors.iconSecondary} muted={value === "none"} />,
+      value,
+    };
+  });
 
   function handleCloseSheet() {
     onOpenChange(false);
@@ -268,14 +274,19 @@ function EditImportantDateSheet({
         ]
       : [primaryAction];
 
-  const sheetTitle = isDeleteConfirmOpen
-    ? tMobileContactIdentity("DeleteDateConfirmTitle").replace(
+  const resolveSheetTitle = () => {
+    if (isDeleteConfirmOpen) {
+      return tMobileContactIdentity("DeleteDateConfirmTitle").replace(
         "{type}",
         tContactImportantDates(`Types.${type}` as never),
-      )
-    : mode === "add"
-      ? tContactImportantDates("AddAction")
-      : tContactImportantDates(`Types.${type}` as never);
+      );
+    }
+    if (mode === "add") {
+      return tContactImportantDates("AddAction");
+    }
+    return tContactImportantDates(`Types.${type}` as never);
+  };
+  const sheetTitle = resolveSheetTitle();
 
   return (
     <>

@@ -14,17 +14,26 @@ const BONDERY_CODE_PLATFORM_LINUX_RE = /^bondery_code_platform=linux\b/u;
 
 type FakeDocument = { cookie: string };
 
-const globalScope = globalThis as { document?: FakeDocument };
+type FakeCookieStore = { set: (options: { name: string; value: string }) => Promise<void> };
+
+const globalScope = globalThis as { cookieStore?: FakeCookieStore; document?: FakeDocument };
 const originalDocument = globalScope.document;
 
 function installDocument(cookie = ""): FakeDocument {
   const document = { cookie };
   globalScope.document = document;
+  globalScope.cookieStore = {
+    set: ({ name, value }) => {
+      document.cookie = `${name}=${value}`;
+      return Promise.resolve();
+    },
+  };
   resetCodeBlockPlatformCache();
   return document;
 }
 
 afterEach(() => {
+  delete globalScope.cookieStore;
   if (originalDocument === undefined) {
     delete globalScope.document;
   } else {

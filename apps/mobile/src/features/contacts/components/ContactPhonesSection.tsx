@@ -113,12 +113,16 @@ export function ContactPhonesSection({ phones, onSavePhones }: ContactPhonesSect
     persistPhones(applyPreferredPhone(phones, index));
   }
 
-  const sheetEntry =
-    sheet.open && sheet.mode === "edit"
-      ? sheet.entry
-      : sheet.open && sheet.mode === "add"
-        ? createDraftPhone(phones.length === 0)
-        : null;
+  const resolveSheetEntry = () => {
+    if (sheet.open && sheet.mode === "edit") {
+      return sheet.entry;
+    }
+    if (sheet.open && sheet.mode === "add") {
+      return createDraftPhone(phones.length === 0);
+    }
+    return null;
+  };
+  const sheetEntry = resolveSheetEntry();
 
   const copyMessages = {
     errorTitle,

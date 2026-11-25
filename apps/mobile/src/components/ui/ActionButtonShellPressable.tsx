@@ -69,6 +69,15 @@ export function ActionButtonShellPressable({
   const borderRadius =
     matchInputChrome || layout === "stretch" ? MOBILE_LAYOUT.borderRadius.control : dimension / 2;
 
+  const resolveValue = () => {
+    if (layout === "stretch") {
+      return { minWidth: dimension, width: "100%" };
+    }
+    if (matchInputChrome) {
+      return { height: dimension, minHeight: dimension, width: dimension };
+    }
+    return { height: dimension, width: dimension };
+  };
   return (
     <Animated.View
       className={cn(layout === "stretch" && "min-w-0 flex-1", className)}
@@ -103,11 +112,7 @@ export function ActionButtonShellPressable({
             justifyContent: "center",
             minHeight: dimension,
             opacity: disabled ? 0.38 : 1,
-            ...(layout === "stretch"
-              ? { minWidth: dimension, width: "100%" }
-              : matchInputChrome
-                ? { height: dimension, minHeight: dimension, width: dimension }
-                : { height: dimension, width: dimension }),
+            ...resolveValue(),
           },
           style,
         ]}

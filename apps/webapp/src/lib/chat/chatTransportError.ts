@@ -9,12 +9,16 @@ import { buildApiErrorFromResponse, extractApiErrorFields, isApiError } from "@b
 
 function jsonPayloadFromTransportError(error: unknown): string {
   // The text is only parsed for a JSON error body, never shown to a user.
-  const bodyText =
-    error instanceof Error
-      ? String(error.message)
-      : typeof error === "string"
-        ? error
-        : JSON.stringify(error);
+  const resolveBodyText = () => {
+    if (error instanceof Error) {
+      return String(error.message);
+    }
+    if (typeof error === "string") {
+      return error;
+    }
+    return JSON.stringify(error);
+  };
+  const bodyText = resolveBodyText();
   const jsonStart = bodyText.indexOf("{");
   const jsonEnd = bodyText.lastIndexOf("}");
 
@@ -29,8 +33,16 @@ export function chatTransportErrorToApiError(error: unknown) {
     return error;
   }
 
-  const status =
-    fields.code === "chat_quota_exceeded" ? 403 : fields.code === "service_unavailable" ? 503 : 500;
+  const resolveStatus = () => {
+    if (fields.code === "chat_quota_exceeded") {
+      return 403;
+    }
+    if (fields.code === "service_unavailable") {
+      return 503;
+    }
+    return 500;
+  };
+  const status = resolveStatus();
 
   return buildApiErrorFromResponse({ bodyText, status });
 }

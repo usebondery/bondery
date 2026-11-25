@@ -124,12 +124,16 @@ function AssistantBriefingAnimation() {
 
 /** Assistant → Bondery → assistant, without a wall of text explaining the pipe. */
 function ConnectionStrip({ active, reduced }: { active: Frame; reduced: boolean }) {
-  const travel =
-    reduced || active.phase === "card" || active.phase === "exit"
-      ? { left: "50%" }
-      : active.phase === "question"
-        ? { left: ["10%", "86%"] }
-        : { left: ["86%", "10%"] };
+  const resolveTravel = () => {
+    if (reduced || active.phase === "card" || active.phase === "exit") {
+      return { left: "50%" };
+    }
+    if (active.phase === "question") {
+      return { left: ["10%", "86%"] };
+    }
+    return { left: ["86%", "10%"] };
+  };
+  const travel = resolveTravel();
 
   return (
     <Group gap="xs" wrap="nowrap">

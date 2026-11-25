@@ -181,6 +181,15 @@ function SubscriptionCardContent({
     ? (subscriptionStatus.productName ?? t("PremiumPlan"))
     : t("FreePlan");
 
+  const resolveValue = () => {
+    if (subscriptionStatus.aiMessagesUsed >= subscriptionStatus.aiMessageLimit) {
+      return "red";
+    }
+    if (subscriptionStatus.aiMessagesUsed / subscriptionStatus.aiMessageLimit >= 0.8) {
+      return "orange";
+    }
+    return "violet";
+  };
   return (
     <SettingsSection
       icon={<IconCreditCard size={20} />}
@@ -230,13 +239,7 @@ function SubscriptionCardContent({
                 ) : null}
               </Group>
               <Progress
-                color={
-                  subscriptionStatus.aiMessagesUsed >= subscriptionStatus.aiMessageLimit
-                    ? "red"
-                    : subscriptionStatus.aiMessagesUsed / subscriptionStatus.aiMessageLimit >= 0.8
-                      ? "orange"
-                      : "violet"
-                }
+                color={resolveValue()}
                 radius="xl"
                 size="sm"
                 value={

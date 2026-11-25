@@ -59,8 +59,10 @@ function tailnetHostname(): string {
   let status: TailscaleStatus;
   try {
     status = JSON.parse(result.stdout) as TailscaleStatus;
-  } catch {
-    throw new Error(`tailscale status failed: ${result.stderr.trim() || result.stdout.trim()}`);
+  } catch (error) {
+    throw new Error(`tailscale status failed: ${result.stderr.trim() || result.stdout.trim()}`, {
+      cause: error,
+    });
   }
   if (status.BackendState !== "Running") {
     throw new Error(

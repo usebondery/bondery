@@ -23,6 +23,7 @@
     "@biomejs/biome": "^2.6.8",
     "@bondery/helpers": "workspace:*",
     "@bondery/schemas": "workspace:*",
+    "@bramus/caniuse-cli": "^2.2.0",
     "@redocly/cli": "^2.79.0",
     "lefthook": "^2.2.2",
     "portless": "^0.18.1",

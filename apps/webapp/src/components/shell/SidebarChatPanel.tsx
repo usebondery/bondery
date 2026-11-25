@@ -55,6 +55,15 @@ function SessionListItem({
   const { hovered, ref } = useHover<HTMLDivElement>();
   const showDelete = isTouch || hovered || menuOpened;
 
+  const resolveBackgroundColor = () => {
+    if (isActive) {
+      return "var(--mantine-primary-color-filled)";
+    }
+    if (hovered) {
+      return "var(--mantine-primary-color-light-hover)";
+    }
+    return "transparent";
+  };
   return (
     <Group
       aria-current={isActive ? "page" : undefined}
@@ -65,11 +74,7 @@ function SessionListItem({
       ref={ref}
       renderRoot={(props) => <Link href={routeChatSession(session.id)} {...props} />}
       style={{
-        backgroundColor: isActive
-          ? "var(--mantine-primary-color-filled)"
-          : hovered
-            ? "var(--mantine-primary-color-light-hover)"
-            : "transparent",
+        backgroundColor: resolveBackgroundColor(),
         color: isActive ? "white" : "inherit",
         textDecoration: "none",
         ...ITEM_PADDING,

@@ -1,7 +1,6 @@
 import type { FastifyRequest } from "fastify";
-import { DomainError } from "../../domains/_shared/context.js";
 import { BYTES_PER_MIB } from "./config.js";
-import { badRequest } from "./errors/http-errors.js";
+import { badRequest, payloadTooLarge } from "./errors/http-errors.js";
 
 interface UploadedFile {
   buffer: Buffer;
@@ -61,10 +60,10 @@ export async function readUploadedFile(
     return { buffer, filename: part.filename, mimetype: part.mimetype };
   } catch (error) {
     if (isFileTooLarge(error)) {
-      throw new DomainError(
+      throw payloadTooLarge(
         `File too large. Maximum size is ${formatMegabytes(maxBytes)}.`,
-        413,
         "validation_error",
+        error,
       );
     }
     throw error;

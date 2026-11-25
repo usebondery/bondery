@@ -51,8 +51,16 @@ function applyChange(db: SQLiteDatabase, change: SyncChange): SyncTableKey | nul
     return null;
   }
 
-  const operation =
-    change.operation === "insert" ? "insert" : change.operation === "delete" ? "delete" : "update";
+  const resolveOperation = () => {
+    if (change.operation === "insert") {
+      return "insert";
+    }
+    if (change.operation === "delete") {
+      return "delete";
+    }
+    return "update";
+  };
+  const operation = resolveOperation();
 
   materializer(db, {
     operation,

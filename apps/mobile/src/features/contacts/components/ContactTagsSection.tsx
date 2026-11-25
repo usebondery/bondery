@@ -95,6 +95,27 @@ function ContactTagsSection({
     }
   }
 
+  const resolveValue = () => {
+    if (loading) {
+      return <TagsLoadingSkeleton />;
+    }
+    if (error) {
+      return (
+        <LoadErrorCard
+          description={error}
+          onRetry={onRetry}
+          title={tMobileSettings("TagsLoadErrorTitle")}
+        />
+      );
+    }
+    return (
+      <ContactsTagsHeader
+        layout="chipRow"
+        onCreatePress={() => setCreateTagOpen(true)}
+        tags={sortedTags}
+      />
+    );
+  };
   return (
     <View style={styles.section}>
       <ContactDetailSectionHeader
@@ -112,21 +133,7 @@ function ContactTagsSection({
         titleNamespace="TagsInput"
       />
 
-      {loading ? (
-        <TagsLoadingSkeleton />
-      ) : error ? (
-        <LoadErrorCard
-          description={error}
-          onRetry={onRetry}
-          title={tMobileSettings("TagsLoadErrorTitle")}
-        />
-      ) : (
-        <ContactsTagsHeader
-          layout="chipRow"
-          onCreatePress={() => setCreateTagOpen(true)}
-          tags={sortedTags}
-        />
-      )}
+      {resolveValue()}
 
       <TagEditSheet
         mode="create"

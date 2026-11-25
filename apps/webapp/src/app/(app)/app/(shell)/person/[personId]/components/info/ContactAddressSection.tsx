@@ -45,16 +45,22 @@ interface ContactAddressSectionProps {
 
 export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddressSectionProps) {
   const t = useContactAddressTranslations();
-  const typeOptions = ADDRESS_TYPE_OPTIONS.map((option) => ({
-    label:
-      option.value === "home"
-        ? t("TypeHome")
-        : option.value === "work"
-          ? t("TypeWork")
-          : t("TypeOther"),
-    leftSection: <span>{option.emoji}</span>,
-    value: option.value,
-  }));
+  const typeOptions = ADDRESS_TYPE_OPTIONS.map((option) => {
+    const resolveLabel = () => {
+      if (option.value === "home") {
+        return t("TypeHome");
+      }
+      if (option.value === "work") {
+        return t("TypeWork");
+      }
+      return t("TypeOther");
+    };
+    return {
+      label: resolveLabel(),
+      leftSection: <span>{option.emoji}</span>,
+      value: option.value,
+    };
+  });
 
   const [addresses, setAddresses] = useState<EditableAddress[]>(() => toEditableAddresses(contact));
   const [draft, setDraft] = useState<DraftAddress>({ suggestion: null, type: "home", value: "" });

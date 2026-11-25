@@ -35,12 +35,16 @@ export function LoginEmailPanel({
   const colors = useMobileThemeColors();
   const tLoginPage = useLoginPageTranslations();
   const tCommon = useCommonTranslations();
-  const sendLabel =
-    resendSeconds > 0
-      ? tLoginPage("ResendInSeconds", { seconds: resendSeconds })
-      : awaitingVerify
-        ? tLoginPage("ResendSignInLink")
-        : tLoginPage("SendLoginLink");
+  const resolveSendLabel = () => {
+    if (resendSeconds > 0) {
+      return tLoginPage("ResendInSeconds", { seconds: resendSeconds });
+    }
+    if (awaitingVerify) {
+      return tLoginPage("ResendSignInLink");
+    }
+    return tLoginPage("SendLoginLink");
+  };
+  const sendLabel = resolveSendLabel();
 
   return (
     <View style={styles.emailPanel}>

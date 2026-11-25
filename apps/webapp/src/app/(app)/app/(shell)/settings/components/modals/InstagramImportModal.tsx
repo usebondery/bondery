@@ -164,14 +164,19 @@ export function InstagramImportModal({
         onDrop={handleZipDrop}
         onReject={(rejections) => {
           const firstError = rejections[0]?.errors?.[0];
-          const rejectionMessage =
-            firstError?.code === "file-too-large"
-              ? t("ZipTooLarge")
-              : firstError?.code === "too-many-files"
-                ? t("ZipTooManyFiles")
-                : firstError?.code === "file-invalid-type"
-                  ? t("ZipInvalidType")
-                  : firstError?.message || t("InvalidFile");
+          const resolveRejectionMessage = () => {
+            if (firstError?.code === "file-too-large") {
+              return t("ZipTooLarge");
+            }
+            if (firstError?.code === "too-many-files") {
+              return t("ZipTooManyFiles");
+            }
+            if (firstError?.code === "file-invalid-type") {
+              return t("ZipInvalidType");
+            }
+            return firstError?.message || t("InvalidFile");
+          };
+          const rejectionMessage = resolveRejectionMessage();
           notifications.show(
             errorNotificationTemplate({
               description: rejectionMessage,

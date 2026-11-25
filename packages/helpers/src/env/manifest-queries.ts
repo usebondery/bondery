@@ -24,7 +24,7 @@ export function getRequiredVarsForTarget(
       names.add(target.runtimeName ?? entry.canonical);
     }
   }
-  return [...names].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  return [...names].sort((a, b) => Number(a > b) - Number(a < b));
 }
 
 export function getRuntimeNamesForTarget(targetId: TargetId): string[] {
@@ -40,7 +40,7 @@ export function getRuntimeNamesForTarget(targetId: TargetId): string[] {
       names.add(target.runtimeName ?? entry.canonical);
     }
   }
-  return [...names].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  return [...names].sort((a, b) => Number(a > b) - Number(a < b));
 }
 
 export function getAllRuntimeNames(): string[] {
@@ -54,7 +54,7 @@ export function getAllRuntimeNames(): string[] {
   for (const name of OPS_ENV_VARS) {
     names.add(name);
   }
-  return [...names].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  return [...names].sort((a, b) => Number(a > b) - Number(a < b));
 }
 
 export function resolveCanonicalValue(

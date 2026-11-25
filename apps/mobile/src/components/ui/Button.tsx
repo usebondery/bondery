@@ -115,15 +115,19 @@ function Button(props: ButtonProps) {
   const fillPressedColor =
     pressedColor ?? (tone && tone !== "primary" ? accent : colors.primaryPress);
   const outlineBorderColor = tone === "neutral" ? colors.borderStrong : accent;
-  const labelColor =
-    textColor ??
-    (isSubtle
-      ? colors.primary
-      : isOutline
-        ? tone === "neutral"
-          ? colors.textSecondary
-          : accent
-        : colors.textOnPrimary);
+  const resolveValue = () => {
+    if (isSubtle) {
+      return colors.primary;
+    }
+    if (isOutline) {
+      if (tone === "neutral") {
+        return colors.textSecondary;
+      }
+      return accent;
+    }
+    return colors.textOnPrimary;
+  };
+  const labelColor = textColor ?? resolveValue();
   const isDimmed = inactive && !loading;
   const isPressLocked = disabled === true || loading === true;
   const showLeftSlot =
@@ -133,6 +137,11 @@ function Button(props: ButtonProps) {
   const showRightSlot = rightSection !== null && rightSection !== undefined;
   const isSpread = align === "spread" && !isSubtle;
   const isContentCentered = align === "center" && !isSubtle;
+  const rightSlotContent = loading ? (
+    <ActivityIndicator color={labelColor} size="small" />
+  ) : (
+    rightSection
+  );
   const labelContent = loading && loadingText ? loadingText : children;
   const squeezeStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -152,6 +161,15 @@ function Button(props: ButtonProps) {
     scale.set(withTiming(1, BUTTON_SCALE_TIMING));
   };
 
+  const resolveValue2 = () => {
+    if (isSpread) {
+      return "min-w-0 flex-1";
+    }
+    if (isSubtle || isContentCentered) {
+      return;
+    }
+    return "flex-1";
+  };
   const pressable = (
     <Pressable
       accessibilityHint={accessibilityHint}
@@ -194,8 +212,17 @@ function Button(props: ButtonProps) {
 
         const isFilledPress = !isSubtle && pressed && !isPressLocked;
 
+        const resolveBackgroundColor = () => {
+          if (isSubtle) {
+            return;
+          }
+          if (isFilledPress) {
+            return fillPressedColor;
+          }
+          return fillColor;
+        };
         return {
-          backgroundColor: isSubtle ? undefined : isFilledPress ? fillPressedColor : fillColor,
+          backgroundColor: resolveBackgroundColor(),
           ...(isDimmed ? { opacity: INACTIVE_OPACITY } : {}),
         };
       }}
@@ -205,14 +232,12 @@ function Button(props: ButtonProps) {
           {loading && (rightSection === null || rightSection === undefined) ? (
             <ActivityIndicator color={labelColor} size="small" />
           ) : (
-            <>{leftSection}</>
+            leftSection
           )}
         </View>
       ) : null}
       <Text
-        className={
-          isSpread ? "min-w-0 flex-1" : isSubtle || isContentCentered ? undefined : "flex-1"
-        }
+        className={resolveValue2()}
         fw={600}
         size={size === "lg" ? "lg" : "md"}
         style={{ color: labelColor }}
@@ -222,7 +247,7 @@ function Button(props: ButtonProps) {
       </Text>
       {showRightSlot ? (
         <View className={cn("w-5 shrink-0 items-center justify-center", !isSpread && "ml-2.5")}>
-          {loading ? <ActivityIndicator color={labelColor} size="small" /> : <>{rightSection}</>}
+          {rightSlotContent}
         </View>
       ) : null}
     </Pressable>

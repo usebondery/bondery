@@ -22,10 +22,12 @@ describe("literalText", () => {
   });
 
   it("replaces each interpolation with one placeholder", () => {
+    // biome-ignore lint/suspicious/noTemplateCurlyInString: the text is a fixture that must contain a literal ${...}.
     assert.equal(literalText("`${path}: missing description`"), "\u0000: missing description");
   });
 
   it("keeps nested braces and objects inside an interpolation out of the text", () => {
+    // biome-ignore lint/suspicious/noTemplateCurlyInString: the text is a fixture that must contain a literal ${...}.
     assert.equal(literalText("`a ${JSON.stringify({ b: 1 })} c`"), "a \u0000 c");
   });
   it("joins a concatenated literal into one sentence", () => {
@@ -72,9 +74,11 @@ describe("hasRemedy", () => {
 
 describe("extractArguments", () => {
   it("reads a template literal containing parentheses and braces", () => {
+    // biome-ignore lint/suspicious/noTemplateCurlyInString: the text is a fixture that must contain a literal ${...}.
     const source = "check.add(`a (b) {c} ${fn({ d: 1 })}`);";
     assert.deepEqual(
       extractArguments(source, "check.add(").map((entry) => entry.argument),
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: the text is a fixture that must contain a literal ${...}.
       ["`a (b) {c} ${fn({ d: 1 })}`"],
     );
   });

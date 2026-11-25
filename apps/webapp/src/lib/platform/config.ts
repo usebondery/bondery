@@ -140,9 +140,18 @@ export const ADDRESS_TYPE_OPTIONS: ReadonlyArray<{
     value: ContactAddressType;
   }> = [];
   for (const option of CONTACT_ADDRESS_TYPE_OPTIONS) {
+    const resolveLabel = () => {
+      if (option.value === "work") {
+        return "Work";
+      }
+      if (option.value === "other") {
+        return "Other";
+      }
+      return "Home";
+    };
     options.push({
       ...option,
-      label: option.value === "work" ? "Work" : option.value === "other" ? "Other" : "Home",
+      label: resolveLabel(),
     });
   }
   return options;

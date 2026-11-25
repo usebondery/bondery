@@ -63,6 +63,7 @@ export function SettingsAccountScreen() {
     }
   }
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Runs once by design, and React Compiler keeps the missing function stable.
   useEffect(() => {
     syncEffectState(() => {
       detachPromise(loadAccount());

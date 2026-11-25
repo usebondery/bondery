@@ -57,7 +57,7 @@ const mergeRequestsInFlight = new Set<string>();
 const mergeRequestsCompleted = new Set<string>();
 
 function mergeRequestKey(leftPersonId: string, rightPersonId: string): string {
-  return [leftPersonId, rightPersonId].toSorted((a, b) => (a < b ? -1 : a > b ? 1 : 0)).join(":");
+  return [leftPersonId, rightPersonId].toSorted((a, b) => Number(a > b) - Number(a < b)).join(":");
 }
 
 function MergeWithModalTitle() {
@@ -346,6 +346,7 @@ function MergeWithModal({
     rightPersonId,
     conflicts.length,
     isSubmitting,
+    // biome-ignore lint/correctness/useExhaustiveDependencies: React Compiler memoizes this function, which Biome cannot see.
     handleMerge,
   ]);
 

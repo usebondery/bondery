@@ -70,6 +70,12 @@ export function NavLinkItem({
     }),
   } as const;
 
+  const resolveValue = () => {
+    if (active) {
+      return "white";
+    }
+    return dimLabel ? "dimmed" : undefined;
+  };
   const innerContent = (
     <>
       <Indicator
@@ -85,7 +91,7 @@ export function NavLinkItem({
       {!collapsed ? (
         <>
           <Text
-            c={active ? "white" : dimLabel ? "dimmed" : undefined}
+            c={resolveValue()}
             fw={dimLabel ? undefined : 500}
             size="sm"
             style={{ flex: 1, lineHeight: 1.2, minWidth: 0 }}
@@ -104,6 +110,24 @@ export function NavLinkItem({
 
   // Button mode — UnstyledButton applies proper UA resets.
   // h={40} prevents rightSection content (e.g. Kbd) from inflating the row.
+  const resolveBackgroundColor2 = () => {
+    if (active) {
+      return "var(--mantine-primary-color-filled)";
+    }
+    if (hovered) {
+      return "var(--mantine-primary-color-light-hover)";
+    }
+    return "transparent";
+  };
+  const resolveBackgroundColor = () => {
+    if (active) {
+      return "var(--mantine-primary-color-filled)";
+    }
+    if (hovered) {
+      return "var(--mantine-primary-color-light-hover)";
+    }
+    return "transparent";
+  };
   const item = onClick ? (
     <UnstyledButton
       className={stateClassName}
@@ -112,11 +136,7 @@ export function NavLinkItem({
       ref={ref}
       style={{
         alignItems: "center",
-        backgroundColor: active
-          ? "var(--mantine-primary-color-filled)"
-          : hovered
-            ? "var(--mantine-primary-color-light-hover)"
-            : "transparent",
+        backgroundColor: resolveBackgroundColor(),
         color: active ? "white" : "inherit",
         display: "flex",
         gap: "var(--mantine-spacing-sm)",
@@ -136,11 +156,7 @@ export function NavLinkItem({
       ref={ref as Ref<HTMLDivElement>}
       renderRoot={(props) => <Link href={href} {...props} />}
       style={{
-        backgroundColor: active
-          ? "var(--mantine-primary-color-filled)"
-          : hovered
-            ? "var(--mantine-primary-color-light-hover)"
-            : "transparent",
+        backgroundColor: resolveBackgroundColor2(),
         color: active ? "white" : "inherit",
         textDecoration: "none",
         ...ITEM_PADDING,

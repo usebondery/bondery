@@ -25,6 +25,10 @@ After every change, run `pnpm run check:changed` before you report. It runs only
 
 Prefer a Biome rule for any code-structure rule (native rules first, GritQL plugins for custom patterns). Use a script only for what Biome cannot do: comment wording, rules scoped to the diff, commit messages and cross-file consistency.
 
+## Browser support: check, do not guess
+
+Never answer a browser-support question from memory. Run `pnpm exec caniuse <feature>` (`@bramus/caniuse-cli`, a root dev dependency) and read its table. Run `pnpm exec caniuse --update` when it reports old data. Use modern web APIs directly, with no fallback for a browser the table shows as unsupported by the browsers we target.
+
 ## Commits: commit means push
 
 When the user asks you to commit, commit and push the branch in the same step. Never push `main` or `master` without asking first. Report a failed push; do not retry it silently.

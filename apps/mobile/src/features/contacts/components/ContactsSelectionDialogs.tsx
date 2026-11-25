@@ -46,11 +46,13 @@ export function ContactsSelectionDialogs({
 
   function performDelete() {
     const selectionState = useContactsSelection.getState();
-    const scope = loadedGroupMembers
-      ? { loadedGroupMembers }
-      : filterGroupId
-        ? { groupId: filterGroupId }
-        : undefined;
+    const resolveScope = () => {
+      if (loadedGroupMembers) {
+        return { loadedGroupMembers };
+      }
+      return filterGroupId ? { groupId: filterGroupId } : undefined;
+    };
+    const scope = resolveScope();
     const personIds = resolveContactsSelectionPersonIds(selectionState, debouncedQuery, scope);
     deleteContacts(personIds);
   }

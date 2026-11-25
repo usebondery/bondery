@@ -128,27 +128,45 @@ export function UpcomingReminderCard({ reminder, onClick }: UpcomingReminderCard
   const sentAtLabel = reminder.notificationSentAt
     ? formatter.formatDateTime(new Date(reminder.notificationSentAt))
     : null;
-  const notificationLabel = isNotificationSent
-    ? t("NotificationSent")
-    : notificationInDays === 0
-      ? t("NotificationToday")
-      : notificationInDays === 1
-        ? t("NotificationTomorrow")
-        : t("NotificationInDays", { count: notificationInDays });
-  const notificationTooltip = isNotificationSent
-    ? sentAtLabel
-      ? t("NotificationTooltipSentAt", { sentAt: sentAtLabel })
-      : t("NotificationSent")
-    : notificationInDays === 0
-      ? t("NotificationTooltipToday")
-      : notificationInDays === 1
-        ? t("NotificationTooltipTomorrow")
-        : t("NotificationTooltipInDays", { count: notificationInDays });
-  const notificationAriaLabel = isNotificationSent
-    ? sentAtLabel
-      ? t("NotificationTooltipSentAt", { sentAt: sentAtLabel })
-      : t("NotificationSent")
-    : notificationLabel;
+  const resolveNotificationLabel = () => {
+    if (isNotificationSent) {
+      return t("NotificationSent");
+    }
+    if (notificationInDays === 0) {
+      return t("NotificationToday");
+    }
+    if (notificationInDays === 1) {
+      return t("NotificationTomorrow");
+    }
+    return t("NotificationInDays", { count: notificationInDays });
+  };
+  const notificationLabel = resolveNotificationLabel();
+  const resolveNotificationTooltip = () => {
+    if (isNotificationSent) {
+      if (sentAtLabel) {
+        return t("NotificationTooltipSentAt", { sentAt: sentAtLabel });
+      }
+      return t("NotificationSent");
+    }
+    if (notificationInDays === 0) {
+      return t("NotificationTooltipToday");
+    }
+    if (notificationInDays === 1) {
+      return t("NotificationTooltipTomorrow");
+    }
+    return t("NotificationTooltipInDays", { count: notificationInDays });
+  };
+  const notificationTooltip = resolveNotificationTooltip();
+  const resolveNotificationAriaLabel = () => {
+    if (isNotificationSent) {
+      if (sentAtLabel) {
+        return t("NotificationTooltipSentAt", { sentAt: sentAtLabel });
+      }
+      return t("NotificationSent");
+    }
+    return notificationLabel;
+  };
+  const notificationAriaLabel = resolveNotificationAriaLabel();
 
   return (
     <Card

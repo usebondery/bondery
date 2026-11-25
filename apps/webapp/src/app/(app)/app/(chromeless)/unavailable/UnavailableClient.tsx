@@ -61,6 +61,7 @@ export function UnavailableClient() {
 
   useEffect(() => {
     detachPromise(probeSession());
+    // biome-ignore lint/correctness/useExhaustiveDependencies: React Compiler memoizes this function, which Biome cannot see.
   }, [probeSession]);
 
   useEffect(() => {
@@ -79,6 +80,7 @@ export function UnavailableClient() {
     }, 1000);
 
     return () => clearInterval(countdown);
+    // biome-ignore lint/correctness/useExhaustiveDependencies: React Compiler memoizes this function, which Biome cannot see.
   }, [isNavigating, probeSession, sessionReachable]);
 
   const handleRetry = async () => {
@@ -98,12 +100,16 @@ export function UnavailableClient() {
 
   const isChecking = sessionReachable === null || isRetrying || isNavigating;
   const showPollCountdown = sessionReachable === false && !isChecking;
-  const statusLabel =
-    sessionReachable === true
-      ? t("StatusOnline")
-      : isChecking
-        ? t("StatusChecking")
-        : t("StatusOffline");
+  const resolveStatusLabel = () => {
+    if (sessionReachable === true) {
+      return t("StatusOnline");
+    }
+    if (isChecking) {
+      return t("StatusChecking");
+    }
+    return t("StatusOffline");
+  };
+  const statusLabel = resolveStatusLabel();
 
   const copyStack = (centered: boolean) => (
     <Stack align={centered ? "center" : "flex-start"} gap="sm">

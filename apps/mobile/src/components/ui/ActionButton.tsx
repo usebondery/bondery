@@ -96,6 +96,8 @@ function ActionButton({
     width: dimension,
   };
 
+  const content = loading ? <ActivityIndicator color={spinnerColor} size="small" /> : children;
+
   return (
     <AnimatedShell style={squeezeStyle}>
       <Pressable
@@ -132,7 +134,7 @@ function ActionButton({
         style={sharedStyle}
         testID={testID}
       >
-        {loading ? <ActivityIndicator color={spinnerColor} size="small" /> : <>{children}</>}
+        {content}
       </Pressable>
     </AnimatedShell>
   );

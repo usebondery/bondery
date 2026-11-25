@@ -306,6 +306,65 @@ export function InteractionsClient() {
     activities.length === 0 &&
     Boolean(listFilter.search || listFilter.start_date || listFilter.end_date);
 
+  const resolveValue = () => {
+    if (!interactionsData) {
+      if (isError) {
+        return (
+          <ShellScrollLoadMore
+            errorLabel={t("LoadMoreError")}
+            fallbackLabel={t("LoadMoreBatch")}
+            hasMore
+            isFetchingNextPage={false}
+            isFetchNextPageError
+            onLoadMore={() => {
+              detachPromise(refetch());
+            }}
+            retryLabel={t("LoadMoreRetry")}
+          />
+        );
+      }
+      return (
+        <Center>
+          <Loader />
+        </Center>
+      );
+    }
+    return (
+      <>
+        {filteredEmpty ? (
+          <Text c="dimmed" size="sm" ta="center">
+            {listFilter.search
+              ? t("NoMatchingSearch", { search: listFilter.search })
+              : t("NoMatchingActivities")}
+          </Text>
+        ) : (
+          <InteractionsList
+            actionsLabel={t("TableColumnActions")}
+            activities={sortedInteractionsActivities}
+            deleteLabel={t("DeleteAction")}
+            duplicateLabel={t("DuplicateAction")}
+            editLabel={t("EditAction")}
+            onDelete={handleDelete}
+            onDuplicate={handleDuplicate}
+            onEdit={handleActivityClick}
+            onOpen={handleActivityClick}
+            resolveParticipants={resolveParticipants}
+          />
+        )}
+        <ShellScrollLoadMore
+          errorLabel={t("LoadMoreError")}
+          fallbackLabel={t("LoadMoreBatch")}
+          hasMore={hasMore}
+          isFetchingNextPage={isFetchingNextPage}
+          isFetchNextPageError={isFetchNextPageError}
+          onLoadMore={() => {
+            detachPromise(fetchNextPage());
+          }}
+          retryLabel={t("LoadMoreRetry")}
+        />
+      </>
+    );
+  };
   return (
     <PageWrapper>
       <Stack gap="lg">
@@ -400,59 +459,7 @@ export function InteractionsClient() {
               </FilterMenuDropdown>
             </Popover>
           </Group>
-          {!interactionsData ? (
-            isError ? (
-              <ShellScrollLoadMore
-                errorLabel={t("LoadMoreError")}
-                fallbackLabel={t("LoadMoreBatch")}
-                hasMore
-                isFetchingNextPage={false}
-                isFetchNextPageError
-                onLoadMore={() => {
-                  detachPromise(refetch());
-                }}
-                retryLabel={t("LoadMoreRetry")}
-              />
-            ) : (
-              <Center>
-                <Loader />
-              </Center>
-            )
-          ) : (
-            <>
-              {filteredEmpty ? (
-                <Text c="dimmed" size="sm" ta="center">
-                  {listFilter.search
-                    ? t("NoMatchingSearch", { search: listFilter.search })
-                    : t("NoMatchingActivities")}
-                </Text>
-              ) : (
-                <InteractionsList
-                  actionsLabel={t("TableColumnActions")}
-                  activities={sortedInteractionsActivities}
-                  deleteLabel={t("DeleteAction")}
-                  duplicateLabel={t("DuplicateAction")}
-                  editLabel={t("EditAction")}
-                  onDelete={handleDelete}
-                  onDuplicate={handleDuplicate}
-                  onEdit={handleActivityClick}
-                  onOpen={handleActivityClick}
-                  resolveParticipants={resolveParticipants}
-                />
-              )}
-              <ShellScrollLoadMore
-                errorLabel={t("LoadMoreError")}
-                fallbackLabel={t("LoadMoreBatch")}
-                hasMore={hasMore}
-                isFetchingNextPage={isFetchingNextPage}
-                isFetchNextPageError={isFetchNextPageError}
-                onLoadMore={() => {
-                  detachPromise(fetchNextPage());
-                }}
-                retryLabel={t("LoadMoreRetry")}
-              />
-            </>
-          )}
+          {resolveValue()}
         </Stack>
       </Stack>
     </PageWrapper>

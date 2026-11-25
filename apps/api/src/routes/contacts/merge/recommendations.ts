@@ -71,12 +71,16 @@ export function registerRecommendationRoutes(fastify: AppFastifyInstance): void 
       const avatarOptions = extractAvatarOptions(request.query);
       const { limit, offset } = parsePagination(request.query);
       const declinedQuery = request.query?.declined;
-      const showDeclined =
-        typeof declinedQuery === "boolean"
-          ? declinedQuery
-          : typeof declinedQuery === "string"
-            ? declinedQuery.toLowerCase() === "true"
-            : false;
+      const resolveShowDeclined = () => {
+        if (typeof declinedQuery === "boolean") {
+          return declinedQuery;
+        }
+        if (typeof declinedQuery === "string") {
+          return declinedQuery.toLowerCase() === "true";
+        }
+        return false;
+      };
+      const showDeclined = resolveShowDeclined();
 
       const where = { isDeclined: showDeclined, userId: ctx.user.id };
 

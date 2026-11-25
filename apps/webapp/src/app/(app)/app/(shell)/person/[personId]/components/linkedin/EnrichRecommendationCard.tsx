@@ -57,6 +57,66 @@ export function EnrichRecommendationCard({
     await discard();
   };
 
+  const resolveValue2 = () => {
+    if (isRunning) {
+      return (
+        <Tooltip disabled={!isPausing} label={t("PausingTooltip")}>
+          <Box component="span" display="inline-block">
+            <Button
+              disabled={isPausing}
+              leftSection={<IconPlayerPause size={16} />}
+              onClick={pause}
+              variant="default"
+            >
+              {t("Pause")}
+            </Button>
+          </Box>
+        </Tooltip>
+      );
+    }
+    if (hasInterruptedRun) {
+      return (
+        <Group gap="xs" wrap="nowrap">
+          <Button leftSection={<IconTrash size={16} />} onClick={handleDiscard} variant="default">
+            {t("SkipRemaining")}
+          </Button>
+          <Button
+            color="blue"
+            leftSection={<IconPlayerPlayFilled size={16} />}
+            onClick={handleResume}
+          >
+            {t("Resume")}
+          </Button>
+        </Group>
+      );
+    }
+    return (
+      <Button
+        color="blue"
+        leftSection={
+          isLoading ? <Loader color="white" size={14} /> : <IconBrandLinkedin size={16} />
+        }
+        onClick={() => startForPerson(personId, linkedinHandle)}
+      >
+        {t("Enrich")}
+      </Button>
+    );
+  };
+  const resolveValue = () => {
+    if (isRunning) {
+      if (failed > 0) {
+        return t("ProgressLabelWithFailed", { completed, failed, totalEligible });
+      }
+      return t("ProgressLabel", { completed, totalEligible });
+    }
+    if (hasInterruptedRun && pendingQueueStatus) {
+      return t("ResumeLabel", {
+        completed: pendingQueueStatus.completed,
+        pending: pendingQueueStatus.pending,
+      });
+    }
+    return t("PersonEligibleLabel");
+  };
   return (
     <Paper
       p="md"
@@ -77,16 +137,7 @@ export function EnrichRecommendationCard({
             </Tooltip>
             <Group align="center" gap={4} wrap="nowrap">
               <Text fw={500} size="sm">
-                {isRunning
-                  ? failed > 0
-                    ? t("ProgressLabelWithFailed", { completed, failed, totalEligible })
-                    : t("ProgressLabel", { completed, totalEligible })
-                  : hasInterruptedRun && pendingQueueStatus
-                    ? t("ResumeLabel", {
-                        completed: pendingQueueStatus.completed,
-                        pending: pendingQueueStatus.pending,
-                      })
-                    : t("PersonEligibleLabel")}
+                {resolveValue()}
               </Text>
               <HelpButton
                 doc="bondery.chrome-extension.enriching-contact"
@@ -104,47 +155,7 @@ export function EnrichRecommendationCard({
             </Group>
           ) : null}
 
-          {isRunning ? (
-            <Tooltip disabled={!isPausing} label={t("PausingTooltip")}>
-              <Box component="span" display="inline-block">
-                <Button
-                  disabled={isPausing}
-                  leftSection={<IconPlayerPause size={16} />}
-                  onClick={pause}
-                  variant="default"
-                >
-                  {t("Pause")}
-                </Button>
-              </Box>
-            </Tooltip>
-          ) : hasInterruptedRun ? (
-            <Group gap="xs" wrap="nowrap">
-              <Button
-                leftSection={<IconTrash size={16} />}
-                onClick={handleDiscard}
-                variant="default"
-              >
-                {t("SkipRemaining")}
-              </Button>
-              <Button
-                color="blue"
-                leftSection={<IconPlayerPlayFilled size={16} />}
-                onClick={handleResume}
-              >
-                {t("Resume")}
-              </Button>
-            </Group>
-          ) : (
-            <Button
-              color="blue"
-              leftSection={
-                isLoading ? <Loader color="white" size={14} /> : <IconBrandLinkedin size={16} />
-              }
-              onClick={() => startForPerson(personId, linkedinHandle)}
-            >
-              {t("Enrich")}
-            </Button>
-          )}
+          {resolveValue2()}
         </Group>
 
         {isRunning && totalEligible > 0 ? (

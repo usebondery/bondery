@@ -210,6 +210,39 @@ function AddGroupForm({
     }
   };
 
+  const resolveValue = () => {
+    if (isLoadingContacts) {
+      return (
+        <Center py="xs">
+          <Loader size="sm" />
+        </Center>
+      );
+    }
+    if (contacts.length === 0) {
+      return (
+        <Text c="dimmed" size="sm">
+          {t("AddGroupModal.NoContactsFound")}
+        </Text>
+      );
+    }
+    return (
+      <PeopleMultiPickerInput
+        contacts={contacts as Contact[]}
+        contactsHasMore={contactsData?.pagination.hasMore ?? false}
+        disabled={isBlocking}
+        loadingMoreLabel={t("AddGroupModal.LoadingMoreLabel")}
+        loadMoreErrorLabel={t("AddGroupModal.LoadMoreError")}
+        loadMoreRetryLabel={t("AddGroupModal.LoadMoreRetry")}
+        noResultsLabel={t("AddGroupModal.NoContactsFound")}
+        onChange={setSelectedIds}
+        onSearch={searchContactsPage}
+        placeholder={t("AddGroupModal.AddContactsPlaceholder")}
+        searchDebounceMs={DEBOUNCE_MS.search}
+        searchingLabel={t("AddGroupModal.SearchingLabel")}
+        selectedIds={selectedIds}
+      />
+    );
+  };
   return (
     <form onSubmit={form.onSubmit(handleSubmit)}>
       <Stack gap="md">
@@ -258,31 +291,7 @@ function AddGroupForm({
             {t("AddGroupModal.AddPeople")}
           </Text>
 
-          {isLoadingContacts ? (
-            <Center py="xs">
-              <Loader size="sm" />
-            </Center>
-          ) : contacts.length === 0 ? (
-            <Text c="dimmed" size="sm">
-              {t("AddGroupModal.NoContactsFound")}
-            </Text>
-          ) : (
-            <PeopleMultiPickerInput
-              contacts={contacts as Contact[]}
-              contactsHasMore={contactsData?.pagination.hasMore ?? false}
-              disabled={isBlocking}
-              loadingMoreLabel={t("AddGroupModal.LoadingMoreLabel")}
-              loadMoreErrorLabel={t("AddGroupModal.LoadMoreError")}
-              loadMoreRetryLabel={t("AddGroupModal.LoadMoreRetry")}
-              noResultsLabel={t("AddGroupModal.NoContactsFound")}
-              onChange={setSelectedIds}
-              onSearch={searchContactsPage}
-              placeholder={t("AddGroupModal.AddContactsPlaceholder")}
-              searchDebounceMs={DEBOUNCE_MS.search}
-              searchingLabel={t("AddGroupModal.SearchingLabel")}
-              selectedIds={selectedIds}
-            />
-          )}
+          {resolveValue()}
         </Stack>
 
         <ModalFooter

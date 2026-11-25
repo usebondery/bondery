@@ -230,7 +230,7 @@ for (const locale of LOCALES) {
       missing.push(full);
     }
   }
-  missing.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  missing.sort((a, b) => Number(a > b) - Number(a < b));
   console.log(`\nUsed keys missing for ${locale}: ${missing.length}`);
   for (const key of missing.slice(0, 30)) {
     console.log(`  ${key}`);

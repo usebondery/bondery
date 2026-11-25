@@ -264,6 +264,15 @@ export function SocialLoginCard({
     </Tooltip>
   );
 
+  const resolveValue = () => {
+    if (resendSeconds > 0) {
+      return t("ResendInSeconds", { seconds: resendSeconds });
+    }
+    if (awaitingVerify) {
+      return t("ResendSignInLink");
+    }
+    return t("ContinueWithEmail");
+  };
   const lockedEmailButton = (
     <CornerLabeledButton
       className={styles.filledButton}
@@ -287,11 +296,7 @@ export function SocialLoginCard({
       type="button"
       variant="filled"
     >
-      {resendSeconds > 0
-        ? t("ResendInSeconds", { seconds: resendSeconds })
-        : awaitingVerify
-          ? t("ResendSignInLink")
-          : t("ContinueWithEmail")}
+      {resolveValue()}
     </CornerLabeledButton>
   );
 
@@ -310,6 +315,15 @@ export function SocialLoginCard({
     ? t("AuthorizationWindowInvalidBody")
     : (description ?? t("Description"));
 
+  const resolveValue2 = () => {
+    if (resendSeconds > 0) {
+      return t("ResendInSeconds", { seconds: resendSeconds });
+    }
+    if (awaitingVerify) {
+      return t("ResendSignInLink");
+    }
+    return t("SendLoginLink");
+  };
   return (
     <LoginBrandShell leftContent={leftContent} loading={loading} websiteUrl={websiteUrl}>
       <Stack gap="lg">
@@ -376,11 +390,7 @@ export function SocialLoginCard({
                 type="submit"
                 variant="filled"
               >
-                {resendSeconds > 0
-                  ? t("ResendInSeconds", { seconds: resendSeconds })
-                  : awaitingVerify
-                    ? t("ResendSignInLink")
-                    : t("SendLoginLink")}
+                {resolveValue2()}
               </CornerLabeledButton>
               <Button
                 data-testid="login-email-back"

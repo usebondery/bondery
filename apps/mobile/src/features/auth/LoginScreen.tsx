@@ -103,6 +103,7 @@ export default function LoginScreen() {
     }
 
     showAuthError(tLoginPage("AuthenticationError"), tMobileAuth("MissingConfig"));
+    // biome-ignore lint/correctness/useExhaustiveDependencies: React Compiler memoizes this function, which Biome cannot see.
   }, [tLoginPage, tMobileAuth, showAuthError]);
 
   useEffect(() => {
@@ -132,6 +133,7 @@ export default function LoginScreen() {
       tLoginPage("AuthenticationError"),
       getAuthUserFacingError({ code: queryError }, tCommon),
     );
+    // biome-ignore lint/correctness/useExhaustiveDependencies: React Compiler memoizes this function, which Biome cannot see.
   }, [params.error, tCommon, tLoginPage, showAuthError]);
 
   useEffect(() => {

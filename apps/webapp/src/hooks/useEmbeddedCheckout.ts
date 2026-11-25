@@ -119,6 +119,7 @@ export function useEmbeddedCheckout({
     () => () => {
       closeCheckout();
     },
+    // biome-ignore lint/correctness/useExhaustiveDependencies: React Compiler memoizes this function, which Biome cannot see.
     [closeCheckout],
   );
 

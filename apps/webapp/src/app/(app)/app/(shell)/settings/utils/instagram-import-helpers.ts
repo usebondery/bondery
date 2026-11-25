@@ -70,22 +70,32 @@ export function sortInstagramContactsForPreview(
   return contacts
     .map((contact, index) => ({ contact, index }))
     .sort((left, right) => {
-      const leftRank =
-        left.contact.isValid && left.contact.likelyPerson && !left.contact.alreadyExists
-          ? 0
-          : left.contact.isValid && !left.contact.likelyPerson && !left.contact.alreadyExists
-            ? 1
-            : left.contact.alreadyExists
-              ? 2
-              : 3;
-      const rightRank =
-        right.contact.isValid && right.contact.likelyPerson && !right.contact.alreadyExists
-          ? 0
-          : right.contact.isValid && !right.contact.likelyPerson && !right.contact.alreadyExists
-            ? 1
-            : right.contact.alreadyExists
-              ? 2
-              : 3;
+      const resolveLeftRank = () => {
+        if (left.contact.isValid && left.contact.likelyPerson && !left.contact.alreadyExists) {
+          return 0;
+        }
+        if (left.contact.isValid && !left.contact.likelyPerson && !left.contact.alreadyExists) {
+          return 1;
+        }
+        if (left.contact.alreadyExists) {
+          return 2;
+        }
+        return 3;
+      };
+      const leftRank = resolveLeftRank();
+      const resolveRightRank = () => {
+        if (right.contact.isValid && right.contact.likelyPerson && !right.contact.alreadyExists) {
+          return 0;
+        }
+        if (right.contact.isValid && !right.contact.likelyPerson && !right.contact.alreadyExists) {
+          return 1;
+        }
+        if (right.contact.alreadyExists) {
+          return 2;
+        }
+        return 3;
+      };
+      const rightRank = resolveRightRank();
 
       if (leftRank !== rightRank) {
         return leftRank - rightRank;

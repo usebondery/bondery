@@ -43,6 +43,7 @@ export function DocumentTitleProvider({ children }: { children: ReactNode }) {
     if (optimistic) {
       clearOptimisticDocumentTitle();
     }
+    // biome-ignore lint/correctness/useExhaustiveDependencies: React Compiler memoizes this function, which Biome cannot see.
   }, [resolveTitle]);
 
   const setEntityTitle = (name: string) => {

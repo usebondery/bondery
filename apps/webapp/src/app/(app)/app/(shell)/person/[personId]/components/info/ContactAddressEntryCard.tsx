@@ -112,20 +112,25 @@ export function ContactAddressEntryCard({
             disabled={isSaving}
             onChange={(value) =>
               onSetAddresses(
-                addresses.map((address) =>
-                  address.id === entry.id
-                    ? value === address.value
-                      ? address
-                      : {
-                          ...address,
-                          addressFormatted: null,
-                          addressGeocodeSource: "manual",
-                          latitude: null,
-                          longitude: null,
-                          value,
-                        }
-                    : address,
-                ),
+                addresses.map((address) => {
+                  const resolveValue = (): EditableAddress => {
+                    if (address.id === entry.id) {
+                      if (value === address.value) {
+                        return address;
+                      }
+                      return {
+                        ...address,
+                        addressFormatted: null,
+                        addressGeocodeSource: "manual",
+                        latitude: null,
+                        longitude: null,
+                        value,
+                      };
+                    }
+                    return address;
+                  };
+                  return resolveValue();
+                }),
               )
             }
             onSuggestionSelect={(selected) => {

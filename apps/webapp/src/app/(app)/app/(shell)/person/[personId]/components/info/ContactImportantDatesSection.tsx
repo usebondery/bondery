@@ -70,15 +70,21 @@ export function ContactImportantDatesSection({
     return options;
   };
 
-  const notifyOptions = IMPORTANT_DATE_NOTIFY_OPTIONS.map((option) => ({
-    label:
-      option.value === "none"
-        ? t("NotifyNone")
-        : Number(option.value) === 1
-          ? t("NotifyDayBefore", { count: Number(option.value) })
-          : t("NotifyDaysBefore", { count: Number(option.value) }),
-    value: option.value,
-  }));
+  const notifyOptions = IMPORTANT_DATE_NOTIFY_OPTIONS.map((option) => {
+    const resolveLabel = () => {
+      if (option.value === "none") {
+        return t("NotifyNone");
+      }
+      if (Number(option.value) === 1) {
+        return t("NotifyDayBefore", { count: Number(option.value) });
+      }
+      return t("NotifyDaysBefore", { count: Number(option.value) });
+    };
+    return {
+      label: resolveLabel(),
+      value: option.value,
+    };
+  });
 
   const isLimitReached = localDates.length >= CONTACT_LIMITS.maxImportantDates;
 

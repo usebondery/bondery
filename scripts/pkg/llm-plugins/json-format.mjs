@@ -16,7 +16,7 @@ function sortValue(value) {
   }
   if (value && typeof value === "object") {
     const out = {};
-    for (const key of Object.keys(value).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))) {
+    for (const key of Object.keys(value).sort((a, b) => Number(a > b) - Number(a < b))) {
       out[key] = sortValue(value[key]);
     }
     return out;

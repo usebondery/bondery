@@ -176,7 +176,13 @@ export function createFakeClient(seed: {
         if (byLast !== 0) {
           return byLast;
         }
-        return left.id < right.id ? -1 : left.id > right.id ? 1 : 0;
+        if (left.id < right.id) {
+          return -1;
+        }
+        if (left.id > right.id) {
+          return 1;
+        }
+        return 0;
       });
       return take === undefined ? sorted : sorted.slice(0, take);
     },
@@ -199,7 +205,13 @@ export function createFakeClient(seed: {
           if (byTime !== 0) {
             return byTime;
           }
-          return left.id < right.id ? -1 : left.id > right.id ? 1 : 0;
+          if (left.id < right.id) {
+            return -1;
+          }
+          if (left.id > right.id) {
+            return 1;
+          }
+          return 0;
         });
       return take === undefined ? rows : rows.slice(0, take);
     },

@@ -74,8 +74,16 @@ export function entrySyncsToDokployTarget(entry: EnvVarDef, target: DokploySyncT
     return true;
   }
 
-  const inheritedTarget =
-    target === "website-beta" ? "website" : target === "services-beta" ? "services" : null;
+  const resolveInheritedTarget = () => {
+    if (target === "website-beta") {
+      return "website";
+    }
+    if (target === "services-beta") {
+      return "services";
+    }
+    return null;
+  };
+  const inheritedTarget = resolveInheritedTarget();
   if (inheritedTarget && syncTargets?.includes(inheritedTarget)) {
     return true;
   }

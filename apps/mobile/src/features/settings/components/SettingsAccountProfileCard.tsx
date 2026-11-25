@@ -58,11 +58,16 @@ export function SettingsAccountProfileCard({
   fallbackName,
   fallbackAvatarUrl,
 }: SettingsAccountProfileCardProps) {
-  const profileContact = contact
-    ? contact
-    : fallbackName?.trim()
-      ? buildFallbackContact(fallbackName)
-      : null;
+  const resolveProfileContact = () => {
+    if (contact) {
+      return contact;
+    }
+    if (fallbackName?.trim()) {
+      return buildFallbackContact(fallbackName);
+    }
+    return null;
+  };
+  const profileContact = resolveProfileContact();
 
   const displayName = profileContact ? formatContactName(profileContact) : null;
   const avatarUrl = contact?.avatar ?? fallbackAvatarUrl ?? null;

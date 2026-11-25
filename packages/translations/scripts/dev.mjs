@@ -82,7 +82,7 @@ function main() {
   function scanLocales() {
     const files = [];
     walkLocaleJson(srcLocales, files);
-    files.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+    files.sort((a, b) => Number(a > b) - Number(a < b));
     const map = new Map();
     for (const file of files) {
       map.set(file, fingerprintOf(file));

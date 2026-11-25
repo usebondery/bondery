@@ -78,11 +78,16 @@ function ContactNotesEditor({ id, isMyselfMode = false }: ContactNotesEditorProp
   const { slashState, handleChangeText, handleChangeSelection, clearSlash } =
     useSlashCommandDetection();
 
-  const paletteMode: EditorPaletteMode = mentionActive
-    ? "mention"
-    : slashState?.isActive
-      ? "slash"
-      : "closed";
+  const resolvePaletteMode = (): EditorPaletteMode => {
+    if (mentionActive) {
+      return "mention";
+    }
+    if (slashState?.isActive) {
+      return "slash";
+    }
+    return "closed";
+  };
+  const paletteMode = resolvePaletteMode();
 
   const mentionResults = filterContacts(mentionQuery);
 

@@ -58,6 +58,9 @@ importers:
       '@bondery/schemas':
         specifier: workspace:*
         version: link:packages/schemas
+      '@bramus/caniuse-cli':
+        specifier: ^2.2.0
+        version: 2.2.0
       '@redocly/cli':
         specifier: ^2.79.0
         version: 2.79.0
@@ -2232,6 +2235,10 @@ packages:
     engines: {node: '>=14.21.3'}
     cpu: [x64]
     os: [win32]
+
+  '@bramus/caniuse-cli@2.2.0':
+    resolution: {integrity: sha512-1UPIfch53UnG9K7+/d8PejrDBock1Z9eZC35VWZxhxCmO9RQHpM6LTF7PDZr+wq5OUwHbJN6fcprc6qb98moew==}
+    hasBin: true
 
   '@corvu/utils@0.4.2':
     resolution: {integrity: sha512-Ox2kYyxy7NoXdKWdHeDEjZxClwzO4SKM8plAaVwmAJPxHMqA0rLOoAsa+hBDwRLpctf+ZRnAd/ykguuJidnaTA==}
@@ -6450,6 +6457,9 @@ packages:
     resolution: {integrity: sha512-8WB3Jcas3swSvjIeA2yvCJ+Miyz5l1ZmB6HFb9R1317dt9LCQoswg/BGrmAmkWVEszSrrg4RwmO46qIm2OEnSA==}
     engines: {node: '>=16'}
 
+  caniuse-db@1.0.30001828:
+    resolution: {integrity: sha512-sTmC74+gNGHD0cc7Okb6s9NYG1MMGFDtbBaac/xGV+Y8KNfR0p+aUVO14OhtQ3Kp2Lhvpu+iVzmozmEKS1VYEw==}
+
   caniuse-lite@1.0.30001814:
     resolution: {integrity: sha512-/Uaf1lAzr59XcMpW0o96WoEfr+VXK2OX4U9AgFoiSHsVJ4HppnIFUjtYzsyDH2+tgANaQb2/oxYGwCPapN1FpA==}
 
@@ -9750,6 +9760,10 @@ packages:
   ohash@2.0.12:
     resolution: {integrity: sha512-65S/5gk9YSsaRjcyf7Nfa6h/d3E8/1gslpXfI4W7Dxn/oap8IKRuNT5VXkLQ1YFKIEg4apRY4Pj6aiwFzrDdmw==}
 
+  omelette@0.4.17:
+    resolution: {integrity: sha512-UlU69G6Bhu0XFjw3tjFZ0qyiMUjAOR+rdzblA1nLQ8xiqFtxOVlkhM39BlgTpLFx9fxkm6rnxNNRsS5GxE/yww==}
+    engines: {node: '>=0.8.0'}
+
   on-exit-leak-free@2.1.2:
     resolution: {integrity: sha512-0eJJY6hXLGf1udHwfNftBqH+g73EU4B504nZeKpz1sYRKafAghwxEJunB2O7rDZkL4PGfsMVnTXZ2EjibbqcsA==}
     engines: {node: '>=14.0.0'}
@@ -11716,6 +11730,9 @@ packages:
     engines: {node: '>=20.0.0', npm: '>=8.0.0'}
     hasBin: true
 
+  web-features@3.47.0:
+    resolution: {integrity: sha512-sD8j2ZQrev47vR5AGtT8gAJWk2+COnbTcopAI+UPo/+kXQClkPfhTWKnTlVOZhZnmH1bA5exPLhNeMtk6l3Ifg==}
+
   web-namespaces@2.0.1:
     resolution: {integrity: sha512-bKr1DkiNa2krS7qxNtdrtHAmzuYGFQLiQ13TsorsdT6ULTkPLKuu5+GsFpDlg6JFjUTwX2DyhMPG2be8uPrqsQ==}
 
@@ -12925,6 +12942,13 @@ snapshots:
 
   '@biomejs/cli-win32-x64@2.6.8':
     optional: true
+
+  '@bramus/caniuse-cli@2.2.0':
+    dependencies:
+      '@mdn/browser-compat-data': 8.1.4
+      caniuse-db: 1.0.30001828
+      omelette: 0.4.17
+      web-features: 3.47.0
 
   '@corvu/utils@0.4.2(solid-js@1.9.15)':
     dependencies:
@@ -17220,6 +17244,8 @@ snapshots:
 
   camelcase@8.0.0: {}
 
+  caniuse-db@1.0.30001828: {}
+
   caniuse-lite@1.0.30001814: {}
 
   ccount@2.0.1: {}
@@ -20967,6 +20993,8 @@ snapshots:
 
   ohash@2.0.12: {}
 
+  omelette@0.4.17: {}
+
   on-exit-leak-free@2.1.2: {}
 
   on-finished@2.3.0:
@@ -23123,6 +23151,8 @@ snapshots:
       - jiti
       - safe-compare
       - supports-color
+
+  web-features@3.47.0: {}
 
   web-namespaces@2.0.1: {}
 

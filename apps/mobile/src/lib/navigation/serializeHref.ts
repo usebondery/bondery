@@ -11,7 +11,7 @@ export function serializeHref(href: Href): string {
   if (typeof href === "object" && href !== null && "pathname" in href) {
     const record = href as { params?: Record<string, unknown>; pathname: string };
     const params = record.params ?? {};
-    const keys = Object.keys(params).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+    const keys = Object.keys(params).sort((a, b) => Number(a > b) - Number(a < b));
     if (keys.length === 0) {
       return record.pathname;
     }

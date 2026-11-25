@@ -126,6 +126,73 @@ export function FixClient() {
 
   const isRefreshing = isListFetching || refreshMutation.isPending;
 
+  const resolveValue = () => {
+    if (recommendations === null || recommendations === undefined) {
+      return null;
+    }
+    if (recommendations.length === 0) {
+      return (
+        <Paper p="md" radius="md" withBorder>
+          <Text c="dimmed" size="sm">
+            {showDeclined ? t("DeclinedEmpty") : t("Empty")}
+          </Text>
+        </Paper>
+      );
+    }
+    return (
+      <Stack gap="sm">
+        {recommendations.map((recommendation) =>
+          showDeclined ? (
+            <Paper
+              className={classes["card"]}
+              key={recommendation.id}
+              p="md"
+              radius="md"
+              withBorder
+            >
+              <div className={classes["pair"]}>
+                <div className={classes["person"]}>
+                  <PersonChip
+                    isClickable
+                    person={recommendation.leftPerson}
+                    prefetch={false}
+                    truncate
+                  />
+                </div>
+                <Text c="dimmed" className={classes["label"]} fw={500} size="sm">
+                  {tMerge("MergeWithLabel")}
+                </Text>
+                <div className={classes["person"]}>
+                  <PersonChip
+                    isClickable
+                    person={recommendation.rightPerson}
+                    prefetch={false}
+                    truncate
+                  />
+                </div>
+              </div>
+              <div className={classes["actions"]}>
+                <Button
+                  leftSection={<IconRefresh size={16} />}
+                  loading={restoringIds.has(recommendation.id)}
+                  onClick={() => detachPromise(handleRestore(recommendation.id))}
+                  variant="default"
+                >
+                  {t("RestoreSuggestion")}
+                </Button>
+              </div>
+            </Paper>
+          ) : (
+            <MergeRecommendationCard
+              contacts={[recommendation.leftPerson, recommendation.rightPerson]}
+              key={recommendation.id}
+              recommendation={recommendation}
+            />
+          ),
+        )}
+      </Stack>
+    );
+  };
   return (
     <PageWrapper>
       <Stack gap="xl">
@@ -177,66 +244,7 @@ export function FixClient() {
           <EnrichRecommendationCard eligibleCount={eligibleCount} queueStatus={queueStatus} />
         )}
 
-        {recommendations === null ||
-        recommendations === undefined ? null : recommendations.length === 0 ? (
-          <Paper p="md" radius="md" withBorder>
-            <Text c="dimmed" size="sm">
-              {showDeclined ? t("DeclinedEmpty") : t("Empty")}
-            </Text>
-          </Paper>
-        ) : (
-          <Stack gap="sm">
-            {recommendations.map((recommendation) =>
-              showDeclined ? (
-                <Paper
-                  className={classes["card"]}
-                  key={recommendation.id}
-                  p="md"
-                  radius="md"
-                  withBorder
-                >
-                  <div className={classes["pair"]}>
-                    <div className={classes["person"]}>
-                      <PersonChip
-                        isClickable
-                        person={recommendation.leftPerson}
-                        prefetch={false}
-                        truncate
-                      />
-                    </div>
-                    <Text c="dimmed" className={classes["label"]} fw={500} size="sm">
-                      {tMerge("MergeWithLabel")}
-                    </Text>
-                    <div className={classes["person"]}>
-                      <PersonChip
-                        isClickable
-                        person={recommendation.rightPerson}
-                        prefetch={false}
-                        truncate
-                      />
-                    </div>
-                  </div>
-                  <div className={classes["actions"]}>
-                    <Button
-                      leftSection={<IconRefresh size={16} />}
-                      loading={restoringIds.has(recommendation.id)}
-                      onClick={() => detachPromise(handleRestore(recommendation.id))}
-                      variant="default"
-                    >
-                      {t("RestoreSuggestion")}
-                    </Button>
-                  </div>
-                </Paper>
-              ) : (
-                <MergeRecommendationCard
-                  contacts={[recommendation.leftPerson, recommendation.rightPerson]}
-                  key={recommendation.id}
-                  recommendation={recommendation}
-                />
-              ),
-            )}
-          </Stack>
-        )}
+        {resolveValue()}
       </Stack>
     </PageWrapper>
   );

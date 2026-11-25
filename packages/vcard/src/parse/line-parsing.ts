@@ -142,7 +142,7 @@ export function unfoldLines(input: string): string[] {
     }
 
     // vCard 2.1 quoted-printable soft line break: previous line ends with '='
-    if (previous !== undefined && previous.endsWith("=") && isQuotedPrintableLine(previous)) {
+    if (previous?.endsWith("=") && isQuotedPrintableLine(previous)) {
       // Remove trailing '=' and append current line
       logicalLines.pop();
       logicalLines.push(previous.slice(0, -1) + line);

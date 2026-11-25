@@ -24,12 +24,16 @@ const reactAlias = {
   "react-dom": path.join(extensionRoot, "node_modules/react-dom"),
 };
 const isCi = process.env["GITHUB_ACTIONS"] === "true" || process.env["CI"] === "true";
-const extensionFlavor =
-  process.env["BONDERY_EXTENSION_FLAVOR"] === "production"
-    ? "production"
-    : process.env["BONDERY_EXTENSION_FLAVOR"] === "staging"
-      ? "staging"
-      : "local";
+const resolveExtensionFlavor = () => {
+  if (process.env["BONDERY_EXTENSION_FLAVOR"] === "production") {
+    return "production";
+  }
+  if (process.env["BONDERY_EXTENSION_FLAVOR"] === "staging") {
+    return "staging";
+  }
+  return "local";
+};
+const extensionFlavor = resolveExtensionFlavor();
 const includeManifestKey = extensionFlavor !== "production";
 
 // Helper to extract origin from URL for host permissions

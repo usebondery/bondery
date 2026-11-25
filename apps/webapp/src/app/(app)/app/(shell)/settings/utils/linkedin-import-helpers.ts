@@ -23,18 +23,26 @@ export function sortLinkedInContactsForPreview(
   return contacts
     .map((contact, index) => ({ contact, index }))
     .sort((left, right) => {
-      const leftRank =
-        left.contact.isValid && !left.contact.alreadyExists
-          ? 0
-          : left.contact.alreadyExists
-            ? 1
-            : 2;
-      const rightRank =
-        right.contact.isValid && !right.contact.alreadyExists
-          ? 0
-          : right.contact.alreadyExists
-            ? 1
-            : 2;
+      const resolveLeftRank = () => {
+        if (left.contact.isValid && !left.contact.alreadyExists) {
+          return 0;
+        }
+        if (left.contact.alreadyExists) {
+          return 1;
+        }
+        return 2;
+      };
+      const leftRank = resolveLeftRank();
+      const resolveRightRank = () => {
+        if (right.contact.isValid && !right.contact.alreadyExists) {
+          return 0;
+        }
+        if (right.contact.alreadyExists) {
+          return 1;
+        }
+        return 2;
+      };
+      const rightRank = resolveRightRank();
 
       if (leftRank !== rightRank) {
         return leftRank - rightRank;

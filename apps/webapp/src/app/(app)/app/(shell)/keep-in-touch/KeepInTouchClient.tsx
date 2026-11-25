@@ -251,13 +251,19 @@ export function KeepInTouchClient({ endDate }: KeepInTouchClientProps) {
             contact.lastInteraction,
             contact.keepFrequencyDays,
           );
-          const dateTooltip = !nextDueDate
-            ? undefined
-            : isOverdue
-              ? t("OverdueBy", { days: Math.abs(contact.daysUntilDue) })
-              : contact.daysUntilDue === 0
-                ? t("DueToday")
-                : t("DueIn", { days: contact.daysUntilDue });
+          const resolveDateTooltip = () => {
+            if (!nextDueDate) {
+              return;
+            }
+            if (isOverdue) {
+              return t("OverdueBy", { days: Math.abs(contact.daysUntilDue) });
+            }
+            if (contact.daysUntilDue === 0) {
+              return t("DueToday");
+            }
+            return t("DueIn", { days: contact.daysUntilDue });
+          };
+          const dateTooltip = resolveDateTooltip();
           const relativeLastMet = (() => {
             if (!contact.lastInteraction) {
               return null;
@@ -276,6 +282,15 @@ export function KeepInTouchClient({ endDate }: KeepInTouchClientProps) {
             return isToday ? "today" : formatter.relativeTime(d, today);
           })();
 
+          const resolveValue = () => {
+            if (relativeLastMet === "today") {
+              return t("LastMetToday");
+            }
+            if (relativeLastMet) {
+              return t("LastMetRelative", { time: relativeLastMet });
+            }
+            return t("LastMetNever");
+          };
           return (
             <Paper key={contact.id} p="sm" radius="md" withBorder>
               <Group align="center" justify="space-between" wrap="nowrap">
@@ -302,11 +317,7 @@ export function KeepInTouchClient({ endDate }: KeepInTouchClientProps) {
                     size="md"
                   />
                   <Text c="dimmed" size="xs" style={{ flexShrink: 0 }}>
-                    {relativeLastMet === "today"
-                      ? t("LastMetToday")
-                      : relativeLastMet
-                        ? t("LastMetRelative", { time: relativeLastMet })
-                        : t("LastMetNever")}
+                    {resolveValue()}
                   </Text>
                 </Group>
 

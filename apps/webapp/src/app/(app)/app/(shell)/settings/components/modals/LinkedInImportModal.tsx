@@ -135,6 +135,7 @@ export function LinkedInImportModal({
     closeModal();
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: step and isImporting are triggers: re-apply the modal chrome after each step change.
   useEffect(() => {
     modals.updateModal({
       modalId,

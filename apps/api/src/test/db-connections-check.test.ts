@@ -54,6 +54,7 @@ describe("check-db-connections rules", () => {
 
   it("rejects libpq TLS parameters that Prisma ignores silently", () => {
     const source =
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: the text is a fixture that must contain a literal ${...}.
       "const url = `${base}?sslmode=verify-full&sslrootcert=/ca.crt`;\nexport default defineConfig({ datasource: { url: prismaCliUrl(url) } });";
     assert.match(
       findDbConnectionViolations(source, "packages/db/prisma.config.ts")[0]?.message ?? "",

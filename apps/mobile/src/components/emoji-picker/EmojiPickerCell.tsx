@@ -24,19 +24,26 @@ function EmojiPickerCell({ item, cellSize, isSelected, onPress }: EmojiPickerCel
       accessibilityState={{ selected: isSelected }}
       hitSlop={EMOJI_PICKER_LAYOUT.cellHitSlop}
       onPress={() => onPress(item.emoji)}
-      style={({ pressed }) => [
-        styles.cell,
-        {
-          backgroundColor: pressed
-            ? colors.surfacePressed
-            : isSelected
-              ? colorWithAlpha(colors.primary, MOBILE_OPACITY.selectedTint)
-              : colors.inputBackground,
-          borderColor: isSelected ? colors.primary : colors.borderStrong,
-          height: cellSize,
-          width: cellSize,
-        },
-      ]}
+      style={({ pressed }) => {
+        const resolveBackgroundColor = () => {
+          if (pressed) {
+            return colors.surfacePressed;
+          }
+          if (isSelected) {
+            return colorWithAlpha(colors.primary, MOBILE_OPACITY.selectedTint);
+          }
+          return colors.inputBackground;
+        };
+        return [
+          styles.cell,
+          {
+            backgroundColor: resolveBackgroundColor(),
+            borderColor: isSelected ? colors.primary : colors.borderStrong,
+            height: cellSize,
+            width: cellSize,
+          },
+        ];
+      }}
     >
       <Text style={styles.emoji}>{item.emoji}</Text>
     </Pressable>

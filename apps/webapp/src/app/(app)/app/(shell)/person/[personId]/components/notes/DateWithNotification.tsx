@@ -71,6 +71,19 @@ export default function DateWithNotification({
   const dateFieldName = fieldPrefix ? `${fieldPrefix}-date` : "date";
   const nameFieldName = fieldPrefix ? `${fieldPrefix}-name` : "name";
 
+  const resolveValue = () => {
+    if (saving && focusedField === nameFieldName) {
+      return <Loader size="xs" />;
+    }
+    if (focusedField === nameFieldName) {
+      return (
+        <Text c="dimmed" size="10px">
+          {nameValue.length}/{INPUT_MAX_LENGTHS.dateName}
+        </Text>
+      );
+    }
+    return null;
+  };
   return (
     <div>
       <Text fw={600} mb="xs" size="sm">
@@ -96,15 +109,7 @@ export default function DateWithNotification({
             onChange={(e) => onNameChange?.(e.target.value)}
             onFocus={() => onFocus?.(nameFieldName)}
             placeholder={nameLabel}
-            rightSection={
-              saving && focusedField === nameFieldName ? (
-                <Loader size="xs" />
-              ) : focusedField === nameFieldName ? (
-                <Text c="dimmed" size="10px">
-                  {nameValue.length}/{INPUT_MAX_LENGTHS.dateName}
-                </Text>
-              ) : null
-            }
+            rightSection={resolveValue()}
             style={{ flex: 1 }}
             value={nameValue}
           />

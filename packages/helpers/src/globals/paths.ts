@@ -180,7 +180,7 @@ export const CHROME_EXTENSION_URL =
  * production git tag — never the version being shipped, never Chrome 4-part.
  * Do not hand-edit. Set to "0.0.0" only to disable enforcement locally.
  */
-export const MIN_EXTENSION_VERSION: string = "1.11.2";
+export const MIN_EXTENSION_VERSION: string = "1.11.4";
 
 /** One-shot account-delete nonce. Browser → BFF and BFF → API must forward it. */
 export const BONDERY_STEP_UP_HEADER = "X-Bondery-Step-Up" as const;

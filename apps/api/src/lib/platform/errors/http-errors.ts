@@ -14,16 +14,20 @@ export function forbidden(
   return new DomainError(message, 403, code, undefined, details);
 }
 
-export function badRequest(message: string, code: ApiErrorCode): DomainError {
-  return new DomainError(message, 400, code);
+export function badRequest(message: string, code: ApiErrorCode, cause?: unknown): DomainError {
+  return new DomainError(message, 400, code, cause);
 }
 
 export function notFound(message: string, code: ApiErrorCode): DomainError {
   return new DomainError(message, 404, code);
 }
 
-export function conflict(message: string, code: ApiErrorCode): DomainError {
-  return new DomainError(message, 409, code);
+export function conflict(message: string, code: ApiErrorCode, cause?: unknown): DomainError {
+  return new DomainError(message, 409, code, cause);
+}
+
+export function payloadTooLarge(message: string, code: ApiErrorCode, cause?: unknown): DomainError {
+  return new DomainError(message, 413, code, cause);
 }
 
 export function internal(code: ApiErrorCode, cause?: unknown): DomainError {

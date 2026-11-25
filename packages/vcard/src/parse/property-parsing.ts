@@ -114,11 +114,16 @@ export function normalizeMediaUri(property: VCardProperty): VCardMedia {
   }
 
   if (encoding === "b" || encoding === "base64") {
-    const normalizedMediaType = mediaType?.includes("/")
-      ? mediaType
-      : mediaType
-        ? `image/${mediaType.toLowerCase()}`
-        : "application/octet-stream";
+    const resolveNormalizedMediaType = () => {
+      if (mediaType?.includes("/")) {
+        return mediaType;
+      }
+      if (mediaType) {
+        return `image/${mediaType.toLowerCase()}`;
+      }
+      return "application/octet-stream";
+    };
+    const normalizedMediaType = resolveNormalizedMediaType();
     return {
       altId: getParameter(property, "ALTID")?.values[0],
       mediaType: normalizedMediaType,

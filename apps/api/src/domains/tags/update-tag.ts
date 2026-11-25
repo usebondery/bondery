@@ -1,5 +1,5 @@
 import type { Tag } from "@bondery/schemas";
-import { internal } from "../../lib/platform/errors/http-errors.js";
+import { conflict, internal } from "../../lib/platform/errors/http-errors.js";
 import { buildTagRowChange } from "../../lib/sync/build-changes.js";
 import { emitSyncBatch } from "../../lib/sync/emit-change.js";
 import { type DomainContext, DomainError, syncEmitMetaFromContext } from "../_shared/context.js";
@@ -65,7 +65,7 @@ export async function updateTag(
       throw error;
     }
     if (isUniqueViolation(error)) {
-      throw new DomainError("Tag label already exists", 409, "tag_label_exists");
+      throw conflict("Tag label already exists", "tag_label_exists", error);
     }
     throw internal("tag_failed", error instanceof Error ? error.message : "tag_failed");
   }

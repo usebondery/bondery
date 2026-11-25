@@ -131,6 +131,7 @@ export function VCardImportModal({
   const isBlocking = isParsing || isImporting || step === "processing";
   const { closeModal } = useModalDismiss(modalId, isBlocking);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: step and isImporting are triggers: re-apply the modal chrome after each step change.
   useEffect(() => {
     modals.updateModal({
       modalId,

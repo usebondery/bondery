@@ -28,6 +28,7 @@ describe("findUnsanitizedNotesWriters", () => {
   });
 
   it("flags raw SQL that sets the notes column", () => {
+    // biome-ignore lint/suspicious/noTemplateCurlyInString: the text is a fixture that must contain a literal ${...}.
     const text = "await db.$executeRaw`UPDATE people SET notes = ${value} WHERE id = ${id}`;";
     assert.equal(findUnsanitizedNotesWriters([file(text)]).length, 1);
   });

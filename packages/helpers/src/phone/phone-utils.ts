@@ -27,11 +27,16 @@ export function parsePhoneNumber(
   const hasInternationalMarker =
     trimmed.startsWith("+") || trimmed.startsWith("00") || trimmed.includes("+");
 
-  const normalized: NormalizePhoneResult = hasInternationalMarker
-    ? normalizePhoneInput(trimmed, { defaultCountry })
-    : defaultCountry
-      ? normalizePhoneInput(trimmed, { defaultCountry })
-      : { error: "missing_default_country" };
+  const resolveNormalized = (): NormalizePhoneResult => {
+    if (hasInternationalMarker) {
+      return normalizePhoneInput(trimmed, { defaultCountry });
+    }
+    if (defaultCountry) {
+      return normalizePhoneInput(trimmed, { defaultCountry });
+    }
+    return { error: "missing_default_country" };
+  };
+  const normalized = resolveNormalized();
 
   if ("error" in normalized) {
     return null;

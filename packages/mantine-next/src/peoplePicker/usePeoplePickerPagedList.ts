@@ -190,6 +190,7 @@ export function usePeoplePickerPagedList<T extends PeoplePickerItem>({
       return;
     }
     loadMore();
+    // biome-ignore lint/correctness/useExhaustiveDependencies: loadMore reads refs only, and the fetch lock and loadMoreKind guard this effect.
   }, [loadMore, loadMoreKind, visibleItems.length]);
 
   const isTyped = isTypedQuery(state.query);

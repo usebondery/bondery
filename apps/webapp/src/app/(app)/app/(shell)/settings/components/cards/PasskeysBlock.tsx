@@ -244,11 +244,16 @@ export function PasskeysBlock() {
   }, []);
 
   const atLimit = passkeys.length >= PASSKEY_LIMITS.maxPerUser;
-  const tooltipLabel = atLimit
-    ? t("Passkeys.LimitReached")
-    : webAuthnSupported
-      ? undefined
-      : t("Passkeys.UnsupportedTooltip");
+  const resolveTooltipLabel = () => {
+    if (atLimit) {
+      return t("Passkeys.LimitReached");
+    }
+    if (webAuthnSupported) {
+      return;
+    }
+    return t("Passkeys.UnsupportedTooltip");
+  };
+  const tooltipLabel = resolveTooltipLabel();
 
   const lastUsedLabel = (passkey: PasskeyRecord) =>
     formatLastUsedAtWithFormatter(passkeyLastUsedAtIso(passkey), formatter, {
@@ -313,6 +318,61 @@ export function PasskeysBlock() {
     </Tooltip>
   );
 
+  const resolveValue = () => {
+    if (isLoading) {
+      return (
+        <Stack gap="sm">
+          <Skeleton height={56} radius="md" />
+          <Skeleton height={56} radius="md" />
+        </Stack>
+      );
+    }
+    if (isError) {
+      return (
+        <Text c="dimmed" size="sm">
+          {getAuthUserFacingError(error, tCommon)}
+        </Text>
+      );
+    }
+    if (passkeys.length === 0) {
+      return (
+        <Text c="dimmed" size="sm">
+          {t("Passkeys.EmptyTitle")}
+        </Text>
+      );
+    }
+    return (
+      <Stack gap="sm">
+        {passkeys.map((passkey) => (
+          <PasskeyRow
+            catalog={catalog}
+            deleteAriaLabel={t("Passkeys.DeleteAriaLabel", {
+              name: passkey.name?.trim() || t("Passkeys.FallbackName"),
+            })}
+            fallbackName={t("Passkeys.FallbackName")}
+            key={passkey.id}
+            lastUsedLabel={lastUsedLabel(passkey)}
+            nameFieldLabel={t("Passkeys.NameField")}
+            onDeleted={() => {
+              queryClient.setQueryData<PasskeyRecord[]>(settingsKeys.passkeys(), (current) =>
+                (current ?? []).filter((item) => item.id !== passkey.id),
+              );
+            }}
+            onRenamed={(nextName) => {
+              queryClient.setQueryData<PasskeyRecord[]>(settingsKeys.passkeys(), (current) => {
+                const next: PasskeyRecord[] = [];
+                for (const item of current ?? []) {
+                  next.push(item.id === passkey.id ? { ...item, name: nextName } : item);
+                }
+                return next;
+              });
+            }}
+            passkey={passkey}
+          />
+        ))}
+      </Stack>
+    );
+  };
   return (
     <Stack gap="md">
       <Group align="flex-start" justify="space-between" wrap="nowrap">
@@ -327,50 +387,7 @@ export function PasskeysBlock() {
         {addButton}
       </Group>
 
-      {isLoading ? (
-        <Stack gap="sm">
-          <Skeleton height={56} radius="md" />
-          <Skeleton height={56} radius="md" />
-        </Stack>
-      ) : isError ? (
-        <Text c="dimmed" size="sm">
-          {getAuthUserFacingError(error, tCommon)}
-        </Text>
-      ) : passkeys.length === 0 ? (
-        <Text c="dimmed" size="sm">
-          {t("Passkeys.EmptyTitle")}
-        </Text>
-      ) : (
-        <Stack gap="sm">
-          {passkeys.map((passkey) => (
-            <PasskeyRow
-              catalog={catalog}
-              deleteAriaLabel={t("Passkeys.DeleteAriaLabel", {
-                name: passkey.name?.trim() || t("Passkeys.FallbackName"),
-              })}
-              fallbackName={t("Passkeys.FallbackName")}
-              key={passkey.id}
-              lastUsedLabel={lastUsedLabel(passkey)}
-              nameFieldLabel={t("Passkeys.NameField")}
-              onDeleted={() => {
-                queryClient.setQueryData<PasskeyRecord[]>(settingsKeys.passkeys(), (current) =>
-                  (current ?? []).filter((item) => item.id !== passkey.id),
-                );
-              }}
-              onRenamed={(nextName) => {
-                queryClient.setQueryData<PasskeyRecord[]>(settingsKeys.passkeys(), (current) => {
-                  const next: PasskeyRecord[] = [];
-                  for (const item of current ?? []) {
-                    next.push(item.id === passkey.id ? { ...item, name: nextName } : item);
-                  }
-                  return next;
-                });
-              }}
-              passkey={passkey}
-            />
-          ))}
-        </Stack>
-      )}
+      {resolveValue()}
     </Stack>
   );
 }

@@ -228,6 +228,123 @@ export function HomeClient({
     }
   };
 
+  const resolveValue4 = () => {
+    if (recentlyInteracted === null || recentlyInteracted === undefined) {
+      return null;
+    }
+    if (recentlyInteracted.length === 0) {
+      return (
+        <Paper p="md" radius="md" withBorder>
+          <Text c="dimmed" size="sm">
+            {t("NoRecentlyInteracted")}
+          </Text>
+        </Paper>
+      );
+    }
+    return (
+      <Group gap="sm" wrap="wrap">
+        {recentlyInteracted.map((person) => (
+          <PersonChip
+            href={routePerson(person.id)}
+            isClickable
+            key={person.id}
+            onNavigate={() => setOptimisticDocumentTitle(optimisticPersonDocumentTitle(person))}
+            person={person}
+            showHoverCard
+            size="md"
+          />
+        ))}
+      </Group>
+    );
+  };
+  const resolveValue3 = () => {
+    if (recentlyAdded === null || recentlyAdded === undefined) {
+      return null;
+    }
+    if (recentlyAdded.length === 0) {
+      return (
+        <Paper p="md" radius="md" withBorder>
+          <Text c="dimmed" size="sm">
+            {t("NoRecentlyAdded")}
+          </Text>
+        </Paper>
+      );
+    }
+    return (
+      <Group gap="sm" wrap="wrap">
+        {recentlyAdded.map((person) => (
+          <PersonChip
+            href={routePerson(person.id)}
+            isClickable
+            key={person.id}
+            onNavigate={() => setOptimisticDocumentTitle(optimisticPersonDocumentTitle(person))}
+            person={person}
+            showHoverCard
+            size="md"
+          />
+        ))}
+      </Group>
+    );
+  };
+  const resolveValue2 = () => {
+    if (reminders === null || reminders === undefined) {
+      return null;
+    }
+    if (reminders.length === 0) {
+      return (
+        <Paper p="md" radius="md" withBorder>
+          <Text c="dimmed" size="sm">
+            {t("NoUpcomingReminders")}
+          </Text>
+        </Paper>
+      );
+    }
+    return (
+      <Stack gap="sm">
+        {reminders.map((reminder) => {
+          const personHref = routePerson(reminder.person.id);
+
+          return (
+            <UpcomingReminderCard
+              key={reminder.importantDate.id}
+              onClick={() => {
+                navigateWithTitle(personHref, optimisticPersonDocumentTitle(reminder.person));
+              }}
+              reminder={reminder}
+            />
+          );
+        })}
+      </Stack>
+    );
+  };
+  const resolveValue = () => {
+    if (compactActivities === null || compactActivities === undefined) {
+      return null;
+    }
+    if (compactActivities.length === 0) {
+      return (
+        <Paper p="md" radius="md" withBorder>
+          <Text c="dimmed" size="sm">
+            {timelineT("NoActivitiesFound")}
+          </Text>
+        </Paper>
+      );
+    }
+    return (
+      <InteractionsList
+        actionsLabel={timelineT("TableColumnActions")}
+        activities={compactActivities}
+        deleteLabel={timelineT("DeleteAction")}
+        duplicateLabel={timelineT("DuplicateAction")}
+        editLabel={timelineT("EditAction")}
+        onDelete={handleDelete}
+        onDuplicate={handleDuplicate}
+        onEdit={handleActivityOpen}
+        onOpen={handleActivityOpen}
+        resolveParticipants={resolveParticipants}
+      />
+    );
+  };
   return (
     <PageWrapper>
       <Stack gap="xl">
@@ -327,27 +444,7 @@ export function HomeClient({
               </Tooltip>
             </Group>
 
-            {compactActivities === null ||
-            compactActivities === undefined ? null : compactActivities.length === 0 ? (
-              <Paper p="md" radius="md" withBorder>
-                <Text c="dimmed" size="sm">
-                  {timelineT("NoActivitiesFound")}
-                </Text>
-              </Paper>
-            ) : (
-              <InteractionsList
-                actionsLabel={timelineT("TableColumnActions")}
-                activities={compactActivities}
-                deleteLabel={timelineT("DeleteAction")}
-                duplicateLabel={timelineT("DuplicateAction")}
-                editLabel={timelineT("EditAction")}
-                onDelete={handleDelete}
-                onDuplicate={handleDuplicate}
-                onEdit={handleActivityOpen}
-                onOpen={handleActivityOpen}
-                resolveParticipants={resolveParticipants}
-              />
-            )}
+            {resolveValue()}
           </Stack>
 
           <Stack gap="xl">
@@ -365,32 +462,7 @@ export function HomeClient({
                 </Tooltip>
               </Group>
 
-              {reminders === null || reminders === undefined ? null : reminders.length === 0 ? (
-                <Paper p="md" radius="md" withBorder>
-                  <Text c="dimmed" size="sm">
-                    {t("NoUpcomingReminders")}
-                  </Text>
-                </Paper>
-              ) : (
-                <Stack gap="sm">
-                  {reminders.map((reminder) => {
-                    const personHref = routePerson(reminder.person.id);
-
-                    return (
-                      <UpcomingReminderCard
-                        key={reminder.importantDate.id}
-                        onClick={() => {
-                          navigateWithTitle(
-                            personHref,
-                            optimisticPersonDocumentTitle(reminder.person),
-                          );
-                        }}
-                        reminder={reminder}
-                      />
-                    );
-                  })}
-                </Stack>
-              )}
+              {resolveValue2()}
             </Stack>
 
             <Stack gap="md">
@@ -410,30 +482,7 @@ export function HomeClient({
                 </Tooltip>
               </Group>
 
-              {recentlyAdded === null ||
-              recentlyAdded === undefined ? null : recentlyAdded.length === 0 ? (
-                <Paper p="md" radius="md" withBorder>
-                  <Text c="dimmed" size="sm">
-                    {t("NoRecentlyAdded")}
-                  </Text>
-                </Paper>
-              ) : (
-                <Group gap="sm" wrap="wrap">
-                  {recentlyAdded.map((person) => (
-                    <PersonChip
-                      href={routePerson(person.id)}
-                      isClickable
-                      key={person.id}
-                      onNavigate={() =>
-                        setOptimisticDocumentTitle(optimisticPersonDocumentTitle(person))
-                      }
-                      person={person}
-                      showHoverCard
-                      size="md"
-                    />
-                  ))}
-                </Group>
-              )}
+              {resolveValue3()}
             </Stack>
 
             <Stack gap="md">
@@ -456,30 +505,7 @@ export function HomeClient({
                 </Tooltip>
               </Group>
 
-              {recentlyInteracted === null ||
-              recentlyInteracted === undefined ? null : recentlyInteracted.length === 0 ? (
-                <Paper p="md" radius="md" withBorder>
-                  <Text c="dimmed" size="sm">
-                    {t("NoRecentlyInteracted")}
-                  </Text>
-                </Paper>
-              ) : (
-                <Group gap="sm" wrap="wrap">
-                  {recentlyInteracted.map((person) => (
-                    <PersonChip
-                      href={routePerson(person.id)}
-                      isClickable
-                      key={person.id}
-                      onNavigate={() =>
-                        setOptimisticDocumentTitle(optimisticPersonDocumentTitle(person))
-                      }
-                      person={person}
-                      showHoverCard
-                      size="md"
-                    />
-                  ))}
-                </Group>
-              )}
+              {resolveValue4()}
             </Stack>
           </Stack>
         </SimpleGrid>

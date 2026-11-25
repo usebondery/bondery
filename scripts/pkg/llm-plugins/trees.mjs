@@ -49,7 +49,7 @@ function listFiles(dir) {
     }
   };
   walk(dir);
-  return out.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  return out.sort((a, b) => Number(a > b) - Number(a < b));
 }
 
 function removeEmptyDirs(dir) {

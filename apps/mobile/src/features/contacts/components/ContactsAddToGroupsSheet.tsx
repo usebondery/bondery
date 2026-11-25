@@ -95,11 +95,13 @@ export function ContactsAddToGroupsSheet({
 
   function performAdd() {
     const selectionState = useContactsSelection.getState();
-    const scope = loadedGroupMembers
-      ? { loadedGroupMembers }
-      : filterGroupId
-        ? { groupId: filterGroupId }
-        : undefined;
+    const resolveScope = () => {
+      if (loadedGroupMembers) {
+        return { loadedGroupMembers };
+      }
+      return filterGroupId ? { groupId: filterGroupId } : undefined;
+    };
+    const scope = resolveScope();
     const personIds = resolveContactsSelectionPersonIds(selectionState, debouncedQuery, scope);
     const targetGroupIds = Array.from(selectedGroupIds);
 

@@ -37,15 +37,9 @@ export function DocsApiRequestBody() {
         const properties = schema?.properties ?? {};
         const propertyNames = Object.keys(properties);
 
-        return (
-          <Stack gap="sm" key={mediaType}>
-            {index > 0 ? <Divider /> : null}
-            {entries.length > 1 ? (
-              <Text c="dimmed" ff="monospace" size="sm">
-                {mediaType}
-              </Text>
-            ) : null}
-            {propertyNames.length > 0 ? (
+        const resolveValue = () => {
+          if (propertyNames.length > 0) {
+            return (
               <Stack gap="md">
                 {propertyNames.map((name) => {
                   const property = properties[name] ?? {};
@@ -62,9 +56,22 @@ export function DocsApiRequestBody() {
                   );
                 })}
               </Stack>
-            ) : media.schema ? (
-              <DocsApiSchema name={mediaType} schema={media.schema} />
+            );
+          }
+          if (media.schema) {
+            return <DocsApiSchema name={mediaType} schema={media.schema} />;
+          }
+          return null;
+        };
+        return (
+          <Stack gap="sm" key={mediaType}>
+            {index > 0 ? <Divider /> : null}
+            {entries.length > 1 ? (
+              <Text c="dimmed" ff="monospace" size="sm">
+                {mediaType}
+              </Text>
             ) : null}
+            {resolveValue()}
           </Stack>
         );
       })}

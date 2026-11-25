@@ -31,6 +31,8 @@ export function Group({
   wrap = false,
   ...rest
 }: GroupProps) {
+  const content = grow ? wrapGrowChildren(children, "row") : children;
+
   return (
     <View
       className={cn(
@@ -43,7 +45,7 @@ export function Group({
       )}
       {...rest}
     >
-      {grow ? <>{wrapGrowChildren(children, "row")}</> : <>{children}</>}
+      {content}
     </View>
   );
 }

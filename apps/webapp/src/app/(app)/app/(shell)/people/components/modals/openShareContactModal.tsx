@@ -203,18 +203,21 @@ function ShareContactModalContent({ contact, modalId }: { contact: Contact; moda
 
   const contactName = [contact.firstName, contact.lastName].filter(Boolean).join(" ");
 
+  const resolveValue = () => {
+    if (isSubmitting) {
+      return tShare("SendingButton");
+    }
+    if (form.values.recipientEmails.length > 0) {
+      return tShare("SubmitButtonWithCount", { count: form.values.recipientEmails.length });
+    }
+    return tShare("SubmitButton");
+  };
   return (
     <ModalScrollLayout
       footer={
         <ModalFooter
           actionDisabled={isSubmitting || !canSubmit}
-          actionLabel={
-            isSubmitting
-              ? tShare("SendingButton")
-              : form.values.recipientEmails.length > 0
-                ? tShare("SubmitButtonWithCount", { count: form.values.recipientEmails.length })
-                : tShare("SubmitButton")
-          }
+          actionLabel={resolveValue()}
           actionLeftSection={<IconSend2 size={16} />}
           actionLoading={isSubmitting}
           cancelDisabled={isSubmitting}

@@ -357,7 +357,7 @@ async function main() {
   console.log(`Attached photos: ${attached.length}`);
   if (skipped.length > 0) {
     console.log(`Skipped: ${skipped.length}`);
-    for (const line of skipped.toSorted((a, b) => (a < b ? -1 : a > b ? 1 : 0))) {
+    for (const line of skipped.toSorted((a, b) => Number(a > b) - Number(a < b))) {
       console.log(`  - ${line}`);
     }
   }

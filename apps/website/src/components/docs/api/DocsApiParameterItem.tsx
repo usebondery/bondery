@@ -33,7 +33,16 @@ function paramTypeName(schema: ParamSchema | null): string | null {
   }
 
   const variant = schema.oneOf?.[0] ?? schema.anyOf?.[0];
-  const types = Array.isArray(schema.type) ? schema.type : schema.type ? [schema.type] : [];
+  const resolveTypes = () => {
+    if (Array.isArray(schema.type)) {
+      return schema.type;
+    }
+    if (schema.type) {
+      return [schema.type];
+    }
+    return [];
+  };
+  const types = resolveTypes();
   const baseType = types.find((type) => type !== "null");
   const nullable = types.includes("null");
 

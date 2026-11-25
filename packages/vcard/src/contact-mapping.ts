@@ -80,20 +80,31 @@ function mapEmails(emails: EmailEntry[] | null): VCardTextValue[] {
 function mapAddresses(addresses: ContactAddressEntry[] | null) {
   const addressEntries = addresses ?? [];
 
-  return addressEntries.map((address) => ({
-    country: address.addressCountry ? [address.addressCountry] : [],
-    extended: address.addressLine2 ? [address.addressLine2] : [],
-    geo:
-      address.latitude !== null && address.longitude !== null
-        ? `geo:${address.latitude},${address.longitude}`
-        : undefined,
-    locality: address.addressCity ? [address.addressCity] : [],
-    poBox: [],
-    postalCode: address.addressPostalCode ? [address.addressPostalCode] : [],
-    region: address.addressState ? [address.addressState] : [],
-    street: address.addressLine1 ? [address.addressLine1] : address.value ? [address.value] : [],
-    types: [address.type],
-  }));
+  return addressEntries.map((address) => {
+    const resolveStreet = () => {
+      if (address.addressLine1) {
+        return [address.addressLine1];
+      }
+      if (address.value) {
+        return [address.value];
+      }
+      return [];
+    };
+    return {
+      country: address.addressCountry ? [address.addressCountry] : [],
+      extended: address.addressLine2 ? [address.addressLine2] : [],
+      geo:
+        address.latitude !== null && address.longitude !== null
+          ? `geo:${address.latitude},${address.longitude}`
+          : undefined,
+      locality: address.addressCity ? [address.addressCity] : [],
+      poBox: [],
+      postalCode: address.addressPostalCode ? [address.addressPostalCode] : [],
+      region: address.addressState ? [address.addressState] : [],
+      street: resolveStreet(),
+      types: [address.type],
+    };
+  });
 }
 
 function mapSocialImpp(contact: Contact): VCardTextValue[] {
@@ -423,29 +434,36 @@ export function vCardToContactDraft(
   const imppValues = card.instantMessaging.map((entry) => entry.value);
 
   return {
-    addresses: card.addresses.map((address) => ({
-      addressCity: address.locality[0] ?? null,
-      addressCountry: address.country[0] ?? null,
-      addressLine1: address.street[0] ?? null,
-      addressLine2: address.extended[0] ?? null,
-      addressPostalCode: address.postalCode[0] ?? null,
-      addressState: address.region[0] ?? null,
-      latitude: address.geo?.startsWith(GEO_URI_PREFIX)
-        ? Number.parseFloat(address.geo.slice(GEO_URI_PREFIX.length).split(",")[0] ?? "")
-        : null,
-      longitude: address.geo?.startsWith(GEO_URI_PREFIX)
-        ? Number.parseFloat(address.geo.slice(GEO_URI_PREFIX.length).split(",")[1] ?? "")
-        : null,
-      preferred: normalizePreferred(address.pref),
-      type: address.types.includes("work")
-        ? "work"
-        : address.types.includes("home")
-          ? "home"
-          : "other",
-      value: [address.street[0], address.locality[0], address.region[0], address.country[0]]
-        .filter(Boolean)
-        .join(", "),
-    })),
+    addresses: card.addresses.map((address) => {
+      const resolveType = () => {
+        if (address.types.includes("work")) {
+          return "work";
+        }
+        if (address.types.includes("home")) {
+          return "home";
+        }
+        return "other";
+      };
+      return {
+        addressCity: address.locality[0] ?? null,
+        addressCountry: address.country[0] ?? null,
+        addressLine1: address.street[0] ?? null,
+        addressLine2: address.extended[0] ?? null,
+        addressPostalCode: address.postalCode[0] ?? null,
+        addressState: address.region[0] ?? null,
+        latitude: address.geo?.startsWith(GEO_URI_PREFIX)
+          ? Number.parseFloat(address.geo.slice(GEO_URI_PREFIX.length).split(",")[0] ?? "")
+          : null,
+        longitude: address.geo?.startsWith(GEO_URI_PREFIX)
+          ? Number.parseFloat(address.geo.slice(GEO_URI_PREFIX.length).split(",")[1] ?? "")
+          : null,
+        preferred: normalizePreferred(address.pref),
+        type: resolveType(),
+        value: [address.street[0], address.locality[0], address.region[0], address.country[0]]
+          .filter(Boolean)
+          .join(", "),
+      };
+    }),
     avatarUri: bestPhoto,
     emails: card.emails.map((email) => ({
       preferred: normalizePreferred(email.pref),

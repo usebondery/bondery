@@ -1,5 +1,5 @@
 import type { RelationshipType } from "@bondery/schemas";
-import { internal } from "../../lib/platform/errors/http-errors.js";
+import { badRequest, conflict, internal } from "../../lib/platform/errors/http-errors.js";
 import { type DomainContext, DomainError } from "../_shared/context.js";
 import { domainDb } from "../_shared/domain-db.js";
 import { isCheckViolation, isUniqueViolation, toSyncRow } from "../_shared/prisma-helpers.js";
@@ -73,10 +73,10 @@ export async function createRelationship(
     return { data: { relationship: toRelationshipRow(insertedRelationship) } };
   } catch (error) {
     if (isUniqueViolation(error)) {
-      throw new DomainError("Relationship already exists", 409, "relationship_already_exists");
+      throw conflict("Relationship already exists", "relationship_already_exists", error);
     }
     if (isCheckViolation(error)) {
-      throw new DomainError("Invalid relationship data", 400, "relationship_invalid");
+      throw badRequest("Invalid relationship data", "relationship_invalid", error);
     }
     throw internal(
       "relationship_failed",
@@ -137,10 +137,10 @@ export async function updateRelationship(
     return { data: { relationship: toRelationshipRow(updatedRelationship) } };
   } catch (error) {
     if (isUniqueViolation(error)) {
-      throw new DomainError("Relationship already exists", 409, "relationship_already_exists");
+      throw conflict("Relationship already exists", "relationship_already_exists", error);
     }
     if (isCheckViolation(error)) {
-      throw new DomainError("Invalid relationship data", 400, "relationship_invalid");
+      throw badRequest("Invalid relationship data", "relationship_invalid", error);
     }
     throw internal(
       "relationship_failed",

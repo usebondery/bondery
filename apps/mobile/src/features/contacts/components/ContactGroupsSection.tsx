@@ -94,6 +94,28 @@ function ContactGroupsSection({
     }
   }
 
+  const resolveValue = () => {
+    if (loading) {
+      return <GroupsLoadingSkeleton />;
+    }
+    if (error) {
+      return (
+        <LoadErrorCard
+          description={error}
+          onRetry={onRetry}
+          title={tMobileSettings("GroupsLoadErrorTitle")}
+        />
+      );
+    }
+    return (
+      <ContactsGroupsHeader
+        groups={sortedGroups}
+        layout="chipRow"
+        onCreatePress={() => setCreateGroupOpen(true)}
+        onGroupPress={(group) => navigateToGroup(group)}
+      />
+    );
+  };
   return (
     <View style={styles.section}>
       <ContactDetailSectionHeader
@@ -111,22 +133,7 @@ function ContactGroupsSection({
         titleNamespace="MobileContacts"
       />
 
-      {loading ? (
-        <GroupsLoadingSkeleton />
-      ) : error ? (
-        <LoadErrorCard
-          description={error}
-          onRetry={onRetry}
-          title={tMobileSettings("GroupsLoadErrorTitle")}
-        />
-      ) : (
-        <ContactsGroupsHeader
-          groups={sortedGroups}
-          layout="chipRow"
-          onCreatePress={() => setCreateGroupOpen(true)}
-          onGroupPress={(group) => navigateToGroup(group)}
-        />
-      )}
+      {resolveValue()}
 
       <GroupEditSheet
         mode="create"

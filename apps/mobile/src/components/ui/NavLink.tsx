@@ -91,6 +91,15 @@ function NavLink(props: NavLinkProps) {
     props.onPress();
   };
 
+  const resolveValue = () => {
+    if (external) {
+      return <IconExternalLink size={16} stroke={colors.iconSecondary} />;
+    }
+    if (showChevron) {
+      return <IconChevronRight size={18} stroke={colors.iconSecondary} />;
+    }
+    return null;
+  };
   return (
     <>
       <Animated.View style={squeezeStyle}>
@@ -150,11 +159,7 @@ function NavLink(props: NavLinkProps) {
             </View>
           ) : null}
 
-          {external ? (
-            <IconExternalLink size={16} stroke={colors.iconSecondary} />
-          ) : showChevron ? (
-            <IconChevronRight size={18} stroke={colors.iconSecondary} />
-          ) : null}
+          {resolveValue()}
         </Pressable>
       </Animated.View>
       {withDivider ? <Divider /> : null}

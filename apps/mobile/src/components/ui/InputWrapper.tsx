@@ -30,6 +30,23 @@ function InputWrapper({
     return children;
   }
 
+  const resolveValue = () => {
+    if (errorMessage) {
+      return (
+        <Text c="danger" className="leading-tight" size="xs" style={COMPACT_TEXT_STYLE}>
+          {errorMessage}
+        </Text>
+      );
+    }
+    if (statusMessage) {
+      return (
+        <Text c="muted" className="leading-tight" size="xs" style={COMPACT_TEXT_STYLE}>
+          {statusMessage}
+        </Text>
+      );
+    }
+    return null;
+  };
   return (
     <View className="w-full gap-1">
       {label || description ? (
@@ -47,15 +64,7 @@ function InputWrapper({
         </View>
       ) : null}
       {children}
-      {errorMessage ? (
-        <Text c="danger" className="leading-tight" size="xs" style={COMPACT_TEXT_STYLE}>
-          {errorMessage}
-        </Text>
-      ) : statusMessage ? (
-        <Text c="muted" className="leading-tight" size="xs" style={COMPACT_TEXT_STYLE}>
-          {statusMessage}
-        </Text>
-      ) : null}
+      {resolveValue()}
     </View>
   );
 }

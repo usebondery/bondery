@@ -22,6 +22,7 @@ export const STORAGE_ENTRIES: EnvVarDef[] = [
     canonical: "BONDERY_PRIVATE_S3_ENDPOINT",
     deployExample: { include: false },
     description:
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: the description quotes a literal ${VAR} placeholder.
       "S3 endpoint the API uses. Use https:// (verified); the API warns about http:// in production. Compose sets https://${BONDERY_INFRA_TRAEFIK_PREFIX}-storage:8443 for the bundled SeaweedFS. Local dev: https://127.0.0.1:8443 (pnpm run start:seaweedfs)",
     exampleValue: "https://127.0.0.1:8443",
     group: "Storage",

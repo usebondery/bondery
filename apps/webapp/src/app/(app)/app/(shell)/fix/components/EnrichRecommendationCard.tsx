@@ -64,48 +64,69 @@ export function EnrichRecommendationCard({
     await discard();
   };
 
-  const statusText = isRunning
-    ? failed > 0
-      ? t("ProgressLabelWithFailed", { completed, failed, totalEligible })
-      : t("ProgressLabel", { completed, totalEligible })
-    : hasInterruptedRun && effectiveQueueStatus
-      ? t("ResumeLabel", {
-          completed: effectiveQueueStatus.completed,
-          pending: effectiveQueueStatus.pending,
-        })
-      : t("EligibleLabel", { count: eligibleCount });
+  const resolveStatusText = () => {
+    if (isRunning) {
+      if (failed > 0) {
+        return t("ProgressLabelWithFailed", { completed, failed, totalEligible });
+      }
+      return t("ProgressLabel", { completed, totalEligible });
+    }
+    if (hasInterruptedRun && effectiveQueueStatus) {
+      return t("ResumeLabel", {
+        completed: effectiveQueueStatus.completed,
+        pending: effectiveQueueStatus.pending,
+      });
+    }
+    return t("EligibleLabel", { count: eligibleCount });
+  };
+  const statusText = resolveStatusText();
 
-  const actions = isRunning ? (
-    <Tooltip disabled={!isPausing} label={t("PausingTooltip")}>
-      <Box component="span" display="inline-block">
-        <Button
-          disabled={isPausing}
-          leftSection={<IconPlayerPause size={16} />}
-          onClick={pause}
-          variant="default"
-        >
-          {t("Pause")}
-        </Button>
-      </Box>
-    </Tooltip>
-  ) : hasInterruptedRun ? (
-    <>
-      <Button leftSection={<IconTrash size={16} />} onClick={handleDiscard} variant="default">
-        {t("SkipRemaining")}
+  const resolveActions = () => {
+    if (isRunning) {
+      return (
+        <Tooltip disabled={!isPausing} label={t("PausingTooltip")}>
+          <Box component="span" display="inline-block">
+            <Button
+              disabled={isPausing}
+              leftSection={<IconPlayerPause size={16} />}
+              onClick={pause}
+              variant="default"
+            >
+              {t("Pause")}
+            </Button>
+          </Box>
+        </Tooltip>
+      );
+    }
+    if (hasInterruptedRun) {
+      return (
+        <>
+          <Button leftSection={<IconTrash size={16} />} onClick={handleDiscard} variant="default">
+            {t("SkipRemaining")}
+          </Button>
+          <Button
+            color="blue"
+            leftSection={<IconPlayerPlayFilled size={16} />}
+            onClick={handleResume}
+          >
+            {t("Resume")}
+          </Button>
+        </>
+      );
+    }
+    return (
+      <Button
+        color="blue"
+        leftSection={
+          isLoading ? <Loader color="white" size={14} /> : <IconBrandLinkedin size={16} />
+        }
+        onClick={start}
+      >
+        {t("EnrichAll")}
       </Button>
-      <Button color="blue" leftSection={<IconPlayerPlayFilled size={16} />} onClick={handleResume}>
-        {t("Resume")}
-      </Button>
-    </>
-  ) : (
-    <Button
-      color="blue"
-      leftSection={isLoading ? <Loader color="white" size={14} /> : <IconBrandLinkedin size={16} />}
-      onClick={start}
-    >
-      {t("EnrichAll")}
-    </Button>
-  );
+    );
+  };
+  const actions = resolveActions();
 
   return (
     <RecommendationCard

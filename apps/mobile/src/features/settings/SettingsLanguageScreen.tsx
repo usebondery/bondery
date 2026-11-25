@@ -138,6 +138,7 @@ export function SettingsLanguageScreen() {
     syncEffectState(() => {
       detachPromise(loadSettings());
     });
+    // biome-ignore lint/correctness/useExhaustiveDependencies: React Compiler memoizes this function, which Biome cannot see.
   }, [loadSettings]);
 
   const localeOptions = APP_LANGUAGES_DATA.map((language) => ({

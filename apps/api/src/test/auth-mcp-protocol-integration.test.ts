@@ -122,12 +122,16 @@ describe("real-database MCP OAuth protocol", () => {
       `expected MCP audience ${MCP_RESOURCE}, got: ${JSON.stringify(payload.aud)}`,
     );
     assert.equal(payload.iss, resolveOAuthIssuerIdentifier());
-    const scopes =
-      typeof payload.scope === "string"
-        ? payload.scope.split(" ")
-        : typeof tokens.scope === "string"
-          ? tokens.scope.split(" ")
-          : [];
+    const resolveScopes = () => {
+      if (typeof payload.scope === "string") {
+        return payload.scope.split(" ");
+      }
+      if (typeof tokens.scope === "string") {
+        return tokens.scope.split(" ");
+      }
+      return [];
+    };
+    const scopes = resolveScopes();
     assert.ok(scopes.includes("mcp:read") || scopes.includes("mcp:write"));
     assert.equal(scopes.includes("api:access"), false, "MCP tokens must never include api:access");
     assert.equal(payload.azp, MCP_TEST_CLIENT_ID);

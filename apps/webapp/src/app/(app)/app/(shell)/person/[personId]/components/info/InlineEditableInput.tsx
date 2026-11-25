@@ -30,6 +30,19 @@ export function InlineEditableInput({
   const shouldShowCounter =
     showCounter && isFocused && typeof maxLength === "number" && Number.isFinite(maxLength);
 
+  const resolveValue = () => {
+    if (isSaving) {
+      return <Loader mr="sm" size="xs" />;
+    }
+    if (shouldShowCounter) {
+      return (
+        <Text c="dimmed" mr="sm" size="xs">
+          {value.length}/{maxLength}
+        </Text>
+      );
+    }
+    return null;
+  };
   return (
     <TextInput
       {...textInputProps}
@@ -38,15 +51,7 @@ export function InlineEditableInput({
       onBlur={onBlur}
       onChange={(event) => onChange(event.currentTarget.value)}
       onFocus={onFocus}
-      rightSection={
-        isSaving ? (
-          <Loader mr="sm" size="xs" />
-        ) : shouldShowCounter ? (
-          <Text c="dimmed" mr="sm" size="xs">
-            {value.length}/{maxLength}
-          </Text>
-        ) : null
-      }
+      rightSection={resolveValue()}
       value={value}
     />
   );

@@ -52,43 +52,64 @@ export function SettingsTechnicalScreen() {
     );
   };
 
-  const serverStatusDescription =
-    apiServerStatus === "connected"
-      ? tMobileSettings("ServerStatusConnected")
-      : apiServerStatus === "offline"
-        ? tMobileSettings("ServerStatusOffline")
-        : apiServerStatus === "unreachable"
-          ? tMobileSettings("ServerStatusUnreachable")
-          : tMobileSettings("ServerStatusChecking");
+  const resolveServerStatusDescription = () => {
+    if (apiServerStatus === "connected") {
+      return tMobileSettings("ServerStatusConnected");
+    }
+    if (apiServerStatus === "offline") {
+      return tMobileSettings("ServerStatusOffline");
+    }
+    if (apiServerStatus === "unreachable") {
+      return tMobileSettings("ServerStatusUnreachable");
+    }
+    return tMobileSettings("ServerStatusChecking");
+  };
+  const serverStatusDescription = resolveServerStatusDescription();
 
-  const serverStatusDotColor =
-    apiServerStatus === "connected"
-      ? colors.successAccent
-      : apiServerStatus === "offline"
-        ? OFFLINE_STATUS_DOT_COLOR
-        : apiServerStatus === "unreachable"
-          ? colors.dangerAccent
-          : colors.textMuted;
+  const resolveServerStatusDotColor = () => {
+    if (apiServerStatus === "connected") {
+      return colors.successAccent;
+    }
+    if (apiServerStatus === "offline") {
+      return OFFLINE_STATUS_DOT_COLOR;
+    }
+    if (apiServerStatus === "unreachable") {
+      return colors.dangerAccent;
+    }
+    return colors.textMuted;
+  };
+  const serverStatusDotColor = resolveServerStatusDotColor();
 
-  const appVersionDescription =
-    appVersionStatus === "latest"
-      ? tMobileSettings("AppVersionLatest")
-      : appVersionStatus === "outdated"
-        ? tMobileSettings("AppVersionUpdateAvailable", { version: latestVersion ?? "" })
-        : appVersionStatus === "offline"
-          ? tMobileSettings("ServerStatusOffline")
-          : appVersionStatus === "unreachable"
-            ? tMobileSettings("AppVersionCheckFailed")
-            : tMobileSettings("AppVersionChecking");
+  const resolveAppVersionDescription = () => {
+    if (appVersionStatus === "latest") {
+      return tMobileSettings("AppVersionLatest");
+    }
+    if (appVersionStatus === "outdated") {
+      return tMobileSettings("AppVersionUpdateAvailable", { version: latestVersion ?? "" });
+    }
+    if (appVersionStatus === "offline") {
+      return tMobileSettings("ServerStatusOffline");
+    }
+    if (appVersionStatus === "unreachable") {
+      return tMobileSettings("AppVersionCheckFailed");
+    }
+    return tMobileSettings("AppVersionChecking");
+  };
+  const appVersionDescription = resolveAppVersionDescription();
 
-  const appVersionDotColor =
-    appVersionStatus === "latest"
-      ? colors.successAccent
-      : appVersionStatus === "offline" || appVersionStatus === "outdated"
-        ? OFFLINE_STATUS_DOT_COLOR
-        : appVersionStatus === "unreachable"
-          ? colors.dangerAccent
-          : colors.textMuted;
+  const resolveAppVersionDotColor = () => {
+    if (appVersionStatus === "latest") {
+      return colors.successAccent;
+    }
+    if (appVersionStatus === "offline" || appVersionStatus === "outdated") {
+      return OFFLINE_STATUS_DOT_COLOR;
+    }
+    if (appVersionStatus === "unreachable") {
+      return colors.dangerAccent;
+    }
+    return colors.textMuted;
+  };
+  const appVersionDotColor = resolveAppVersionDotColor();
 
   return (
     <>

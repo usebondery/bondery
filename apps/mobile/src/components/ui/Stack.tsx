@@ -29,6 +29,8 @@ export function Stack({
   justify,
   ...rest
 }: StackProps) {
+  const content = grow ? wrapGrowChildren(children, "column") : children;
+
   return (
     <View
       className={cn(
@@ -40,7 +42,7 @@ export function Stack({
       )}
       {...rest}
     >
-      {grow ? <>{wrapGrowChildren(children, "column")}</> : <>{children}</>}
+      {content}
     </View>
   );
 }

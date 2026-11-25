@@ -80,7 +80,7 @@ async function collectModuleSubpaths(srcDir) {
   }
 
   await walk(srcRoot);
-  return [...modules].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  return [...modules].sort((a, b) => Number(a > b) - Number(a < b));
 }
 
 async function collectBarrelSubpaths(srcDir) {
@@ -104,7 +104,7 @@ async function collectBarrelSubpaths(srcDir) {
   }
 
   await walk(srcRoot);
-  return [...barrels].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  return [...barrels].sort((a, b) => Number(a > b) - Number(a < b));
 }
 
 function tsToDist(srcPath) {

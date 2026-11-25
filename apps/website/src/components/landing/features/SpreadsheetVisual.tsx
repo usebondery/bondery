@@ -233,7 +233,16 @@ export function SpreadsheetVisual() {
 
   const reduced = Boolean(reduceMotion);
   // Derived, so reduced motion and an off-screen tile need no state update in an effect.
-  const shownPhase: Phase = reduced ? RESTING_PHASE : inView ? phase : "sheet";
+  const resolveShownPhase = (): Phase => {
+    if (reduced) {
+      return RESTING_PHASE;
+    }
+    if (inView) {
+      return phase;
+    }
+    return "sheet";
+  };
+  const shownPhase = resolveShownPhase();
 
   useEffect(() => {
     if (reduced) {

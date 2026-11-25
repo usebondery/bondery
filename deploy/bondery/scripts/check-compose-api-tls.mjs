@@ -110,6 +110,7 @@ const TRANSPORT_JOB_RULES = [
   ],
   [
     /source: \$\{BONDERY_INFRA_TRAEFIK_DYNAMIC_DIR:-\/etc\/dokploy\/traefik\/dynamic\}\s*\n\s*target: \/traefik-dynamic\s*\n\s*bind:\s*\n\s*create_host_path: false/u,
+    // biome-ignore lint/suspicious/noTemplateCurlyInString: the message quotes a literal Compose ${VAR} placeholder.
     "traefik-transport must bind ${BONDERY_INFRA_TRAEFIK_DYNAMIC_DIR:-/etc/dokploy/traefik/dynamic} at /traefik-dynamic with create_host_path: false (fail, never create it)",
   ],
   [

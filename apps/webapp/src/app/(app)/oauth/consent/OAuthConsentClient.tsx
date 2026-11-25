@@ -313,6 +313,38 @@ export function OAuthConsentClient({
   const scopes = requestedScopes;
   const { hostname, name: displayName } = authDetails.client;
 
+  const resolveValue = () => {
+    if (authDetails.isMcp) {
+      return (
+        <DescribedSelect
+          allowDeselect={false}
+          data={permissionOptions}
+          disabled={submitting}
+          label={t("PermissionLabel")}
+          onChange={(value) => setPermission(value === "full" ? "full" : "read")}
+          value={permission}
+        />
+      );
+    }
+    if (scopes.length > 0) {
+      return (
+        <Stack gap="xs">
+          <Text fw={500} size="sm">
+            {t("RequestedPermissions")}
+          </Text>
+          {scopes.map((scope) => (
+            <Group gap="sm" key={scope} wrap="nowrap">
+              <ThemeIcon color="branding-primary" radius="xl" size={20} variant="light">
+                <IconCheck size={12} />
+              </ThemeIcon>
+              <Text size="sm">{t(`Scopes.${scope}`, { defaultValue: scope })}</Text>
+            </Group>
+          ))}
+        </Stack>
+      );
+    }
+    return null;
+  };
   return (
     <LoginBrandShell leftContent="userKey" websiteUrl={websiteUrl}>
       <Stack gap="lg">
@@ -336,30 +368,7 @@ export function OAuthConsentClient({
           </Alert>
         ) : null}
 
-        {authDetails.isMcp ? (
-          <DescribedSelect
-            allowDeselect={false}
-            data={permissionOptions}
-            disabled={submitting}
-            label={t("PermissionLabel")}
-            onChange={(value) => setPermission(value === "full" ? "full" : "read")}
-            value={permission}
-          />
-        ) : scopes.length > 0 ? (
-          <Stack gap="xs">
-            <Text fw={500} size="sm">
-              {t("RequestedPermissions")}
-            </Text>
-            {scopes.map((scope) => (
-              <Group gap="sm" key={scope} wrap="nowrap">
-                <ThemeIcon color="branding-primary" radius="xl" size={20} variant="light">
-                  <IconCheck size={12} />
-                </ThemeIcon>
-                <Text size="sm">{t(`Scopes.${scope}`, { defaultValue: scope })}</Text>
-              </Group>
-            ))}
-          </Stack>
-        ) : null}
+        {resolveValue()}
 
         <Group grow>
           <Button

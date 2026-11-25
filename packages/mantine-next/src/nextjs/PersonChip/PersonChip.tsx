@@ -202,33 +202,37 @@ function PersonChip({
 
   const shouldShowChevron = isSelectable && !disabled && (person ? !onClear : showChevronWhenEmpty);
 
-  const endSection =
-    rightSection !== undefined ? (
-      rightSection
-    ) : onClear && person ? (
-      <UnstyledButton
-        aria-label="Clear"
-        onClick={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          onClear();
-        }}
-        onMouseDown={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-        }}
-        style={{
-          alignItems: "center",
-          cursor: "pointer",
-          display: "inline-flex",
-        }}
-        type="button"
-      >
-        <IconX size={clearSize} />
-      </UnstyledButton>
-    ) : shouldShowChevron ? (
-      <IconChevronDown size={chevronSize} />
-    ) : undefined;
+  const resolveEndSection = () => {
+    if (rightSection !== undefined) {
+      return rightSection;
+    }
+    if (onClear && person) {
+      return (
+        <UnstyledButton
+          aria-label="Clear"
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            onClear();
+          }}
+          onMouseDown={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+          }}
+          style={{
+            alignItems: "center",
+            cursor: "pointer",
+            display: "inline-flex",
+          }}
+          type="button"
+        >
+          <IconX size={clearSize} />
+        </UnstyledButton>
+      );
+    }
+    return shouldShowChevron ? <IconChevronDown size={chevronSize} /> : undefined;
+  };
+  const endSection = resolveEndSection();
 
   const renderBadge = () => (
     <PersonChipView

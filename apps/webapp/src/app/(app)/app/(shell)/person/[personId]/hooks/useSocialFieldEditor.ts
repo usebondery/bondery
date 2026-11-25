@@ -103,6 +103,7 @@ export function useSocialFieldEditor({
     () => () => {
       clearCloseTimeout();
     },
+    // biome-ignore lint/correctness/useExhaustiveDependencies: React Compiler memoizes this function, which Biome cannot see.
     [clearCloseTimeout],
   );
 
@@ -396,15 +397,17 @@ export function useSocialFieldEditor({
 
     setDrafts((previous) => {
       if (open && isSavableSocialField(open)) {
+        const resolveValue = () => {
+          if (open === "whatsapp") {
+            return { dialCode: whatsappPrefixRef.current };
+          }
+          return open === "signal" ? { dialCode: signalPrefixRef.current } : undefined;
+        };
         const resolution = resolveContactSocialFieldCommit(
           open,
           previous[open] || "",
           persistedRef.current[open] || "",
-          open === "whatsapp"
-            ? { dialCode: whatsappPrefixRef.current }
-            : open === "signal"
-              ? { dialCode: signalPrefixRef.current }
-              : undefined,
+          resolveValue(),
         );
         if (resolution.action !== "noop") {
           return { ...nextDisplay, [open]: previous[open] };

@@ -38,9 +38,11 @@ const CASES = [
   ["cn call", `{cn("p-2", className)}`, 0],
   ["cn with conditional", `{cn("p-2", isActive && "p-4")}`, 0],
   ["cn with ternary", `{cn(isActive ? "p-2" : "p-4")}`, 0],
+  // biome-ignore lint/suspicious/noTemplateCurlyInString: the text is a fixture that must contain a literal ${...}.
   ["cn with dynamic class", "{cn(`fi fi-${country}`)}", 0],
   ["cn with nested call", "{cn(country.toUpperCase())}", 0],
   ["ternary selecting one class", `{isActive ? "p-2" : "p-4"}`, 0],
+  // biome-ignore lint/suspicious/noTemplateCurlyInString: the text is a fixture that must contain a literal ${...}.
   ["template literal", "{`p-2 ${className}`}", 1],
   ["concatenation", `{"p-2 " + className}`, 1],
   ["array join", `{["p-2", className].join(" ")}`, 1],

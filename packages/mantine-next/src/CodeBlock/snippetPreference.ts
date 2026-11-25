@@ -68,37 +68,17 @@ function notify(): void {
   }
 }
 
-type CookieStoreLike = {
-  set: (options: {
-    expires: number;
-    name: string;
-    path: string;
-    sameSite: "lax";
-    value: string;
-  }) => Promise<void>;
-};
-
-/**
- * Cookie Store API when the browser has it, matching the webapp cookie helper.
- * The `document.cookie` path covers a browser without `cookieStore`.
- */
+/** Writes the choice with the Cookie Store API, which every supported browser has. */
 async function writeCookie(choices: SnippetChoices): Promise<void> {
   const value = encodeURIComponent(JSON.stringify(choices));
-  const { cookieStore } = globalThis as { cookieStore?: CookieStoreLike };
-
-  if (cookieStore) {
-    await cookieStore.set({
-      // The Cookie Store API takes a Unix timestamp in milliseconds.
-      expires: Date.now() + COOKIE_MAX_AGE_SECONDS * 1000,
-      name: CODE_BLOCK_SNIPPET_COOKIE,
-      path: "/",
-      sameSite: "lax",
-      value,
-    });
-    return;
-  }
-
-  document.cookie = `${CODE_BLOCK_SNIPPET_COOKIE}=${value}; path=/; max-age=${COOKIE_MAX_AGE_SECONDS}; samesite=lax`;
+  await cookieStore.set({
+    // The Cookie Store API takes a Unix timestamp in milliseconds.
+    expires: Date.now() + COOKIE_MAX_AGE_SECONDS * 1000,
+    name: CODE_BLOCK_SNIPPET_COOKIE,
+    path: "/",
+    sameSite: "lax",
+    value,
+  });
 }
 
 export { CODE_BLOCK_SNIPPET_COOKIE, parseCodeBlockSnippets };

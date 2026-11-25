@@ -102,9 +102,8 @@ export function PeopleSearchSpotlight() {
           <Spotlight.Empty>{t("NoPeopleFound")}</Spotlight.Empty>
         ) : null}
 
-        {hasQuery && !isLoading ? (
-          <>
-            {results.map((contact) => (
+        {hasQuery && !isLoading
+          ? results.map((contact) => (
               <Spotlight.Action
                 className={PERSON_SEARCH_OPTION_HIT_CLASS}
                 key={contact.id}
@@ -112,9 +111,8 @@ export function PeopleSearchSpotlight() {
               >
                 <PersonSearchOptionRow person={contact} />
               </Spotlight.Action>
-            ))}
-          </>
-        ) : null}
+            ))
+          : null}
 
         {hasQuery && !isLoading && results.length > 0 ? (
           <Spotlight.Action onClick={handleSeeAll}>

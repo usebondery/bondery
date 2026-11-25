@@ -37,6 +37,15 @@ export function ChatQuotaBadge({ subscriptionStatus }: { subscriptionStatus: Sub
 
   const remaining = subscriptionStatus.aiMessageLimit - subscriptionStatus.aiMessagesUsed;
 
+  const resolveValue = () => {
+    if (remaining <= 1) {
+      return "red";
+    }
+    if (remaining <= 2) {
+      return "orange";
+    }
+    return "blue";
+  };
   return (
     <Tooltip
       label={t("quotaTooltip", {
@@ -44,11 +53,7 @@ export function ChatQuotaBadge({ subscriptionStatus }: { subscriptionStatus: Sub
         remaining,
       })}
     >
-      <Badge
-        color={remaining <= 1 ? "red" : remaining <= 2 ? "orange" : "blue"}
-        size="sm"
-        variant="light"
-      >
+      <Badge color={resolveValue()} size="sm" variant="light">
         {t("quotaBadge", {
           limit: subscriptionStatus.aiMessageLimit,
           remaining,

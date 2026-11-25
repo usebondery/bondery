@@ -33,12 +33,16 @@ function FloatingActionBar({
     <FloatingPillRail accessibilityLabel={accessibilityLabel} accessibilityRole="toolbar">
       {actions.map((action) => {
         const isDisabled = action.disabled === true || action.loading === true;
-        const iconColor =
-          action.tone === "danger"
-            ? colors.dangerAccent
-            : action.isActive
-              ? colors.primary
-              : colors.iconSecondary;
+        const resolveIconColor = () => {
+          if (action.tone === "danger") {
+            return colors.dangerAccent;
+          }
+          if (action.isActive) {
+            return colors.primary;
+          }
+          return colors.iconSecondary;
+        };
+        const iconColor = resolveIconColor();
 
         return (
           <ActionButton

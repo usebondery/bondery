@@ -152,6 +152,89 @@ export function NavigationSidebarContent({
     }
   }
 
+  const resolveBackgroundColor = () => {
+    if (isMyselfActive) {
+      return "var(--mantine-primary-color-filled)";
+    }
+    if (userCardHovered) {
+      return "var(--mantine-primary-color-light-hover)";
+    }
+    return "transparent";
+  };
+  const resolveValue = () => {
+    if (isMobileOverlay) {
+      return (
+        <Stack className={SIDEBAR_NAV_STACK_CLASSNAME}>
+          <NavLinkItem
+            active={isChatRoute(pathname)}
+            collapsed={collapsed}
+            href={chatLink.href}
+            icon={chatLink.icon}
+            label={chatLink.label}
+          />
+          {primaryLinks.map((link) => (
+            <NavLinkItem
+              active={pathname === link.href}
+              collapsed={collapsed}
+              href={link.href}
+              icon={link.icon}
+              key={link.href}
+              label={link.label}
+              showIndicator={link.href === WEBAPP_ROUTES.KEEP_IN_TOUCH && hasOverdueKeepInTouch}
+            />
+          ))}
+        </Stack>
+      );
+    }
+    if (collapsed) {
+      return (
+        <Stack className={SIDEBAR_NAV_STACK_CLASSNAME}>
+          <NavLinkItem
+            active={isChat}
+            collapsed={collapsed}
+            icon={chatLink.icon}
+            label={chatLink.label}
+            onClick={() => {
+              onExpandSidebar();
+              if (!isChatRoute(pathname)) {
+                setChatModePending(true);
+                router.push(chatLink.href);
+              }
+            }}
+          />
+          {primaryLinks.map((link) => (
+            <NavLinkItem
+              active={pathname === link.href}
+              collapsed={collapsed}
+              href={link.href}
+              icon={link.icon}
+              key={link.href}
+              label={link.label}
+              showIndicator={link.href === WEBAPP_ROUTES.KEEP_IN_TOUCH && hasOverdueKeepInTouch}
+            />
+          ))}
+        </Stack>
+      );
+    }
+    if (isChat) {
+      return <SidebarChatPanel />;
+    }
+    return (
+      <Stack className={SIDEBAR_NAV_STACK_CLASSNAME}>
+        {primaryLinks.map((link) => (
+          <NavLinkItem
+            active={pathname === link.href}
+            collapsed={collapsed}
+            href={link.href}
+            icon={link.icon}
+            key={link.href}
+            label={link.label}
+            showIndicator={link.href === WEBAPP_ROUTES.KEEP_IN_TOUCH && hasOverdueKeepInTouch}
+          />
+        ))}
+      </Stack>
+    );
+  };
   return (
     <Box
       style={{
@@ -243,71 +326,7 @@ export function NavigationSidebarContent({
         </Box>
       )}
 
-      {isMobileOverlay ? (
-        <Stack className={SIDEBAR_NAV_STACK_CLASSNAME}>
-          <NavLinkItem
-            active={isChatRoute(pathname)}
-            collapsed={collapsed}
-            href={chatLink.href}
-            icon={chatLink.icon}
-            label={chatLink.label}
-          />
-          {primaryLinks.map((link) => (
-            <NavLinkItem
-              active={pathname === link.href}
-              collapsed={collapsed}
-              href={link.href}
-              icon={link.icon}
-              key={link.href}
-              label={link.label}
-              showIndicator={link.href === WEBAPP_ROUTES.KEEP_IN_TOUCH && hasOverdueKeepInTouch}
-            />
-          ))}
-        </Stack>
-      ) : collapsed ? (
-        <Stack className={SIDEBAR_NAV_STACK_CLASSNAME}>
-          <NavLinkItem
-            active={isChat}
-            collapsed={collapsed}
-            icon={chatLink.icon}
-            label={chatLink.label}
-            onClick={() => {
-              onExpandSidebar();
-              if (!isChatRoute(pathname)) {
-                setChatModePending(true);
-                router.push(chatLink.href);
-              }
-            }}
-          />
-          {primaryLinks.map((link) => (
-            <NavLinkItem
-              active={pathname === link.href}
-              collapsed={collapsed}
-              href={link.href}
-              icon={link.icon}
-              key={link.href}
-              label={link.label}
-              showIndicator={link.href === WEBAPP_ROUTES.KEEP_IN_TOUCH && hasOverdueKeepInTouch}
-            />
-          ))}
-        </Stack>
-      ) : isChat ? (
-        <SidebarChatPanel />
-      ) : (
-        <Stack className={SIDEBAR_NAV_STACK_CLASSNAME}>
-          {primaryLinks.map((link) => (
-            <NavLinkItem
-              active={pathname === link.href}
-              collapsed={collapsed}
-              href={link.href}
-              icon={link.icon}
-              key={link.href}
-              label={link.label}
-              showIndicator={link.href === WEBAPP_ROUTES.KEEP_IN_TOUCH && hasOverdueKeepInTouch}
-            />
-          ))}
-        </Stack>
-      )}
+      {resolveValue()}
 
       {/* Secondary navigation links */}
       <Stack className={SIDEBAR_NAV_STACK_CLASSNAME} mb="xs" mt="auto" style={{ flexShrink: 0 }}>
@@ -348,11 +367,7 @@ export function NavigationSidebarContent({
               // defines transition for transform, filter, AND background-color.
               // An inline override here would cause transform/filter to snap
               // instantly (no animation) because inline styles beat CSS classes.
-              backgroundColor: isMyselfActive
-                ? "var(--mantine-primary-color-filled)"
-                : userCardHovered
-                  ? "var(--mantine-primary-color-light-hover)"
-                  : "transparent",
+              backgroundColor: resolveBackgroundColor(),
               borderRadius: NAV_LINK_ITEM_BORDER_RADIUS,
               color: isMyselfActive ? "white" : "inherit",
               paddingBottom: "var(--mantine-spacing-xs)",

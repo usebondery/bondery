@@ -55,21 +55,12 @@ export function PeoplePickerOptions<T extends PeoplePickerOptionPerson>({
       </Group>
     ));
 
-  return (
-    <ScrollArea.Autosize
-      className="peoplePickerOptions"
-      key={scrollResetKey}
-      mah={PEOPLE_PICKER_DROPDOWN_MAX_HEIGHT}
-      offsetScrollbars="y"
-      onBottomReached={onBottomReached}
-      scrollbarSize="var(--combobox-padding)"
-      scrollbars="y"
-      type="scroll"
-      w="100%"
-    >
-      {isFirstPageSearching ? (
-        searching
-      ) : items.length > 0 ? (
+  const resolveValue = () => {
+    if (isFirstPageSearching) {
+      return searching;
+    }
+    if (items.length > 0) {
+      return (
         <>
           {items.map((item, index) =>
             renderOption(item, <PersonSearchOptionRow person={item} />, index),
@@ -83,9 +74,23 @@ export function PeoplePickerOptions<T extends PeoplePickerOptionPerson>({
             onRetryLoadMore={onRetryLoadMore}
           />
         </>
-      ) : (
-        emptyState
-      )}
+      );
+    }
+    return emptyState;
+  };
+  return (
+    <ScrollArea.Autosize
+      className="peoplePickerOptions"
+      key={scrollResetKey}
+      mah={PEOPLE_PICKER_DROPDOWN_MAX_HEIGHT}
+      offsetScrollbars="y"
+      onBottomReached={onBottomReached}
+      scrollbarSize="var(--combobox-padding)"
+      scrollbars="y"
+      type="scroll"
+      w="100%"
+    >
+      {resolveValue()}
     </ScrollArea.Autosize>
   );
 }

@@ -108,6 +108,7 @@ export const PUBLIC_DATABASE_ENTRIES: EnvVarDef[] = [
     canonical: "BONDERY_PUBLIC_CSP_REPORT_ENABLED",
     deployExample: { group: "Public hostnames", include: true, value: "true" },
     description:
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: the description quotes a literal ${VAR} placeholder.
       "Send CSP violation reports to `${BONDERY_PUBLIC_API_URL}/security/csp-report` (true | false). Default on. A self-host install set `false` to send no reports. The endpoint is derived from the API URL, so it cannot disagree with the API it posts to.",
     exampleValue: "true",
     group: "Public URLs",

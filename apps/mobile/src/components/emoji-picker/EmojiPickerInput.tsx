@@ -84,9 +84,18 @@ function EmojiPickerInput({
 
   const layout = stretch ? "stretch" : "square";
 
+  const resolveValue = () => {
+    if (stretch) {
+      return styles.stretchRoot;
+    }
+    if (compact) {
+      return styles.compactRoot;
+    }
+    return styles.root;
+  };
   return (
     <>
-      <View style={[stretch ? styles.stretchRoot : compact ? styles.compactRoot : styles.root]}>
+      <View style={[resolveValue()]}>
         {label ? (
           <Text style={[styles.label, { color: colors.textSecondary }]}>{label}</Text>
         ) : null}

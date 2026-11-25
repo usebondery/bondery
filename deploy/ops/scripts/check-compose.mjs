@@ -107,6 +107,7 @@ function main() {
     }
     if (!WEBSITE_IMAGE_TAG_RE.test(website)) {
       errors.push(
+        // biome-ignore lint/suspicious/noTemplateCurlyInString: the message quotes a literal Compose ${VAR} placeholder.
         "website image must use ghcr.io/usebondery/website:${BONDERY_INFRA_WEBSITE_IMAGE_TAG:-production}",
       );
     }

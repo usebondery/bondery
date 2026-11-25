@@ -18,7 +18,7 @@ import { setPersonLocationWithDb } from "../../lib/data/contact-rpc.js";
 import { cachedGeocodeLinkedInLocation } from "../../lib/integrations/mapy.js";
 import { loadDefaultPhoneCountryForUser } from "../../lib/me/default-phone-country.js";
 import { sanitizeNotesHtml } from "../../lib/notes/sanitize-notes-html.js";
-import { internal } from "../../lib/platform/errors/http-errors.js";
+import { badRequest, internal } from "../../lib/platform/errors/http-errors.js";
 import { listContactChildIds } from "../../lib/sync/build-changes.js";
 import { type DomainContext, DomainError } from "../_shared/context.js";
 import { domainDb } from "../_shared/domain-db.js";
@@ -148,7 +148,7 @@ export async function applyContactPatch(
       nextPhones = parsePhoneEntries(body.phones, defaultPhoneCountry);
     } catch (parseError) {
       const message = parseError instanceof Error ? parseError.message : "Invalid phones payload";
-      throw new DomainError(message, 400, "contact_invalid");
+      throw badRequest(message, "contact_invalid", parseError);
     }
   }
 
@@ -159,7 +159,7 @@ export async function applyContactPatch(
       nextEmails = parseEmailEntries(body.emails);
     } catch (parseError) {
       const message = parseError instanceof Error ? parseError.message : "Invalid emails payload";
-      throw new DomainError(message, 400, "contact_invalid");
+      throw badRequest(message, "contact_invalid", parseError);
     }
   }
 
@@ -171,7 +171,7 @@ export async function applyContactPatch(
     } catch (parseError) {
       const message =
         parseError instanceof Error ? parseError.message : "Invalid addresses payload";
-      throw new DomainError(message, 400, "contact_invalid");
+      throw badRequest(message, "contact_invalid", parseError);
     }
   }
 

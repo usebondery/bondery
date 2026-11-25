@@ -100,11 +100,16 @@ export function ContactsScreenList({
     rightSwipeAction,
   };
 
-  const listKey = isSearchActive
-    ? `search-${debouncedQuery}-${isGroupFilterActive ? "group" : "all"}`
-    : isGroupFilterActive
-      ? "browse-group"
-      : "browse";
+  const resolveListKey = () => {
+    if (isSearchActive) {
+      return `search-${debouncedQuery}-${isGroupFilterActive ? "group" : "all"}`;
+    }
+    if (isGroupFilterActive) {
+      return "browse-group";
+    }
+    return "browse";
+  };
+  const listKey = resolveListKey();
 
   return (
     <View className="flex-1" collapsable={false}>

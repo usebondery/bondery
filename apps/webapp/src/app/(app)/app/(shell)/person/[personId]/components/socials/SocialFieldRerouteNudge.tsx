@@ -34,39 +34,45 @@ export function SocialFieldRerouteNudge({
   const sourceLabel = fieldLabels[suggestion.fromField];
   const whatsappLabel = fieldLabels.whatsapp;
 
-  const title =
-    suggestion.reason === "wrong_platform"
-      ? t("RerouteWrongPlatformDescription", { field: sourceLabel, platform: targetLabel })
-      : suggestion.reason === "looks_like_phone"
-        ? t("RerouteLooksLikePhoneDescription", {
-            field: sourceLabel,
-            platform: whatsappLabel,
-          })
-        : t("RerouteLooksLikeWebsiteDescription", { field: sourceLabel });
+  const resolveTitle = () => {
+    if (suggestion.reason === "wrong_platform") {
+      return t("RerouteWrongPlatformDescription", { field: sourceLabel, platform: targetLabel });
+    }
+    if (suggestion.reason === "looks_like_phone") {
+      return t("RerouteLooksLikePhoneDescription", {
+        field: sourceLabel,
+        platform: whatsappLabel,
+      });
+    }
+    return t("RerouteLooksLikeWebsiteDescription", { field: sourceLabel });
+  };
+  const title = resolveTitle();
 
   const bodyParams = { field: sourceLabel, platform: targetLabel };
 
-  const body =
-    suggestion.reason === "wrong_platform"
-      ? t(
-          suggestion.targetHasValue
-            ? "RerouteWrongPlatformBodyConflict"
-            : "RerouteWrongPlatformBody",
-          bodyParams,
-        )
-      : suggestion.reason === "looks_like_phone"
-        ? t(
-            suggestion.targetHasValue
-              ? "RerouteLooksLikePhoneBodyConflict"
-              : "RerouteLooksLikePhoneBody",
-            bodyParams,
-          )
-        : t(
-            suggestion.targetHasValue
-              ? "RerouteLooksLikeWebsiteBodyConflict"
-              : "RerouteLooksLikeWebsiteBody",
-            bodyParams,
-          );
+  const resolveBody = () => {
+    if (suggestion.reason === "wrong_platform") {
+      return t(
+        suggestion.targetHasValue ? "RerouteWrongPlatformBodyConflict" : "RerouteWrongPlatformBody",
+        bodyParams,
+      );
+    }
+    if (suggestion.reason === "looks_like_phone") {
+      return t(
+        suggestion.targetHasValue
+          ? "RerouteLooksLikePhoneBodyConflict"
+          : "RerouteLooksLikePhoneBody",
+        bodyParams,
+      );
+    }
+    return t(
+      suggestion.targetHasValue
+        ? "RerouteLooksLikeWebsiteBodyConflict"
+        : "RerouteLooksLikeWebsiteBody",
+      bodyParams,
+    );
+  };
+  const body = resolveBody();
 
   const primaryLabel = suggestion.targetHasValue
     ? t("RerouteReplace")

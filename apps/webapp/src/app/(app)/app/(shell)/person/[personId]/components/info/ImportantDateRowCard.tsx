@@ -77,12 +77,16 @@ export function ImportantDateRowCard({
       return option;
     }
 
-    const disabledTooltip =
-      option.value === "birthday"
-        ? disabledBirthdateTypeHint
-        : option.value === "nameday"
-          ? disabledNamedateTypeHint
-          : disabledTypeHint;
+    const resolveDisabledTooltip = () => {
+      if (option.value === "birthday") {
+        return disabledBirthdateTypeHint;
+      }
+      if (option.value === "nameday") {
+        return disabledNamedateTypeHint;
+      }
+      return disabledTypeHint;
+    };
+    const disabledTooltip = resolveDisabledTooltip();
 
     return { ...option, disabledTooltip };
   });

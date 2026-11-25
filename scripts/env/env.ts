@@ -242,8 +242,8 @@ function writeTurbo(dryRun) {
   const turbo = JSON.parse(readFileSync(turboPath, "utf-8"));
 
   const globalPassThroughEnv = [...TURBO_SYSTEM_PASSTHROUGH, ...getAllRuntimeNames()];
-  turbo.globalPassThroughEnv = [...new Set(globalPassThroughEnv)].toSorted((a, b) =>
-    a < b ? -1 : a > b ? 1 : 0,
+  turbo.globalPassThroughEnv = [...new Set(globalPassThroughEnv)].toSorted(
+    (a, b) => Number(a > b) - Number(a < b),
   );
 
   const packageEnv = {
@@ -295,7 +295,7 @@ function writeTurbo(dryRun) {
         ...inherit,
         ...existing,
         dependsOn: existing.dependsOn ?? inherit.dependsOn,
-        env: [...new Set(env)].toSorted((a, b) => (a < b ? -1 : a > b ? 1 : 0)),
+        env: [...new Set(env)].toSorted((a, b) => Number(a > b) - Number(a < b)),
       };
     }
   }

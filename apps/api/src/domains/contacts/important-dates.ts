@@ -1,6 +1,6 @@
 import type { ImportantDateType } from "@bondery/schemas";
 import { toImportantDate } from "../../lib/contacts/important-dates.js";
-import { internal } from "../../lib/platform/errors/http-errors.js";
+import { conflict, internal } from "../../lib/platform/errors/http-errors.js";
 import {
   buildChildTableReplaceChanges,
   listContactChildIds,
@@ -119,7 +119,7 @@ export async function replaceImportantDates(
     );
   } catch (error) {
     if (isUniqueViolation(error)) {
-      throw new DomainError("Duplicate important date", 409, "important_date_duplicate");
+      throw conflict("Duplicate important date", "important_date_duplicate", error);
     }
     throw internal("contact_failed", error instanceof Error ? error.message : "contact_failed");
   }

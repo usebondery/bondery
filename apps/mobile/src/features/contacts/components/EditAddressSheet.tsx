@@ -298,23 +298,33 @@ function EditAddressSheet({
   const isBusy = isSubmitting || isDeleting;
   const canSubmit = isValid && !isBusy;
 
-  const typeOptions = CONTACT_ADDRESS_TYPE_OPTIONS.map((option) => ({
-    label:
-      option.value === "work"
-        ? tContactAddress("TypeWork")
-        : option.value === "other"
-          ? tContactAddress("TypeOther")
-          : tContactAddress("TypeHome"),
-    leftSection: <Text style={styles.typeEmoji}>{option.emoji}</Text>,
-    value: option.value,
-  }));
+  const typeOptions = CONTACT_ADDRESS_TYPE_OPTIONS.map((option) => {
+    const resolveLabel = () => {
+      if (option.value === "work") {
+        return tContactAddress("TypeWork");
+      }
+      if (option.value === "other") {
+        return tContactAddress("TypeOther");
+      }
+      return tContactAddress("TypeHome");
+    };
+    return {
+      label: resolveLabel(),
+      leftSection: <Text style={styles.typeEmoji}>{option.emoji}</Text>,
+      value: option.value,
+    };
+  });
 
-  const geocodeTrailingIcon =
-    geocodeStatus === "loading" ? (
-      <ActivityIndicator color={colors.textMuted} size="small" />
-    ) : geocodeStatus === "geocoded" ? (
-      <IconMapPinCheck size={18} stroke={colors.primary} />
-    ) : null;
+  const resolveGeocodeTrailingIcon = () => {
+    if (geocodeStatus === "loading") {
+      return <ActivityIndicator color={colors.textMuted} size="small" />;
+    }
+    if (geocodeStatus === "geocoded") {
+      return <IconMapPinCheck size={18} stroke={colors.primary} />;
+    }
+    return null;
+  };
+  const geocodeTrailingIcon = resolveGeocodeTrailingIcon();
 
   const primaryAction: SheetAction = {
     disabled: !canSubmit,

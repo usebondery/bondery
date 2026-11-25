@@ -68,6 +68,7 @@ function SyncProvider({ children }: SyncProviderProps) {
     setConflictCount(0);
   }
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Runs once by design, and React Compiler keeps the missing function stable.
   useEffect(
     () =>
       subscribeLocalSessionEnded(() => {
@@ -83,6 +84,7 @@ function SyncProvider({ children }: SyncProviderProps) {
     [],
   );
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Runs once by design, and React Compiler keeps the missing function stable.
   useEffect(() => {
     let active = true;
     let wakeClient: Awaited<ReturnType<typeof startSyncWakeClient>> | null = null;

@@ -361,14 +361,29 @@ function AddPeopleToGroupSelectionForm({
                   const isInitiallySelected = initialSelectedGroupIds.has(group.id);
                   const isCurrentlySelected = selectedGroupIds.has(group.id);
 
-                  const selectionState = isInitiallySelected
-                    ? isCurrentlySelected
-                      ? "already"
-                      : "remove"
-                    : isCurrentlySelected
-                      ? "add"
-                      : "none";
+                  const resolveSelectionState = () => {
+                    if (isInitiallySelected) {
+                      if (isCurrentlySelected) {
+                        return "already";
+                      }
+                      return "remove";
+                    }
+                    if (isCurrentlySelected) {
+                      return "add";
+                    }
+                    return "none";
+                  };
+                  const selectionState = resolveSelectionState();
 
+                  const resolveValue = () => {
+                    if (selectionState === "add") {
+                      return "green";
+                    }
+                    if (selectionState === "remove") {
+                      return "red";
+                    }
+                    return selectionState === "already" ? "primary" : undefined;
+                  };
                   return (
                     <div className="relative">
                       {selectionState === "remove" && (
@@ -413,15 +428,7 @@ function AddPeopleToGroupSelectionForm({
                       <GroupCard
                         cursorType="pointer"
                         group={group}
-                        highlightColor={
-                          selectionState === "add"
-                            ? "green"
-                            : selectionState === "remove"
-                              ? "red"
-                              : selectionState === "already"
-                                ? "primary"
-                                : undefined
-                        }
+                        highlightColor={resolveValue()}
                         interactive={false}
                         onAddPeople={ignoreGroupCardAction}
                         onClick={ignoreGroupCardAction}

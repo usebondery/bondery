@@ -194,31 +194,47 @@ export function DataTable<TRow, TSortKey extends string = string>({
     (effectiveSelectedCount > 0 || (selectedIds !== undefined && selectedIds.size > 0)) &&
     totalCount > data.length;
 
+  const resolveValue2 = () => {
+    if (showSelectAllTotal) {
+      if (allTotalSelected) {
+        return (
+          <Anchor component="span" onClick={handleSelectAll} size="sm">
+            {labels.clearAllTotalTemplate?.replace("{count}", String(totalCount)) ??
+              `Clear selection (${totalCount})`}
+          </Anchor>
+        );
+      }
+      return (
+        <Anchor component="span" onClick={onSelectAllTotal} size="sm">
+          {labels.selectAllTotalTemplate?.replace("{count}", String(totalCount)) ??
+            `Select all ${totalCount}`}
+        </Anchor>
+      );
+    }
+    return null;
+  };
+  const resolveValue = () => {
+    if (effectiveSelectedCount > 0) {
+      if (effectiveSelectedCount === 1 && labels.selectedSingularCountTemplate) {
+        return labels.selectedSingularCountTemplate;
+      }
+      return (
+        labels.selectedCountTemplate?.replace("{count}", String(effectiveSelectedCount)) ??
+        `${effectiveSelectedCount} selected`
+      );
+    }
+    return (
+      labels.totalCountTemplate?.replace("{count}", String(data.length)) ??
+      `${data.length} total items`
+    );
+  };
   const bulkActionsContent = showSelection ? (
     <Group align="center" className="min-h-9" justify="space-between">
       <Stack gap={2}>
         <Text c="dimmed" size="sm">
-          {effectiveSelectedCount > 0
-            ? effectiveSelectedCount === 1 && labels.selectedSingularCountTemplate
-              ? labels.selectedSingularCountTemplate
-              : (labels.selectedCountTemplate?.replace("{count}", String(effectiveSelectedCount)) ??
-                `${effectiveSelectedCount} selected`)
-            : (labels.totalCountTemplate?.replace("{count}", String(data.length)) ??
-              `${data.length} total items`)}
+          {resolveValue()}
         </Text>
-        {showSelectAllTotal ? (
-          allTotalSelected ? (
-            <Anchor component="span" onClick={handleSelectAll} size="sm">
-              {labels.clearAllTotalTemplate?.replace("{count}", String(totalCount)) ??
-                `Clear selection (${totalCount})`}
-            </Anchor>
-          ) : (
-            <Anchor component="span" onClick={onSelectAllTotal} size="sm">
-              {labels.selectAllTotalTemplate?.replace("{count}", String(totalCount)) ??
-                `Select all ${totalCount}`}
-            </Anchor>
-          )
-        ) : null}
+        {resolveValue2()}
       </Stack>
 
       {selectedIds && effectiveSelectedCount > 0 && bulkActions && bulkActions.length > 0 ? (
@@ -286,6 +302,25 @@ export function DataTable<TRow, TSortKey extends string = string>({
   // --- Column span calculation ---
   const totalColSpan = visibleColumns.length + (showSelection ? 1 : 0) + (showRowActions ? 1 : 0);
 
+  const resolveValue3 = () => {
+    if (showSelection && showSelectAll) {
+      return (
+        <TableTh style={{ width: 40 }}>
+          <Checkbox
+            aria-label="Select all rows"
+            checked={allSelected || Boolean(allTotalSelected)}
+            icon={allTotalSelected ? AllCheckedIcon : undefined}
+            indeterminate={someSelected && !allTotalSelected}
+            onChange={handleSelectAll}
+          />
+        </TableTh>
+      );
+    }
+    if (showSelection) {
+      return <TableTh style={{ width: 40 }} />;
+    }
+    return null;
+  };
   return (
     <>
       {showHeader ? (
@@ -311,19 +346,7 @@ export function DataTable<TRow, TSortKey extends string = string>({
         <Table className={className} highlightOnHover striped>
           <TableThead>
             <TableTr>
-              {showSelection && showSelectAll ? (
-                <TableTh style={{ width: 40 }}>
-                  <Checkbox
-                    aria-label="Select all rows"
-                    checked={allSelected || Boolean(allTotalSelected)}
-                    icon={allTotalSelected ? AllCheckedIcon : undefined}
-                    indeterminate={someSelected && !allTotalSelected}
-                    onChange={handleSelectAll}
-                  />
-                </TableTh>
-              ) : showSelection ? (
-                <TableTh style={{ width: 40 }} />
-              ) : null}
+              {resolveValue3()}
 
               {visibleColumns.map((col) => (
                 <TableTh className={col.minWidthClass} key={col.key}>

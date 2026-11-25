@@ -115,6 +115,7 @@
         "noRedundantDefaultExport": "error",
         "noUnnecessaryTemplateExpression": "error",
         "noUselessCatchBinding": "error",
+        "noUselessFragments": "error",
         "noUselessReturn": "error",
         "noUselessStringConcat": "error",
         "noUselessUndefined": "error",
@@ -126,6 +127,7 @@
         "useIndexOf": "error",
         "useMathMinMax": "error",
         "useMaxParams": "info",
+        "useOptionalChain": "error",
         "useRegexpTest": "error"
       },
       "correctness": {
@@ -147,6 +149,7 @@
         "noUndeclaredVariables": "error",
         "noUnresolvedImports": "off",
         "noUnusedInstantiation": "error",
+        "noUnusedVariables": "error",
         "useGraphqlNamedOperations": "error",
         "useImportExtensions": "off",
         "useInlineScriptId": "error",
@@ -386,7 +389,7 @@
         "noMultiAssign": "error",
         "noMultilineString": "error",
         "noNamespace": "error",
-        "noNestedTernary": "info",
+        "noNestedTernary": "error",
         "noParameterAssign": "error",
         "noParameterProperties": "error",
         "noPlaywrightElementHandle": "error",
@@ -454,7 +457,7 @@
         "useDestructuring": "error",
         "useDomQuerySelector": "error",
         "useEnumInitializers": "error",
-        "useErrorCause": "warn",
+        "useErrorCause": "error",
         "useExplicitLengthCheck": "error",
         "useExportsLast": "error",
         "useFilenamingConvention": {
@@ -558,6 +561,7 @@
         "noReturnAssign": "error",
         "noShadow": "error",
         "noSkippedTests": "error",
+        "noTemplateCurlyInString": "error",
         "noThenProperty": "error",
         "noUnassignedVariables": "error",
         "noUndeclaredEnvVars": {
@@ -729,7 +733,7 @@
         },
         "rules": {
           "correctness": {
-            "useExhaustiveDependencies": "warn"
+            "useExhaustiveDependencies": "error"
           },
           "nursery": {
             "useReactCompiler": "error"
@@ -779,7 +783,7 @@
       "linter": {
         "rules": {
           "correctness": {
-            "useExhaustiveDependencies": "warn"
+            "useExhaustiveDependencies": "error"
           },
           "nursery": {
             "useReactCompiler": "error"
@@ -838,7 +842,7 @@
       "linter": {
         "rules": {
           "correctness": {
-            "useExhaustiveDependencies": "warn"
+            "useExhaustiveDependencies": "error"
           },
           "nursery": {
             "useReactCompiler": "error"

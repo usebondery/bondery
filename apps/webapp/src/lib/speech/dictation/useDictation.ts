@@ -469,6 +469,7 @@ export function useDictation({
   //
   // A terminal status (denied, unavailable) describes the browser, not the
   // session, so it survives a reset and the user keeps its explanation.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: lang and resetKey are triggers: a locale change or reset ends the session.
   useEffect(() => {
     if (isLiveStatus(statusRef.current)) {
       endSession();

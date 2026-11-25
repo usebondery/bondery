@@ -94,26 +94,36 @@ export function SearchableComboboxPicker({
     (targetFallback ?? value)
   );
 
-  return (
-    <Stack gap={4}>
-      {label ? (
-        typeof label === "string" ? (
-          <Text fw={500} size="sm">
-            {label}
-          </Text>
-        ) : (
-          label
-        )
-      ) : null}
-      {description ? (
-        typeof description === "string" ? (
+  const resolveValue2 = () => {
+    if (description) {
+      if (typeof description === "string") {
+        return (
           <Text c="dimmed" size="xs">
             {description}
           </Text>
-        ) : (
-          description
-        )
-      ) : null}
+        );
+      }
+      return description;
+    }
+    return null;
+  };
+  const resolveValue = () => {
+    if (label) {
+      if (typeof label === "string") {
+        return (
+          <Text fw={500} size="sm">
+            {label}
+          </Text>
+        );
+      }
+      return label;
+    }
+    return null;
+  };
+  return (
+    <Stack gap={4}>
+      {resolveValue()}
+      {resolveValue2()}
       <Combobox onOptionSubmit={handleOptionSubmit} store={combobox}>
         <Combobox.Target>
           <Input

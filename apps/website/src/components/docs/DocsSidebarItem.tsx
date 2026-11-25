@@ -22,12 +22,13 @@ function DocsSidebarItem({ activeRef, node, pathname }: DocsSidebarItemProps) {
   const method = docsApiMethod(node.url);
   const errorStatus = docsErrorStatus(node.url);
 
-  const badge =
-    method !== null ? (
-      <DocsApiMethodBadge method={method} size="xs" />
-    ) : errorStatus !== null ? (
-      <DocsApiStatusBadge size="xs" status={errorStatus} />
-    ) : undefined;
+  const resolveBadge = () => {
+    if (method !== null) {
+      return <DocsApiMethodBadge method={method} size="xs" />;
+    }
+    return errorStatus !== null ? <DocsApiStatusBadge size="xs" status={errorStatus} /> : undefined;
+  };
+  const badge = resolveBadge();
 
   return (
     <SidebarLink

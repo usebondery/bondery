@@ -52,14 +52,18 @@ export function PageHeader({
   backOnClick,
 }: PageHeaderProps) {
   const tCommon = useCommonTranslations();
-  const resolvedAction = action ? (
-    <PageHeaderActions>{action}</PageHeaderActions>
-  ) : primaryAction || secondaryAction ? (
-    <PageHeaderActions>
-      {secondaryAction}
-      {primaryAction}
-    </PageHeaderActions>
-  ) : undefined;
+  const resolveResolvedAction = () => {
+    if (action) {
+      return <PageHeaderActions>{action}</PageHeaderActions>;
+    }
+    return primaryAction || secondaryAction ? (
+      <PageHeaderActions>
+        {secondaryAction}
+        {primaryAction}
+      </PageHeaderActions>
+    ) : undefined;
+  };
+  const resolvedAction = resolveResolvedAction();
 
   return (
     <Flex

@@ -14,12 +14,16 @@ function joinNumericDate(
   year: string,
 ): string {
   const sep = order === "ymd" ? "-" : "/";
-  const parts =
-    order === "mdy"
-      ? [month, day, year]
-      : order === "dmy"
-        ? [day, month, year]
-        : [year, month, day];
+  const resolveParts = () => {
+    if (order === "mdy") {
+      return [month, day, year];
+    }
+    if (order === "dmy") {
+      return [day, month, year];
+    }
+    return [year, month, day];
+  };
+  const parts = resolveParts();
   return parts.join(sep);
 }
 

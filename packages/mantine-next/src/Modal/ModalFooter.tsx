@@ -99,50 +99,60 @@ export function ModalFooter({
     );
   }
 
-  const leftSlot =
-    showDanger || showBack ? (
-      <Group gap="sm" w={{ base: "100%", sm: "auto" }} wrap="nowrap">
-        {showDanger ? (
-          <Button
-            color="red"
-            disabled={dangerDisabled}
-            flex={MOBILE_EQUAL_BUTTON_FLEX}
-            leftSection={resolvedDangerLeftSection}
-            onClick={onDanger}
-            type="button"
-            variant="light"
-          >
-            {dangerLabel}
-          </Button>
-        ) : null}
-        {showBack ? (
-          <Button
-            disabled={backDisabled}
-            flex={MOBILE_EQUAL_BUTTON_FLEX}
-            leftSection={backLeftSection}
-            onClick={onBack}
-            variant="default"
-          >
-            {backLabel}
-          </Button>
-        ) : null}
-      </Group>
-    ) : showCreateMore && onCreateMoreChange ? (
-      <Group gap="sm" style={{ flexShrink: 0 }} wrap="nowrap">
-        <Switch
-          aria-describedby={createMoreAriaDescription ? createMoreDescriptionId : undefined}
-          checked={createMoreChecked}
-          disabled={createMoreDisabled}
-          label={createMoreLabel}
-          onChange={(event) => onCreateMoreChange(event.currentTarget.checked)}
-          size="sm"
-          styles={{ label: { whiteSpace: "nowrap" } }}
-        />
-        {createMoreAriaDescription ? (
-          <VisuallyHidden id={createMoreDescriptionId}>{createMoreAriaDescription}</VisuallyHidden>
-        ) : null}
-      </Group>
-    ) : null;
+  const resolveLeftSlot = () => {
+    if (showDanger || showBack) {
+      return (
+        <Group gap="sm" w={{ base: "100%", sm: "auto" }} wrap="nowrap">
+          {showDanger ? (
+            <Button
+              color="red"
+              disabled={dangerDisabled}
+              flex={MOBILE_EQUAL_BUTTON_FLEX}
+              leftSection={resolvedDangerLeftSection}
+              onClick={onDanger}
+              type="button"
+              variant="light"
+            >
+              {dangerLabel}
+            </Button>
+          ) : null}
+          {showBack ? (
+            <Button
+              disabled={backDisabled}
+              flex={MOBILE_EQUAL_BUTTON_FLEX}
+              leftSection={backLeftSection}
+              onClick={onBack}
+              variant="default"
+            >
+              {backLabel}
+            </Button>
+          ) : null}
+        </Group>
+      );
+    }
+    if (showCreateMore && onCreateMoreChange) {
+      return (
+        <Group gap="sm" style={{ flexShrink: 0 }} wrap="nowrap">
+          <Switch
+            aria-describedby={createMoreAriaDescription ? createMoreDescriptionId : undefined}
+            checked={createMoreChecked}
+            disabled={createMoreDisabled}
+            label={createMoreLabel}
+            onChange={(event) => onCreateMoreChange(event.currentTarget.checked)}
+            size="sm"
+            styles={{ label: { whiteSpace: "nowrap" } }}
+          />
+          {createMoreAriaDescription ? (
+            <VisuallyHidden id={createMoreDescriptionId}>
+              {createMoreAriaDescription}
+            </VisuallyHidden>
+          ) : null}
+        </Group>
+      );
+    }
+    return null;
+  };
+  const leftSlot = resolveLeftSlot();
 
   return (
     <Flex

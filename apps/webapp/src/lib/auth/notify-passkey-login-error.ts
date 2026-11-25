@@ -26,14 +26,19 @@ export function notifyPasskeyLoginError(error: unknown, t: PasskeyLoginT): void 
 
   captureEvent("auth:passkey_fail");
 
-  const description =
-    kind === "timeout"
-      ? t("PasskeyTimedOut")
-      : kind === "not_found"
-        ? t("NoPasskeyFound")
-        : kind === "unsupported"
-          ? t("PasskeysUnavailable")
-          : t("PasskeySignInFailed");
+  const resolveDescription = () => {
+    if (kind === "timeout") {
+      return t("PasskeyTimedOut");
+    }
+    if (kind === "not_found") {
+      return t("NoPasskeyFound");
+    }
+    if (kind === "unsupported") {
+      return t("PasskeysUnavailable");
+    }
+    return t("PasskeySignInFailed");
+  };
+  const description = resolveDescription();
 
   notifications.show(
     errorNotificationTemplate({

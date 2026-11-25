@@ -54,6 +54,70 @@ export function ContactDetailNotesSection({
     openContact(personId);
   }
 
+  const resolveValue = () => {
+    if (notesPending) {
+      return <ActivityIndicator color={colors.textMuted} size="small" />;
+    }
+    if (notesMarkdown) {
+      return (
+        <>
+          <View style={notesExpanded ? undefined : styles.notesCollapsed}>
+            <EnrichedMarkdownText
+              flavor="github"
+              markdown={notesMarkdown}
+              markdownStyle={{
+                blockquote: { borderColor: colors.border },
+                code: { backgroundColor: colors.surfacePressed },
+                h1: { color: colors.textPrimary },
+                h2: { color: colors.textPrimary },
+                h3: { color: colors.textPrimary },
+                link: { color: colors.primary },
+                linkVariants: {
+                  "^bp://person/": {
+                    backgroundColor: `${colors.primary}18`,
+                    color: colors.primary,
+                    underline: false,
+                  },
+                },
+                list: { color: colors.textSecondary, fontSize: 15 },
+                paragraph: {
+                  color: colors.textSecondary,
+                  fontSize: 15,
+                  lineHeight: 22,
+                  marginBottom: 4,
+                },
+              }}
+              onLinkPress={handleMentionLinkPress}
+            />
+          </View>
+          {longNotes ? (
+            <Pressable
+              accessibilityLabel={notesExpanded ? "Show less notes" : "Show more notes"}
+              accessibilityRole="button"
+              onPress={() => {
+                setNotesExpanded((v) => !v);
+              }}
+              style={styles.showMoreButton}
+            >
+              {notesExpanded ? (
+                <IconChevronUp size={14} stroke={colors.iconSecondary} />
+              ) : (
+                <IconChevronDown size={14} stroke={colors.iconSecondary} />
+              )}
+              <Text style={[styles.showMoreText, { color: colors.textMuted }]}>
+                {notesExpanded ? "Show less" : "Show more"}
+              </Text>
+            </Pressable>
+          ) : null}
+        </>
+      );
+    }
+    return (
+      <Text style={[styles.notesPlaceholder, { color: colors.textMuted }]}>
+        {t("AddNotesPlaceholder")}
+      </Text>
+    );
+  };
   return (
     <View style={contactDetailStyles.section}>
       <ContactDetailSectionHeader title="Notes" />
@@ -69,64 +133,7 @@ export function ContactDetailNotesSection({
           },
         ]}
       >
-        {notesPending ? (
-          <ActivityIndicator color={colors.textMuted} size="small" />
-        ) : notesMarkdown ? (
-          <>
-            <View style={notesExpanded ? undefined : styles.notesCollapsed}>
-              <EnrichedMarkdownText
-                flavor="github"
-                markdown={notesMarkdown}
-                markdownStyle={{
-                  blockquote: { borderColor: colors.border },
-                  code: { backgroundColor: colors.surfacePressed },
-                  h1: { color: colors.textPrimary },
-                  h2: { color: colors.textPrimary },
-                  h3: { color: colors.textPrimary },
-                  link: { color: colors.primary },
-                  linkVariants: {
-                    "^bp://person/": {
-                      backgroundColor: `${colors.primary}18`,
-                      color: colors.primary,
-                      underline: false,
-                    },
-                  },
-                  list: { color: colors.textSecondary, fontSize: 15 },
-                  paragraph: {
-                    color: colors.textSecondary,
-                    fontSize: 15,
-                    lineHeight: 22,
-                    marginBottom: 4,
-                  },
-                }}
-                onLinkPress={handleMentionLinkPress}
-              />
-            </View>
-            {longNotes ? (
-              <Pressable
-                accessibilityLabel={notesExpanded ? "Show less notes" : "Show more notes"}
-                accessibilityRole="button"
-                onPress={() => {
-                  setNotesExpanded((v) => !v);
-                }}
-                style={styles.showMoreButton}
-              >
-                {notesExpanded ? (
-                  <IconChevronUp size={14} stroke={colors.iconSecondary} />
-                ) : (
-                  <IconChevronDown size={14} stroke={colors.iconSecondary} />
-                )}
-                <Text style={[styles.showMoreText, { color: colors.textMuted }]}>
-                  {notesExpanded ? "Show less" : "Show more"}
-                </Text>
-              </Pressable>
-            ) : null}
-          </>
-        ) : (
-          <Text style={[styles.notesPlaceholder, { color: colors.textMuted }]}>
-            {t("AddNotesPlaceholder")}
-          </Text>
-        )}
+        {resolveValue()}
       </Pressable>
     </View>
   );

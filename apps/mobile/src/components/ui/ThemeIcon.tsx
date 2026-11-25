@@ -30,8 +30,13 @@ export function ThemeIcon({
   variant = "light",
 }: ThemeIconProps) {
   const colors = useMobileThemeColors();
-  const backgroundColor =
-    variant === "custom" && color ? color : variant === "light" ? colors.surfaceMuted : undefined;
+  const resolveBackgroundColor = () => {
+    if (variant === "custom" && color) {
+      return color;
+    }
+    return variant === "light" ? colors.surfaceMuted : undefined;
+  };
+  const backgroundColor = resolveBackgroundColor();
 
   return (
     <View

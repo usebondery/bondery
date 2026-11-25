@@ -33,13 +33,18 @@ function TagChip({
   const colors = useMobileThemeColors();
   const { pressIn, pressOut, squeezeStyle } = usePressSqueeze("subtle");
   const tagColor = nonEmpty(tag.color) ?? colors.textMuted;
+  const resolveBorderColor = () => {
+    if (isSelected) {
+      return colors.primary;
+    }
+    if (tag.color) {
+      return hexWithAlpha(tagColor, 0.4);
+    }
+    return colors.borderStrong;
+  };
   const chipPaint = {
     backgroundColor: tag.color ? hexWithAlpha(tagColor, 0.1) : colors.surfaceMuted,
-    borderColor: isSelected
-      ? colors.primary
-      : tag.color
-        ? hexWithAlpha(tagColor, 0.4)
-        : colors.borderStrong,
+    borderColor: resolveBorderColor(),
     borderWidth: isSelected ? 2 : 1,
     opacity: disabled ? 0.5 : 1,
   };

@@ -275,6 +275,180 @@ export function GraphClient({ focus }: GraphClientProps) {
   const noPeople = graph.nodes.length === 0 && graph.unlinkedCount === 0;
   const noLinks = graph.nodes.length === 0 && graph.unlinkedCount > 0;
 
+  const resolveValue = () => {
+    if (noPeople || noLinks) {
+      return (
+        <Stack align="center" gap="sm" py="xl">
+          <Title order={3}>{noPeople ? t("EmptyNoPeopleTitle") : t("EmptyNoLinksTitle")}</Title>
+          <Text c="dimmed" maw={460} ta="center">
+            {noPeople ? t("EmptyNoPeopleBody") : t("EmptyNoLinksBody")}
+          </Text>
+          <ButtonLink href={routeAssert(WEBAPP_ROUTES.PEOPLE)}>{t("GoToPeople")}</ButtonLink>
+        </Stack>
+      );
+    }
+    if (!showCanvas) {
+      return (
+        <Stack gap="xs">
+          <GraphSearchField
+            label={t("SearchLabel")}
+            loading={searchLoading}
+            onValue={handleSearch}
+            placeholder={t("SearchPlaceholder")}
+            value={searchInput}
+          />
+          {mobileEdges.map((edge) => (
+            <RelationshipSentence
+              edge={edge}
+              emphasized={
+                relationshipPairKey(edge.sourcePersonId, edge.targetPersonId) === selectedEdgeKey
+              }
+              key={`${edge.id}:${edge.relationshipType}`}
+              linkNames
+              nodesById={nodesById}
+            />
+          ))}
+        </Stack>
+      );
+    }
+    return (
+      <Group align="stretch" gap="md" style={{ flex: 1, minHeight: 0 }} wrap="nowrap">
+        <Box pos="relative" style={{ flex: 1, minHeight: 240 }}>
+          <Paper
+            h="100%"
+            pos="relative"
+            radius={GRAPH_CARD_RADIUS_PX}
+            ref={setGraphCard}
+            shadow="sm"
+            style={{ overflow: "hidden" }}
+            withBorder
+          >
+            {visibleNodes.length > 0 ? (
+              <RelationshipGraph
+                ariaLabel={t("CanvasLabel")}
+                clipRoot={graphCard}
+                controlsRef={controlsRef}
+                edges={collapsed}
+                groups={graph.groups}
+                hubs={graph.hubs}
+                nodes={visibleNodes}
+                onClearSelection={() => {
+                  setSelectedNodeId(null);
+                  setSelectedEdgeKey(null);
+                  setSelectedHubId(null);
+                  neighborCursorRef.current = -1;
+                }}
+                onHover={() => undefined}
+                onOpenPerson={(personId: string) => router.push(routePerson(personId))}
+                onSelectEdge={(edgeKey: string, personId: string) => {
+                  setSelectedEdgeKey(edgeKey);
+                  setSelectedNodeId(personId);
+                  setSelectedHubId(null);
+                  neighborCursorRef.current = -1;
+                }}
+                onSelectHub={(hubId: string) => {
+                  setSelectedHubId(hubId);
+                  setSelectedNodeId(null);
+                  setSelectedEdgeKey(null);
+                  neighborCursorRef.current = -1;
+                }}
+                onSelectNode={(personId: string) => {
+                  setSelectedNodeId(personId);
+                  setSelectedEdgeKey(null);
+                  setSelectedHubId(null);
+                  neighborCursorRef.current = -1;
+                }}
+                searchQuery={searchQuery}
+                selectedEdgeKey={selectedEdgeKey}
+                selectedHubId={selectedHub?.id ?? null}
+                selectedNodeId={selectedNode?.id ?? null}
+              />
+            ) : null}
+          </Paper>
+          <ActionIcon.Group
+            aria-label={t("CanvasLabel")}
+            orientation="vertical"
+            style={{
+              left: 12,
+              position: "absolute",
+              top: 12,
+              zIndex: GRAPH_CHROME_Z_INDEX,
+            }}
+          >
+            <Tooltip label={t("ZoomReset")}>
+              <ActionIcon
+                aria-label={t("ZoomReset")}
+                onClick={() => controlsRef.current?.resetZoom()}
+                size="lg"
+                variant="default"
+              >
+                <Text size="xs">1×</Text>
+              </ActionIcon>
+            </Tooltip>
+            <ActionIconButton
+              aria-label={t("ZoomIn")}
+              icon={<IconPlus />}
+              onClick={() => controlsRef.current?.zoomIn()}
+              size="lg"
+              variant="default"
+            />
+            <ActionIconButton
+              aria-label={t("ZoomOut")}
+              icon={<IconMinus />}
+              onClick={() => controlsRef.current?.zoomOut()}
+              size="lg"
+              variant="default"
+            />
+            {visibleNodes.some((node) => node.myself) ? (
+              <Tooltip label={t("CenterMyself")}>
+                <ActionIcon
+                  aria-label={t("CenterMyself")}
+                  onClick={() => controlsRef.current?.centerMyself()}
+                  size="lg"
+                  variant="default"
+                >
+                  <IconCurrentLocation size={20} stroke={1.5} />
+                </ActionIcon>
+              </Tooltip>
+            ) : null}
+          </ActionIcon.Group>
+          <Paper
+            p="xs"
+            pos="absolute"
+            radius="md"
+            right={12}
+            shadow="sm"
+            style={{ width: "min(320px, calc(100% - 96px))", zIndex: GRAPH_CHROME_Z_INDEX }}
+            top={12}
+          >
+            <GraphSearchField
+              label={t("SearchLabel")}
+              loading={searchLoading}
+              onValue={handleSearch}
+              placeholder={t("SearchPlaceholder")}
+              value={searchInput}
+            />
+          </Paper>
+        </Box>
+        {selectedHub ? (
+          <GraphSelectionPanel
+            hub={selectedHub}
+            membersLabel={t("HubMembersLabel")}
+            nodesById={nodesById}
+          />
+        ) : null}
+        {selectedNode ? (
+          <GraphSelectionPanel
+            cardEdges={cardEdges}
+            nodesById={nodesById}
+            openPersonLabel={t("OpenPerson")}
+            person={selectedNode}
+            selectedEdgeKey={selectedEdgeKey}
+          />
+        ) : null}
+      </Group>
+    );
+  };
   return (
     <PageWrapper fill={showCanvas}>
       <Stack gap="xl" mih={showCanvas ? 0 : undefined} style={showCanvas ? { flex: 1 } : undefined}>
@@ -291,172 +465,7 @@ export function GraphClient({ focus }: GraphClientProps) {
           icon={IconAffiliate}
           title={t("Title")}
         />
-        {noPeople || noLinks ? (
-          <Stack align="center" gap="sm" py="xl">
-            <Title order={3}>{noPeople ? t("EmptyNoPeopleTitle") : t("EmptyNoLinksTitle")}</Title>
-            <Text c="dimmed" maw={460} ta="center">
-              {noPeople ? t("EmptyNoPeopleBody") : t("EmptyNoLinksBody")}
-            </Text>
-            <ButtonLink href={routeAssert(WEBAPP_ROUTES.PEOPLE)}>{t("GoToPeople")}</ButtonLink>
-          </Stack>
-        ) : !showCanvas ? (
-          <Stack gap="xs">
-            <GraphSearchField
-              label={t("SearchLabel")}
-              loading={searchLoading}
-              onValue={handleSearch}
-              placeholder={t("SearchPlaceholder")}
-              value={searchInput}
-            />
-            {mobileEdges.map((edge) => (
-              <RelationshipSentence
-                edge={edge}
-                emphasized={
-                  relationshipPairKey(edge.sourcePersonId, edge.targetPersonId) === selectedEdgeKey
-                }
-                key={`${edge.id}:${edge.relationshipType}`}
-                linkNames
-                nodesById={nodesById}
-              />
-            ))}
-          </Stack>
-        ) : (
-          <Group align="stretch" gap="md" style={{ flex: 1, minHeight: 0 }} wrap="nowrap">
-            <Box pos="relative" style={{ flex: 1, minHeight: 240 }}>
-              <Paper
-                h="100%"
-                pos="relative"
-                radius={GRAPH_CARD_RADIUS_PX}
-                ref={setGraphCard}
-                shadow="sm"
-                style={{ overflow: "hidden" }}
-                withBorder
-              >
-                {visibleNodes.length > 0 ? (
-                  <RelationshipGraph
-                    ariaLabel={t("CanvasLabel")}
-                    clipRoot={graphCard}
-                    controlsRef={controlsRef}
-                    edges={collapsed}
-                    groups={graph.groups}
-                    hubs={graph.hubs}
-                    nodes={visibleNodes}
-                    onClearSelection={() => {
-                      setSelectedNodeId(null);
-                      setSelectedEdgeKey(null);
-                      setSelectedHubId(null);
-                      neighborCursorRef.current = -1;
-                    }}
-                    onHover={() => undefined}
-                    onOpenPerson={(personId: string) => router.push(routePerson(personId))}
-                    onSelectEdge={(edgeKey: string, personId: string) => {
-                      setSelectedEdgeKey(edgeKey);
-                      setSelectedNodeId(personId);
-                      setSelectedHubId(null);
-                      neighborCursorRef.current = -1;
-                    }}
-                    onSelectHub={(hubId: string) => {
-                      setSelectedHubId(hubId);
-                      setSelectedNodeId(null);
-                      setSelectedEdgeKey(null);
-                      neighborCursorRef.current = -1;
-                    }}
-                    onSelectNode={(personId: string) => {
-                      setSelectedNodeId(personId);
-                      setSelectedEdgeKey(null);
-                      setSelectedHubId(null);
-                      neighborCursorRef.current = -1;
-                    }}
-                    searchQuery={searchQuery}
-                    selectedEdgeKey={selectedEdgeKey}
-                    selectedHubId={selectedHub?.id ?? null}
-                    selectedNodeId={selectedNode?.id ?? null}
-                  />
-                ) : null}
-              </Paper>
-              <ActionIcon.Group
-                aria-label={t("CanvasLabel")}
-                orientation="vertical"
-                style={{
-                  left: 12,
-                  position: "absolute",
-                  top: 12,
-                  zIndex: GRAPH_CHROME_Z_INDEX,
-                }}
-              >
-                <Tooltip label={t("ZoomReset")}>
-                  <ActionIcon
-                    aria-label={t("ZoomReset")}
-                    onClick={() => controlsRef.current?.resetZoom()}
-                    size="lg"
-                    variant="default"
-                  >
-                    <Text size="xs">1×</Text>
-                  </ActionIcon>
-                </Tooltip>
-                <ActionIconButton
-                  aria-label={t("ZoomIn")}
-                  icon={<IconPlus />}
-                  onClick={() => controlsRef.current?.zoomIn()}
-                  size="lg"
-                  variant="default"
-                />
-                <ActionIconButton
-                  aria-label={t("ZoomOut")}
-                  icon={<IconMinus />}
-                  onClick={() => controlsRef.current?.zoomOut()}
-                  size="lg"
-                  variant="default"
-                />
-                {visibleNodes.some((node) => node.myself) ? (
-                  <Tooltip label={t("CenterMyself")}>
-                    <ActionIcon
-                      aria-label={t("CenterMyself")}
-                      onClick={() => controlsRef.current?.centerMyself()}
-                      size="lg"
-                      variant="default"
-                    >
-                      <IconCurrentLocation size={20} stroke={1.5} />
-                    </ActionIcon>
-                  </Tooltip>
-                ) : null}
-              </ActionIcon.Group>
-              <Paper
-                p="xs"
-                pos="absolute"
-                radius="md"
-                right={12}
-                shadow="sm"
-                style={{ width: "min(320px, calc(100% - 96px))", zIndex: GRAPH_CHROME_Z_INDEX }}
-                top={12}
-              >
-                <GraphSearchField
-                  label={t("SearchLabel")}
-                  loading={searchLoading}
-                  onValue={handleSearch}
-                  placeholder={t("SearchPlaceholder")}
-                  value={searchInput}
-                />
-              </Paper>
-            </Box>
-            {selectedHub ? (
-              <GraphSelectionPanel
-                hub={selectedHub}
-                membersLabel={t("HubMembersLabel")}
-                nodesById={nodesById}
-              />
-            ) : null}
-            {selectedNode ? (
-              <GraphSelectionPanel
-                cardEdges={cardEdges}
-                nodesById={nodesById}
-                openPersonLabel={t("OpenPerson")}
-                person={selectedNode}
-                selectedEdgeKey={selectedEdgeKey}
-              />
-            ) : null}
-          </Group>
-        )}
+        {resolveValue()}
       </Stack>
     </PageWrapper>
   );

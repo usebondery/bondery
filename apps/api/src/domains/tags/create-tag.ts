@@ -1,9 +1,9 @@
 import type { PrismaClient } from "@bondery/db";
 import type { Tag } from "@bondery/schemas";
-import { internal } from "../../lib/platform/errors/http-errors.js";
+import { conflict, internal } from "../../lib/platform/errors/http-errors.js";
 import { buildTagRowChange } from "../../lib/sync/build-changes.js";
 import { emitSyncBatch } from "../../lib/sync/emit-change.js";
-import { type DomainContext, DomainError, syncEmitMetaFromContext } from "../_shared/context.js";
+import { type DomainContext, syncEmitMetaFromContext } from "../_shared/context.js";
 import { domainDb } from "../_shared/domain-db.js";
 import { isUniqueViolation, toSyncRow, toTagDto } from "../_shared/prisma-helpers.js";
 import { captureCurrentSyncTxid } from "../_shared/with-txid.js";
@@ -62,7 +62,7 @@ export async function createTag(
     return { data: { tag }, serverSequence, txid };
   } catch (error) {
     if (isUniqueViolation(error)) {
-      throw new DomainError("Tag label already exists", 409, "tag_label_exists");
+      throw conflict("Tag label already exists", "tag_label_exists", error);
     }
     throw internal("tag_failed", error instanceof Error ? error.message : "tag_failed");
   }

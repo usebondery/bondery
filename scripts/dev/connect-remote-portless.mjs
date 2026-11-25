@@ -51,7 +51,7 @@ function portlessHttpsHostnames(urls = DEV_URLS) {
       names.add(hostname);
     }
   }
-  return [...names].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  return [...names].sort((a, b) => Number(a > b) - Number(a < b));
 }
 
 function runQuiet(command, args) {

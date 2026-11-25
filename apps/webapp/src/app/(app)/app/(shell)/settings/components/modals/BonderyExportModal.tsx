@@ -56,6 +56,7 @@ export function BonderyExportModal({ modalId }: BonderyExportModalProps) {
 
   const closeModal = () => modals.close(modalId);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: summaryAttempt is a trigger: it reloads the export summary on retry.
   useEffect(() => {
     const summaryAbort = new AbortController();
     setCountsFailed(false);
@@ -152,18 +153,26 @@ export function BonderyExportModal({ modalId }: BonderyExportModalProps) {
     }
   };
 
-  const errorTitle =
-    errorKind === "timeout"
-      ? t("TimeoutTitle")
-      : errorKind === "blocked"
-        ? t("BlockedTitle")
-        : t("ErrorTitle");
-  const errorBody =
-    errorKind === "timeout"
-      ? t("TimeoutBody")
-      : errorKind === "blocked"
-        ? t("BlockedBody")
-        : (errorMessage ?? t("ErrorBody"));
+  const resolveErrorTitle = () => {
+    if (errorKind === "timeout") {
+      return t("TimeoutTitle");
+    }
+    if (errorKind === "blocked") {
+      return t("BlockedTitle");
+    }
+    return t("ErrorTitle");
+  };
+  const errorTitle = resolveErrorTitle();
+  const resolveErrorBody = () => {
+    if (errorKind === "timeout") {
+      return t("TimeoutBody");
+    }
+    if (errorKind === "blocked") {
+      return t("BlockedBody");
+    }
+    return errorMessage ?? t("ErrorBody");
+  };
+  const errorBody = resolveErrorBody();
 
   if (phase === "generating") {
     return (
