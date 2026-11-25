@@ -68,6 +68,6 @@ jobs:
   image_ready:
     needs: [ promote, build-push ]
     if: ${{ always() && (needs.promote.result == 'success' || needs.build-push.result == 'success') }}
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2604
     steps:
       - run: echo "${{ inputs.service }} image ready at ${{ inputs.version }}"

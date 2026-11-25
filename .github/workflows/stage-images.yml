@@ -16,13 +16,13 @@ permissions:
 
 jobs:
   detect_changes:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2604
     outputs:
       api: ${{ steps.filter.outputs.api }}
       webapp: ${{ steps.filter.outputs.webapp }}
       website: ${{ steps.filter.outputs.website }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: useblacksmith/checkout@v1
         with:
           persist-credentials: false
 
@@ -78,7 +78,7 @@ jobs:
               - deploy/ops/**
 
   resolve:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2604
     outputs:
       infra_version: ${{ steps.pkg.outputs.infra_version }}
       is_rc: ${{ steps.pkg.outputs.is_rc }}
@@ -86,7 +86,7 @@ jobs:
       npm_version: ${{ steps.pkg.outputs.npm_version }}
       short_sha: ${{ steps.pkg.outputs.short_sha }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: useblacksmith/checkout@v1
         with:
           fetch-depth: 2
           persist-credentials: false
@@ -185,12 +185,12 @@ jobs:
   notify_beta_website:
     needs: [ resolve, build_website ]
     if: always() && needs.build_website.result == 'success' && needs.resolve.outputs.is_rc_cut == 'true'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2604
     permissions:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: useblacksmith/checkout@v1
         with:
           persist-credentials: false
 
@@ -245,12 +245,12 @@ jobs:
       always() &&
       needs.promote_rc_api.result == 'success' &&
       needs.promote_rc_webapp.result == 'success'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2604
     permissions:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: useblacksmith/checkout@v1
         with:
           persist-credentials: false
 

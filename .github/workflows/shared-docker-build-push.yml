@@ -73,12 +73,12 @@ env:
 
 jobs:
   build-push:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2604
     env:
       TURBO_TEAM: ${{ vars.BONDERY_OPS_TURBO_TEAM }}
       TURBO_TOKEN: ${{ secrets.BONDERY_OPS_TURBO_TOKEN }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: useblacksmith/checkout@v1
         with:
           ref: ${{ inputs.checkout_ref != '' && inputs.checkout_ref || github.sha }}
           fetch-depth: 0
@@ -93,8 +93,8 @@ jobs:
         with:
           dockerignore_file: ${{ inputs.dockerignore_file }}
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+      - name: Setup Blacksmith Builder
+        uses: useblacksmith/setup-docker-builder@v1
 
       - name: Log in to GHCR
         if: inputs.push
@@ -134,7 +134,7 @@ jobs:
 
       - name: Build and push
         if: inputs.push
-        uses: docker/build-push-action@v7
+        uses: useblacksmith/build-push-action@v2
         env:
           BUILDKIT_PROGRESS: plain
         with:
@@ -149,14 +149,12 @@ jobs:
             TURBO_TEAM=${{ vars.BONDERY_OPS_TURBO_TEAM }}
           secrets: |
             turbo_token=${{ secrets.BONDERY_OPS_TURBO_TOKEN }}
-          cache-from: type=gha,scope=${{ inputs.cache_scope }}
-          cache-to: type=gha,mode=max,scope=${{ inputs.cache_scope }}
           provenance: false
           sbom: false
 
       - name: Build (verify only)
         if: ${{ !inputs.push }}
-        uses: docker/build-push-action@v7
+        uses: useblacksmith/build-push-action@v2
         env:
           BUILDKIT_PROGRESS: plain
         with:
@@ -170,7 +168,5 @@ jobs:
             TURBO_TEAM=${{ vars.BONDERY_OPS_TURBO_TEAM }}
           secrets: |
             turbo_token=${{ secrets.BONDERY_OPS_TURBO_TOKEN }}
-          cache-from: type=gha,scope=${{ inputs.cache_scope }}
-          cache-to: type=gha,mode=max,scope=${{ inputs.cache_scope }}
           provenance: false
           sbom: false

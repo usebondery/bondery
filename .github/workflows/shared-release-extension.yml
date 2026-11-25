@@ -39,7 +39,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2604
     outputs:
       zip_path: ${{ steps.paths.outputs.zip_path }}
       crx_path: ${{ steps.paths.outputs.crx_path }}
@@ -53,7 +53,7 @@ jobs:
       BONDERY_EXTENSION_FLAVOR: ${{ inputs.flavor }}
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: useblacksmith/checkout@v1
         with:
           persist-credentials: false
 
