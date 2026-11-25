@@ -118,7 +118,7 @@ function leafTexts(root: Element): string[] {
 // ─── Detection ───────────────────────────────────────────────────────────────
 
 function isSduiProfile(doc?: Document): boolean {
-  return !!getDoc(doc).querySelector('[componentkey*="Topcard"]');
+  return Boolean(getDoc(doc).querySelector('[componentkey*="Topcard"]'));
 }
 
 function getTopcard(doc?: Document): Element | null {

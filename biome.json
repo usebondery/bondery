@@ -111,6 +111,7 @@
         "noExcessiveNestedCallbacks": "error",
         "noExcessiveNestedTestSuites": "error",
         "noForEach": "error",
+        "noImplicitCoercions": "error",
         "noRedundantDefaultExport": "error",
         "noUnnecessaryTemplateExpression": "error",
         "noUselessCatchBinding": "error",

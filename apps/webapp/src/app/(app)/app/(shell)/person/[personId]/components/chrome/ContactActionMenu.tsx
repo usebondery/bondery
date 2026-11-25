@@ -115,7 +115,7 @@ export function ContactActionMenu({
           <Tooltip disabled={!contact.myself} label={tActions("CannotMergeMyself")}>
             <div>
               <MenuItem
-                disabled={!!contact.myself}
+                disabled={Boolean(contact.myself)}
                 leftSection={<IconArrowMerge size={16} />}
                 onClick={onMergeWith}
               >
@@ -129,7 +129,7 @@ export function ContactActionMenu({
             <div>
               <MenuItem
                 color="red"
-                disabled={!!contact.myself}
+                disabled={Boolean(contact.myself)}
                 leftSection={<IconTrash size={16} />}
                 onClick={onDelete}
               >

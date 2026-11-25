@@ -396,7 +396,7 @@ export async function cachedGeocodeLinkedInLocation(
     logger.error({ err: error }, "[mapy] Cache read failed, falling through to live geocode");
   }
 
-  const mapsKeyConfigured = !!getMapsKey();
+  const mapsKeyConfigured = Boolean(getMapsKey());
   const geo = await geocodeLinkedInLocation(location);
   let timezone: string | null = null;
 

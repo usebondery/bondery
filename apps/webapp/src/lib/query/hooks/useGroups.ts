@@ -41,7 +41,7 @@ export function useGroupsListQuery(params?: GroupsListParams) {
 
 export function useGroupDetailQuery(id: string, enabled = true) {
   return useQuery({
-    enabled: enabled && !!id,
+    enabled: enabled && Boolean(id),
 
     queryFn: () => getGroupDetail(id),
     queryKey: groupKeys.detail(id),
@@ -51,7 +51,7 @@ export function useGroupDetailQuery(id: string, enabled = true) {
 
 export function useGroupMembersQuery(groupId: string, params?: GroupMembersParams, enabled = true) {
   return useQuery({
-    enabled: enabled && !!groupId,
+    enabled: enabled && Boolean(groupId),
 
     queryFn: () => getGroupMembers(groupId, params),
     queryKey: groupKeys.members(groupId, params),
@@ -70,7 +70,7 @@ export function useGroupMembersInfiniteQuery(
   };
 
   return useInfiniteQuery<GroupMembersResult>({
-    enabled: !!groupId,
+    enabled: Boolean(groupId),
     queryFn: async ({ pageParam }) =>
       getGroupMembers(groupId, {
         ...filter,

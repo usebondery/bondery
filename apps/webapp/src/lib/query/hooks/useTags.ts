@@ -35,7 +35,7 @@ export function useTagsListQuery(params?: TagsListParams) {
 
 export function useTagDetailQuery(tagId: string, enabled = true) {
   return useQuery({
-    enabled: enabled && !!tagId,
+    enabled: enabled && Boolean(tagId),
 
     queryFn: () => getTagDetail(tagId),
     queryKey: tagKeys.detail(tagId),
@@ -50,7 +50,7 @@ export function useTagMembersQuery(
   enabled = true,
 ) {
   return useQuery({
-    enabled: enabled && !!tagId,
+    enabled: enabled && Boolean(tagId),
 
     queryFn: () => getTagMembers(tagId, params),
     queryKey: tagKeys.members(tagId, params),

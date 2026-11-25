@@ -79,7 +79,7 @@ async function enrichAddress(addr: PreparedAddress): Promise<PreparedAddress> {
     const candidates = [
       [city, country].filter(Boolean).join(", "),
       [state, country].filter(Boolean).join(", "),
-    ].filter((s): s is string => !!s && s.length > 0);
+    ].filter((s): s is string => Boolean(s) && s.length > 0);
 
     const seen = new Set<string>();
     for (const candidate of candidates) {

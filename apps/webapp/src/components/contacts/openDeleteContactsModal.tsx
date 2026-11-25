@@ -162,7 +162,7 @@ export function openDeleteContactsModal({
   filterPayload,
   onDeleted,
 }: OpenDeleteContactsModalParams) {
-  const isFilterMode = !!filterPayload;
+  const isFilterMode = Boolean(filterPayload);
   if (!isFilterMode && contactIds.length === 0) {
     return;
   }

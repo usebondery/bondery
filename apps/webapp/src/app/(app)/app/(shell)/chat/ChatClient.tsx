@@ -94,7 +94,7 @@ export function ChatClient() {
     error: messagesError,
     isError: isMessagesError,
     isSuccess: isMessagesSuccess,
-  } = useChatSessionMessagesQuery(routeSessionId, !!routeSessionId);
+  } = useChatSessionMessagesQuery(routeSessionId, Boolean(routeSessionId));
   const { data: sessions = [] } = useChatSessionsQuery();
   const sessionDisplayTitle = routeSessionId
     ? (sessions.find((session) => session.id === routeSessionId)?.title ?? t("untitledSession"))

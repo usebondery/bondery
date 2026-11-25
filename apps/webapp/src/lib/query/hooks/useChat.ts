@@ -32,7 +32,7 @@ export function useChatSessionsQuery() {
 
 export function useChatSessionMessagesQuery(sessionId: string | undefined, enabled = true) {
   return useQuery({
-    enabled: enabled && !!sessionId,
+    enabled: enabled && Boolean(sessionId),
 
     queryFn: () => {
       if (!sessionId) {
@@ -78,7 +78,7 @@ export function useDeleteChatSessionMutation() {
 
 export function useChatContactQuery(id: string) {
   return useQuery({
-    enabled: !!id,
+    enabled: Boolean(id),
 
     queryFn: () => getContactDetail(id, "small"),
     queryKey: contactKeys.detail(id),
@@ -87,7 +87,7 @@ export function useChatContactQuery(id: string) {
 
 export function useChatTagQuery(id: string) {
   return useQuery({
-    enabled: !!id,
+    enabled: Boolean(id),
 
     queryFn: () => getTagDetail(id),
     queryKey: tagKeys.detail(id),
@@ -96,7 +96,7 @@ export function useChatTagQuery(id: string) {
 
 export function useChatGroupQuery(id: string) {
   return useQuery({
-    enabled: !!id,
+    enabled: Boolean(id),
 
     queryFn: () => getGroupDetail(id),
     queryKey: groupKeys.detail(id),
@@ -105,7 +105,7 @@ export function useChatGroupQuery(id: string) {
 
 export function useChatInteractionQuery(id: string) {
   return useQuery({
-    enabled: !!id,
+    enabled: Boolean(id),
 
     queryFn: () => getInteractionDetail(id),
     queryKey: interactionKeys.detail(id),

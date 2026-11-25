@@ -33,7 +33,7 @@ export function useMergeRecommendationsCountQuery() {
 
 export function useContactMergeRecommendation(contactId: string, enabled = true) {
   return useQuery({
-    enabled: enabled && !!contactId,
+    enabled: enabled && Boolean(contactId),
     queryFn: () => getMergeRecommendations(PERSON_MERGE_RECOMMENDATIONS),
     queryKey: mergeRecommendationKeys.list(PERSON_MERGE_RECOMMENDATIONS),
     select: (recommendations): MergeRecommendation | null =>

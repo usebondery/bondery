@@ -80,7 +80,8 @@ function extractProfileLocationFromEntities(
 
     const pubId = nfcText(e.publicIdentifier) ?? nfcText(e.vanityName);
     const entityUrn = typeof e.entityUrn === "string" ? e.entityUrn : undefined;
-    const matchesUser = pubId === nfcText(username) || (!!profileUrn && entityUrn === profileUrn);
+    const matchesUser =
+      pubId === nfcText(username) || (Boolean(profileUrn) && entityUrn === profileUrn);
     if (!matchesUser) {
       continue;
     }

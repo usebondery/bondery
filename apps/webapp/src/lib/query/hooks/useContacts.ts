@@ -105,7 +105,7 @@ export function useContactsInfiniteQuery(
 
 export function useContactQuery(id: string, enabled = true) {
   return useQuery({
-    enabled: enabled && !!id,
+    enabled: enabled && Boolean(id),
     queryFn: () => getContactDetail(id),
     queryKey: contactKeys.detail(id),
     throwOnError: throwIfPageCannotRender,
@@ -114,7 +114,7 @@ export function useContactQuery(id: string, enabled = true) {
 
 export function useContactLinkedInDataQuery(id: string, enabled = true) {
   return useQuery({
-    enabled: enabled && !!id,
+    enabled: enabled && Boolean(id),
     queryFn: () => getContactLinkedInData(id),
     queryKey: contactKeys.linkedin(id),
   });
@@ -122,7 +122,7 @@ export function useContactLinkedInDataQuery(id: string, enabled = true) {
 
 export function useContactRelationshipsQuery(contactId: string, enabled = true) {
   return useQuery({
-    enabled: enabled && !!contactId,
+    enabled: enabled && Boolean(contactId),
     queryFn: () => getContactRelationships(contactId),
     queryKey: contactKeys.relationships(contactId),
   });
@@ -130,7 +130,7 @@ export function useContactRelationshipsQuery(contactId: string, enabled = true) 
 
 export function useContactImportantDatesQuery(contactId: string, enabled = true) {
   return useQuery({
-    enabled: enabled && !!contactId,
+    enabled: enabled && Boolean(contactId),
     queryFn: () => getContactImportantDates(contactId),
     queryKey: contactKeys.importantDates(contactId),
   });
@@ -138,7 +138,7 @@ export function useContactImportantDatesQuery(contactId: string, enabled = true)
 
 export function useContactTagsQuery(contactId: string, enabled = true) {
   return useQuery({
-    enabled: enabled && !!contactId,
+    enabled: enabled && Boolean(contactId),
     queryFn: () => getContactTags(contactId),
     queryKey: contactKeys.tags(contactId),
   });
@@ -150,7 +150,7 @@ export function useContactInteractionsQuery(
   enabled = true,
 ) {
   return useQuery({
-    enabled: enabled && !!contactId,
+    enabled: enabled && Boolean(contactId),
     queryFn: () => getContactInteractions(contactId, params),
     queryKey: contactKeys.interactions(contactId, params),
   });
@@ -163,7 +163,7 @@ export function useContactInteractionsInfiniteQuery(
   const infiniteParams = { limit: INTERACTIONS_TIMELINE.limit };
 
   return useInfiniteQuery<InteractionsListResult>({
-    enabled: enabled && !!contactId,
+    enabled: enabled && Boolean(contactId),
     queryFn: async ({ pageParam }) =>
       getInteractionsList({
         contactId,
@@ -195,7 +195,7 @@ export function useRelationshipGraphQuery(focus: string | null, enabled = true) 
 
 export function useContactGroupsQuery(contactId: string, enabled = true) {
   return useQuery({
-    enabled: enabled && !!contactId,
+    enabled: enabled && Boolean(contactId),
     queryFn: () => getContactGroups(contactId),
     queryKey: contactKeys.groups(contactId),
   });
@@ -204,7 +204,7 @@ export function useContactGroupsQuery(contactId: string, enabled = true) {
 export function useContactGroupsQueries(contactIds: string[]) {
   return useQueries({
     queries: contactIds.map((contactId) => ({
-      enabled: !!contactId,
+      enabled: Boolean(contactId),
       queryFn: () => getContactGroups(contactId),
       queryKey: contactKeys.groups(contactId),
     })),

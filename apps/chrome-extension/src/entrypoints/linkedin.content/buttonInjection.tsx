@@ -62,7 +62,7 @@ function findProfileActionButton(): HTMLButtonElement | null {
     profileSection.querySelectorAll<HTMLButtonElement>("button.artdeco-button"),
   ).filter((btn) => !btn.closest("[class*='nt-edge']"));
 
-  const firstArtdeco = artdecoButtons.find((btn) => !!btn.textContent?.trim());
+  const firstArtdeco = artdecoButtons.find((btn) => Boolean(btn.textContent?.trim()));
   if (firstArtdeco) {
     return firstArtdeco;
   }
@@ -71,7 +71,7 @@ function findProfileActionButton(): HTMLButtonElement | null {
     profileSection.querySelectorAll<HTMLButtonElement>("button"),
   ).filter((btn) => !btn.closest("[class*='nt-edge']"));
 
-  return allButtons.find((btn) => !!btn.textContent?.trim()) ?? null;
+  return allButtons.find((btn) => Boolean(btn.textContent?.trim())) ?? null;
 }
 
 /**
@@ -121,7 +121,7 @@ async function injectBonderyButton(ctx: ContentScriptContext) {
 
   const anchor = findLinkedInAnchor();
 
-  extLog.debug("Bondery LinkedIn: Target section found:", !!anchor, anchor);
+  extLog.debug("Bondery LinkedIn: Target section found:", Boolean(anchor), anchor);
 
   if (!anchor) {
     extLog.debug("Bondery LinkedIn: Target section not found.");
@@ -226,7 +226,7 @@ function isProfileReady(): boolean {
   if (!topcard) {
     return false;
   }
-  return !!findProfileActionButton();
+  return Boolean(findProfileActionButton());
 }
 
 function _waitForProfileReady(timeoutMs: number): Promise<void> {

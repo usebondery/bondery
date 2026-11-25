@@ -346,7 +346,9 @@ export async function getContactVCardExport(
       });
 
       exportCategories = Array.from(
-        new Set(tags.map((entry) => entry.label).filter((label): label is string => !!label)),
+        new Set(
+          tags.map((entry) => entry.label).filter((label): label is string => Boolean(label)),
+        ),
       );
     }
   } catch (extrasError) {

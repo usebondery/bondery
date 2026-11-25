@@ -24,7 +24,7 @@ const JSESSIONID_COOKIE_RE = /JSESSIONID="?(?<group1>[^";]+)"?/u;
 
   const domLines = topcard
     ? [...topcard.querySelectorAll("p")].map((p) => ({
-        inOrgLink: !!p.closest('a[href*="/company/"], a[href*="/school/"]'),
+        inOrgLink: Boolean(p.closest('a[href*="/company/"], a[href*="/school/"]')),
         linkHref: p.closest("a")?.href ?? null,
         text: p.textContent?.replace(/\s+/gu, " ").trim(),
       }))

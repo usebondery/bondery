@@ -106,7 +106,7 @@ function TagEditorModalBody({
   const { data: tagMembers, isLoading: isLoadingMembers } = useTagMembersQuery(
     tag?.id ?? "",
     undefined,
-    mode === "edit" && !!tag,
+    mode === "edit" && Boolean(tag),
   );
 
   const form = useForm<{ label: string; color: string }>({
@@ -158,7 +158,8 @@ function TagEditorModalBody({
     setInitialSelectedIds(ids);
   }, [mode, tagMembers]);
 
-  const isLoadingContacts = isLoadingContactsList || (mode === "edit" && !!tag && isLoadingMembers);
+  const isLoadingContacts =
+    isLoadingContactsList || (mode === "edit" && Boolean(tag) && isLoadingMembers);
 
   const isBlocking = isSubmitting || isLoadingContacts;
   const { closeModal, closeModalSync } = useModalDismiss(modalId, isBlocking);

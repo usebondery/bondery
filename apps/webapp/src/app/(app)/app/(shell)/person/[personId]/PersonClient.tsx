@@ -249,7 +249,7 @@ export function PersonClient({ personId, initialTab, myselfMode = false }: Perso
           linkedinHandle={contact.linkedin ?? null}
           mergeRecommendation={mergeRecommendation}
           personId={personId}
-          showEnrichCard={!!contact.linkedin && !linkedInData.syncedAt}
+          showEnrichCard={Boolean(contact.linkedin) && !linkedInData.syncedAt}
         />
 
         <Paper p="xl" radius="md" shadow="sm" withBorder>
