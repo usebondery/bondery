@@ -81,6 +81,10 @@ jobs:
               ARGS+=(-t "${IMAGE_NAME}:${tag}")
             fi
           done <<< "$EXTRA_TARGET_TAGS"
+          # A carbon copy keeps the source digest. Without --prefer-index=false, a plain image
+          # manifest source is wrapped in a new index, so the promoted tag gets another digest
+          # than the :sha tag and the digest checks in rc-release and release reject it.
           docker buildx imagetools create \
+            --prefer-index=false \
             "${ARGS[@]}" \
             "${IMAGE_NAME}:${SOURCE_TAG}"
