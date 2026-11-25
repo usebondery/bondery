@@ -66,7 +66,7 @@ jobs:
 
   detect_changes:
     needs: validate
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2604
     outputs:
       api: ${{ steps.set.outputs.api }}
       webapp: ${{ steps.set.outputs.webapp }}
@@ -117,7 +117,7 @@ jobs:
 
   resolve_meta:
     needs: validate
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2604
     permissions:
       contents: read
       packages: read
@@ -131,7 +131,7 @@ jobs:
       api_digest: ${{ steps.source.outputs.api_digest }}
       webapp_digest: ${{ steps.source.outputs.webapp_digest }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: useblacksmith/checkout@v1
         with:
           fetch-depth: 0
           fetch-tags: true
@@ -141,9 +141,9 @@ jobs:
         with:
           install: false
 
-      - name: Set up Docker Buildx
+      - name: Setup Blacksmith Builder
+        uses: useblacksmith/setup-docker-builder@v1
         if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.force_rebuild == true) }}
-        uses: docker/setup-buildx-action@v4
 
       - name: Log in to GHCR
         if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.force_rebuild == true) }}
@@ -225,7 +225,7 @@ jobs:
   github_release_init:
     needs: validate
     if: github.event_name == 'push'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2604
     steps:
       - name: Create unified GitHub release
         uses: softprops/action-gh-release@v3
@@ -286,7 +286,7 @@ jobs:
     needs: [ detect_changes, smoke_release ]
     if: ${{ needs.smoke_release.result == 'success' && needs.detect_changes.outputs.extension == 'true' }}
     environment: production-containers
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2604
     steps:
       - run: echo "Extension gate approved — promote to :production"
 
@@ -341,12 +341,12 @@ jobs:
         (needs.detect_changes.outputs.api != 'true' && needs.promote_production_api.result == 'skipped')) &&
       (needs.promote_production_webapp.result == 'success' ||
         (needs.detect_changes.outputs.webapp != 'true' && needs.promote_production_webapp.result == 'skipped'))
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2604
     permissions:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: useblacksmith/checkout@v1
         with:
           persist-credentials: false
 
@@ -372,11 +372,11 @@ jobs:
       - release_extension
       - deploy_production
     if: always() && needs.validate.result == 'success'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2604
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: useblacksmith/checkout@v1
         with:
           ref: ${{ needs.validate.outputs.tag }}
           persist-credentials: false

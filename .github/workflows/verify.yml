@@ -12,11 +12,11 @@ env:
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2604
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: useblacksmith/checkout@v1
         with:
           persist-credentials: false
 
@@ -44,11 +44,11 @@ jobs:
         run: pnpm run check:security-headers
 
   quality-rules:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2604
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: useblacksmith/checkout@v1
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -75,11 +75,11 @@ jobs:
         run: pnpm run check:diagnostic-messages
 
   env:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2604
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: useblacksmith/checkout@v1
         with:
           fetch-depth: 0
           fetch-tags: true
@@ -99,11 +99,11 @@ jobs:
           exit "$status"
 
   openapi:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2604
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: useblacksmith/checkout@v1
         with:
           persist-credentials: false
 
@@ -127,11 +127,11 @@ jobs:
           exit "$status"
 
   schema-contracts:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2604
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: useblacksmith/checkout@v1
         with:
           persist-credentials: false
 
@@ -155,11 +155,11 @@ jobs:
           exit "$status"
 
   translations:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2604
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: useblacksmith/checkout@v1
         with:
           persist-credentials: false
 
@@ -172,7 +172,7 @@ jobs:
   contracts:
     needs: [ env, openapi, schema-contracts, translations ]
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2604
     steps:
       - name: Require parallel contract checks
         run: |
@@ -187,11 +187,11 @@ jobs:
           test "${{ needs.translations.result }}" = "success"
 
   types:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2604
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: useblacksmith/checkout@v1
         with:
           persist-credentials: false
 
@@ -214,11 +214,11 @@ jobs:
         run: pnpm run check:types
 
   api-tests:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2604
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: useblacksmith/checkout@v1
         with:
           persist-credentials: false
 
@@ -283,12 +283,12 @@ jobs:
 
   website-docker-build:
     needs: [ lint, types, contracts ]
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2604
     timeout-minutes: 30
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: useblacksmith/checkout@v1
         with:
           persist-credentials: false
 
@@ -334,12 +334,12 @@ jobs:
 
   api-docker-build:
     needs: [ lint, types, contracts ]
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2604
     timeout-minutes: 30
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: useblacksmith/checkout@v1
         with:
           persist-credentials: false
 
@@ -383,12 +383,12 @@ jobs:
 
   webapp-docker-build:
     needs: [ lint, types, contracts ]
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2604
     timeout-minutes: 30
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: useblacksmith/checkout@v1
         with:
           persist-credentials: false
 
