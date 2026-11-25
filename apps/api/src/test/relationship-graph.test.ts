@@ -48,10 +48,22 @@ describe("getRelationshipGraph", () => {
 
   const client = createFakeClient({
     edges: [
-      edge("edge-a-neighbor", userA, personA, neighborA, "parent", new Date(1)),
-      edge("edge-a-other", userA, personA, neighborB, "friend", new Date(2)),
-      edge("edge-neighbors", userA, neighborA, neighborB, "sibling", new Date(3)),
-      edge("edge-b", userB, personB, unlinkedB, "colleague", new Date(4)),
+      edge("edge-a-neighbor", userA, personA, neighborA, {
+        createdAt: new Date(1),
+        relationshipType: "parent",
+      }),
+      edge("edge-a-other", userA, personA, neighborB, {
+        createdAt: new Date(2),
+        relationshipType: "friend",
+      }),
+      edge("edge-neighbors", userA, neighborA, neighborB, {
+        createdAt: new Date(3),
+        relationshipType: "sibling",
+      }),
+      edge("edge-b", userB, personB, unlinkedB, {
+        createdAt: new Date(4),
+        relationshipType: "colleague",
+      }),
     ],
     people: [
       person(personA, userA, "Ada"),
@@ -121,7 +133,12 @@ describe("getRelationshipGraph", () => {
     ada.headline = "Engineer";
     ada.location = "London";
     const seeded = createFakeClient({
-      edges: [edge("edge-friends", userA, "ada", "bea", "friend", new Date(1))],
+      edges: [
+        edge("edge-friends", userA, "ada", "bea", {
+          createdAt: new Date(1),
+          relationshipType: "friend",
+        }),
+      ],
       people: [owner, ada, person("bea", userA, "Bea")],
     });
     const result = await getRelationshipGraph(caller(seeded, userA), {});
@@ -171,7 +188,10 @@ describe("getRelationshipGraph", () => {
     }
     for (let index = 0; index < count - 1; index += 1) {
       edges.push(
-        edge(`e-${index}`, userA, `p-${index}`, `p-${index + 1}`, "friend", new Date(index)),
+        edge(`e-${index}`, userA, `p-${index}`, `p-${index + 1}`, {
+          createdAt: new Date(index),
+          relationshipType: "friend",
+        }),
       );
     }
     const capped = createFakeClient({ edges, people });
@@ -198,7 +218,12 @@ describe("getRelationshipGraph", () => {
     const edges: EdgeSeed[] = [];
     const count = RELATIONSHIP_GRAPH_EDGE_CAP + 1;
     for (let index = 0; index < count; index += 1) {
-      edges.push(edge(`many-${index}`, userA, "hub", "leaf", "friend", new Date(index)));
+      edges.push(
+        edge(`many-${index}`, userA, "hub", "leaf", {
+          createdAt: new Date(index),
+          relationshipType: "friend",
+        }),
+      );
     }
     const capped = createFakeClient({ edges, people });
     const result = await getRelationshipGraph(caller(capped, userA), {});
@@ -287,7 +312,12 @@ describe("getRelationshipGraph", () => {
 
   it("does not pull an outside coworker into focus mode", async () => {
     const seeded = createFakeClient({
-      edges: [edge("edge-focus", userA, "ada", "bea", "friend", new Date(1))],
+      edges: [
+        edge("edge-focus", userA, "ada", "bea", {
+          createdAt: new Date(1),
+          relationshipType: "friend",
+        }),
+      ],
       education: [],
       people: [
         person("ada", userA, "Ada"),

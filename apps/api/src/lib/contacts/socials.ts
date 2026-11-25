@@ -86,12 +86,15 @@ export async function attachContactSocials<T extends ContactWithId>(
 /** Upserts or deletes a socials handle for a specific person and platform. */
 export async function upsertContactSocials(
   db: PrismaClient,
-  userId: string,
-  personId: string,
-  platform: SocialPlatform,
-  handle: string | null | undefined,
-  connectedAt?: string | null,
+  input: {
+    connectedAt?: string | null;
+    handle: string | null | undefined;
+    personId: string;
+    platform: SocialPlatform;
+    userId: string;
+  },
 ): Promise<void> {
+  const { connectedAt, handle, personId, platform, userId } = input;
   const normalizedHandle = typeof handle === "string" ? handle.trim() : "";
 
   if (normalizedHandle.length === 0) {

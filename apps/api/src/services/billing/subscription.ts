@@ -27,16 +27,26 @@ export async function findUserIdByEmail(email: string): Promise<string | null> {
 /** `user_missing` means the user row is gone (deleted account), so nothing was written. */
 export type UpsertSubscriptionResult = "saved" | "user_missing";
 
-export async function upsertSubscription(
-  userId: string,
-  stripeCustomerId: string,
-  stripeSubscriptionId: string,
-  status: string,
-  currentPeriodStart: Date | null,
-  currentPeriodEnd: Date | null,
-  cancelAtPeriodEnd: boolean,
-  mirror: SubscriptionMirrorFields = {},
-): Promise<UpsertSubscriptionResult> {
+export async function upsertSubscription(input: {
+  cancelAtPeriodEnd: boolean;
+  currentPeriodEnd: Date | null;
+  currentPeriodStart: Date | null;
+  mirror?: SubscriptionMirrorFields;
+  status: string;
+  stripeCustomerId: string;
+  stripeSubscriptionId: string;
+  userId: string;
+}): Promise<UpsertSubscriptionResult> {
+  const {
+    cancelAtPeriodEnd,
+    currentPeriodEnd,
+    currentPeriodStart,
+    mirror = {},
+    status,
+    stripeCustomerId,
+    stripeSubscriptionId,
+    userId,
+  } = input;
   const data = {
     billingInterval: mirror.billingInterval ?? null,
     cancelAtPeriodEnd,
@@ -91,14 +101,22 @@ export async function upsertSubscription(
   }
 }
 
-export async function storePendingSubscription(
-  email: string,
-  stripeCustomerId: string,
-  stripeSubscriptionId: string,
-  status: string,
-  currentPeriodEnd: Date | null,
-  cancelAtPeriodEnd: boolean,
-): Promise<void> {
+export async function storePendingSubscription(input: {
+  cancelAtPeriodEnd: boolean;
+  currentPeriodEnd: Date | null;
+  email: string;
+  status: string;
+  stripeCustomerId: string;
+  stripeSubscriptionId: string;
+}): Promise<void> {
+  const {
+    cancelAtPeriodEnd,
+    currentPeriodEnd,
+    email,
+    status,
+    stripeCustomerId,
+    stripeSubscriptionId,
+  } = input;
   try {
     await prisma.pendingSubscription.upsert({
       create: {

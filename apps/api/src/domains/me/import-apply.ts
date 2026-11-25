@@ -407,30 +407,24 @@ export async function applyParsedImport(
   );
 
   const gisJobs: Promise<void>[] = [];
-  for (const person of insertedPeople) {
+  const gisTargets = [
+    ...insertedPeople.map((row) => ({ row, table: "people" as const })),
+    ...insertedAddresses.map((row) => ({ row, table: "people_addresses" as const })),
+  ];
+  for (const { row, table } of gisTargets) {
     if (
-      person.latitude !== null &&
-      person.longitude !== null &&
-      isValidLatLng(person.latitude, person.longitude)
-    ) {
-      gisJobs.push(setGisPoint(db, "people", person.id, userId, person.latitude, person.longitude));
-    }
-  }
-  for (const address of insertedAddresses) {
-    if (
-      address.latitude !== null &&
-      address.longitude !== null &&
-      isValidLatLng(address.latitude, address.longitude)
+      row.latitude !== null &&
+      row.longitude !== null &&
+      isValidLatLng(row.latitude, row.longitude)
     ) {
       gisJobs.push(
-        setGisPoint(
-          db,
-          "people_addresses",
-          address.id,
+        setGisPoint(db, {
+          id: row.id,
+          latitude: row.latitude,
+          longitude: row.longitude,
+          table,
           userId,
-          address.latitude,
-          address.longitude,
-        ),
+        }),
       );
     }
   }

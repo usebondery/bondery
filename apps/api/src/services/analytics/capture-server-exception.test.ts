@@ -33,15 +33,19 @@ const context: ServerExceptionContext = {
 describe("rootCause", () => {
   it("returns the innermost Error in a cause chain", () => {
     const database = new Error("connection refused");
-    const upsert = new DomainError("x", 500, "billing_subscription_upsert_failed", database);
-    const webhook = new DomainError("x", 500, "failed_to_process_webhook", upsert);
+    const upsert = new DomainError("x", 500, "billing_subscription_upsert_failed", {
+      cause: database,
+    });
+    const webhook = new DomainError("x", 500, "failed_to_process_webhook", { cause: upsert });
 
     assert.equal(rootCause(webhook), database);
   });
 
   it("returns the error itself when there is no Error cause", () => {
     const plain = new Error("boom");
-    const withTextCause = new DomainError("x", 500, "failed_to_process_webhook", "not an error");
+    const withTextCause = new DomainError("x", 500, "failed_to_process_webhook", {
+      cause: "not an error",
+    });
 
     assert.equal(rootCause(plain), plain);
     assert.equal(rootCause(withTextCause), withTextCause);
@@ -107,7 +111,7 @@ describe("captureServerException", () => {
   it("reports a 5xx with the root cause, request context and no user id", () => {
     const { calls, client } = fakeClient();
     const database = new Error("connection refused");
-    const error = new DomainError("x", 500, "failed_to_process_webhook", database);
+    const error = new DomainError("x", 500, "failed_to_process_webhook", { cause: database });
 
     captureServerException(error, context, client);
 

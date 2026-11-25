@@ -80,16 +80,10 @@ export async function resolveContactPersonIds(
     const tagWhere = tagIds ? { tags: { some: { tagId: { in: tagIds } } } } : {};
 
     if (search) {
-      const { ranked, error: rpcError } = await searchPeopleIdsWithDb(
-        db,
-        userId,
-        search,
-        10_000,
-        0,
-        {
-          tagIds,
-        },
-      );
+      const { ranked, error: rpcError } = await searchPeopleIdsWithDb(db, userId, search, {
+        limit: 10_000,
+        tagIds,
+      });
 
       if (rpcError) {
         throw internal("contact_ids_search_failed", rpcError);

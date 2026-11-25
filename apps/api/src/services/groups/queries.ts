@@ -206,7 +206,7 @@ export async function listGroupMembers(
 
   if (search) {
     const [searchResult, countResult] = await Promise.all([
-      searchPeopleIdsWithDb(db, user.id, search, limit, offset, { groupId }),
+      searchPeopleIdsWithDb(db, user.id, search, { groupId, limit, offset }),
       countSearchPeopleIdsWithDb(db, user.id, search, { groupId }),
     ]);
 

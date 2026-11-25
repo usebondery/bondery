@@ -136,14 +136,13 @@ export async function upsertContactFromExtension(ctx: DomainContext, input: Exte
       await updateContactPhoto(existingContact.id, user.id, profileImageUrl);
     }
 
-    await upsertLinkedInHistory(
-      db,
-      user.id,
-      existingContact.id,
-      linkedinBio,
-      workHistory,
+    await upsertLinkedInHistory(db, {
       educationHistory,
-    );
+      linkedinBio,
+      personId: existingContact.id,
+      userId: user.id,
+      workHistory,
+    });
 
     const contact = await loadEnrichedContact(db, user.id, existingContact.id, undefined, log);
     if (!contact) {
@@ -188,14 +187,13 @@ export async function upsertContactFromExtension(ctx: DomainContext, input: Exte
     );
   }
 
-  await upsertLinkedInHistory(
-    db,
-    user.id,
-    newContactId,
-    linkedinBio,
-    workHistory,
+  await upsertLinkedInHistory(db, {
     educationHistory,
-  );
+    linkedinBio,
+    personId: newContactId,
+    userId: user.id,
+    workHistory,
+  });
 
   const contact = await loadEnrichedContact(db, user.id, newContactId, undefined, log);
   if (!contact) {

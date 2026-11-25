@@ -83,7 +83,7 @@ export async function queryPeoplePage<S extends Prisma.PeopleSelect>(
 
   if (search) {
     const [searchResult, countResult] = await Promise.all([
-      searchPeopleIdsWithDb(db, user.id, search, limit, offset, { keepInTouch, tagIds }),
+      searchPeopleIdsWithDb(db, user.id, search, { keepInTouch, limit, offset, tagIds }),
       countSearchPeopleIdsWithDb(db, user.id, search, { keepInTouch, tagIds }),
     ]);
 

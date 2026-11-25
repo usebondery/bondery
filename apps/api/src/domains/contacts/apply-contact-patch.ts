@@ -176,7 +176,7 @@ export async function applyContactPatch(
   }
 
   const socialsUpdates: Array<{
-    platform: Parameters<typeof upsertContactSocials>[3];
+    platform: Parameters<typeof upsertContactSocials>[1]["platform"];
     handle: string | null | undefined;
   }> = [];
 
@@ -276,7 +276,12 @@ export async function applyContactPatch(
       parallelOps.push(
         Promise.all(
           socialsUpdates.map((entry) =>
-            upsertContactSocials(db, user.id, personId, entry.platform, entry.handle),
+            upsertContactSocials(db, {
+              handle: entry.handle,
+              personId,
+              platform: entry.platform,
+              userId: user.id,
+            }),
           ),
         ).then(() => undefined),
       );

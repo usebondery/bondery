@@ -48,15 +48,15 @@ export async function syncSubscriptionFromStripe(
     });
 
     if (pending) {
-      await upsertSubscription(
-        user.id,
-        pending.stripeCustomerId,
-        pending.stripeSubscriptionId,
-        pending.status,
-        null,
-        pending.currentPeriodEnd,
-        pending.cancelAtPeriodEnd,
-      );
+      await upsertSubscription({
+        cancelAtPeriodEnd: pending.cancelAtPeriodEnd,
+        currentPeriodEnd: pending.currentPeriodEnd,
+        currentPeriodStart: null,
+        status: pending.status,
+        stripeCustomerId: pending.stripeCustomerId,
+        stripeSubscriptionId: pending.stripeSubscriptionId,
+        userId: user.id,
+      });
 
       if (pending.currentPeriodEnd) {
         await syncAiQuotaPeriod(user.id, pending.currentPeriodEnd, log ?? undefined);
@@ -129,16 +129,17 @@ export async function syncSubscriptionFromStripe(
   const { currentPeriodEnd, currentPeriodStart } = getSubscriptionPeriod(activeSub);
   const mirror = extractMirrorFromStripeSubscription(activeSub);
 
-  await upsertSubscription(
-    user.id,
-    typeof activeSub.customer === "string" ? activeSub.customer : activeSub.customer.id,
-    activeSub.id,
-    status,
-    currentPeriodStart,
-    currentPeriodEnd,
+  await upsertSubscription({
     cancelAtPeriodEnd,
+    currentPeriodEnd,
+    currentPeriodStart,
     mirror,
-  );
+    status,
+    stripeCustomerId:
+      typeof activeSub.customer === "string" ? activeSub.customer : activeSub.customer.id,
+    stripeSubscriptionId: activeSub.id,
+    userId: user.id,
+  });
 
   if (currentPeriodEnd) {
     await syncAiQuotaPeriod(user.id, currentPeriodEnd, log ?? undefined);

@@ -104,12 +104,15 @@ export function toPostgresDate(val: string | null | undefined): string | null {
  */
 export async function upsertLinkedInHistory(
   db: PrismaClient,
-  userId: string,
-  personId: string,
-  linkedinBio: string | null | undefined,
-  workHistory: ScrapedWorkHistoryEntry[] | undefined,
-  educationHistory: ScrapedEducationEntry[] | undefined,
+  input: {
+    educationHistory: ScrapedEducationEntry[] | undefined;
+    linkedinBio: string | null | undefined;
+    personId: string;
+    userId: string;
+    workHistory: ScrapedWorkHistoryEntry[] | undefined;
+  },
 ): Promise<void> {
+  const { educationHistory, linkedinBio, personId, userId, workHistory } = input;
   const hasWork = Boolean(workHistory && workHistory.length > 0);
   const hasEducation = Boolean(educationHistory && educationHistory.length > 0);
   if (!hasWork && !hasEducation && !linkedinBio) {

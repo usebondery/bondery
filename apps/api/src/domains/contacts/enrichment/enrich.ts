@@ -55,7 +55,13 @@ export async function enrichContact(
     log?.warn({ personId }, "[enrich] No LinkedIn history in payload");
   }
 
-  await upsertLinkedInHistory(db, user.id, personId, linkedinBio, workHistory, educationHistory);
+  await upsertLinkedInHistory(db, {
+    educationHistory,
+    linkedinBio,
+    personId,
+    userId: user.id,
+    workHistory,
+  });
 
   try {
     await uploadAllLinkedInLogos(user.id, workHistory, educationHistory);

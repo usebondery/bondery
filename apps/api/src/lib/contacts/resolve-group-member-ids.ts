@@ -52,14 +52,10 @@ export async function resolveGroupMemberPersonIds(
       typeof body.memberFilter.search === "string" ? body.memberFilter.search.trim() : "";
 
     if (search) {
-      const { ranked, error: rpcError } = await searchPeopleIdsWithDb(
-        db,
-        userId,
-        search,
-        10_000,
-        0,
-        { groupId },
-      );
+      const { ranked, error: rpcError } = await searchPeopleIdsWithDb(db, userId, search, {
+        groupId,
+        limit: 10_000,
+      });
 
       if (rpcError) {
         throw internal("group_member_ids_search_failed", rpcError);

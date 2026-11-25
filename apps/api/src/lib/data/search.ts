@@ -19,7 +19,7 @@ export async function searchPeopleIds(
   offset = 0,
   options?: { groupId?: string; tagId?: string; tagIds?: string[]; keepInTouch?: boolean },
 ): Promise<{ ranked: RankedPerson[] | null; error: string | null }> {
-  return searchPeopleIdsWithDb(prisma, userId, query, limit, offset, options);
+  return searchPeopleIdsWithDb(prisma, userId, query, { ...options, limit, offset });
 }
 
 /**

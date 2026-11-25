@@ -203,7 +203,7 @@ export async function listTagMembers(ctx: TagListContext, tagId: string, query: 
 
   if (search) {
     const [searchResult, countResult] = await Promise.all([
-      searchPeopleIdsWithDb(db, user.id, search, limit, offset, { tagId }),
+      searchPeopleIdsWithDb(db, user.id, search, { limit, offset, tagId }),
       countSearchPeopleIdsWithDb(db, user.id, search, { tagId }),
     ]);
 

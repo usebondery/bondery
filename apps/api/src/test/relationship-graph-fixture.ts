@@ -291,9 +291,9 @@ export function edge(
   userId: string,
   sourcePersonId: string,
   targetPersonId: string,
-  relationshipType = "friend",
-  createdAt = new Date(id.length),
+  options: { createdAt?: Date; relationshipType?: string } = {},
 ): EdgeSeed {
+  const { createdAt = new Date(id.length), relationshipType = "friend" } = options;
   return {
     createdAt,
     id,

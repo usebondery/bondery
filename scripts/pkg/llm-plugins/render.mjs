@@ -70,7 +70,7 @@ function assertCleanTree(tree, label) {
   }
 }
 
-function renderHost(label, config, files, version, manifestRel, manifest, mcpRel, mcp) {
+function renderHost({ config, files, label, manifest, manifestRel, mcp, mcpRel, version }) {
   validateConfig(config);
   const onboarding = config.hosts.openai.onboardingSkill.slice(2);
   if (!files.has(onboarding)) {
@@ -97,16 +97,16 @@ function renderHost(label, config, files, version, manifestRel, manifest, mcpRel
 export { applyConnectBlock, skillBodies };
 
 export function renderClaudeTree(config, files, version) {
-  return renderHost(
-    "claude",
+  return renderHost({
     config,
     files,
+    label: "claude",
+    manifest: claudeManifest(config, version),
+    manifestRel: ".claude-plugin/plugin.json",
+    mcp: claudeMcp(config),
+    mcpRel: ".mcp.json",
     version,
-    ".claude-plugin/plugin.json",
-    claudeManifest(config, version),
-    ".mcp.json",
-    claudeMcp(config),
-  );
+  });
 }
 
 export function renderOpenAiTree(
@@ -115,16 +115,16 @@ export function renderOpenAiTree(
   version,
   brandColor = readBrandPrimaryColor(repoRoot()),
 ) {
-  return renderHost(
-    "openai",
+  return renderHost({
     config,
     files,
+    label: "openai",
+    manifest: openAiManifest(config, version, brandColor),
+    manifestRel: "plugin.json",
+    mcp: openAiMcp(config),
+    mcpRel: "mcp.json",
     version,
-    "plugin.json",
-    openAiManifest(config, version, brandColor),
-    "mcp.json",
-    openAiMcp(config),
-  );
+  });
 }
 
 /**

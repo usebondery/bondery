@@ -91,14 +91,14 @@ export async function upsertSubscriptionFromStripe(
       return;
     }
 
-    await storePendingSubscription(
-      email,
-      stripeCustomerId,
-      subscription.id,
-      status,
-      currentPeriodEnd,
+    await storePendingSubscription({
       cancelAtPeriodEnd,
-    );
+      currentPeriodEnd,
+      email,
+      status,
+      stripeCustomerId,
+      stripeSubscriptionId: subscription.id,
+    });
     log?.info(
       { email, stripeSubscriptionId: subscription.id },
       "stripe-webhook: stored pending subscription",
@@ -106,16 +106,16 @@ export async function upsertSubscriptionFromStripe(
     return;
   }
 
-  const result = await upsertSubscription(
-    userId,
-    stripeCustomerId,
-    subscription.id,
-    status,
-    currentPeriodStart,
-    currentPeriodEnd,
+  const result = await upsertSubscription({
     cancelAtPeriodEnd,
+    currentPeriodEnd,
+    currentPeriodStart,
     mirror,
-  );
+    status,
+    stripeCustomerId,
+    stripeSubscriptionId: subscription.id,
+    userId,
+  });
 
   if (result === "user_missing") {
     // The account was deleted. Stripe would retry a failure for days and it could never

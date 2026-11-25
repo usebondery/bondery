@@ -77,12 +77,15 @@ export async function createManyReturning<T, R>(
 
 export async function setGisPoint(
   db: PrismaClient,
-  table: "people" | "people_addresses",
-  id: string,
-  userId: string,
-  latitude: number,
-  longitude: number,
+  point: {
+    id: string;
+    latitude: number;
+    longitude: number;
+    table: "people" | "people_addresses";
+    userId: string;
+  },
 ): Promise<void> {
+  const { id, latitude, longitude, table, userId } = point;
   const ewkt = `SRID=4326;POINT(${longitude} ${latitude})`;
   if (table === "people") {
     await db.$executeRaw`

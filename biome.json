@@ -100,6 +100,7 @@
         "noSvgWithoutTitle": "off"
       },
       "complexity": {
+        "noArguments": "error",
         "noDivRegex": "error",
         "noExcessiveCognitiveComplexity": "info",
         "noExcessiveLinesPerFunction": {
@@ -126,7 +127,12 @@
         "useDateNow": "error",
         "useIndexOf": "error",
         "useMathMinMax": "error",
-        "useMaxParams": "info",
+        "useMaxParams": {
+          "level": "error",
+          "options": {
+            "max": 5
+          }
+        },
         "useOptionalChain": "error",
         "useRegexpTest": "error"
       },
@@ -396,7 +402,16 @@
         "noPlaywrightEval": "error",
         "noPlaywrightWaitForSelector": "error",
         "noProcessEnv": "info",
-        "noRestrictedGlobals": "error",
+        "noRestrictedGlobals": {
+          "level": "error",
+          "options": {
+            "deniedGlobals": {
+              "escape": "Use encodeURIComponent.",
+              "unescape": "Use decodeURIComponent.",
+              "XMLHttpRequest": "Use fetch."
+            }
+          }
+        },
         "noRestrictedTypes": "error",
         "noRootType": "error",
         "noShoutyConstants": "error",
@@ -459,6 +474,7 @@
         "useEnumInitializers": "error",
         "useErrorCause": "error",
         "useExplicitLengthCheck": "error",
+        "useExponentiationOperator": "error",
         "useExportsLast": "error",
         "useFilenamingConvention": {
           "level": "error",
@@ -499,6 +515,7 @@
           }
         },
         "useNodeAssertStrict": "error",
+        "useNodejsImportProtocol": "error",
         "useNumberNamespace": "error",
         "useNumericSeparators": "error",
         "useObjectSpread": "error",
@@ -510,6 +527,7 @@
         "useSingleVarDeclarator": "error",
         "useSpreadOverApply": "error",
         "useSymbolDescription": "error",
+        "useTemplate": "error",
         "useTestHooksInOrder": "error",
         "useTestHooksOnTop": "error",
         "useThisInClassMethods": "error",
@@ -557,6 +575,7 @@
         "noPlaywrightPagePause": "error",
         "noPlaywrightWaitForNavigation": "error",
         "noPlaywrightWaitForTimeout": "error",
+        "noPrototypeBuiltins": "error",
         "noReactForwardRef": "error",
         "noReturnAssign": "error",
         "noShadow": "error",

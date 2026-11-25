@@ -20,6 +20,8 @@ function toIsoTimestamp(value: Date | string | null | undefined): string | null 
   return null;
 }
 
+type BboxQuery = { maxLat: number; maxLng: number; minLat: number; minLng: number; userId: string };
+
 export type { MapPin };
 
 export async function rpcGetContactExtras(
@@ -48,14 +50,8 @@ export async function rpcSetPersonLocation(
   `;
 }
 
-export async function rpcGetMapPinsInBbox(
-  db: RpcClient,
-  userId: string,
-  minLat: number,
-  minLng: number,
-  maxLat: number,
-  maxLng: number,
-): Promise<MapPin[]> {
+export async function rpcGetMapPinsInBbox(db: RpcClient, bbox: BboxQuery): Promise<MapPin[]> {
+  const { maxLat, maxLng, minLat, minLng, userId } = bbox;
   return db.$queryRaw<MapPin[]>`
     SELECT id, latitude, longitude FROM get_map_pins_in_bbox(
       ${userId}::uuid, ${minLat}, ${minLng}, ${maxLat}, ${maxLng}
@@ -65,12 +61,9 @@ export async function rpcGetMapPinsInBbox(
 
 export async function rpcGetMapAddressPinsInBbox(
   db: RpcClient,
-  userId: string,
-  minLat: number,
-  minLng: number,
-  maxLat: number,
-  maxLng: number,
+  bbox: BboxQuery,
 ): Promise<MapPin[]> {
+  const { maxLat, maxLng, minLat, minLng, userId } = bbox;
   return db.$queryRaw<MapPin[]>`
     SELECT id, latitude, longitude FROM get_map_address_pins_in_bbox(
       ${userId}::uuid, ${minLat}, ${minLng}, ${maxLat}, ${maxLng}

@@ -36,6 +36,7 @@ interface NetworkMetaPayload {
   zip: string;
 }
 
+// biome-ignore lint/style/noRestrictedGlobals: this module patches the page's own XMLHttpRequest to observe Instagram's requests; fetch cannot intercept them.
 interface InterceptableXhr extends XMLHttpRequest {
   __bonderyRequestHeaders?: Record<string, string>;
   __bonderyRequestMethod?: string;
@@ -252,7 +253,9 @@ function installInstagramNetworkInterceptor(): void {
     }
   }
 
+  // biome-ignore lint/style/noRestrictedGlobals: this module patches the page's own XMLHttpRequest to observe Instagram's requests; fetch cannot intercept them.
   (window as unknown as { XMLHttpRequest: typeof XMLHttpRequest }).XMLHttpRequest =
+    // biome-ignore lint/style/noRestrictedGlobals: this module patches the page's own XMLHttpRequest to observe Instagram's requests; fetch cannot intercept them.
     PatchedXHR as unknown as typeof XMLHttpRequest;
 
   const originalFetch = window.fetch.bind(window);

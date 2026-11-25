@@ -11,11 +11,11 @@ export function forbidden(
   code: ApiErrorCode,
   details?: Record<string, unknown>,
 ): DomainError {
-  return new DomainError(message, 403, code, undefined, details);
+  return new DomainError(message, 403, code, { details });
 }
 
 export function badRequest(message: string, code: ApiErrorCode, cause?: unknown): DomainError {
-  return new DomainError(message, 400, code, cause);
+  return new DomainError(message, 400, code, { cause });
 }
 
 export function notFound(message: string, code: ApiErrorCode): DomainError {
@@ -23,17 +23,17 @@ export function notFound(message: string, code: ApiErrorCode): DomainError {
 }
 
 export function conflict(message: string, code: ApiErrorCode, cause?: unknown): DomainError {
-  return new DomainError(message, 409, code, cause);
+  return new DomainError(message, 409, code, { cause });
 }
 
 export function payloadTooLarge(message: string, code: ApiErrorCode, cause?: unknown): DomainError {
-  return new DomainError(message, 413, code, cause);
+  return new DomainError(message, 413, code, { cause });
 }
 
 export function internal(code: ApiErrorCode, cause?: unknown): DomainError {
-  return new DomainError(GENERIC_500_MESSAGE, 500, code, cause);
+  return new DomainError(GENERIC_500_MESSAGE, 500, code, { cause });
 }
 
 export function serviceUnavailable(cause?: unknown): DomainError {
-  return new DomainError(SERVICE_UNAVAILABLE_MESSAGE, 503, "service_unavailable", cause);
+  return new DomainError(SERVICE_UNAVAILABLE_MESSAGE, 503, "service_unavailable", { cause });
 }

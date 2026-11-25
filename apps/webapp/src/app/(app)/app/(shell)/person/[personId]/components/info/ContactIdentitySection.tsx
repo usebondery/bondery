@@ -55,14 +55,18 @@ interface NameFieldsProps {
  */
 function usePersonNameFields(
   personId: string,
-  initialValues: Record<NameField, string>,
-  fieldConfigs: NameFieldConfig[],
-  isMyselfContact: boolean,
-  nameFieldValidationSchemas: ReturnType<
-    typeof useContactIdentityFieldConfigs
-  >["nameFieldValidationSchemas"],
-  copy: ReturnType<typeof useContactIdentityFieldConfigs>["copy"],
+  options: {
+    copy: ReturnType<typeof useContactIdentityFieldConfigs>["copy"];
+    fieldConfigs: NameFieldConfig[];
+    initialValues: Record<NameField, string>;
+    isMyselfContact: boolean;
+    nameFieldValidationSchemas: ReturnType<
+      typeof useContactIdentityFieldConfigs
+    >["nameFieldValidationSchemas"];
+  },
 ) {
+  const { copy, fieldConfigs, initialValues, isMyselfContact, nameFieldValidationSchemas } =
+    options;
   const updateContactMutation = useUpdateContactMutation(personId, {
     syncSettingsOnFirstNameChange: isMyselfContact,
   });
@@ -163,14 +167,18 @@ function usePersonNameFields(
  */
 function usePersonProfileFields(
   personId: string,
-  initialHeadline: string,
-  initialLocation: string,
-  fieldConfigs: ProfileFieldConfig[],
-  profileFieldValidationSchemas: ReturnType<
-    typeof useContactIdentityFieldConfigs
-  >["profileFieldValidationSchemas"],
-  copy: ReturnType<typeof useContactIdentityFieldConfigs>["copy"],
+  options: {
+    copy: ReturnType<typeof useContactIdentityFieldConfigs>["copy"];
+    fieldConfigs: ProfileFieldConfig[];
+    initialHeadline: string;
+    initialLocation: string;
+    profileFieldValidationSchemas: ReturnType<
+      typeof useContactIdentityFieldConfigs
+    >["profileFieldValidationSchemas"];
+  },
 ) {
+  const { copy, fieldConfigs, initialHeadline, initialLocation, profileFieldValidationSchemas } =
+    options;
   const updateContactMutation = useUpdateContactMutation(personId);
   const [focusedField, setFocusedField] = useState<ProfileField | null>(null);
   const [savingByField, setSavingByField] = useState<Record<ProfileField, boolean>>({
@@ -364,18 +372,17 @@ function NameFields({
 }: NameFieldsProps) {
   const { nameFieldConfigs, nameFieldValidationSchemas, copy } = useContactIdentityFieldConfigs();
   const { values, focusedField, savingByField, setFocusedField, updateField, handleBlur } =
-    usePersonNameFields(
-      personId,
-      {
+    usePersonNameFields(personId, {
+      copy,
+      fieldConfigs: nameFieldConfigs,
+      initialValues: {
         firstName: initialFirstName,
         lastName: initialLastName,
         middleName: initialMiddleName,
       },
-      nameFieldConfigs,
       isMyselfContact,
       nameFieldValidationSchemas,
-      copy,
-    );
+    });
   const [hoveredField, setHoveredField] = useState<NameField | null>(null);
 
   return (
@@ -427,14 +434,13 @@ export function ContactIdentitySection({
     updateField: updateProfileField,
     savePlaceFromSuggestion,
     handleBlur: handleProfileBlur,
-  } = usePersonProfileFields(
-    personId,
-    contact.headline ?? "",
-    contact.location ?? "",
-    profileFieldConfigs,
-    profileFieldValidationSchemas,
+  } = usePersonProfileFields(personId, {
     copy,
-  );
+    fieldConfigs: profileFieldConfigs,
+    initialHeadline: contact.headline ?? "",
+    initialLocation: contact.location ?? "",
+    profileFieldValidationSchemas,
+  });
 
   return (
     <Group align="center">

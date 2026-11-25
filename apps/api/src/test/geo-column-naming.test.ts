@@ -58,7 +58,13 @@ describe("geo column naming", () => {
   });
 
   it("writes a point to people without error", async () => {
-    await setGisPoint(prisma, "people", personId, userId, 52.52, 13.405);
+    await setGisPoint(prisma, {
+      id: personId,
+      latitude: 52.52,
+      longitude: 13.405,
+      table: "people",
+      userId,
+    });
 
     const [row] = await prisma.$queryRaw<{ lat: number | null; lng: number | null }[]>`
       SELECT ST_Y("gisPoint"::geometry) AS lat, ST_X("gisPoint"::geometry) AS lng
@@ -72,7 +78,13 @@ describe("geo column naming", () => {
   });
 
   it("writes a point to people_addresses without error", async () => {
-    await setGisPoint(prisma, "people_addresses", addressId, userId, 48.137, 11.575);
+    await setGisPoint(prisma, {
+      id: addressId,
+      latitude: 48.137,
+      longitude: 11.575,
+      table: "people_addresses",
+      userId,
+    });
 
     const [row] = await prisma.$queryRaw<{ lat: number | null }[]>`
       SELECT ST_Y("gisPoint"::geometry) AS lat

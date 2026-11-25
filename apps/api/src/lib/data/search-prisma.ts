@@ -24,22 +24,21 @@ export async function searchPeopleIdsWithDb(
   db: PrismaClient,
   userId: string,
   query: string,
-  limit: number,
-  offset = 0,
-  options?: SearchPeopleOptions,
+  options: SearchPeopleOptions & { limit: number; offset?: number },
 ): Promise<{ ranked: RankedPerson[] | null; error: string | null }> {
+  const { limit, offset = 0 } = options;
   try {
     const ranked = await db.$queryRaw<RankedPerson[]>`
       SELECT id, rank FROM search_people_ids(
         ${userId}::uuid,
         ${query},
-        ${options?.groupId ?? null}::uuid,
-        ${options?.tagId ?? null}::uuid,
-        ${options?.keepInTouch ?? false},
+        ${options.groupId ?? null}::uuid,
+        ${options.tagId ?? null}::uuid,
+        ${options.keepInTouch ?? false},
         ${PEOPLE_SEARCH_WORD_SIMILARITY_THRESHOLD}::real,
         ${limit}::int,
         ${offset}::int,
-        ${options?.tagIds && options.tagIds.length > 0 ? options.tagIds : null}::uuid[]
+        ${options.tagIds && options.tagIds.length > 0 ? options.tagIds : null}::uuid[]
       )
     `;
     return { error: null, ranked };

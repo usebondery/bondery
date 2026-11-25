@@ -177,15 +177,14 @@ export async function mergeContacts(
   await mergeContactImportantDates(db, user.id, leftPersonId, rightPersonId, conflictResolutions);
   await mergeContactRelationships(db, user.id, leftPersonId, rightPersonId);
 
-  await mergeContactAvatar(
-    db,
-    user.id,
-    leftPersonId,
-    rightPersonId,
-    leftPerson.hasAvatar,
-    rightPerson.hasAvatar,
+  await mergeContactAvatar(db, {
     conflictResolutions,
-  );
+    leftHasAvatar: leftPerson.hasAvatar,
+    leftPersonId,
+    rightHasAvatar: rightPerson.hasAvatar,
+    rightPersonId,
+    userId: user.id,
+  });
 
   const deleted = await db.people.deleteMany({
     where: { id: rightPersonId, userId: user.id },

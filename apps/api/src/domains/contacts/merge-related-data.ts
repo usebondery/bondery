@@ -334,13 +334,23 @@ export async function mergeContactRelationships(
 
 export async function mergeContactAvatar(
   db: PrismaClient,
-  userId: string,
-  leftPersonId: string,
-  rightPersonId: string,
-  leftHasAvatar: boolean,
-  rightHasAvatar: boolean,
-  conflictResolutions: ConflictResolutions,
+  input: {
+    conflictResolutions: ConflictResolutions;
+    leftHasAvatar: boolean;
+    leftPersonId: string;
+    rightHasAvatar: boolean;
+    rightPersonId: string;
+    userId: string;
+  },
 ): Promise<void> {
+  const {
+    conflictResolutions,
+    leftHasAvatar,
+    leftPersonId,
+    rightHasAvatar,
+    rightPersonId,
+    userId,
+  } = input;
   const rightAvatarPath = `${userId}/${rightPersonId}.jpg`;
   const leftAvatarPath = `${userId}/${leftPersonId}.jpg`;
 

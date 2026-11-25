@@ -31,19 +31,21 @@ export class DomainError extends Error {
     message: string,
     statusCode: number,
     code: ApiErrorCode,
-    cause?: unknown,
-    details?: Record<string, unknown>,
-    type?: ApiErrorType,
-    param?: string,
+    options: {
+      cause?: unknown;
+      details?: Record<string, unknown>;
+      param?: string;
+      type?: ApiErrorType;
+    } = {},
   ) {
     super(message);
     this.name = "DomainError";
     this.statusCode = statusCode;
     this.code = code;
-    this.cause = cause;
-    this.details = details;
-    this.type = type;
-    this.param = param;
+    this.cause = options.cause;
+    this.details = options.details;
+    this.type = options.type;
+    this.param = options.param;
   }
 }
 
