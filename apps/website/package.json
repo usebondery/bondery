@@ -86,5 +86,5 @@
     "test:i18n": "tsx --test src/lib/i18n/message.test.ts",
     "test:proxy": "tsx --test src/lib/security/proxy.test.ts"
   },
-  "version": "1.11.3-rc.5"
+  "version": "1.11.3"
 }
