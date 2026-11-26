@@ -1,10 +1,12 @@
 /**
- * Mirror agent definitions, skills, and MCP config from `.agents/` into each coding tool's paths.
+ * Mirror agent definitions, settings, skills, and MCP config from `.agents/` into each coding
+ * tool's paths.
  *
  * `.agents/` is the one place to edit. Each tool only reads its own folder or file:
  *
  *   .agents/agents/*.md   -> .claude/agents/  (Claude Code, also inside Orca)
  *                         -> .cursor/agents/  (Cursor)
+ *   .agents/settings.json -> .claude/settings.json (Claude Code project settings)
  *   .agents/skills/<name> -> .claude/skills/  (Claude Code; Codex and Cursor read .agents/skills)
  *   .agents/mcp/mcp.json  -> .mcp.json        (Claude Code project MCP)
  *                         -> .cursor/mcp.json (Cursor project MCP)
@@ -34,6 +36,8 @@ import { parse as parseYaml } from "yaml";
 
 const ROOT = join(fileURLToPath(new URL(".", import.meta.url)), "../..");
 
+const SETTINGS_SOURCE = ".agents/settings.json";
+const SETTINGS_TARGET = ".claude/settings.json";
 const MCP_SOURCE = ".agents/mcp/mcp.json";
 const MCP_TARGETS = [
   { format: "claude", path: ".mcp.json" },
@@ -182,6 +186,23 @@ function findMcpDrift() {
   return drift;
 }
 
+function findSettingsDrift(sourcePath, targetPath) {
+  if (!existsSync(targetPath)) {
+    return [`missing ${relative(ROOT, targetPath)}`];
+  }
+  if (!readFileSync(sourcePath).equals(readFileSync(targetPath))) {
+    return [`changed ${relative(ROOT, targetPath)}`];
+  }
+  return [];
+}
+
+function writeSettingsMirror() {
+  const sourcePath = join(ROOT, SETTINGS_SOURCE);
+  const targetPath = join(ROOT, SETTINGS_TARGET);
+  mkdirSync(dirname(targetPath), { recursive: true });
+  writeFileSync(targetPath, readFileSync(sourcePath));
+}
+
 function writeMcpMirrors() {
   for (const { path: targetPath, format } of MCP_TARGETS) {
     const full = join(ROOT, targetPath);
@@ -197,7 +218,9 @@ function main() {
   if (check) {
     const drift = MIRRORS.flatMap(({ source, targets }) =>
       targets.flatMap((target) => findDrift(join(ROOT, source), join(ROOT, target))),
-    ).concat(findMcpDrift());
+    )
+      .concat(findSettingsDrift(join(ROOT, SETTINGS_SOURCE), join(ROOT, SETTINGS_TARGET)))
+      .concat(findMcpDrift());
     if (drift.length > 0) {
       console.error("check-agent-files: failed\n");
       for (const line of drift) {
@@ -216,10 +239,12 @@ function main() {
       writeMirror(join(ROOT, source), join(ROOT, target));
     }
   }
+  writeSettingsMirror();
   writeMcpMirrors();
   if (stage) {
     const paths = [
       ...MIRRORS.flatMap(({ targets }) => targets),
+      SETTINGS_TARGET,
       ...MCP_TARGETS.map(({ path }) => path),
     ];
     execFileSync("git", ["add", "--all", "--", ...paths], { cwd: ROOT, stdio: "inherit" });
@@ -231,4 +256,12 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   main();
 }
 
-export { findDrift, findMcpDrift, MCP_TARGETS, MIRRORS, prepareClaudeMcp, prepareCursorMcp };
+export {
+  findDrift,
+  findMcpDrift,
+  findSettingsDrift,
+  MCP_TARGETS,
+  MIRRORS,
+  prepareClaudeMcp,
+  prepareCursorMcp,
+};

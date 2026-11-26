@@ -4,12 +4,18 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, describe, it } from "node:test";
 
-import { findDrift, prepareClaudeMcp, prepareCursorMcp } from "../dev/sync-agent-files.mjs";
+import {
+  findDrift,
+  findSettingsDrift,
+  prepareClaudeMcp,
+  prepareCursorMcp,
+} from "../dev/sync-agent-files.mjs";
 
 const PLANE_WRAPPER = "scripts/dev/plane-mcp-stdio.mjs";
 const MISSING_MISSING_MD_RE = /missing .*missing\.md/;
 const CHANGED_KEEP_MD_RE = /changed .*keep\.md/;
 const EXTRA_EXTRA_MD_RE = /extra .*extra\.md/;
+const CHANGED_SETTINGS_RE = /^changed /;
 
 const root = mkdtempSync(join(tmpdir(), "agent-files-"));
 after(() => rmSync(root, { force: true, recursive: true }));
@@ -75,5 +81,15 @@ describe("findDrift", () => {
     assert.match(drift, MISSING_MISSING_MD_RE);
     assert.match(drift, CHANGED_KEEP_MD_RE);
     assert.match(drift, EXTRA_EXTRA_MD_RE);
+  });
+});
+
+describe("findSettingsDrift", () => {
+  it("reports when a settings mirror differs from its source", () => {
+    const source = join(root, "settings-source.json");
+    const target = join(root, "settings-target.json");
+    writeFileSync(source, '{"attribution":false}\n');
+    writeFileSync(target, '{"attribution":true}\n');
+    assert.match(findSettingsDrift(source, target)[0], CHANGED_SETTINGS_RE);
   });
 });
