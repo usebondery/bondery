@@ -121,7 +121,7 @@ const ROUTE_MOUNTS: RouteMount[] = [
   { area: "session", plugin: meMcpConsentsRoutes, prefix: API_ROUTES.ME_MCP_CONSENTS },
   { area: "mcp", plugin: mcpRoutes, prefix: API_ROUTES.MCP },
   { area: "composite", plugin: syncRoutes, prefix: API_ROUTES.SYNC },
-  { area: "session", plugin: extensionRoutes, prefix: API_ROUTES.EXTENSION },
+  { area: "composite", plugin: extensionRoutes, prefix: API_ROUTES.EXTENSION },
   { area: "session", plugin: chatRoutes, prefix: API_ROUTES.CHAT },
   { area: "session", plugin: chatSessionRoutes, prefix: API_ROUTES.CHAT_SESSIONS },
   { area: "session", plugin: subscriptionRoutes, prefix: API_ROUTES.SUBSCRIPTIONS },

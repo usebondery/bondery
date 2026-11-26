@@ -24,6 +24,8 @@ type AuditedRoute = {
   method: string;
   url: string;
   openApiArea: OpenApiRouteArea;
+  /** WebSocket routes authenticate in the handshake (a ticket), not with an HTTP 401. */
+  isWebSocket: boolean;
 };
 
 let routeSecurityAudit: AuditedRoute[] | null = null;
@@ -35,9 +37,11 @@ function recordAuditedRoute(routeOptions: RouteOptions, area: OpenApiRouteArea):
 
   const methods = Array.isArray(routeOptions.method) ? routeOptions.method : [routeOptions.method];
   const url = routeOptions.url ?? "";
+  const isWebSocket = (routeOptions as RouteOptions & { websocket?: boolean }).websocket === true;
 
   for (const method of methods) {
     routeSecurityAudit.push({
+      isWebSocket,
       method: String(method).toUpperCase(),
       openApiArea: area,
       url,

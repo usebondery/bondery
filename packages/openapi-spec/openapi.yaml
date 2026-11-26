@@ -27713,7 +27713,6 @@ paths:
       description: Public Chrome extension configuration. `minVersion` is the HTTP 426 floor (previous production CalVer).
         `latestVersion` is the current production CalVer for a non-blocking update nudge. Not a health probe — use `GET
         /health/live` for liveness.
-      security: *a2
       responses:
         "200":
           description: Extension manifest
