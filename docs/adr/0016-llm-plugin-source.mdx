@@ -1,7 +1,7 @@
 ---
 title: "ADR 0016: LLM plugin source"
 hidden: true
-last_updated: 2026-11-13
+last_updated: 2026-11-25
 ---
 
 # ADR 0016: LLM plugin source
@@ -17,7 +17,7 @@ Two edited trees drift.
 
 The root `package.json` holds the product version.
 A version key in the plugin config would diverge from that file.
-Claude publishes by a fast-forward of the git branch `claude-plugin`.
+The Claude directory reads the plugin from one git branch.
 OpenAI publishes by a ZIP that a human uploads.
 Portal Submit stays a human step.
 
@@ -26,7 +26,7 @@ Portal Submit stays a human step.
 1. `llm-plugins/src` is the only edited source.
 2. A builder writes two committed packages: `llm-plugins/claude` and `llm-plugins/openai`.
 3. The root `package.json` supplies the version. The config has no version key.
-4. Claude publishes by a fast-forward of the git branch `claude-plugin`.
+4. The Claude directory tracks the `release` branch, plugin path `llm-plugins/claude`. Amended 2026-11-25: a dedicated `claude-plugin` branch, moved by a workflow on production tags, was replaced. `release` is the one branch for production code, so the directory reads the same commit that production runs.
 5. OpenAI publishes by a human ZIP upload.
 6. Portal Submit stays human.
 
@@ -35,6 +35,7 @@ Portal Submit stays a human step.
 | Alternative | Why not |
 |---|---|
 | One folder with both manifests | The hosts require different manifest paths. The hosts require different MCP types. One folder cannot meet both contracts. |
+| A `claude-plugin` branch that moves only when the plugin changes | It skipped a review for a version-only release. It added a second production branch and a workflow to move it. `release` already holds production code. |
 | Upload the Claude archive and let the OpenAI portal convert it | OpenAI skill text must not contain the word Claude. A Claude archive is not the OpenAI package. |
 
 ## Consequences
@@ -44,6 +45,7 @@ Portal Submit stays a human step.
 - Commit `llm-plugins/claude` and `llm-plugins/openai`.
 - Do not edit the generated folders.
 - `pnpm run check:llm-plugins` fails when a generated tree drifts from source.
+- Each production release changes the plugin `version`, so each push of a release to `release` opens a new Claude directory version. That push ends an open appeal on the previous version.
 
 ## Related
 

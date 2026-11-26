@@ -2,7 +2,7 @@
 
 This file is a human checklist. This change does not implement the portal.
 
-`pnpm run pack:openai-plugin` writes a gitignored ZIP. Do not commit that ZIP. Package limits are in [openai-package.md](./openai-package.md).
+Each production release attaches `bondery-openai-plugin-X.Y.Z.zip` to its GitHub release. The `openai_plugin_zip` job in `release.yml` builds it from the tag. Upload that file to the portal. `pnpm run pack:openai-plugin` writes the same ZIP locally, gitignored. Do not commit that ZIP. Package limits are in [openai-package.md](./openai-package.md).
 
 ## Before submit
 

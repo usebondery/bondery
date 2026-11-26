@@ -17,14 +17,14 @@ metadata:
 ## When to use
 
 - Editing `llm-plugins` or `plugin.config.json`
-- Changing the Claude plugin or the `claude-plugin` branch
+- Changing the Claude plugin or its directory source
 - Changing the OpenAI plugin, the ChatGPT plugin, or a directory ZIP
 
 ## Do not use this skill for
 
 - MCP route code in `apps/api`. Read [bondery-api](../bondery-api/SKILL.md). Hint values for skill text are in [guidelines.md](references/guidelines.md).
 - Privacy or Terms wording. Read [bondery-legal](../bondery-legal/SKILL.md).
-- Tag order past the `claude-plugin` rule. Read [bondery-release](../bondery-release/SKILL.md).
+- Tag order and pushes to `release`. Read [bondery-release](../bondery-release/SKILL.md).
 - MCP Inspector steps. Read [Inspect the MCP server](../../../docs/contributing/mcp.mdx).
 
 ## Non-negotiables
@@ -56,7 +56,7 @@ Read the file in the Read column when the task matches.
 | ------------------------------------------------- | ------------------------------------------------------------------ |
 | Source tree, host output, builder, or drift check | [references/architecture.md](references/architecture.md)           |
 | `plugin.config.json` or a manifest field          | [references/source-config.md](references/source-config.md)         |
-| Claude output or the `claude-plugin` branch       | [references/claude.md](references/claude.md)                       |
+| Claude output or the Claude directory source      | [references/claude.md](references/claude.md)                       |
 | OpenAI package limits or ZIP contents             | [references/openai-package.md](references/openai-package.md)       |
 | Human OpenAI portal submit                        | [references/openai-submission.md](references/openai-submission.md) |
 | Skill text, connect copy, or tool hints           | [references/guidelines.md](references/guidelines.md)               |

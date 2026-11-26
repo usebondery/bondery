@@ -240,6 +240,38 @@ jobs:
 
             Release publishing in progress for ${{ needs.validate.outputs.version }}.
 
+  # The OpenAI portal takes the plugin as a ZIP that a human uploads. Attach it to the GitHub
+  # release so each production version has one, built from the tag. `--check` fails the job when
+  # the committed llm-plugins trees drift from llm-plugins/src.
+  openai_plugin_zip:
+    needs: [ validate, github_release_init ]
+    if: always() && needs.validate.result == 'success' && needs.github_release_init.result != 'failure'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.validate.outputs.tag }}
+          persist-credentials: false
+
+      - uses: pnpm/setup@v1
+        with:
+          install: false
+
+      - name: Build the OpenAI plugin ZIP
+        run: node scripts/pkg/build-llm-plugins.mjs --check --zip
+
+      - name: Attach the ZIP to the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.validate.outputs.tag }}
+          VERSION: ${{ needs.validate.outputs.version }}
+        run: |
+          ASSET="tmp/bondery-openai-plugin-${VERSION}.zip"
+          mv tmp/bondery-openai-plugin.zip "$ASSET"
+          gh release upload "$TAG" "$ASSET" --clobber --repo "$GITHUB_REPOSITORY"
+
   release_api:
     needs: [ validate, detect_changes, resolve_meta ]
     if: needs.detect_changes.outputs.api == 'true'
@@ -371,6 +403,7 @@ jobs:
       - release_webapp
       - release_extension
       - deploy_production
+      - openai_plugin_zip
     if: always() && needs.validate.result == 'success'
     runs-on: ubuntu-latest
     permissions:
@@ -400,6 +433,7 @@ jobs:
           API_DIGEST: ${{ needs.resolve_meta.outputs.api_digest }}
           WEBAPP_DIGEST: ${{ needs.resolve_meta.outputs.webapp_digest }}
           SOURCE_MODE: ${{ needs.resolve_meta.outputs.source_mode }}
+          OPENAI_ZIP_RESULT: ${{ needs.openai_plugin_zip.result }}
         run: |
           component_ok() {
             local result="$1"
@@ -459,6 +493,11 @@ jobs:
 
           [Changelog ${VERSION}](https://usebondery.com/docs/changelog/${VERSION})
           EOF
+            # The Chrome extension ships through the Chrome Web Store only. Beta testers get the
+            # sideloadable zip on the RC prerelease (rc-release.yml), never on a production release.
+            if [ "$OPENAI_ZIP_RESULT" = "success" ]; then
+              printf '\n## Assets\n\n- `bondery-openai-plugin-%s.zip`: the OpenAI plugin package for the portal upload\n' "$VERSION" >> "$BODY_FILE"
+            fi
             if [ -n "$RETRY_NOTE" ]; then
               printf '\n%s\n' "$RETRY_NOTE" >> "$BODY_FILE"
             fi

@@ -14,10 +14,9 @@ deploy/
   website.yml              -> deploy-website.yml  release -> promote :sha or build -> :production
 
 release/
-  bondery.yml              -> release.yml           vX.Y.Z unified production (skips -rc): stage images -> ONE smoke -> gate -> :production -> pin + deploy
+  bondery.yml              -> release.yml           vX.Y.Z unified production (skips -rc): stage images -> ONE smoke -> gate -> :production -> pin + deploy; attaches the OpenAI plugin ZIP to the GitHub release (the extension ships through the store only)
   rc.yml                   -> rc-release.yml        vX.Y.Z-rc.N prerelease + staging zip; no CWS
   mcp-registry.yml         -> publish-mcp-registry.yml  workflow_dispatch or vX.Y.Z (skips -rc)
-  claude-plugin.yml        -> publish-claude-plugin.yml  vX.Y.Z fast-forwards `claude-plugin` when the plugin folder changed
 
 smoke/
   bondery-stack.yml        -> smoke-bondery-stack.yml  manual workflow_dispatch drill

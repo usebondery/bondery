@@ -27,13 +27,13 @@ Set these listing keys:
 
 Do not add a component key.
 
-## `claude-plugin` branch
+## Directory source
 
-When `llm-plugins/claude` changes, a production tag `vX.Y.Z` may fast-forward `claude-plugin`.
+The Claude directory submission tracks the `release` branch, plugin path `llm-plugins/claude`. `release` holds production code only, so the directory reads the plugin of the current production release. No workflow publishes the plugin.
 
-An RC tag never fast-forwards `claude-plugin`.
+Each push to `release` that changes `llm-plugins/claude` opens a new directory version. A production release changes the `version` field, so each production release opens one. A pushed commit replaces an open version and ends an open appeal on it.
 
-When the only change under `llm-plugins/claude` is the version field, the publish is a green skip. The check passes. The workflow does not push `claude-plugin`.
+Do not point the submission at `main`. `main` carries unreleased code.
 
 A human runs Portal Submit. A human runs Portal Publish.
 
@@ -50,8 +50,7 @@ Put that text inside the connect block. The OpenAI replacement of the block must
 - [ ] Listing keys are `icon`, `documentationUrl`, `supportUrl`, `privacyPolicyUrl`, and `termsOfServiceUrl`
 - [ ] The manifest has no component key
 - [ ] `version` matches the root `package.json`
-- [ ] A production tag fast-forward is limited to a real `llm-plugins/claude` change
-- [ ] An RC tag does not move `claude-plugin`
-- [ ] A version-only bump stays a green skip
+- [ ] The directory submission tracks `release` with plugin path `llm-plugins/claude`
+- [ ] No open appeal is pending when a production release is pushed to `release`
 - [ ] Portal Submit and Portal Publish stay human
 - [ ] Claude naming stays inside the connect block

@@ -1,4 +1,5 @@
 {
+  "attribution": false,
   "hooks": {
     "SessionStart": [
       {

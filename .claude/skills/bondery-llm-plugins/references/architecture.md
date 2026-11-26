@@ -24,7 +24,7 @@ The root `package.json` supplies `version`. The config has no version key. The b
 | Manifest | `.claude-plugin/plugin.json`    | root `plugin.json`   |
 | MCP file | `.mcp.json`                     | root `mcp.json`      |
 | MCP type | `http`                          | `streamable-http`    |
-| Publish  | fast-forward of `claude-plugin` | human ZIP upload     |
+| Publish  | directory tracks `release`      | human ZIP upload     |
 
 ## MCP skills
 
@@ -45,7 +45,7 @@ Host field rules are in [claude.md](./claude.md) and [source-config.md](./source
 
 `pnpm run check:claude-plugin` runs the same check.
 
-`pnpm run pack:openai-plugin` writes a gitignored ZIP for a human upload. Do not commit that ZIP. Portal steps are in [openai-submission.md](./openai-submission.md).
+`pnpm run pack:openai-plugin` writes a gitignored ZIP for a human upload. Do not commit that ZIP. Each production release attaches the same ZIP to its GitHub release as `bondery-openai-plugin-X.Y.Z.zip`. Portal steps are in [openai-submission.md](./openai-submission.md).
 
 Token and secret rules stay in [bondery-security](../../bondery-security/SKILL.md).
 
