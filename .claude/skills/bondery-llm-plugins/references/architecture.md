@@ -18,13 +18,13 @@ The root `package.json` supplies `version`. The config has no version key. The b
 
 ## Host-only output
 
-| Piece    | Claude                          | OpenAI               |
-| -------- | ------------------------------- | -------------------- |
-| Folder   | `llm-plugins/claude`            | `llm-plugins/openai` |
-| Manifest | `.claude-plugin/plugin.json`    | root `plugin.json`   |
-| MCP file | `.mcp.json`                     | root `mcp.json`      |
-| MCP type | `http`                          | `streamable-http`    |
-| Publish  | directory tracks `release`      | human ZIP upload     |
+| Piece    | Claude                       | OpenAI               |
+| -------- | ---------------------------- | -------------------- |
+| Folder   | `llm-plugins/claude`         | `llm-plugins/openai` |
+| Manifest | `.claude-plugin/plugin.json` | root `plugin.json`   |
+| MCP file | `.mcp.json`                  | root `mcp.json`      |
+| MCP type | `http`                       | `streamable-http`    |
+| Publish  | directory tracks `release`   | human ZIP upload     |
 
 ## MCP skills
 
