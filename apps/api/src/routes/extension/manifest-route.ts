@@ -14,7 +14,9 @@ export function registerManifestRoute(fastify: AppFastifyInstance): void {
   fastify.get(
     "/manifest",
     {
-      config: { rateLimit: false },
+      // Public, and reachable by an outdated extension: it reads `minVersion` and
+      // `latestVersion` here to show its update prompt.
+      config: { allowOutdatedExtension: true, rateLimit: false },
       schema: {
         description:
           "Public Chrome extension configuration. `minVersion` is the HTTP 426 floor (previous production CalVer). " +

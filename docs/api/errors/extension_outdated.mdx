@@ -1,12 +1,12 @@
 ---
 title: extension_outdated
 description: The API rejected the extension version header. Ship a newer Chrome extension build, or lower the minimum version that the API still accepts.
-last_updated: 2026-07-28
+last_updated: 2026-11-26
 ---
 
 ## When this happens
 
-Extension version check failed in `version-check.ts`.
+The request sent `X-Bondery-Extension-Version` with a version below the minimum the API accepts, or with a value that is not a version. A Bearer token does not skip this check. `GET /extension/manifest` stays reachable, so the extension can read `minVersion` and prompt for an update.
 
 ## What your integration should do
 

@@ -28,6 +28,16 @@ Registered in `apps/api/src/lib/platform/auth/strategies.ts`:
 | `verifyAuth`          | Session, OAuth JWT, or API key          |
 | `verifyServiceSecret` | `BONDERY_PRIVATE_SERVICE_SECRET` bearer |
 
+### No global credential pre-check
+
+Route shells are the only auth layer ([ADR 0034](../../../../docs/adr/0034-route-shells-own-auth.mdx)). Do not add a global hook that answers 401 when credential headers are missing. It saves no I/O:
+
+- Shell strategies run in `onRequest`, before body parsing.
+- With no cookie and no Bearer, Better Auth `getSession` returns `null` after reading the cookie, before any Postgres or Redis read.
+- `src/test/route-auth-coverage.test.ts` proves every `session` and `integration` route answers 401 without credentials.
+
+If a strategy ever costs I/O with no credential present, short-circuit inside `strategies.ts`, not in a global hook.
+
 ### JWT vs opaque bearer (no fallback)
 
 ```text
@@ -107,9 +117,10 @@ Deep link scheme: `bondery://` (trusted origin on API).
 
 `apps/api/src/lib/extension/version-check.ts`:
 
-- Unauthenticated requests without Cookie, Bearer, or extension version → 401
-- Extension below `MIN_EXTENSION_VERSION` (generated 3-part previous production CalVer) → 426 `extension_outdated`. `GET /extension/manifest` also exposes `latestVersion` for a non-blocking nudge.
-- Skips `/auth/*`, `/webhooks/*`, `/health/*`, `/extension/manifest`
+- The gate checks only requests that send `X-Bondery-Extension-Version`. A Bearer token does not skip it. Requests without the header (webapp, mobile, MCP, webhooks, CardDAV) are never gated.
+- Extension below `MIN_EXTENSION_VERSION` (generated 3-part previous production CalVer), or a malformed version → 426 `extension_outdated`.
+- A route that an outdated extension must still reach sets `config: { allowOutdatedExtension: true }`. Today only `GET /extension/manifest` does, which also exposes `latestVersion` for a non-blocking nudge.
+- The gate does not authenticate and keeps no path list. Route shells own auth (see [No global credential pre-check](#no-global-credential-pre-check)).
 
 ## Service secret (internal)
 

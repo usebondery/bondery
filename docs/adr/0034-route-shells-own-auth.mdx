@@ -1,0 +1,56 @@
+---
+title: "ADR 0034: Route shells own authentication"
+hidden: true
+last_updated: 2026-11-26
+description: No global hook checks for credentials before a route runs. Route shells reject a request with no credentials before any database read, and the extension version gate keys on its own header.
+---
+
+# ADR 0034: Route shells own authentication
+
+**Status:** Accepted
+**Date:** 2026-11-26
+
+## Context
+
+`registerExtensionVersionCheck` was a global `onRequest` hook with two jobs:
+
+1. Answer `426 extension_outdated` to an outdated Chrome extension.
+2. Answer `401 auth_required` to any request with no Bearer token, no cookie and no extension header, before the route shell ran.
+
+The second job was a presence check. The reason given for it was cost: reject a request with no credentials before the API spends work on validating a session.
+
+The hook matched URLs against a growing list of public paths (health, manifests, OAuth discovery, Better Auth, MCP, webhooks, docs, CSP reports). Each new public area or protocol needed an entry. CardDAV, which sends `Authorization: Basic`, would have needed one more. The hook also hid three bugs:
+
+- It returned at the Bearer check before it read the version, so a signed-in outdated extension never got `426`.
+- `GET /extension/manifest` sat in the `session` shell, so the extension's update nudge always got `401`.
+- The mobile sync WebSocket carries only its single-use ticket, so the hook answered its upgrade with `401` before the ticket check ran.
+
+## Finding: the presence check saved no I/O
+
+Checked on 2026-11-26 against `better-auth` 1.7.25:
+
+- Shell auth runs in `onRequest`, before Fastify parses the body. The global hook ran at the same stage.
+- With no credentials, `resolveRequestAuthUser` calls `auth.api.getSession`. That endpoint reads the signed session cookie and returns `null` when it is absent, before any Postgres or Redis read (`better-auth/dist/api/routes/session.mjs`).
+- A JWT-shaped Bearer token goes to JWKS verification, and an API key goes to `verifyApiKey`. Both need a token, so neither runs without one.
+- `src/test/route-auth-coverage.test.ts` sends every `session` and `integration` route a request with no credentials, in an environment without a reachable database. Every route answers `401`. A database read would have failed with `500`.
+
+The presence check saved only the cost of entering Better Auth and parsing cookies, which is CPU work. For a request that carries credentials, it saved nothing, because it passed the request on.
+
+## Decision
+
+1. **Route shells own authentication.** `integrationRoutes`, `sessionRoutes`, `nativeSessionRoutes` and `internalRoutes` in `lib/platform/route-areas.ts` are the only places that reject a request for missing or invalid credentials. A route outside the shells is public by design, or authenticates in its own handler (webhook HMAC, WebSocket ticket, MCP).
+2. **No global credential pre-check.** Do not add a global hook that rejects requests on the presence or shape of credential headers. Do not keep a list of public URLs.
+3. **The extension version gate keys on its header.** It checks only requests that send `X-Bondery-Extension-Version`, with or without a Bearer token. A route that an outdated extension must reach sets `config: { allowOutdatedExtension: true }`. Today only `GET /extension/manifest` does.
+4. **Cheap rejection stays in the shell.** If a credential check ever costs I/O when no credential is present, short-circuit inside the shell strategy in `lib/platform/auth/strategies.ts`, not in a global hook.
+5. **A test guards the shells.** `route-auth-coverage.test.ts` fails if any `session` or `integration` route answers anything but `401` to a request with no credentials.
+
+## Consequences
+
+- A new public route or protocol, such as CardDAV, needs no change outside its own route shell.
+- An outdated signed-in extension now gets `426`, as `MIN_EXTENSION_VERSION` intends.
+- Requests with no credentials enter Better Auth's `getSession` before they get `401`. The cost is cookie parsing, with no I/O.
+
+## Alternatives
+
+- **Keep the global presence check and add CardDAV to its exemption list.** Rejected. Every new public surface must remember the list, and the check saves no I/O.
+- **Treat any `Authorization` header as credentials in the global hook.** Rejected. It keeps a second, header-shape-only auth layer that every route inherits, and it does not fix the Bearer bypass of the version gate.

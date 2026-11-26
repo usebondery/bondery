@@ -1,25 +1,35 @@
 /**
- * Global Fastify hook that enforces a minimum Chrome extension version.
+ * Minimum Chrome extension version gate.
  *
- * Unauthenticated requests (no Bearer, no Cookie) receive 401 before route auth.
- * Extension clients without `X-Bondery-Extension-Version` are treated as
- * unauthenticated. Outdated extension versions receive 426 Upgrade Required.
+ * The gate applies only to requests that identify as the extension through the
+ * `X-Bondery-Extension-Version` header. Every other client (web app, mobile, MCP,
+ * webhooks, CardDAV) sends no such header and passes through untouched.
  *
- * Webapp browser requests include a Cookie header; mobile and server clients
- * use Bearer and bypass extension version enforcement.
+ * This hook does not authenticate. Route shells in `lib/platform/route-areas.ts`
+ * own authentication, so the gate keeps no list of public paths.
+ *
+ * A route that an outdated extension must still reach (for example the manifest
+ * that drives the "please update" nudge) declares `allowOutdatedExtension: true`
+ * in its route config.
  */
 
-import {
-  API_ROUTES,
-  CHROME_EXTENSION_URL,
-  isVersionBelow,
-  MIN_EXTENSION_VERSION,
-} from "@bondery/helpers";
-import { BETTER_AUTH_BASE_PATH, publicOAuthDiscoveryPaths } from "@bondery/helpers/globals/paths";
+import { CHROME_EXTENSION_URL, isVersionBelow, MIN_EXTENSION_VERSION } from "@bondery/helpers";
 import { buildAgentMessage, getErrorDocUrl } from "@bondery/schemas/errors";
 import { URLS } from "../platform/config.js";
-import { unauthorized } from "../platform/errors/http-errors.js";
 import type { AppFastifyInstance } from "../platform/fastify-types.js";
+
+declare module "fastify" {
+  interface FastifyContextConfig {
+    /** When true, an extension below the minimum version may still call the route. */
+    allowOutdatedExtension?: boolean;
+  }
+}
+
+/** Header the extension sends on every API call. Node lowercases header names. */
+const EXTENSION_VERSION_HEADER = "x-bondery-extension-version";
+
+/** A minimum of `0.0.0` (or empty) turns enforcement off. */
+const UNENFORCED_MINIMUM = "0.0.0";
 
 const TRAILING_SLASH_PATTERN = /\/$/;
 
@@ -27,109 +37,58 @@ function websiteBaseUrl(): string {
   return (URLS.website ?? "https://usebondery.com").replace(TRAILING_SLASH_PATTERN, "");
 }
 
-function isPublicInfraPath(url: string): boolean {
-  const path = url.split("?")[0] ?? url;
-  return (
-    path.startsWith("/health/") ||
-    path === `${API_ROUTES.EXTENSION}/manifest` ||
-    path === `${API_ROUTES.MOBILE}/manifest` ||
-    path === API_ROUTES.OAUTH_PROVIDERS ||
-    path === API_ROUTES.API_REFERENCE ||
-    path === API_ROUTES.DOCS_API ||
-    // CSP reports arrive from a browser with no credentials to add.
-    path === API_ROUTES.SECURITY_CSP_REPORT
-  );
-}
+type ExtensionVersionCheckOptions = {
+  /** Lowest extension version the API accepts. Defaults to the build-time constant. */
+  minVersion?: string;
+};
 
-function isPublicAuthPath(url: string): boolean {
-  const path = url.split("?")[0] ?? url;
-  if (
-    path === BETTER_AUTH_BASE_PATH ||
-    path.startsWith(`${BETTER_AUTH_BASE_PATH}/`) ||
-    publicOAuthDiscoveryPaths().includes(path) ||
-    path === API_ROUTES.WELL_KNOWN_MCP ||
-    path === `${API_ROUTES.WELL_KNOWN_MCP}/`
-  ) {
-    return true;
-  }
-
-  // Unauthenticated MCP clients start OAuth from GET/HEAD/POST /mcp (401 + RFC 9728).
-  return path === API_ROUTES.MCP || path.startsWith(`${API_ROUTES.MCP}/`);
-}
-
-function isPublicWebhookPath(url: string): boolean {
-  const path = url.split("?")[0] ?? url;
-  return path.startsWith("/webhooks/") || path.startsWith("/api/webhooks/");
-}
+export { EXTENSION_VERSION_HEADER };
 
 /**
- * Registers a global `onRequest` hook for extension version enforcement and
- * early 401 rejection of unauthenticated headless requests.
+ * Registers a global `onRequest` hook that answers `426 extension_outdated` to an
+ * extension below the minimum version, whether or not the request is authenticated.
  */
-export function registerExtensionVersionCheck(fastify: AppFastifyInstance): void {
+export function registerExtensionVersionCheck(
+  fastify: AppFastifyInstance,
+  { minVersion = MIN_EXTENSION_VERSION }: ExtensionVersionCheckOptions = {},
+): void {
+  if (!minVersion || minVersion === UNENFORCED_MINIMUM) {
+    return;
+  }
+
   fastify.addHook("onRequest", async (request, reply) => {
-    // No enforcement when the minimum is the default "0.0.0"
-    if (!MIN_EXTENSION_VERSION || MIN_EXTENSION_VERSION === "0.0.0") {
+    const extensionVersion = request.headers[EXTENSION_VERSION_HEADER];
+
+    // Not the extension: nothing to gate.
+    if (typeof extensionVersion !== "string") {
       return;
     }
 
-    /**
-     * Only guard routes that exist. An `onRequest` hook runs before routing
-     * resolves, so without this check a request for an unknown path is answered
-     * `401 auth_required` instead of `404 not_found`. That hides real 404s from
-     * clients and makes port scanners look like auth failures.
-     */
-    if (!request.routeOptions?.url) {
+    // An unknown path keeps its 404, and an opted-out route stays reachable.
+    if (!request.routeOptions.url || request.routeOptions.config?.allowOutdatedExtension) {
       return;
     }
 
-    // Skip unauthenticated health-check routes and public Better Auth / OIDC discovery
-    if (isPublicInfraPath(request.url) || isPublicAuthPath(request.url)) {
+    if (!isVersionBelow(extensionVersion, minVersion)) {
       return;
     }
 
-    // Inbound webhooks authenticate via HMAC in the route handler, not session cookies.
-    if (isPublicWebhookPath(request.url)) {
-      return;
-    }
-
-    // Mobile, webapp server, and extension OAuth flows authenticate with Bearer.
-    const { authorization } = request.headers;
-    if (typeof authorization === "string" && authorization.startsWith("Bearer ")) {
-      return;
-    }
-
-    // Webapp browser requests include a Cookie header — let auth strategies decide.
-    if (request.headers.cookie) {
-      return;
-    }
-
-    const extensionVersion = request.headers["x-bondery-extension-version"] as string | undefined;
-
-    // No credentials and no extension identity → unauthenticated, not outdated extension.
-    if (!extensionVersion) {
-      throw unauthorized("Unauthorized - Please log in", "auth_required");
-    }
-
-    // Extension identified but version too low → upgrade required.
-    if (isVersionBelow(extensionVersion, MIN_EXTENSION_VERSION)) {
-      reply
-        .code(426)
-        .header("Upgrade", "X-Bondery-Extension-Version")
-        .send({
-          error: {
-            agent_message: buildAgentMessage("extension_outdated", "Extension update required"),
-            code: "extension_outdated",
-            details: {
-              minVersion: MIN_EXTENSION_VERSION,
-              storeUrl: CHROME_EXTENSION_URL,
-            },
-            doc_url: getErrorDocUrl("extension_outdated", websiteBaseUrl()),
-            message: "Extension update required",
-            request_id: request.id,
-            type: "invalid_request_error",
+    return reply
+      .code(426)
+      .header("Upgrade", "X-Bondery-Extension-Version")
+      .send({
+        error: {
+          agent_message: buildAgentMessage("extension_outdated", "Extension update required"),
+          code: "extension_outdated",
+          details: {
+            minVersion,
+            storeUrl: CHROME_EXTENSION_URL,
           },
-        });
-    }
+          doc_url: getErrorDocUrl("extension_outdated", websiteBaseUrl()),
+          message: "Extension update required",
+          request_id: request.id,
+          type: "invalid_request_error",
+        },
+      });
   });
 }

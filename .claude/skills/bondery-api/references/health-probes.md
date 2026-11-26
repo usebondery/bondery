@@ -58,7 +58,7 @@ Extension manifest: [`apps/api/src/routes/extension/manifest-route.ts`](../../..
 
 Mobile manifest: [`apps/api/src/lib/mobile/manifest-route.ts`](../../../apps/api/src/lib/mobile/manifest-route.ts)
 
-Auth bypass: health paths, `/extension/manifest`, and `/mobile/manifest` skip extension version enforcement in [`version-check.ts`](../../../apps/api/src/lib/extension/version-check.ts).
+Health paths and `/mobile/manifest` are public routes outside every auth shell. `/extension/manifest` is public too and sets `config: { allowOutdatedExtension: true }`, so an outdated extension can still read it. The extension version gate in [`version-check.ts`](../../../apps/api/src/lib/extension/version-check.ts) applies only to requests that send `X-Bondery-Extension-Version`.
 
 ## Webapp BFF
 
@@ -110,5 +110,5 @@ Do **not** use `/health/ready` from product chrome, Settings, or layout routing.
 - [ ] Webapp container probes under `/health/*`, not `/api/*`
 - [ ] BFF API health under `/api/health/*`
 - [ ] Extension config on `/extension/manifest`, not mixed into liveness
-- [ ] `version-check.ts` bypass updated for new public paths
+- [ ] A new public route sits outside the auth shells. It sets `allowOutdatedExtension: true` only if an outdated extension must reach it
 - [ ] Deploy docs and Docker HEALTHCHECK updated

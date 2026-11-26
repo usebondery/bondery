@@ -36,7 +36,7 @@ Do **not** activate for routine UI refactors, copy changes, or non-security API 
 ## Non-negotiables (ranked)
 
 1. **Tenant isolation** — `getAuth(request).client` is unscoped Prisma. Every tenant-owned query must filter by `where: { userId: user.id }` (or equivalent join). There is **no RLS** on the current API path. Foreign and nonexistent resources should normally be indistinguishable (404, not 403).
-2. **Route shell auth** — Auth hooks live only in `apps/api/src/lib/platform/route-areas.ts`, mounted via `routes/register-all.ts`. Custom-auth routes (webhooks, WS tickets) must implement their own verification.
+2. **Route shell auth** — Auth hooks live only in `apps/api/src/lib/platform/route-areas.ts`, mounted via `routes/register-all.ts`. Custom-auth routes (webhooks, WS tickets) must implement their own verification. No global hook pre-checks credential headers or keeps a public-URL list: it saves no I/O, because shells reject a credential-less request before any database read (ADR 0034).
 3. **JWT vs opaque bearer** — JWT-shaped bearer tokens route exclusively to OAuth JWT verification. On failure, return `null` — **never** fall back to `auth.api.getSession`.
 4. **Secrets in env only** — Use `packages/helpers/src/env/manifest.ts` (`BONDERY_PRIVATE_*`, `secret: true`). No hardcoded keys, tokens, or passwords.
 5. **Public clients never get secrets** — Webapp OAuth client secrets stay server-only. Mobile and extension use PKCE + state validation.
