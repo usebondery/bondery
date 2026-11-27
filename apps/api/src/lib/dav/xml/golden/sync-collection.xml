@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<d:multistatus xmlns:d="DAV:" xmlns:card="urn:ietf:params:xml:ns:carddav" xmlns:cs="http://calendarserver.org/ns/">
+  <d:response>
+    <d:href>/dav/addressbooks/u1/bondery/019a.vcf</d:href>
+    <d:propstat>
+      <d:prop>
+        <d:getetag>"abc123"</d:getetag>
+        <card:address-data>BEGIN:VCARD&#13;
+VERSION:3.0&#13;
+FN:Anna &amp; &lt;Bob&gt; "Q"&#13;
+END:VCARD&#13;
+</card:address-data>
+      </d:prop>
+      <d:status>HTTP/1.1 200 OK</d:status>
+    </d:propstat>
+  </d:response>
+  <d:response>
+    <d:href>/dav/addressbooks/u1/bondery/gone.vcf</d:href>
+    <d:status>HTTP/1.1 404 Not Found</d:status>
+  </d:response>
+  <d:sync-token>https://usebondery.com/ns/sync/g1-8</d:sync-token>
+</d:multistatus>

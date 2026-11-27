@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<d:multistatus xmlns:d="DAV:" xmlns:card="urn:ietf:params:xml:ns:carddav" xmlns:cs="http://calendarserver.org/ns/" xmlns:x1="urn:example:custom">
+  <d:response>
+    <d:href>/dav/addressbooks/u1/bondery/</d:href>
+    <d:propstat>
+      <d:prop>
+        <d:resourcetype>
+          <d:collection/>
+          <card:addressbook/>
+        </d:resourcetype>
+        <d:displayname>Bondery</d:displayname>
+        <cs:getctag>https://usebondery.com/ns/sync/g1-7</cs:getctag>
+        <d:sync-token>https://usebondery.com/ns/sync/g1-7</d:sync-token>
+        <d:supported-report-set>
+          <d:supported-report>
+            <d:report>
+              <card:addressbook-multiget/>
+            </d:report>
+          </d:supported-report>
+          <d:supported-report>
+            <d:report>
+              <card:addressbook-query/>
+            </d:report>
+          </d:supported-report>
+        </d:supported-report-set>
+        <card:supported-address-data>
+          <card:address-data-type content-type="text/vcard" version="3.0"/>
+        </card:supported-address-data>
+        <d:current-user-privilege-set>
+          <d:privilege>
+            <d:read/>
+          </d:privilege>
+          <d:privilege>
+            <d:read-current-user-privilege-set/>
+          </d:privilege>
+        </d:current-user-privilege-set>
+      </d:prop>
+      <d:status>HTTP/1.1 200 OK</d:status>
+    </d:propstat>
+    <d:propstat>
+      <d:prop>
+        <x1:unknown-prop/>
+      </d:prop>
+      <d:status>HTTP/1.1 404 Not Found</d:status>
+    </d:propstat>
+  </d:response>
+</d:multistatus>
