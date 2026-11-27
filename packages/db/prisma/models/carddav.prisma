@@ -1,0 +1,125 @@
+// ---------------------------------------------------------------------------
+// CardDAV sync (see docs/adr/0036-carddav-sync.mdx)
+//
+// None of these tables is in SYNC_TABLE_KEYS: mobile sync never replicates them. Every table
+// carries `user_id`, so each query scopes by the authenticated user.
+// ---------------------------------------------------------------------------
+
+enum CarddavCardKind {
+  person
+  opaque
+
+  @@map("carddav_card_kind")
+}
+
+/// One row per user. Holds the sync-token state and the reconciler watermark. Locking this row
+/// serializes every revision write.
+model CarddavAddressBook {
+  id                String   @id @default(uuid()) @db.Uuid
+  userId            String   @unique @map("user_id") @db.Uuid
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Random per address book and regenerated on "disconnect all", so a token from an earlier
+  /// connection can never match a new one.
+  generation        String   @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// The current sync token and CTag value. Grows by one per address-book change.
+  revision          BigInt   @default(0)
+  /// Highest `sync_change_log` sequence the reconciler has folded into the cards.
+  reconciledThrough BigInt   @default(0) @map("reconciled_through")
+  /// Oldest revision a client may still sync from. A token below it gets a full resync.
+  tombstoneFloor    BigInt   @default(0) @map("tombstone_floor")
+  /// Version of the projection mapping. A higher code version rebuilds the cards.
+  projectionVersion Int      @default(0) @map("projection_version")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  cards   CarddavCard[]
+
+  @@map("carddav_address_books")
+}
+
+/// One row per card, live or tombstone. Person cards hold the version-neutral projection. Opaque
+/// cards (group vCards from a device) hold the vCard exactly as the device sent it.
+model CarddavCard {
+  id             String             @id @default(uuid()) @db.Uuid
+  userId         String             @map("user_id") @db.Uuid
+  user           User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  addressBookId  String             @map("address_book_id") @db.Uuid
+  addressBook    CarddavAddressBook @relation(fields: [addressBookId], references: [id], onDelete: Cascade)
+  /// Plain UUID with no foreign key. A hard delete of the person must leave the tombstone
+  /// findable from the change-log entity id. Postgres treats NULLs as distinct in a unique
+  /// index, so any number of opaque cards (NULL) coexist next to the one-card-per-person rule.
+  personId       String?            @unique @map("person_id") @db.Uuid
+  kind           CarddavCardKind
+  href           String
+  uid            String
+  projection     Json?
+  rawVcard       String?            @map("raw_vcard")
+  /// Avatar timestamp the card photo was built from. Null when the card has no photo.
+  photoVersion   DateTime?          @map("photo_version")
+  etag           String
+  revision       BigInt
+  /// Set on a tombstone. The row stays so a sync-collection response can report the removal.
+  deletedAt      DateTime?          @map("deleted_at")
+  createdAt      DateTime           @default(now()) @map("created_at")
+  updatedAt      DateTime           @updatedAt @map("updated_at")
+
+  versions CarddavCardVersion[]
+
+  @@unique([addressBookId, href])
+  @@unique([addressBookId, uid])
+  @@index([addressBookId, revision])
+  @@index([userId])
+  @@map("carddav_cards")
+}
+
+/// Older projections of a card, kept as merge bases for conflict resolution. A device PUT names
+/// the ETag it last saw, and this table answers what that version held.
+model CarddavCardVersion {
+  cardId     String      @map("card_id") @db.Uuid
+  card       CarddavCard @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  etag       String
+  projection Json
+  createdAt  DateTime    @default(now()) @map("created_at")
+
+  @@id([cardId, etag])
+  @@map("carddav_card_versions")
+}
+
+/// One row per connected device. A device and its Better Auth key (`apikey`, config `carddav`)
+/// live and die together.
+model CarddavDevice {
+  id            String    @id @default(uuid()) @db.Uuid
+  userId        String    @map("user_id") @db.Uuid
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  apiKeyId      String    @unique @map("api_key_id") @db.Uuid
+  apiKey        Apikey    @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+  name          String
+  /// Derived from the User-Agent: dataaccessd, AddressBookCore, DAVx5, Thunderbird, other.
+  clientFamily  String?   @map("client_family")
+  vcardVersion  String    @default("3.0") @map("vcard_version")
+  userAgent     String?   @map("user_agent")
+  lastSeenAt    DateTime? @map("last_seen_at")
+  lastSyncedAt  DateTime? @map("last_synced_at")
+  /// Set by the mass-change guard. A paused device cannot write until the user resumes it.
+  pausedAt      DateTime? @map("paused_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@map("carddav_devices")
+}
+
+/// vCard properties that Bondery does not map, kept so a device round trip loses nothing. A
+/// separate table keeps this blob out of the mobile `row_data` payload. The extras belong to the
+/// person, so a full disconnect keeps them and a person delete removes them.
+model PeopleVcardExtras {
+  personId   String   @id @map("person_id") @db.Uuid
+  person     People   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  userId     String   @map("user_id") @db.Uuid
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  properties Json
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@map("people_vcard_extras")
+}

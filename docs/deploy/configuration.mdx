@@ -2,7 +2,7 @@
 title: Configuration
 description: Set the BONDERY_* variables that the stack reads. Copy the generated env example, fill in the core secrets, then review each optional service.
 icon: AdjustmentsHorizontal
-last_updated: 2026-11-23
+last_updated: 2026-11-27
 ---
 
 ## Core secrets
@@ -217,6 +217,19 @@ All listeners use TLS 1.3.
 **External S3** (AWS S3, Cloudflare R2, Backblaze B2, or MinIO) is not supported in this stack. Compose sets `BONDERY_PRIVATE_S3_ENDPOINT` and the storage certificate files, and `.env` cannot override them, because the stack also publishes the storage CA and its client certificate to Traefik. The API image alone can reach other S3 endpoints, but nothing in this stack does.
 
 **Certificate expiry.** The API logs the TLS version and the days left on the gateway certificate at boot, and checks it daily with the Postgres certificate. It warns 90 days before expiry and logs an error 14 days before. See [Object storage TLS certificate](./secrets.mdx#storage_tls_certificate) to renew it.
+
+## CardDAV contact sync
+
+`BONDERY_INFRA_CARDDAV_ENABLED` turns CardDAV on for the whole deployment. The default is `false`.
+
+| Value | Effect |
+|-------|--------|
+| `false` | The API registers no `/dav/*` route and no `/.well-known/carddav` route. Both answer `404`. |
+| `true` | The API serves CardDAV on its own host, `BONDERY_PUBLIC_API_URL`. `/.well-known/carddav` redirects to `/dav/` on that host. |
+
+The API reads the switch once at boot. Restart the API after you change it. Set it to `false` and restart to stop all CardDAV traffic during an incident. Data stays in the database.
+
+Each stack decides for itself. A staging stack and a production stack keep separate data, so enabling one does not enable the other. Devices sign in over HTTPS with a device key and never reach any other API route.
 
 ## Local development parity
 

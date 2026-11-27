@@ -77,6 +77,11 @@ export function registerSessionAuthHooks(fastify: AppFastifyInstance): void {
   fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
 }
 
+/** CardDAV Basic auth with a device key. Accepts no session, cookie, OAuth token, or REST key. */
+export function registerDavAuthHooks(fastify: AppFastifyInstance): void {
+  fastify.addHook("onRequest", fastify.verifyDavAuth);
+}
+
 /** Service-role bearer auth for server-to-server internal routes. */
 export function registerInternalAuthHooks(fastify: AppFastifyInstance): void {
   fastify.addHook("onRequest", fastify.auth([fastify.verifyServiceSecret]));

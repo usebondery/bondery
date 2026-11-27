@@ -403,6 +403,11 @@ export const ModelName = {
   Verification: 'Verification',
   Jwks: 'Jwks',
   Passkey: 'Passkey',
+  CarddavAddressBook: 'CarddavAddressBook',
+  CarddavCard: 'CarddavCard',
+  CarddavCardVersion: 'CarddavCardVersion',
+  CarddavDevice: 'CarddavDevice',
+  PeopleVcardExtras: 'PeopleVcardExtras',
   Group: 'Group',
   PeopleGroup: 'PeopleGroup',
   Interaction: 'Interaction',
@@ -457,7 +462,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "verification" | "jwks" | "passkey" | "group" | "peopleGroup" | "interaction" | "interactionParticipant" | "peopleLinkedin" | "peopleWorkHistory" | "peopleEducationHistory" | "linkedinEnrichQueue" | "oauthClient" | "oauthResource" | "oauthClientResource" | "oauthRefreshToken" | "oauthAccessToken" | "oauthConsent" | "oauthClientAssertion" | "people" | "peoplePhone" | "peopleEmail" | "peopleSocial" | "peopleAddress" | "peopleImportantDate" | "peopleRelationship" | "peopleMergeRecommendation" | "geocodeCache" | "apikey" | "chatSession" | "chatMessage" | "subscription" | "pendingSubscription" | "stripeWebhookEvent" | "reminderDispatchLog" | "syncChangeLog" | "syncMutationReceipt" | "idempotencyKey" | "syncUserSequence" | "reviewerAccess" | "userSettings" | "tag" | "peopleTag"
+    modelProps: "user" | "session" | "account" | "verification" | "jwks" | "passkey" | "carddavAddressBook" | "carddavCard" | "carddavCardVersion" | "carddavDevice" | "peopleVcardExtras" | "group" | "peopleGroup" | "interaction" | "interactionParticipant" | "peopleLinkedin" | "peopleWorkHistory" | "peopleEducationHistory" | "linkedinEnrichQueue" | "oauthClient" | "oauthResource" | "oauthClientResource" | "oauthRefreshToken" | "oauthAccessToken" | "oauthConsent" | "oauthClientAssertion" | "people" | "peoplePhone" | "peopleEmail" | "peopleSocial" | "peopleAddress" | "peopleImportantDate" | "peopleRelationship" | "peopleMergeRecommendation" | "geocodeCache" | "apikey" | "chatSession" | "chatMessage" | "subscription" | "pendingSubscription" | "stripeWebhookEvent" | "reminderDispatchLog" | "syncChangeLog" | "syncMutationReceipt" | "idempotencyKey" | "syncUserSequence" | "reviewerAccess" | "userSettings" | "tag" | "peopleTag"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -902,6 +907,376 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.PasskeyCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.PasskeyCountAggregateOutputType> | number
+        }
+      }
+    }
+    CarddavAddressBook: {
+      payload: Prisma.$CarddavAddressBookPayload<ExtArgs>
+      fields: Prisma.CarddavAddressBookFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CarddavAddressBookFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavAddressBookPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CarddavAddressBookFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavAddressBookPayload>
+        }
+        findFirst: {
+          args: Prisma.CarddavAddressBookFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavAddressBookPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CarddavAddressBookFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavAddressBookPayload>
+        }
+        findMany: {
+          args: Prisma.CarddavAddressBookFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavAddressBookPayload>[]
+        }
+        create: {
+          args: Prisma.CarddavAddressBookCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavAddressBookPayload>
+        }
+        createMany: {
+          args: Prisma.CarddavAddressBookCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CarddavAddressBookCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavAddressBookPayload>[]
+        }
+        delete: {
+          args: Prisma.CarddavAddressBookDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavAddressBookPayload>
+        }
+        update: {
+          args: Prisma.CarddavAddressBookUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavAddressBookPayload>
+        }
+        deleteMany: {
+          args: Prisma.CarddavAddressBookDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CarddavAddressBookUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CarddavAddressBookUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavAddressBookPayload>[]
+        }
+        upsert: {
+          args: Prisma.CarddavAddressBookUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavAddressBookPayload>
+        }
+        aggregate: {
+          args: Prisma.CarddavAddressBookAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCarddavAddressBook>
+        }
+        groupBy: {
+          args: Prisma.CarddavAddressBookGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CarddavAddressBookGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CarddavAddressBookCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CarddavAddressBookCountAggregateOutputType> | number
+        }
+      }
+    }
+    CarddavCard: {
+      payload: Prisma.$CarddavCardPayload<ExtArgs>
+      fields: Prisma.CarddavCardFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CarddavCardFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavCardPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CarddavCardFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavCardPayload>
+        }
+        findFirst: {
+          args: Prisma.CarddavCardFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavCardPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CarddavCardFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavCardPayload>
+        }
+        findMany: {
+          args: Prisma.CarddavCardFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavCardPayload>[]
+        }
+        create: {
+          args: Prisma.CarddavCardCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavCardPayload>
+        }
+        createMany: {
+          args: Prisma.CarddavCardCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CarddavCardCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavCardPayload>[]
+        }
+        delete: {
+          args: Prisma.CarddavCardDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavCardPayload>
+        }
+        update: {
+          args: Prisma.CarddavCardUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavCardPayload>
+        }
+        deleteMany: {
+          args: Prisma.CarddavCardDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CarddavCardUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CarddavCardUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavCardPayload>[]
+        }
+        upsert: {
+          args: Prisma.CarddavCardUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavCardPayload>
+        }
+        aggregate: {
+          args: Prisma.CarddavCardAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCarddavCard>
+        }
+        groupBy: {
+          args: Prisma.CarddavCardGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CarddavCardGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CarddavCardCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CarddavCardCountAggregateOutputType> | number
+        }
+      }
+    }
+    CarddavCardVersion: {
+      payload: Prisma.$CarddavCardVersionPayload<ExtArgs>
+      fields: Prisma.CarddavCardVersionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CarddavCardVersionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavCardVersionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CarddavCardVersionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavCardVersionPayload>
+        }
+        findFirst: {
+          args: Prisma.CarddavCardVersionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavCardVersionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CarddavCardVersionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavCardVersionPayload>
+        }
+        findMany: {
+          args: Prisma.CarddavCardVersionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavCardVersionPayload>[]
+        }
+        create: {
+          args: Prisma.CarddavCardVersionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavCardVersionPayload>
+        }
+        createMany: {
+          args: Prisma.CarddavCardVersionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CarddavCardVersionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavCardVersionPayload>[]
+        }
+        delete: {
+          args: Prisma.CarddavCardVersionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavCardVersionPayload>
+        }
+        update: {
+          args: Prisma.CarddavCardVersionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavCardVersionPayload>
+        }
+        deleteMany: {
+          args: Prisma.CarddavCardVersionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CarddavCardVersionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CarddavCardVersionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavCardVersionPayload>[]
+        }
+        upsert: {
+          args: Prisma.CarddavCardVersionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavCardVersionPayload>
+        }
+        aggregate: {
+          args: Prisma.CarddavCardVersionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCarddavCardVersion>
+        }
+        groupBy: {
+          args: Prisma.CarddavCardVersionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CarddavCardVersionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CarddavCardVersionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CarddavCardVersionCountAggregateOutputType> | number
+        }
+      }
+    }
+    CarddavDevice: {
+      payload: Prisma.$CarddavDevicePayload<ExtArgs>
+      fields: Prisma.CarddavDeviceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CarddavDeviceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavDevicePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CarddavDeviceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavDevicePayload>
+        }
+        findFirst: {
+          args: Prisma.CarddavDeviceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavDevicePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CarddavDeviceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavDevicePayload>
+        }
+        findMany: {
+          args: Prisma.CarddavDeviceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavDevicePayload>[]
+        }
+        create: {
+          args: Prisma.CarddavDeviceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavDevicePayload>
+        }
+        createMany: {
+          args: Prisma.CarddavDeviceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CarddavDeviceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavDevicePayload>[]
+        }
+        delete: {
+          args: Prisma.CarddavDeviceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavDevicePayload>
+        }
+        update: {
+          args: Prisma.CarddavDeviceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavDevicePayload>
+        }
+        deleteMany: {
+          args: Prisma.CarddavDeviceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CarddavDeviceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CarddavDeviceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavDevicePayload>[]
+        }
+        upsert: {
+          args: Prisma.CarddavDeviceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarddavDevicePayload>
+        }
+        aggregate: {
+          args: Prisma.CarddavDeviceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCarddavDevice>
+        }
+        groupBy: {
+          args: Prisma.CarddavDeviceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CarddavDeviceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CarddavDeviceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CarddavDeviceCountAggregateOutputType> | number
+        }
+      }
+    }
+    PeopleVcardExtras: {
+      payload: Prisma.$PeopleVcardExtrasPayload<ExtArgs>
+      fields: Prisma.PeopleVcardExtrasFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PeopleVcardExtrasFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PeopleVcardExtrasPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PeopleVcardExtrasFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PeopleVcardExtrasPayload>
+        }
+        findFirst: {
+          args: Prisma.PeopleVcardExtrasFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PeopleVcardExtrasPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PeopleVcardExtrasFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PeopleVcardExtrasPayload>
+        }
+        findMany: {
+          args: Prisma.PeopleVcardExtrasFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PeopleVcardExtrasPayload>[]
+        }
+        create: {
+          args: Prisma.PeopleVcardExtrasCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PeopleVcardExtrasPayload>
+        }
+        createMany: {
+          args: Prisma.PeopleVcardExtrasCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PeopleVcardExtrasCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PeopleVcardExtrasPayload>[]
+        }
+        delete: {
+          args: Prisma.PeopleVcardExtrasDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PeopleVcardExtrasPayload>
+        }
+        update: {
+          args: Prisma.PeopleVcardExtrasUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PeopleVcardExtrasPayload>
+        }
+        deleteMany: {
+          args: Prisma.PeopleVcardExtrasDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PeopleVcardExtrasUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PeopleVcardExtrasUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PeopleVcardExtrasPayload>[]
+        }
+        upsert: {
+          args: Prisma.PeopleVcardExtrasUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PeopleVcardExtrasPayload>
+        }
+        aggregate: {
+          args: Prisma.PeopleVcardExtrasAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePeopleVcardExtras>
+        }
+        groupBy: {
+          args: Prisma.PeopleVcardExtrasGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PeopleVcardExtrasGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PeopleVcardExtrasCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PeopleVcardExtrasCountAggregateOutputType> | number
         }
       }
     }
@@ -3924,6 +4299,80 @@ export const PasskeyScalarFieldEnum = {
 export type PasskeyScalarFieldEnum = (typeof PasskeyScalarFieldEnum)[keyof typeof PasskeyScalarFieldEnum]
 
 
+export const CarddavAddressBookScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  generation: 'generation',
+  revision: 'revision',
+  reconciledThrough: 'reconciledThrough',
+  tombstoneFloor: 'tombstoneFloor',
+  projectionVersion: 'projectionVersion',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CarddavAddressBookScalarFieldEnum = (typeof CarddavAddressBookScalarFieldEnum)[keyof typeof CarddavAddressBookScalarFieldEnum]
+
+
+export const CarddavCardScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  addressBookId: 'addressBookId',
+  personId: 'personId',
+  kind: 'kind',
+  href: 'href',
+  uid: 'uid',
+  projection: 'projection',
+  rawVcard: 'rawVcard',
+  photoVersion: 'photoVersion',
+  etag: 'etag',
+  revision: 'revision',
+  deletedAt: 'deletedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CarddavCardScalarFieldEnum = (typeof CarddavCardScalarFieldEnum)[keyof typeof CarddavCardScalarFieldEnum]
+
+
+export const CarddavCardVersionScalarFieldEnum = {
+  cardId: 'cardId',
+  etag: 'etag',
+  projection: 'projection',
+  createdAt: 'createdAt'
+} as const
+
+export type CarddavCardVersionScalarFieldEnum = (typeof CarddavCardVersionScalarFieldEnum)[keyof typeof CarddavCardVersionScalarFieldEnum]
+
+
+export const CarddavDeviceScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  apiKeyId: 'apiKeyId',
+  name: 'name',
+  clientFamily: 'clientFamily',
+  vcardVersion: 'vcardVersion',
+  userAgent: 'userAgent',
+  lastSeenAt: 'lastSeenAt',
+  lastSyncedAt: 'lastSyncedAt',
+  pausedAt: 'pausedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CarddavDeviceScalarFieldEnum = (typeof CarddavDeviceScalarFieldEnum)[keyof typeof CarddavDeviceScalarFieldEnum]
+
+
+export const PeopleVcardExtrasScalarFieldEnum = {
+  personId: 'personId',
+  userId: 'userId',
+  properties: 'properties',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PeopleVcardExtrasScalarFieldEnum = (typeof PeopleVcardExtrasScalarFieldEnum)[keyof typeof PeopleVcardExtrasScalarFieldEnum]
+
+
 export const GroupScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -4682,6 +5131,34 @@ export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
 
 
 /**
+ * Reference to a field of type 'BigInt'
+ */
+export type BigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt'>
+    
+
+
+/**
+ * Reference to a field of type 'BigInt[]'
+ */
+export type ListBigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt[]'>
+    
+
+
+/**
+ * Reference to a field of type 'CarddavCardKind'
+ */
+export type EnumCarddavCardKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CarddavCardKind'>
+    
+
+
+/**
+ * Reference to a field of type 'CarddavCardKind[]'
+ */
+export type ListEnumCarddavCardKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CarddavCardKind[]'>
+    
+
+
+/**
  * Reference to a field of type 'Json'
  */
 export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
@@ -4706,20 +5183,6 @@ export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, '
  * Reference to a field of type 'Float[]'
  */
 export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
-    
-
-
-/**
- * Reference to a field of type 'BigInt'
- */
-export type BigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt'>
-    
-
-
-/**
- * Reference to a field of type 'BigInt[]'
- */
-export type ListBigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt[]'>
     
 
 
@@ -4907,6 +5370,11 @@ export type GlobalOmitConfig = {
   verification?: Prisma.VerificationOmit
   jwks?: Prisma.JwksOmit
   passkey?: Prisma.PasskeyOmit
+  carddavAddressBook?: Prisma.CarddavAddressBookOmit
+  carddavCard?: Prisma.CarddavCardOmit
+  carddavCardVersion?: Prisma.CarddavCardVersionOmit
+  carddavDevice?: Prisma.CarddavDeviceOmit
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasOmit
   group?: Prisma.GroupOmit
   peopleGroup?: Prisma.PeopleGroupOmit
   interaction?: Prisma.InteractionOmit

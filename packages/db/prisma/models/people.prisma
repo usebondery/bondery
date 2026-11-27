@@ -39,6 +39,7 @@ model People {
   mergeRecommendationsRight PeopleMergeRecommendation[] @relation("RightPerson")
   enrichQueue          LinkedinEnrichQueue[]
   interactionsLast     Interaction[] @relation("LastInteractionActivity")
+  vcardExtras          PeopleVcardExtras?
 
   @@map("people")
   @@index([userId])

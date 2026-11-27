@@ -62,6 +62,17 @@ const CSP_REPORT_TIER = {
   timeWindow: "1 minute",
 } as const;
 
+/**
+ * CardDAV traffic, keyed per device. A DAV request is neither an API key nor a session user,
+ * so the global key would fall back to the IP address, which many phones share behind carrier
+ * NAT. The DAV shell authenticates in `onRequest`, so `davDevice` exists when this runs.
+ */
+const DAV_TIER = {
+  keyGenerator: (request: FastifyRequest) => `dav:${request.davDevice?.id ?? request.ip}`,
+  max: 600,
+  timeWindow: "5 minutes",
+} as const;
+
 /** MCP JSON-RPC — keyed per user/IP and Mcp-Method/Mcp-Name (no body parse). */
 const MCP_TIER = {
   keyGenerator: (request: FastifyRequest) => {
@@ -87,6 +98,7 @@ const MCP_TIER = {
 const POLICY_NAME_BY_TIER = new WeakMap<object, string>([
   [AI_TIER, "ai"],
   [CSP_REPORT_TIER, "csp_report"],
+  [DAV_TIER, "dav"],
   [ENRICH_TIER, "enrich"],
   [EXPORT_TIER, "export"],
   [GEOCODE_TIER, "geocode"],
@@ -278,6 +290,7 @@ export {
   AI_TIER,
   buildRateLimitErrorResponse,
   CSP_REPORT_TIER,
+  DAV_TIER,
   ENRICH_TIER,
   EXPORT_TIER,
   GEOCODE_TIER,

@@ -74,6 +74,25 @@ export const PASSKEY_LIMITS = {
 
 export const API_KEY_PREFIX = "bondery_key_" as const;
 
+/** Prefix of a CardDAV device password. REST rejects it and the DAV shell requires it. */
+export const CARDDAV_KEY_PREFIX = "bondery_dav_" as const;
+
+/** CardDAV sync limits. Each one bounds memory, request size, or per-user fan-out. */
+export const CARDDAV_LIMITS = {
+  /** Longest device name, also the Better Auth key name limit. */
+  deviceNameMaxLength: 100,
+  /** Connected devices per user. Each device owns one key. */
+  maxDevicesPerUser: 5,
+  /** Opaque (group) cards per address book. */
+  maxOpaqueCards: 200,
+  /** Hrefs one `addressbook-multiget` may name. */
+  multigetMaxHrefs: 1000,
+  /** Largest vCard the server stores for a card it does not map (group cards). */
+  opaqueCardMaxBytes: 262_144,
+  /** Persons the reconciler folds into the address book per transaction. */
+  reconcileChunkSize: 500,
+} as const;
+
 /** Secret chars shown in list UI after the prefix (`bondery_key_abc…`). */
 export const API_KEY_START_DISPLAY_SECRET_CHARS = 3;
 

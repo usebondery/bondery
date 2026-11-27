@@ -249,6 +249,10 @@ export type UserWhereInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyListRelationFilter
   syncUserSequence?: Prisma.XOR<Prisma.SyncUserSequenceNullableScalarRelationFilter, Prisma.SyncUserSequenceWhereInput> | null
   reviewerAccess?: Prisma.XOR<Prisma.ReviewerAccessNullableScalarRelationFilter, Prisma.ReviewerAccessWhereInput> | null
+  carddavAddressBook?: Prisma.XOR<Prisma.CarddavAddressBookNullableScalarRelationFilter, Prisma.CarddavAddressBookWhereInput> | null
+  carddavCards?: Prisma.CarddavCardListRelationFilter
+  carddavDevices?: Prisma.CarddavDeviceListRelationFilter
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasListRelationFilter
   oauthClients?: Prisma.OauthClientListRelationFilter
   oauthRefreshTokens?: Prisma.OauthRefreshTokenListRelationFilter
   oauthAccessTokens?: Prisma.OauthAccessTokenListRelationFilter
@@ -286,6 +290,10 @@ export type UserOrderByWithRelationInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyOrderByRelationAggregateInput
   syncUserSequence?: Prisma.SyncUserSequenceOrderByWithRelationInput
   reviewerAccess?: Prisma.ReviewerAccessOrderByWithRelationInput
+  carddavAddressBook?: Prisma.CarddavAddressBookOrderByWithRelationInput
+  carddavCards?: Prisma.CarddavCardOrderByRelationAggregateInput
+  carddavDevices?: Prisma.CarddavDeviceOrderByRelationAggregateInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasOrderByRelationAggregateInput
   oauthClients?: Prisma.OauthClientOrderByRelationAggregateInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenOrderByRelationAggregateInput
   oauthAccessTokens?: Prisma.OauthAccessTokenOrderByRelationAggregateInput
@@ -326,6 +334,10 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   idempotencyKeys?: Prisma.IdempotencyKeyListRelationFilter
   syncUserSequence?: Prisma.XOR<Prisma.SyncUserSequenceNullableScalarRelationFilter, Prisma.SyncUserSequenceWhereInput> | null
   reviewerAccess?: Prisma.XOR<Prisma.ReviewerAccessNullableScalarRelationFilter, Prisma.ReviewerAccessWhereInput> | null
+  carddavAddressBook?: Prisma.XOR<Prisma.CarddavAddressBookNullableScalarRelationFilter, Prisma.CarddavAddressBookWhereInput> | null
+  carddavCards?: Prisma.CarddavCardListRelationFilter
+  carddavDevices?: Prisma.CarddavDeviceListRelationFilter
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasListRelationFilter
   oauthClients?: Prisma.OauthClientListRelationFilter
   oauthRefreshTokens?: Prisma.OauthRefreshTokenListRelationFilter
   oauthAccessTokens?: Prisma.OauthAccessTokenListRelationFilter
@@ -397,6 +409,10 @@ export type UserCreateInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -434,6 +450,10 @@ export type UserUncheckedCreateInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardUncheckedCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -471,6 +491,10 @@ export type UserUpdateInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -508,6 +532,10 @@ export type UserUncheckedUpdateInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUncheckedUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -672,6 +700,62 @@ export type UserUpdateOneRequiredWithoutPasskeysNestedInput = {
   upsert?: Prisma.UserUpsertWithoutPasskeysInput
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPasskeysInput, Prisma.UserUpdateWithoutPasskeysInput>, Prisma.UserUncheckedUpdateWithoutPasskeysInput>
+}
+
+export type UserCreateNestedOneWithoutCarddavAddressBookInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCarddavAddressBookInput, Prisma.UserUncheckedCreateWithoutCarddavAddressBookInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCarddavAddressBookInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutCarddavAddressBookNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCarddavAddressBookInput, Prisma.UserUncheckedCreateWithoutCarddavAddressBookInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCarddavAddressBookInput
+  upsert?: Prisma.UserUpsertWithoutCarddavAddressBookInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCarddavAddressBookInput, Prisma.UserUpdateWithoutCarddavAddressBookInput>, Prisma.UserUncheckedUpdateWithoutCarddavAddressBookInput>
+}
+
+export type UserCreateNestedOneWithoutCarddavCardsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCarddavCardsInput, Prisma.UserUncheckedCreateWithoutCarddavCardsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCarddavCardsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutCarddavCardsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCarddavCardsInput, Prisma.UserUncheckedCreateWithoutCarddavCardsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCarddavCardsInput
+  upsert?: Prisma.UserUpsertWithoutCarddavCardsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCarddavCardsInput, Prisma.UserUpdateWithoutCarddavCardsInput>, Prisma.UserUncheckedUpdateWithoutCarddavCardsInput>
+}
+
+export type UserCreateNestedOneWithoutCarddavDevicesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCarddavDevicesInput, Prisma.UserUncheckedCreateWithoutCarddavDevicesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCarddavDevicesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutCarddavDevicesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCarddavDevicesInput, Prisma.UserUncheckedCreateWithoutCarddavDevicesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCarddavDevicesInput
+  upsert?: Prisma.UserUpsertWithoutCarddavDevicesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCarddavDevicesInput, Prisma.UserUpdateWithoutCarddavDevicesInput>, Prisma.UserUncheckedUpdateWithoutCarddavDevicesInput>
+}
+
+export type UserCreateNestedOneWithoutPeopleVcardExtrasInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPeopleVcardExtrasInput, Prisma.UserUncheckedCreateWithoutPeopleVcardExtrasInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPeopleVcardExtrasInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutPeopleVcardExtrasNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPeopleVcardExtrasInput, Prisma.UserUncheckedCreateWithoutPeopleVcardExtrasInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPeopleVcardExtrasInput
+  upsert?: Prisma.UserUpsertWithoutPeopleVcardExtrasInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPeopleVcardExtrasInput, Prisma.UserUpdateWithoutPeopleVcardExtrasInput>, Prisma.UserUncheckedUpdateWithoutPeopleVcardExtrasInput>
 }
 
 export type UserCreateNestedOneWithoutGroupsInput = {
@@ -990,6 +1074,10 @@ export type UserCreateWithoutSessionsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -1026,6 +1114,10 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardUncheckedCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1078,6 +1170,10 @@ export type UserUpdateWithoutSessionsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -1114,6 +1210,10 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUncheckedUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1150,6 +1250,10 @@ export type UserCreateWithoutAccountsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -1186,6 +1290,10 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardUncheckedCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1238,6 +1346,10 @@ export type UserUpdateWithoutAccountsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -1274,6 +1386,10 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUncheckedUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1310,6 +1426,10 @@ export type UserCreateWithoutPasskeysInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -1346,6 +1466,10 @@ export type UserUncheckedCreateWithoutPasskeysInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardUncheckedCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1398,6 +1522,10 @@ export type UserUpdateWithoutPasskeysInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -1434,6 +1562,714 @@ export type UserUncheckedUpdateWithoutPasskeysInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUncheckedUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateManyWithoutUserNestedInput
+  oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
+  oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
+  oauthConsents?: Prisma.OauthConsentUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutCarddavAddressBookInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  role?: string | null
+  banned?: boolean | null
+  banReason?: string | null
+  banExpires?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  passkeys?: Prisma.PasskeyCreateNestedManyWithoutUserInput
+  userSettings?: Prisma.UserSettingsCreateNestedOneWithoutUserInput
+  people?: Prisma.PeopleCreateNestedManyWithoutUserInput
+  groups?: Prisma.GroupCreateNestedManyWithoutUserInput
+  tags?: Prisma.TagCreateNestedManyWithoutUserInput
+  interactions?: Prisma.InteractionCreateNestedManyWithoutUserInput
+  apikeys?: Prisma.ApikeyCreateNestedManyWithoutUserInput
+  chatSessions?: Prisma.ChatSessionCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.SubscriptionCreateNestedManyWithoutUserInput
+  linkedinEnrichQueue?: Prisma.LinkedinEnrichQueueCreateNestedManyWithoutUserInput
+  peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationCreateNestedManyWithoutUserInput
+  reminderDispatchLogs?: Prisma.ReminderDispatchLogCreateNestedManyWithoutUserInput
+  syncChangeLogs?: Prisma.SyncChangeLogCreateNestedManyWithoutUserInput
+  syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
+  syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasCreateNestedManyWithoutUserInput
+  oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
+  oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
+  oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
+  oauthConsents?: Prisma.OauthConsentCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutCarddavAddressBookInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  role?: string | null
+  banned?: boolean | null
+  banReason?: string | null
+  banExpires?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  passkeys?: Prisma.PasskeyUncheckedCreateNestedManyWithoutUserInput
+  userSettings?: Prisma.UserSettingsUncheckedCreateNestedOneWithoutUserInput
+  people?: Prisma.PeopleUncheckedCreateNestedManyWithoutUserInput
+  groups?: Prisma.GroupUncheckedCreateNestedManyWithoutUserInput
+  tags?: Prisma.TagUncheckedCreateNestedManyWithoutUserInput
+  interactions?: Prisma.InteractionUncheckedCreateNestedManyWithoutUserInput
+  apikeys?: Prisma.ApikeyUncheckedCreateNestedManyWithoutUserInput
+  chatSessions?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutUserInput
+  linkedinEnrichQueue?: Prisma.LinkedinEnrichQueueUncheckedCreateNestedManyWithoutUserInput
+  peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationUncheckedCreateNestedManyWithoutUserInput
+  reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedCreateNestedManyWithoutUserInput
+  syncChangeLogs?: Prisma.SyncChangeLogUncheckedCreateNestedManyWithoutUserInput
+  syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
+  syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardUncheckedCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedManyWithoutUserInput
+  oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
+  oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
+  oauthConsents?: Prisma.OauthConsentUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutCarddavAddressBookInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutCarddavAddressBookInput, Prisma.UserUncheckedCreateWithoutCarddavAddressBookInput>
+}
+
+export type UserUpsertWithoutCarddavAddressBookInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCarddavAddressBookInput, Prisma.UserUncheckedUpdateWithoutCarddavAddressBookInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCarddavAddressBookInput, Prisma.UserUncheckedCreateWithoutCarddavAddressBookInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutCarddavAddressBookInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCarddavAddressBookInput, Prisma.UserUncheckedUpdateWithoutCarddavAddressBookInput>
+}
+
+export type UserUpdateWithoutCarddavAddressBookInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banned?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  banReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  passkeys?: Prisma.PasskeyUpdateManyWithoutUserNestedInput
+  userSettings?: Prisma.UserSettingsUpdateOneWithoutUserNestedInput
+  people?: Prisma.PeopleUpdateManyWithoutUserNestedInput
+  groups?: Prisma.GroupUpdateManyWithoutUserNestedInput
+  tags?: Prisma.TagUpdateManyWithoutUserNestedInput
+  interactions?: Prisma.InteractionUpdateManyWithoutUserNestedInput
+  apikeys?: Prisma.ApikeyUpdateManyWithoutUserNestedInput
+  chatSessions?: Prisma.ChatSessionUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.SubscriptionUpdateManyWithoutUserNestedInput
+  linkedinEnrichQueue?: Prisma.LinkedinEnrichQueueUpdateManyWithoutUserNestedInput
+  peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationUpdateManyWithoutUserNestedInput
+  reminderDispatchLogs?: Prisma.ReminderDispatchLogUpdateManyWithoutUserNestedInput
+  syncChangeLogs?: Prisma.SyncChangeLogUpdateManyWithoutUserNestedInput
+  syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
+  syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUpdateManyWithoutUserNestedInput
+  oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
+  oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
+  oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
+  oauthConsents?: Prisma.OauthConsentUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCarddavAddressBookInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banned?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  banReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  passkeys?: Prisma.PasskeyUncheckedUpdateManyWithoutUserNestedInput
+  userSettings?: Prisma.UserSettingsUncheckedUpdateOneWithoutUserNestedInput
+  people?: Prisma.PeopleUncheckedUpdateManyWithoutUserNestedInput
+  groups?: Prisma.GroupUncheckedUpdateManyWithoutUserNestedInput
+  tags?: Prisma.TagUncheckedUpdateManyWithoutUserNestedInput
+  interactions?: Prisma.InteractionUncheckedUpdateManyWithoutUserNestedInput
+  apikeys?: Prisma.ApikeyUncheckedUpdateManyWithoutUserNestedInput
+  chatSessions?: Prisma.ChatSessionUncheckedUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.SubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  linkedinEnrichQueue?: Prisma.LinkedinEnrichQueueUncheckedUpdateManyWithoutUserNestedInput
+  peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationUncheckedUpdateManyWithoutUserNestedInput
+  reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedUpdateManyWithoutUserNestedInput
+  syncChangeLogs?: Prisma.SyncChangeLogUncheckedUpdateManyWithoutUserNestedInput
+  syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
+  syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUncheckedUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateManyWithoutUserNestedInput
+  oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
+  oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
+  oauthConsents?: Prisma.OauthConsentUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutCarddavCardsInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  role?: string | null
+  banned?: boolean | null
+  banReason?: string | null
+  banExpires?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  passkeys?: Prisma.PasskeyCreateNestedManyWithoutUserInput
+  userSettings?: Prisma.UserSettingsCreateNestedOneWithoutUserInput
+  people?: Prisma.PeopleCreateNestedManyWithoutUserInput
+  groups?: Prisma.GroupCreateNestedManyWithoutUserInput
+  tags?: Prisma.TagCreateNestedManyWithoutUserInput
+  interactions?: Prisma.InteractionCreateNestedManyWithoutUserInput
+  apikeys?: Prisma.ApikeyCreateNestedManyWithoutUserInput
+  chatSessions?: Prisma.ChatSessionCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.SubscriptionCreateNestedManyWithoutUserInput
+  linkedinEnrichQueue?: Prisma.LinkedinEnrichQueueCreateNestedManyWithoutUserInput
+  peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationCreateNestedManyWithoutUserInput
+  reminderDispatchLogs?: Prisma.ReminderDispatchLogCreateNestedManyWithoutUserInput
+  syncChangeLogs?: Prisma.SyncChangeLogCreateNestedManyWithoutUserInput
+  syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
+  syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookCreateNestedOneWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasCreateNestedManyWithoutUserInput
+  oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
+  oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
+  oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
+  oauthConsents?: Prisma.OauthConsentCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutCarddavCardsInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  role?: string | null
+  banned?: boolean | null
+  banReason?: string | null
+  banExpires?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  passkeys?: Prisma.PasskeyUncheckedCreateNestedManyWithoutUserInput
+  userSettings?: Prisma.UserSettingsUncheckedCreateNestedOneWithoutUserInput
+  people?: Prisma.PeopleUncheckedCreateNestedManyWithoutUserInput
+  groups?: Prisma.GroupUncheckedCreateNestedManyWithoutUserInput
+  tags?: Prisma.TagUncheckedCreateNestedManyWithoutUserInput
+  interactions?: Prisma.InteractionUncheckedCreateNestedManyWithoutUserInput
+  apikeys?: Prisma.ApikeyUncheckedCreateNestedManyWithoutUserInput
+  chatSessions?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutUserInput
+  linkedinEnrichQueue?: Prisma.LinkedinEnrichQueueUncheckedCreateNestedManyWithoutUserInput
+  peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationUncheckedCreateNestedManyWithoutUserInput
+  reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedCreateNestedManyWithoutUserInput
+  syncChangeLogs?: Prisma.SyncChangeLogUncheckedCreateNestedManyWithoutUserInput
+  syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
+  syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedCreateNestedOneWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedManyWithoutUserInput
+  oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
+  oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
+  oauthConsents?: Prisma.OauthConsentUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutCarddavCardsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutCarddavCardsInput, Prisma.UserUncheckedCreateWithoutCarddavCardsInput>
+}
+
+export type UserUpsertWithoutCarddavCardsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCarddavCardsInput, Prisma.UserUncheckedUpdateWithoutCarddavCardsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCarddavCardsInput, Prisma.UserUncheckedCreateWithoutCarddavCardsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutCarddavCardsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCarddavCardsInput, Prisma.UserUncheckedUpdateWithoutCarddavCardsInput>
+}
+
+export type UserUpdateWithoutCarddavCardsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banned?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  banReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  passkeys?: Prisma.PasskeyUpdateManyWithoutUserNestedInput
+  userSettings?: Prisma.UserSettingsUpdateOneWithoutUserNestedInput
+  people?: Prisma.PeopleUpdateManyWithoutUserNestedInput
+  groups?: Prisma.GroupUpdateManyWithoutUserNestedInput
+  tags?: Prisma.TagUpdateManyWithoutUserNestedInput
+  interactions?: Prisma.InteractionUpdateManyWithoutUserNestedInput
+  apikeys?: Prisma.ApikeyUpdateManyWithoutUserNestedInput
+  chatSessions?: Prisma.ChatSessionUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.SubscriptionUpdateManyWithoutUserNestedInput
+  linkedinEnrichQueue?: Prisma.LinkedinEnrichQueueUpdateManyWithoutUserNestedInput
+  peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationUpdateManyWithoutUserNestedInput
+  reminderDispatchLogs?: Prisma.ReminderDispatchLogUpdateManyWithoutUserNestedInput
+  syncChangeLogs?: Prisma.SyncChangeLogUpdateManyWithoutUserNestedInput
+  syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
+  syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUpdateOneWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUpdateManyWithoutUserNestedInput
+  oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
+  oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
+  oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
+  oauthConsents?: Prisma.OauthConsentUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCarddavCardsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banned?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  banReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  passkeys?: Prisma.PasskeyUncheckedUpdateManyWithoutUserNestedInput
+  userSettings?: Prisma.UserSettingsUncheckedUpdateOneWithoutUserNestedInput
+  people?: Prisma.PeopleUncheckedUpdateManyWithoutUserNestedInput
+  groups?: Prisma.GroupUncheckedUpdateManyWithoutUserNestedInput
+  tags?: Prisma.TagUncheckedUpdateManyWithoutUserNestedInput
+  interactions?: Prisma.InteractionUncheckedUpdateManyWithoutUserNestedInput
+  apikeys?: Prisma.ApikeyUncheckedUpdateManyWithoutUserNestedInput
+  chatSessions?: Prisma.ChatSessionUncheckedUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.SubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  linkedinEnrichQueue?: Prisma.LinkedinEnrichQueueUncheckedUpdateManyWithoutUserNestedInput
+  peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationUncheckedUpdateManyWithoutUserNestedInput
+  reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedUpdateManyWithoutUserNestedInput
+  syncChangeLogs?: Prisma.SyncChangeLogUncheckedUpdateManyWithoutUserNestedInput
+  syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
+  syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedUpdateOneWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateManyWithoutUserNestedInput
+  oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
+  oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
+  oauthConsents?: Prisma.OauthConsentUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutCarddavDevicesInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  role?: string | null
+  banned?: boolean | null
+  banReason?: string | null
+  banExpires?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  passkeys?: Prisma.PasskeyCreateNestedManyWithoutUserInput
+  userSettings?: Prisma.UserSettingsCreateNestedOneWithoutUserInput
+  people?: Prisma.PeopleCreateNestedManyWithoutUserInput
+  groups?: Prisma.GroupCreateNestedManyWithoutUserInput
+  tags?: Prisma.TagCreateNestedManyWithoutUserInput
+  interactions?: Prisma.InteractionCreateNestedManyWithoutUserInput
+  apikeys?: Prisma.ApikeyCreateNestedManyWithoutUserInput
+  chatSessions?: Prisma.ChatSessionCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.SubscriptionCreateNestedManyWithoutUserInput
+  linkedinEnrichQueue?: Prisma.LinkedinEnrichQueueCreateNestedManyWithoutUserInput
+  peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationCreateNestedManyWithoutUserInput
+  reminderDispatchLogs?: Prisma.ReminderDispatchLogCreateNestedManyWithoutUserInput
+  syncChangeLogs?: Prisma.SyncChangeLogCreateNestedManyWithoutUserInput
+  syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
+  syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasCreateNestedManyWithoutUserInput
+  oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
+  oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
+  oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
+  oauthConsents?: Prisma.OauthConsentCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutCarddavDevicesInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  role?: string | null
+  banned?: boolean | null
+  banReason?: string | null
+  banExpires?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  passkeys?: Prisma.PasskeyUncheckedCreateNestedManyWithoutUserInput
+  userSettings?: Prisma.UserSettingsUncheckedCreateNestedOneWithoutUserInput
+  people?: Prisma.PeopleUncheckedCreateNestedManyWithoutUserInput
+  groups?: Prisma.GroupUncheckedCreateNestedManyWithoutUserInput
+  tags?: Prisma.TagUncheckedCreateNestedManyWithoutUserInput
+  interactions?: Prisma.InteractionUncheckedCreateNestedManyWithoutUserInput
+  apikeys?: Prisma.ApikeyUncheckedCreateNestedManyWithoutUserInput
+  chatSessions?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutUserInput
+  linkedinEnrichQueue?: Prisma.LinkedinEnrichQueueUncheckedCreateNestedManyWithoutUserInput
+  peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationUncheckedCreateNestedManyWithoutUserInput
+  reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedCreateNestedManyWithoutUserInput
+  syncChangeLogs?: Prisma.SyncChangeLogUncheckedCreateNestedManyWithoutUserInput
+  syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
+  syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardUncheckedCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedManyWithoutUserInput
+  oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
+  oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
+  oauthConsents?: Prisma.OauthConsentUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutCarddavDevicesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutCarddavDevicesInput, Prisma.UserUncheckedCreateWithoutCarddavDevicesInput>
+}
+
+export type UserUpsertWithoutCarddavDevicesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCarddavDevicesInput, Prisma.UserUncheckedUpdateWithoutCarddavDevicesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCarddavDevicesInput, Prisma.UserUncheckedCreateWithoutCarddavDevicesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutCarddavDevicesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCarddavDevicesInput, Prisma.UserUncheckedUpdateWithoutCarddavDevicesInput>
+}
+
+export type UserUpdateWithoutCarddavDevicesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banned?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  banReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  passkeys?: Prisma.PasskeyUpdateManyWithoutUserNestedInput
+  userSettings?: Prisma.UserSettingsUpdateOneWithoutUserNestedInput
+  people?: Prisma.PeopleUpdateManyWithoutUserNestedInput
+  groups?: Prisma.GroupUpdateManyWithoutUserNestedInput
+  tags?: Prisma.TagUpdateManyWithoutUserNestedInput
+  interactions?: Prisma.InteractionUpdateManyWithoutUserNestedInput
+  apikeys?: Prisma.ApikeyUpdateManyWithoutUserNestedInput
+  chatSessions?: Prisma.ChatSessionUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.SubscriptionUpdateManyWithoutUserNestedInput
+  linkedinEnrichQueue?: Prisma.LinkedinEnrichQueueUpdateManyWithoutUserNestedInput
+  peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationUpdateManyWithoutUserNestedInput
+  reminderDispatchLogs?: Prisma.ReminderDispatchLogUpdateManyWithoutUserNestedInput
+  syncChangeLogs?: Prisma.SyncChangeLogUpdateManyWithoutUserNestedInput
+  syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
+  syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUpdateManyWithoutUserNestedInput
+  oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
+  oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
+  oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
+  oauthConsents?: Prisma.OauthConsentUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCarddavDevicesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banned?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  banReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  passkeys?: Prisma.PasskeyUncheckedUpdateManyWithoutUserNestedInput
+  userSettings?: Prisma.UserSettingsUncheckedUpdateOneWithoutUserNestedInput
+  people?: Prisma.PeopleUncheckedUpdateManyWithoutUserNestedInput
+  groups?: Prisma.GroupUncheckedUpdateManyWithoutUserNestedInput
+  tags?: Prisma.TagUncheckedUpdateManyWithoutUserNestedInput
+  interactions?: Prisma.InteractionUncheckedUpdateManyWithoutUserNestedInput
+  apikeys?: Prisma.ApikeyUncheckedUpdateManyWithoutUserNestedInput
+  chatSessions?: Prisma.ChatSessionUncheckedUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.SubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  linkedinEnrichQueue?: Prisma.LinkedinEnrichQueueUncheckedUpdateManyWithoutUserNestedInput
+  peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationUncheckedUpdateManyWithoutUserNestedInput
+  reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedUpdateManyWithoutUserNestedInput
+  syncChangeLogs?: Prisma.SyncChangeLogUncheckedUpdateManyWithoutUserNestedInput
+  syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
+  syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUncheckedUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateManyWithoutUserNestedInput
+  oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
+  oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
+  oauthConsents?: Prisma.OauthConsentUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutPeopleVcardExtrasInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  role?: string | null
+  banned?: boolean | null
+  banReason?: string | null
+  banExpires?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  passkeys?: Prisma.PasskeyCreateNestedManyWithoutUserInput
+  userSettings?: Prisma.UserSettingsCreateNestedOneWithoutUserInput
+  people?: Prisma.PeopleCreateNestedManyWithoutUserInput
+  groups?: Prisma.GroupCreateNestedManyWithoutUserInput
+  tags?: Prisma.TagCreateNestedManyWithoutUserInput
+  interactions?: Prisma.InteractionCreateNestedManyWithoutUserInput
+  apikeys?: Prisma.ApikeyCreateNestedManyWithoutUserInput
+  chatSessions?: Prisma.ChatSessionCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.SubscriptionCreateNestedManyWithoutUserInput
+  linkedinEnrichQueue?: Prisma.LinkedinEnrichQueueCreateNestedManyWithoutUserInput
+  peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationCreateNestedManyWithoutUserInput
+  reminderDispatchLogs?: Prisma.ReminderDispatchLogCreateNestedManyWithoutUserInput
+  syncChangeLogs?: Prisma.SyncChangeLogCreateNestedManyWithoutUserInput
+  syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
+  syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceCreateNestedManyWithoutUserInput
+  oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
+  oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
+  oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
+  oauthConsents?: Prisma.OauthConsentCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutPeopleVcardExtrasInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  role?: string | null
+  banned?: boolean | null
+  banReason?: string | null
+  banExpires?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  passkeys?: Prisma.PasskeyUncheckedCreateNestedManyWithoutUserInput
+  userSettings?: Prisma.UserSettingsUncheckedCreateNestedOneWithoutUserInput
+  people?: Prisma.PeopleUncheckedCreateNestedManyWithoutUserInput
+  groups?: Prisma.GroupUncheckedCreateNestedManyWithoutUserInput
+  tags?: Prisma.TagUncheckedCreateNestedManyWithoutUserInput
+  interactions?: Prisma.InteractionUncheckedCreateNestedManyWithoutUserInput
+  apikeys?: Prisma.ApikeyUncheckedCreateNestedManyWithoutUserInput
+  chatSessions?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutUserInput
+  linkedinEnrichQueue?: Prisma.LinkedinEnrichQueueUncheckedCreateNestedManyWithoutUserInput
+  peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationUncheckedCreateNestedManyWithoutUserInput
+  reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedCreateNestedManyWithoutUserInput
+  syncChangeLogs?: Prisma.SyncChangeLogUncheckedCreateNestedManyWithoutUserInput
+  syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
+  syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardUncheckedCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedCreateNestedManyWithoutUserInput
+  oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
+  oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
+  oauthConsents?: Prisma.OauthConsentUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutPeopleVcardExtrasInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutPeopleVcardExtrasInput, Prisma.UserUncheckedCreateWithoutPeopleVcardExtrasInput>
+}
+
+export type UserUpsertWithoutPeopleVcardExtrasInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutPeopleVcardExtrasInput, Prisma.UserUncheckedUpdateWithoutPeopleVcardExtrasInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutPeopleVcardExtrasInput, Prisma.UserUncheckedCreateWithoutPeopleVcardExtrasInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutPeopleVcardExtrasInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutPeopleVcardExtrasInput, Prisma.UserUncheckedUpdateWithoutPeopleVcardExtrasInput>
+}
+
+export type UserUpdateWithoutPeopleVcardExtrasInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banned?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  banReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  passkeys?: Prisma.PasskeyUpdateManyWithoutUserNestedInput
+  userSettings?: Prisma.UserSettingsUpdateOneWithoutUserNestedInput
+  people?: Prisma.PeopleUpdateManyWithoutUserNestedInput
+  groups?: Prisma.GroupUpdateManyWithoutUserNestedInput
+  tags?: Prisma.TagUpdateManyWithoutUserNestedInput
+  interactions?: Prisma.InteractionUpdateManyWithoutUserNestedInput
+  apikeys?: Prisma.ApikeyUpdateManyWithoutUserNestedInput
+  chatSessions?: Prisma.ChatSessionUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.SubscriptionUpdateManyWithoutUserNestedInput
+  linkedinEnrichQueue?: Prisma.LinkedinEnrichQueueUpdateManyWithoutUserNestedInput
+  peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationUpdateManyWithoutUserNestedInput
+  reminderDispatchLogs?: Prisma.ReminderDispatchLogUpdateManyWithoutUserNestedInput
+  syncChangeLogs?: Prisma.SyncChangeLogUpdateManyWithoutUserNestedInput
+  syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
+  syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUpdateManyWithoutUserNestedInput
+  oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
+  oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
+  oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
+  oauthConsents?: Prisma.OauthConsentUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutPeopleVcardExtrasInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banned?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  banReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  passkeys?: Prisma.PasskeyUncheckedUpdateManyWithoutUserNestedInput
+  userSettings?: Prisma.UserSettingsUncheckedUpdateOneWithoutUserNestedInput
+  people?: Prisma.PeopleUncheckedUpdateManyWithoutUserNestedInput
+  groups?: Prisma.GroupUncheckedUpdateManyWithoutUserNestedInput
+  tags?: Prisma.TagUncheckedUpdateManyWithoutUserNestedInput
+  interactions?: Prisma.InteractionUncheckedUpdateManyWithoutUserNestedInput
+  apikeys?: Prisma.ApikeyUncheckedUpdateManyWithoutUserNestedInput
+  chatSessions?: Prisma.ChatSessionUncheckedUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.SubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  linkedinEnrichQueue?: Prisma.LinkedinEnrichQueueUncheckedUpdateManyWithoutUserNestedInput
+  peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationUncheckedUpdateManyWithoutUserNestedInput
+  reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedUpdateManyWithoutUserNestedInput
+  syncChangeLogs?: Prisma.SyncChangeLogUncheckedUpdateManyWithoutUserNestedInput
+  syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
+  syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUncheckedUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1470,6 +2306,10 @@ export type UserCreateWithoutGroupsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -1506,6 +2346,10 @@ export type UserUncheckedCreateWithoutGroupsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardUncheckedCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1558,6 +2402,10 @@ export type UserUpdateWithoutGroupsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -1594,6 +2442,10 @@ export type UserUncheckedUpdateWithoutGroupsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUncheckedUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1630,6 +2482,10 @@ export type UserCreateWithoutInteractionsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -1666,6 +2522,10 @@ export type UserUncheckedCreateWithoutInteractionsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardUncheckedCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1718,6 +2578,10 @@ export type UserUpdateWithoutInteractionsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -1754,6 +2618,10 @@ export type UserUncheckedUpdateWithoutInteractionsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUncheckedUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1790,6 +2658,10 @@ export type UserCreateWithoutLinkedinEnrichQueueInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -1826,6 +2698,10 @@ export type UserUncheckedCreateWithoutLinkedinEnrichQueueInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardUncheckedCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1878,6 +2754,10 @@ export type UserUpdateWithoutLinkedinEnrichQueueInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -1914,6 +2794,10 @@ export type UserUncheckedUpdateWithoutLinkedinEnrichQueueInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUncheckedUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1951,6 +2835,10 @@ export type UserCreateWithoutOauthClientsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
   oauthConsents?: Prisma.OauthConsentCreateNestedManyWithoutUserInput
@@ -1987,6 +2875,10 @@ export type UserUncheckedCreateWithoutOauthClientsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardUncheckedCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
   oauthConsents?: Prisma.OauthConsentUncheckedCreateNestedManyWithoutUserInput
@@ -2039,6 +2931,10 @@ export type UserUpdateWithoutOauthClientsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
   oauthConsents?: Prisma.OauthConsentUpdateManyWithoutUserNestedInput
@@ -2075,6 +2971,10 @@ export type UserUncheckedUpdateWithoutOauthClientsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUncheckedUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthConsents?: Prisma.OauthConsentUncheckedUpdateManyWithoutUserNestedInput
@@ -2111,6 +3011,10 @@ export type UserCreateWithoutOauthRefreshTokensInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
   oauthConsents?: Prisma.OauthConsentCreateNestedManyWithoutUserInput
@@ -2147,6 +3051,10 @@ export type UserUncheckedCreateWithoutOauthRefreshTokensInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardUncheckedCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
   oauthConsents?: Prisma.OauthConsentUncheckedCreateNestedManyWithoutUserInput
@@ -2199,6 +3107,10 @@ export type UserUpdateWithoutOauthRefreshTokensInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
   oauthConsents?: Prisma.OauthConsentUpdateManyWithoutUserNestedInput
@@ -2235,6 +3147,10 @@ export type UserUncheckedUpdateWithoutOauthRefreshTokensInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUncheckedUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthConsents?: Prisma.OauthConsentUncheckedUpdateManyWithoutUserNestedInput
@@ -2271,6 +3187,10 @@ export type UserCreateWithoutOauthAccessTokensInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthConsents?: Prisma.OauthConsentCreateNestedManyWithoutUserInput
@@ -2307,6 +3227,10 @@ export type UserUncheckedCreateWithoutOauthAccessTokensInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardUncheckedCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthConsents?: Prisma.OauthConsentUncheckedCreateNestedManyWithoutUserInput
@@ -2359,6 +3283,10 @@ export type UserUpdateWithoutOauthAccessTokensInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthConsents?: Prisma.OauthConsentUpdateManyWithoutUserNestedInput
@@ -2395,6 +3323,10 @@ export type UserUncheckedUpdateWithoutOauthAccessTokensInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUncheckedUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthConsents?: Prisma.OauthConsentUncheckedUpdateManyWithoutUserNestedInput
@@ -2431,6 +3363,10 @@ export type UserCreateWithoutOauthConsentsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -2467,6 +3403,10 @@ export type UserUncheckedCreateWithoutOauthConsentsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardUncheckedCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2519,6 +3459,10 @@ export type UserUpdateWithoutOauthConsentsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -2555,6 +3499,10 @@ export type UserUncheckedUpdateWithoutOauthConsentsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUncheckedUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2590,6 +3538,10 @@ export type UserCreateWithoutPeopleInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -2626,6 +3578,10 @@ export type UserUncheckedCreateWithoutPeopleInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardUncheckedCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2678,6 +3634,10 @@ export type UserUpdateWithoutPeopleInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -2714,6 +3674,10 @@ export type UserUncheckedUpdateWithoutPeopleInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUncheckedUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2750,6 +3714,10 @@ export type UserCreateWithoutPeopleMergeRecommendationsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -2786,6 +3754,10 @@ export type UserUncheckedCreateWithoutPeopleMergeRecommendationsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardUncheckedCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2838,6 +3810,10 @@ export type UserUpdateWithoutPeopleMergeRecommendationsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -2874,6 +3850,10 @@ export type UserUncheckedUpdateWithoutPeopleMergeRecommendationsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUncheckedUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2910,6 +3890,10 @@ export type UserCreateWithoutApikeysInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -2946,6 +3930,10 @@ export type UserUncheckedCreateWithoutApikeysInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardUncheckedCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2998,6 +3986,10 @@ export type UserUpdateWithoutApikeysInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -3034,6 +4026,10 @@ export type UserUncheckedUpdateWithoutApikeysInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUncheckedUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -3070,6 +4066,10 @@ export type UserCreateWithoutChatSessionsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -3106,6 +4106,10 @@ export type UserUncheckedCreateWithoutChatSessionsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardUncheckedCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -3158,6 +4162,10 @@ export type UserUpdateWithoutChatSessionsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -3194,6 +4202,10 @@ export type UserUncheckedUpdateWithoutChatSessionsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUncheckedUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -3230,6 +4242,10 @@ export type UserCreateWithoutSubscriptionsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -3266,6 +4282,10 @@ export type UserUncheckedCreateWithoutSubscriptionsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardUncheckedCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -3318,6 +4338,10 @@ export type UserUpdateWithoutSubscriptionsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -3354,6 +4378,10 @@ export type UserUncheckedUpdateWithoutSubscriptionsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUncheckedUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -3390,6 +4418,10 @@ export type UserCreateWithoutReminderDispatchLogsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -3426,6 +4458,10 @@ export type UserUncheckedCreateWithoutReminderDispatchLogsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardUncheckedCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -3478,6 +4514,10 @@ export type UserUpdateWithoutReminderDispatchLogsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -3514,6 +4554,10 @@ export type UserUncheckedUpdateWithoutReminderDispatchLogsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUncheckedUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -3550,6 +4594,10 @@ export type UserCreateWithoutSyncChangeLogsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -3586,6 +4634,10 @@ export type UserUncheckedCreateWithoutSyncChangeLogsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardUncheckedCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -3638,6 +4690,10 @@ export type UserUpdateWithoutSyncChangeLogsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -3674,6 +4730,10 @@ export type UserUncheckedUpdateWithoutSyncChangeLogsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUncheckedUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -3710,6 +4770,10 @@ export type UserCreateWithoutSyncMutationReceiptsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -3746,6 +4810,10 @@ export type UserUncheckedCreateWithoutSyncMutationReceiptsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardUncheckedCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -3798,6 +4866,10 @@ export type UserUpdateWithoutSyncMutationReceiptsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -3834,6 +4906,10 @@ export type UserUncheckedUpdateWithoutSyncMutationReceiptsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUncheckedUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -3870,6 +4946,10 @@ export type UserCreateWithoutIdempotencyKeysInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -3906,6 +4986,10 @@ export type UserUncheckedCreateWithoutIdempotencyKeysInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardUncheckedCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -3958,6 +5042,10 @@ export type UserUpdateWithoutIdempotencyKeysInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -3994,6 +5082,10 @@ export type UserUncheckedUpdateWithoutIdempotencyKeysInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUncheckedUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -4030,6 +5122,10 @@ export type UserCreateWithoutSyncUserSequenceInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -4066,6 +5162,10 @@ export type UserUncheckedCreateWithoutSyncUserSequenceInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardUncheckedCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -4118,6 +5218,10 @@ export type UserUpdateWithoutSyncUserSequenceInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -4154,6 +5258,10 @@ export type UserUncheckedUpdateWithoutSyncUserSequenceInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUncheckedUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -4190,6 +5298,10 @@ export type UserCreateWithoutReviewerAccessInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -4226,6 +5338,10 @@ export type UserUncheckedCreateWithoutReviewerAccessInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardUncheckedCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -4278,6 +5394,10 @@ export type UserUpdateWithoutReviewerAccessInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -4314,6 +5434,10 @@ export type UserUncheckedUpdateWithoutReviewerAccessInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUncheckedUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -4350,6 +5474,10 @@ export type UserCreateWithoutUserSettingsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -4386,6 +5514,10 @@ export type UserUncheckedCreateWithoutUserSettingsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardUncheckedCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -4438,6 +5570,10 @@ export type UserUpdateWithoutUserSettingsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -4474,6 +5610,10 @@ export type UserUncheckedUpdateWithoutUserSettingsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUncheckedUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -4510,6 +5650,10 @@ export type UserCreateWithoutTagsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -4546,6 +5690,10 @@ export type UserUncheckedCreateWithoutTagsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedCreateNestedOneWithoutUserInput
+  carddavCards?: Prisma.CarddavCardUncheckedCreateNestedManyWithoutUserInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedCreateNestedManyWithoutUserInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -4598,6 +5746,10 @@ export type UserUpdateWithoutTagsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -4634,6 +5786,10 @@ export type UserUncheckedUpdateWithoutTagsInput = {
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
+  carddavAddressBook?: Prisma.CarddavAddressBookUncheckedUpdateOneWithoutUserNestedInput
+  carddavCards?: Prisma.CarddavCardUncheckedUpdateManyWithoutUserNestedInput
+  carddavDevices?: Prisma.CarddavDeviceUncheckedUpdateManyWithoutUserNestedInput
+  peopleVcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -4662,6 +5818,9 @@ export type UserCountOutputType = {
   syncChangeLogs: number
   syncMutationReceipts: number
   idempotencyKeys: number
+  carddavCards: number
+  carddavDevices: number
+  peopleVcardExtras: number
   oauthClients: number
   oauthRefreshTokens: number
   oauthAccessTokens: number
@@ -4685,6 +5844,9 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   syncChangeLogs?: boolean | UserCountOutputTypeCountSyncChangeLogsArgs
   syncMutationReceipts?: boolean | UserCountOutputTypeCountSyncMutationReceiptsArgs
   idempotencyKeys?: boolean | UserCountOutputTypeCountIdempotencyKeysArgs
+  carddavCards?: boolean | UserCountOutputTypeCountCarddavCardsArgs
+  carddavDevices?: boolean | UserCountOutputTypeCountCarddavDevicesArgs
+  peopleVcardExtras?: boolean | UserCountOutputTypeCountPeopleVcardExtrasArgs
   oauthClients?: boolean | UserCountOutputTypeCountOauthClientsArgs
   oauthRefreshTokens?: boolean | UserCountOutputTypeCountOauthRefreshTokensArgs
   oauthAccessTokens?: boolean | UserCountOutputTypeCountOauthAccessTokensArgs
@@ -4816,6 +5978,27 @@ export type UserCountOutputTypeCountIdempotencyKeysArgs<ExtArgs extends runtime.
 /**
  * UserCountOutputType without action
  */
+export type UserCountOutputTypeCountCarddavCardsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CarddavCardWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountCarddavDevicesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CarddavDeviceWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountPeopleVcardExtrasArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PeopleVcardExtrasWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
 export type UserCountOutputTypeCountOauthClientsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.OauthClientWhereInput
 }
@@ -4873,6 +6056,10 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   idempotencyKeys?: boolean | Prisma.User$idempotencyKeysArgs<ExtArgs>
   syncUserSequence?: boolean | Prisma.User$syncUserSequenceArgs<ExtArgs>
   reviewerAccess?: boolean | Prisma.User$reviewerAccessArgs<ExtArgs>
+  carddavAddressBook?: boolean | Prisma.User$carddavAddressBookArgs<ExtArgs>
+  carddavCards?: boolean | Prisma.User$carddavCardsArgs<ExtArgs>
+  carddavDevices?: boolean | Prisma.User$carddavDevicesArgs<ExtArgs>
+  peopleVcardExtras?: boolean | Prisma.User$peopleVcardExtrasArgs<ExtArgs>
   oauthClients?: boolean | Prisma.User$oauthClientsArgs<ExtArgs>
   oauthRefreshTokens?: boolean | Prisma.User$oauthRefreshTokensArgs<ExtArgs>
   oauthAccessTokens?: boolean | Prisma.User$oauthAccessTokensArgs<ExtArgs>
@@ -4943,6 +6130,10 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   idempotencyKeys?: boolean | Prisma.User$idempotencyKeysArgs<ExtArgs>
   syncUserSequence?: boolean | Prisma.User$syncUserSequenceArgs<ExtArgs>
   reviewerAccess?: boolean | Prisma.User$reviewerAccessArgs<ExtArgs>
+  carddavAddressBook?: boolean | Prisma.User$carddavAddressBookArgs<ExtArgs>
+  carddavCards?: boolean | Prisma.User$carddavCardsArgs<ExtArgs>
+  carddavDevices?: boolean | Prisma.User$carddavDevicesArgs<ExtArgs>
+  peopleVcardExtras?: boolean | Prisma.User$peopleVcardExtrasArgs<ExtArgs>
   oauthClients?: boolean | Prisma.User$oauthClientsArgs<ExtArgs>
   oauthRefreshTokens?: boolean | Prisma.User$oauthRefreshTokensArgs<ExtArgs>
   oauthAccessTokens?: boolean | Prisma.User$oauthAccessTokensArgs<ExtArgs>
@@ -4974,6 +6165,10 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     idempotencyKeys: Prisma.$IdempotencyKeyPayload<ExtArgs>[]
     syncUserSequence: Prisma.$SyncUserSequencePayload<ExtArgs> | null
     reviewerAccess: Prisma.$ReviewerAccessPayload<ExtArgs> | null
+    carddavAddressBook: Prisma.$CarddavAddressBookPayload<ExtArgs> | null
+    carddavCards: Prisma.$CarddavCardPayload<ExtArgs>[]
+    carddavDevices: Prisma.$CarddavDevicePayload<ExtArgs>[]
+    peopleVcardExtras: Prisma.$PeopleVcardExtrasPayload<ExtArgs>[]
     oauthClients: Prisma.$OauthClientPayload<ExtArgs>[]
     oauthRefreshTokens: Prisma.$OauthRefreshTokenPayload<ExtArgs>[]
     oauthAccessTokens: Prisma.$OauthAccessTokenPayload<ExtArgs>[]
@@ -5404,6 +6599,10 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   idempotencyKeys<T extends Prisma.User$idempotencyKeysArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$idempotencyKeysArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$IdempotencyKeyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   syncUserSequence<T extends Prisma.User$syncUserSequenceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$syncUserSequenceArgs<ExtArgs>>): Prisma.Prisma__SyncUserSequenceClient<runtime.Types.Result.GetResult<Prisma.$SyncUserSequencePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   reviewerAccess<T extends Prisma.User$reviewerAccessArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reviewerAccessArgs<ExtArgs>>): Prisma.Prisma__ReviewerAccessClient<runtime.Types.Result.GetResult<Prisma.$ReviewerAccessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  carddavAddressBook<T extends Prisma.User$carddavAddressBookArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$carddavAddressBookArgs<ExtArgs>>): Prisma.Prisma__CarddavAddressBookClient<runtime.Types.Result.GetResult<Prisma.$CarddavAddressBookPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  carddavCards<T extends Prisma.User$carddavCardsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$carddavCardsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CarddavCardPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  carddavDevices<T extends Prisma.User$carddavDevicesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$carddavDevicesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CarddavDevicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  peopleVcardExtras<T extends Prisma.User$peopleVcardExtrasArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$peopleVcardExtrasArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PeopleVcardExtrasPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   oauthClients<T extends Prisma.User$oauthClientsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$oauthClientsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OauthClientPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   oauthRefreshTokens<T extends Prisma.User$oauthRefreshTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$oauthRefreshTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OauthRefreshTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   oauthAccessTokens<T extends Prisma.User$oauthAccessTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$oauthAccessTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OauthAccessTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -6279,6 +7478,97 @@ export type User$reviewerAccessArgs<ExtArgs extends runtime.Types.Extensions.Int
    */
   include?: Prisma.ReviewerAccessInclude<ExtArgs> | null
   where?: Prisma.ReviewerAccessWhereInput
+}
+
+/**
+ * User.carddavAddressBook
+ */
+export type User$carddavAddressBookArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CarddavAddressBook
+   */
+  select?: Prisma.CarddavAddressBookSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CarddavAddressBook
+   */
+  omit?: Prisma.CarddavAddressBookOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CarddavAddressBookInclude<ExtArgs> | null
+  where?: Prisma.CarddavAddressBookWhereInput
+}
+
+/**
+ * User.carddavCards
+ */
+export type User$carddavCardsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CarddavCard
+   */
+  select?: Prisma.CarddavCardSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CarddavCard
+   */
+  omit?: Prisma.CarddavCardOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CarddavCardInclude<ExtArgs> | null
+  where?: Prisma.CarddavCardWhereInput
+  orderBy?: Prisma.CarddavCardOrderByWithRelationInput | Prisma.CarddavCardOrderByWithRelationInput[]
+  cursor?: Prisma.CarddavCardWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CarddavCardScalarFieldEnum | Prisma.CarddavCardScalarFieldEnum[]
+}
+
+/**
+ * User.carddavDevices
+ */
+export type User$carddavDevicesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CarddavDevice
+   */
+  select?: Prisma.CarddavDeviceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CarddavDevice
+   */
+  omit?: Prisma.CarddavDeviceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CarddavDeviceInclude<ExtArgs> | null
+  where?: Prisma.CarddavDeviceWhereInput
+  orderBy?: Prisma.CarddavDeviceOrderByWithRelationInput | Prisma.CarddavDeviceOrderByWithRelationInput[]
+  cursor?: Prisma.CarddavDeviceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CarddavDeviceScalarFieldEnum | Prisma.CarddavDeviceScalarFieldEnum[]
+}
+
+/**
+ * User.peopleVcardExtras
+ */
+export type User$peopleVcardExtrasArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PeopleVcardExtras
+   */
+  select?: Prisma.PeopleVcardExtrasSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PeopleVcardExtras
+   */
+  omit?: Prisma.PeopleVcardExtrasOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PeopleVcardExtrasInclude<ExtArgs> | null
+  where?: Prisma.PeopleVcardExtrasWhereInput
+  orderBy?: Prisma.PeopleVcardExtrasOrderByWithRelationInput | Prisma.PeopleVcardExtrasOrderByWithRelationInput[]
+  cursor?: Prisma.PeopleVcardExtrasWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PeopleVcardExtrasScalarFieldEnum | Prisma.PeopleVcardExtrasScalarFieldEnum[]
 }
 
 /**

@@ -9,6 +9,12 @@ import {
 import { auth } from "../../lib/auth/index.js";
 import { internal } from "../../lib/platform/errors/http-errors.js";
 
+/**
+ * Better Auth config id of the REST keys. CardDAV device keys live in the same table under
+ * `carddav`, so every query here names this id and never sees or changes a device key.
+ */
+const REST_API_KEY_CONFIG_ID = "default";
+
 function mapApiKeyRow(row: {
   id: string;
   name: string | null;
@@ -40,7 +46,7 @@ export async function listApiKeys(userId: string) {
       prefix: true,
       start: true,
     },
-    where: { referenceId: userId },
+    where: { configId: REST_API_KEY_CONFIG_ID, referenceId: userId },
   });
 
   const apiKeys = rows.map(mapApiKeyRow);
@@ -57,7 +63,7 @@ export async function createApiKey(
   const { user } = ctx;
 
   const count = await prisma.apikey.count({
-    where: { referenceId: user.id },
+    where: { configId: REST_API_KEY_CONFIG_ID, referenceId: user.id },
   });
 
   if (count >= API_KEY_LIMITS.maxPerUser) {
@@ -72,6 +78,7 @@ export async function createApiKey(
   try {
     created = await auth.api.createApiKey({
       body: {
+        configId: REST_API_KEY_CONFIG_ID,
         name: input.label.trim(),
         permissions: baPermissionsFromProduct(input.permission),
         userId: user.id,
@@ -105,7 +112,7 @@ export async function updateApiKeyLabel(ctx: DomainContext, apiKeyId: string, la
 
   const existing = await prisma.apikey.findFirst({
     select: { id: true },
-    where: { id: apiKeyId, referenceId: user.id },
+    where: { configId: REST_API_KEY_CONFIG_ID, id: apiKeyId, referenceId: user.id },
   });
 
   if (!existing) {
@@ -116,6 +123,7 @@ export async function updateApiKeyLabel(ctx: DomainContext, apiKeyId: string, la
   try {
     updated = await auth.api.updateApiKey({
       body: {
+        configId: REST_API_KEY_CONFIG_ID,
         keyId: apiKeyId,
         name: label.trim(),
         userId: user.id,
@@ -144,7 +152,7 @@ export async function deleteApiKey(ctx: DomainContext, apiKeyId: string): Promis
   const { user } = ctx;
 
   const deleted = await prisma.apikey.deleteMany({
-    where: { id: apiKeyId, referenceId: user.id },
+    where: { configId: REST_API_KEY_CONFIG_ID, id: apiKeyId, referenceId: user.id },
   });
 
   if (deleted.count === 0) {

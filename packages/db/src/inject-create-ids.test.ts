@@ -45,6 +45,18 @@ describe("injectCreateIds", () => {
     assert.equal("id" in result, false);
   });
 
+  it("does not inject id for CardDAV card versions and vCard extras", () => {
+    const version = { cardId: "01932f1a-7b2e-7000-8000-000000000003", etag: "abc", projection: {} };
+    const extras = {
+      personId: "01932f1a-7b2e-7000-8000-000000000002",
+      properties: {},
+      userId: "u",
+    };
+
+    assert.deepEqual(injectCreateIds(version), version);
+    assert.deepEqual(injectCreateIds(extras), extras);
+  });
+
   it("does not inject id for a Stripe webhook event, which is keyed by eventId", () => {
     // Regression: an injected `id` made every Stripe webhook answer 500.
     const row = { eventId: "evt_123", eventType: "invoice.paid" };

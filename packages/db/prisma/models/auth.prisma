@@ -36,6 +36,10 @@ model User {
   idempotencyKeys           IdempotencyKey[]
   syncUserSequence          SyncUserSequence?
   reviewerAccess            ReviewerAccess?
+  carddavAddressBook        CarddavAddressBook?
+  carddavCards              CarddavCard[]
+  carddavDevices            CarddavDevice[]
+  peopleVcardExtras         PeopleVcardExtras[]
 
   oauthClients       OauthClient[]
   oauthRefreshTokens OauthRefreshToken[]

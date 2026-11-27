@@ -79,6 +79,37 @@ export type Jwks = Prisma.JwksModel
  */
 export type Passkey = Prisma.PasskeyModel
 /**
+ * Model CarddavAddressBook
+ * One row per user. Holds the sync-token state and the reconciler watermark. Locking this row
+ * serializes every revision write.
+ */
+export type CarddavAddressBook = Prisma.CarddavAddressBookModel
+/**
+ * Model CarddavCard
+ * One row per card, live or tombstone. Person cards hold the version-neutral projection. Opaque
+ * cards (group vCards from a device) hold the vCard exactly as the device sent it.
+ */
+export type CarddavCard = Prisma.CarddavCardModel
+/**
+ * Model CarddavCardVersion
+ * Older projections of a card, kept as merge bases for conflict resolution. A device PUT names
+ * the ETag it last saw, and this table answers what that version held.
+ */
+export type CarddavCardVersion = Prisma.CarddavCardVersionModel
+/**
+ * Model CarddavDevice
+ * One row per connected device. A device and its Better Auth key (`apikey`, config `carddav`)
+ * live and die together.
+ */
+export type CarddavDevice = Prisma.CarddavDeviceModel
+/**
+ * Model PeopleVcardExtras
+ * vCard properties that Bondery does not map, kept so a device round trip loses nothing. A
+ * separate table keeps this blob out of the mobile `row_data` payload. The extras belong to the
+ * person, so a full disconnect keeps them and a person delete removes them.
+ */
+export type PeopleVcardExtras = Prisma.PeopleVcardExtrasModel
+/**
  * Model Group
  * 
  */

@@ -17,7 +17,12 @@ import { PLATFORM_ADMIN_ROLE, PLATFORM_USER_ROLE } from "@bondery/helpers/auth/p
 import { resolveCookieDomain } from "@bondery/helpers/auth/resolve-cookie-domain";
 import { BETTER_AUTH_BASE_PATH } from "@bondery/helpers/globals/paths";
 import { generateId } from "@bondery/helpers/ids";
-import { API_KEY_PREFIX, API_KEY_START_DISPLAY_LENGTH } from "@bondery/schemas";
+import {
+  API_KEY_PREFIX,
+  API_KEY_START_DISPLAY_LENGTH,
+  CARDDAV_KEY_PREFIX,
+  CARDDAV_LIMITS,
+} from "@bondery/schemas";
 import { DEFAULT_LOCALE } from "@bondery/schemas/locale/supported-locale";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { betterAuth } from "better-auth/minimal";
@@ -285,21 +290,41 @@ export function createBonderyAuth() {
         fetchClientMetadataResource,
         metadataProfile: "mcp-2026-07-28",
       }),
-      apiKey({
-        defaultPrefix: API_KEY_PREFIX,
-        enableSessionForAPIKeys: false,
-        maximumNameLength: 100,
-        permissions: {
-          defaultPermissions: { api: ["read"] },
+      // Two configurations share the `apikey` table. `configId` keeps them apart: REST keys
+      // (`default`) never verify on the DAV shell and DAV keys (`carddav`) never verify on REST.
+      // Every verify call names its `configId`, because the plugin falls back to `default` for
+      // a missing or unknown one.
+      apiKey([
+        {
+          configId: "default",
+          defaultPrefix: API_KEY_PREFIX,
+          enableSessionForAPIKeys: false,
+          maximumNameLength: 100,
+          permissions: {
+            defaultPermissions: { api: ["read"] },
+          },
+          rateLimit: { enabled: false },
+          references: "user",
+          requireName: true,
+          startingCharactersConfig: {
+            charactersLength: API_KEY_START_DISPLAY_LENGTH,
+            shouldStore: true,
+          },
         },
-        rateLimit: { enabled: false },
-        references: "user",
-        requireName: true,
-        startingCharactersConfig: {
-          charactersLength: API_KEY_START_DISPLAY_LENGTH,
-          shouldStore: true,
+        {
+          configId: "carddav",
+          defaultPrefix: CARDDAV_KEY_PREFIX,
+          enableSessionForAPIKeys: false,
+          maximumNameLength: CARDDAV_LIMITS.deviceNameMaxLength,
+          rateLimit: { enabled: false },
+          references: "user",
+          requireName: true,
+          startingCharactersConfig: {
+            charactersLength: 16,
+            shouldStore: true,
+          },
         },
-      }),
+      ]),
       withPasskeyLastUsedAtField(
         passkey({
           authentication: {

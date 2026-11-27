@@ -57,6 +57,11 @@ export const ModelName = {
   Verification: 'Verification',
   Jwks: 'Jwks',
   Passkey: 'Passkey',
+  CarddavAddressBook: 'CarddavAddressBook',
+  CarddavCard: 'CarddavCard',
+  CarddavCardVersion: 'CarddavCardVersion',
+  CarddavDevice: 'CarddavDevice',
+  PeopleVcardExtras: 'PeopleVcardExtras',
   Group: 'Group',
   PeopleGroup: 'PeopleGroup',
   Interaction: 'Interaction',
@@ -206,6 +211,80 @@ export const PasskeyScalarFieldEnum = {
 } as const
 
 export type PasskeyScalarFieldEnum = (typeof PasskeyScalarFieldEnum)[keyof typeof PasskeyScalarFieldEnum]
+
+
+export const CarddavAddressBookScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  generation: 'generation',
+  revision: 'revision',
+  reconciledThrough: 'reconciledThrough',
+  tombstoneFloor: 'tombstoneFloor',
+  projectionVersion: 'projectionVersion',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CarddavAddressBookScalarFieldEnum = (typeof CarddavAddressBookScalarFieldEnum)[keyof typeof CarddavAddressBookScalarFieldEnum]
+
+
+export const CarddavCardScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  addressBookId: 'addressBookId',
+  personId: 'personId',
+  kind: 'kind',
+  href: 'href',
+  uid: 'uid',
+  projection: 'projection',
+  rawVcard: 'rawVcard',
+  photoVersion: 'photoVersion',
+  etag: 'etag',
+  revision: 'revision',
+  deletedAt: 'deletedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CarddavCardScalarFieldEnum = (typeof CarddavCardScalarFieldEnum)[keyof typeof CarddavCardScalarFieldEnum]
+
+
+export const CarddavCardVersionScalarFieldEnum = {
+  cardId: 'cardId',
+  etag: 'etag',
+  projection: 'projection',
+  createdAt: 'createdAt'
+} as const
+
+export type CarddavCardVersionScalarFieldEnum = (typeof CarddavCardVersionScalarFieldEnum)[keyof typeof CarddavCardVersionScalarFieldEnum]
+
+
+export const CarddavDeviceScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  apiKeyId: 'apiKeyId',
+  name: 'name',
+  clientFamily: 'clientFamily',
+  vcardVersion: 'vcardVersion',
+  userAgent: 'userAgent',
+  lastSeenAt: 'lastSeenAt',
+  lastSyncedAt: 'lastSyncedAt',
+  pausedAt: 'pausedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CarddavDeviceScalarFieldEnum = (typeof CarddavDeviceScalarFieldEnum)[keyof typeof CarddavDeviceScalarFieldEnum]
+
+
+export const PeopleVcardExtrasScalarFieldEnum = {
+  personId: 'personId',
+  userId: 'userId',
+  properties: 'properties',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PeopleVcardExtrasScalarFieldEnum = (typeof PeopleVcardExtrasScalarFieldEnum)[keyof typeof PeopleVcardExtrasScalarFieldEnum]
 
 
 export const GroupScalarFieldEnum = {

@@ -6,6 +6,8 @@ declare module "fastify" {
   interface FastifyInstance {
     config: {
       LOG_LEVEL: string;
+      /** Deployment switch: when false, no CardDAV routes are registered. */
+      BONDERY_INFRA_CARDDAV_ENABLED: boolean;
       BONDERY_PUBLIC_ANDROID_SHA256_CERT_FINGERPRINTS: string;
       BONDERY_PUBLIC_WEBAPP_URL: string;
       BONDERY_PUBLIC_WEBAUTHN_RP_ID: string;
@@ -55,6 +57,10 @@ export const envSchema = {
     API_PORT: {
       default: 26_631,
       type: "number",
+    },
+    BONDERY_INFRA_CARDDAV_ENABLED: {
+      default: false,
+      type: "boolean",
     },
     BONDERY_PRIVATE_ANTHROPIC_API_KEY: {
       default: "",

@@ -36,6 +36,14 @@ function usesCompositePrimaryKey(record: Record<string, unknown>): boolean {
   if ("stripeSubscriptionId" in record && "email" in record && !("userId" in record)) {
     return true;
   }
+  // CarddavCardVersion: keyed by (cardId, etag).
+  if ("cardId" in record && "etag" in record) {
+    return true;
+  }
+  // PeopleVcardExtras: keyed by personId.
+  if ("personId" in record && "properties" in record) {
+    return true;
+  }
   return false;
 }
 

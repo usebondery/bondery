@@ -6,11 +6,13 @@
 
 import { API_ROUTES } from "@bondery/helpers";
 import { registerOAuthProvidersRoutes } from "../lib/auth/oauth-providers-routes.js";
+import { registerDavHttpMethods } from "../lib/dav/protocol.js";
 import { registerDocsRedirectRoutes } from "../lib/docs/redirect-routes.js";
 import { registerHealthRoutes } from "../lib/health/routes.js";
 import { registerMobileManifestRoute } from "../lib/mobile/manifest-route.js";
 import type { AppFastifyInstance, AppRoutePlugin } from "../lib/platform/fastify-types.js";
 import {
+  davRoutes,
   integrationRoutes,
   internalRoutes,
   nativeSessionRoutes,
@@ -22,6 +24,9 @@ import { chatSessionRoutes } from "./chat/sessions.js";
 import { contactIntegrationRoutes } from "./contacts/index.js";
 import { contactSessionRoutes } from "./contacts/session-routes.js";
 import { shareRoutes } from "./contacts/share/index.js";
+import { davCollectionRoutes } from "./dav/index.js";
+import { davOptionsRoutes } from "./dav/options.js";
+import { davWellKnownRoutes } from "./dav/well-known.js";
 import { extensionRoutes } from "./extension/index.js";
 import { geocodeRoutes } from "./geocode/index.js";
 import { groupRoutes } from "./groups/index.js";
@@ -59,7 +64,9 @@ type RouteMountArea =
   | "publicInternal"
   | "webhook"
   | "mcp"
-  | "composite";
+  | "composite"
+  | "dav"
+  | "publicDav";
 
 type RouteMount = {
   area: RouteMountArea;
@@ -70,10 +77,14 @@ type RouteMount = {
 const SHELLS: Record<RouteMountArea, (plugin: AppRoutePlugin) => AppRoutePlugin> = {
   /** Plugin composes sub-shells internally (e.g. sync HTTP vs WS ticket auth). */
   composite: (plugin) => plugin,
+  /** CardDAV behind HTTP Basic with a device key. */
+  dav: davRoutes,
   integration: integrationRoutes,
   internal: internalRoutes,
   mcp: (plugin) => openApiAreaRoutes("internal", plugin),
   nativeSession: nativeSessionRoutes,
+  /** CardDAV capability probe. OpenAPI-hidden, no auth hooks. */
+  publicDav: (plugin) => openApiAreaRoutes("dav", plugin),
   /**
    * OpenAPI-hidden route with NO auth hooks. For endpoints a browser must
    * reach without a secret, such as CSP violation reports.
@@ -136,6 +147,16 @@ const ROUTE_MOUNTS: RouteMount[] = [
   { area: "publicInternal", plugin: cspReportRoutes, prefix: API_ROUTES.SECURITY_CSP_REPORT },
 ];
 
+/**
+ * CardDAV routes. Registered only when `BONDERY_INFRA_CARDDAV_ENABLED` is true, so a
+ * deployment with the switch off answers 404 for `/dav/*` and `/.well-known/carddav`.
+ */
+const CARDDAV_ROUTE_MOUNTS: RouteMount[] = [
+  { area: "publicInternal", plugin: davWellKnownRoutes, prefix: API_ROUTES.WELL_KNOWN_CARDDAV },
+  { area: "publicDav", plugin: davOptionsRoutes, prefix: API_ROUTES.DAV },
+  { area: "dav", plugin: davCollectionRoutes, prefix: API_ROUTES.DAV },
+];
+
 export async function registerAllRoutes(fastify: AppFastifyInstance): Promise<void> {
   registerHealthRoutes(fastify);
   registerMobileManifestRoute(fastify);
@@ -144,6 +165,13 @@ export async function registerAllRoutes(fastify: AppFastifyInstance): Promise<vo
 
   for (const { area, plugin, prefix } of ROUTE_MOUNTS) {
     await fastify.register(SHELLS[area](plugin), { prefix });
+  }
+
+  if (fastify.config.BONDERY_INFRA_CARDDAV_ENABLED) {
+    registerDavHttpMethods(fastify);
+    for (const { area, plugin, prefix } of CARDDAV_ROUTE_MOUNTS) {
+      await fastify.register(SHELLS[area](plugin), { prefix });
+    }
   }
 }
 

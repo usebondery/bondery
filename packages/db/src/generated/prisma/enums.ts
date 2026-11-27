@@ -9,6 +9,14 @@
 * 🟢 You can import this file directly.
 */
 
+export const CarddavCardKind = {
+  person: 'person',
+  opaque: 'opaque'
+} as const
+
+export type CarddavCardKind = (typeof CarddavCardKind)[keyof typeof CarddavCardKind]
+
+
 export const ColorScheme = {
   light: 'light',
   dark: 'dark',

@@ -172,6 +172,17 @@ export const RUNTIME_ENTRIES: EnvVarDef[] = [
     targets: [t("api")],
   },
   {
+    canonical: "BONDERY_INFRA_CARDDAV_ENABLED",
+    deployExample: { group: "Optional integrations (API)", include: true, value: "false" },
+    description:
+      "Deployment switch for CardDAV contact sync (true | false). Off by default. When off, the API registers no /dav/* and no /.well-known/carddav route, so both answer 404. Read once at boot: restart the API after a change. Also the incident kill switch.",
+    exampleValue: "false",
+    group: "Infra",
+    requiredIn: [],
+    secret: false,
+    targets: [t("api")],
+  },
+  {
     canonical: "BONDERY_PUBLIC_SYNC_DEBUG",
     description: "Mobile sync debug logging (1/true)",
     exampleValue: "",

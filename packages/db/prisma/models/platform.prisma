@@ -46,6 +46,8 @@ model Apikey {
   permissions         String?
   metadata            String?
 
+  carddavDevice       CarddavDevice?
+
   @@index([referenceId])
   @@index([configId])
   @@index([key])

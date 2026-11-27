@@ -1,0 +1,47 @@
+---
+title: "ADR 0036: CardDAV contact sync"
+hidden: true
+last_updated: 2026-11-27
+description: The API serves CardDAV in-process, behind a deployment switch. Device keys live in the apikey table under their own Better Auth configuration, and sync tokens come from a reconciled projection that sync_change_log feeds.
+---
+
+# ADR 0036: CardDAV contact sync
+
+**Status:** Accepted
+**Date:** 2026-11-27
+
+## Context
+
+Users want their Bondery contacts on a phone or desktop without a Bondery app: Apple Contacts, Android through DAVx5, and Thunderbird. All of them speak CardDAV (RFC 6352) with sync tokens (RFC 6578). Bondery has no archive and no per-device sync state.
+
+The API already writes `sync_change_log`, an ordered change feed per user, for mobile sync. Several write paths skipped it and are now fixed (`withSyncedWrite`). The route shells own authentication (ADR 0034), so a Basic-auth protocol needs no global exemption.
+
+## Decision
+
+1. **Serve CardDAV in the API process.** A small server in Fastify, with no sidecar and no generic WebDAV library. Postgres stays the only source of truth.
+2. **The host comes from the environment.** The server value, the discovery redirect, and every setup link use `BONDERY_PUBLIC_API_URL`. Beta and production are separate stacks with separate data. `/.well-known/carddav` redirects to `/dav/` on the host that serves it.
+3. **A deployment switch guards the feature.** `BONDERY_INFRA_CARDDAV_ENABLED` defaults to `false`. The API reads it once at boot. When it is off, the API registers no DAV route and no discovery route, so both answer 404. It is also the incident kill switch. It is not a per-user flag.
+4. **Device keys use the `apikey` table.** Better Auth cannot store keys in another table, so a second configuration (`configId: carddav`, prefix `bondery_dav_`) shares it. Every verify call names its `configId`, because the plugin falls back to the default one. REST code reads only `configId: default`. Device state lives in `carddav_devices`, which cascades from the key.
+5. **The DAV shell accepts one credential.** HTTP Basic, with the user UUID as username and a DAV key as password. It rejects sessions, cookies, OAuth tokens, and REST keys. Failed logins are limited to 20 per minute per address and per username. Each device gets a request budget of its own (`DAV_TIER`).
+6. **Sync tokens come from a reconciled projection.** A per-user address book holds one card row per person, with a revision. A reconciler folds `sync_change_log` into those rows in chunks of at most 500 persons. The token is the address-book revision. A random `generation` changes when the user disconnects every device, so an old token never matches.
+7. **A delete on a device is a hard delete.** It deletes the person, as the web app does. The card row stays as a tombstone, and `person_id` has no foreign key so the tombstone survives the delete.
+8. **The conflict rule is simple.** The server compares a write with the version the device last saw (its ETag). If both sides changed one field group, the device wins and the server logs it. With no base version, the answer is 412. A delete needs `If-Match`.
+9. **Group cards are stored opaque.** The server keeps a device's group vCard as sent and never maps it to a Bondery group.
+10. **Notes do not sync.** Bondery notes are stored HTML. A device note stays in `people_vcard_extras` as plain text.
+11. **vCard 3.0 comes first.** Apple Contacts reads only 3.0. vCard 4.0 stays in scope and ships after 3.0 works with every client in the test matrix.
+
+## Consequences
+
+- With the switch off, nothing changes for any user. The tables exist and stay empty.
+- `verifyApiKey` writes to the key row on every call, even with rate limiting off (Better Auth 1.7.25 sets `lastRequest` and `updatedAt`). `deferUpdates` does not cover the database storage mode, so each DAV request costs two key-row writes. Revisit if load tests show pressure.
+- A REST key can never open the address book, and a DAV key can never call REST. Tests cover both directions.
+- Redis outages fail open for the failed-login counters. Keys carry 64 random characters, so a missing counter does not make guessing feasible.
+- Mobile sync gains no new table. The CardDAV tables are not in `SYNC_TABLE_KEYS`.
+
+## Alternatives
+
+- **A sidecar such as Radicale.** Rejected. It needs a second data store and a sync job in both directions.
+- **A separate key table.** Rejected. It needs a fork of the Better Auth plugin.
+- **A per-user feature flag.** Rejected. One switch per deployment is simpler to operate and covers the kill-switch need.
+- **Soft delete with a trash.** Rejected. One delete rule everywhere is simpler. A trash is future work.
+- **Field-level merge with timestamps.** Rejected. The device-wins rule is easier to explain and test.

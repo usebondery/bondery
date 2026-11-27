@@ -373,6 +373,7 @@ export type ApikeyWhereInput = {
   permissions?: Prisma.StringNullableFilter<"Apikey"> | string | null
   metadata?: Prisma.StringNullableFilter<"Apikey"> | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  carddavDevice?: Prisma.XOR<Prisma.CarddavDeviceNullableScalarRelationFilter, Prisma.CarddavDeviceWhereInput> | null
 }
 
 export type ApikeyOrderByWithRelationInput = {
@@ -399,6 +400,7 @@ export type ApikeyOrderByWithRelationInput = {
   permissions?: Prisma.SortOrderInput | Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
+  carddavDevice?: Prisma.CarddavDeviceOrderByWithRelationInput
 }
 
 export type ApikeyWhereUniqueInput = Prisma.AtLeast<{
@@ -428,6 +430,7 @@ export type ApikeyWhereUniqueInput = Prisma.AtLeast<{
   permissions?: Prisma.StringNullableFilter<"Apikey"> | string | null
   metadata?: Prisma.StringNullableFilter<"Apikey"> | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  carddavDevice?: Prisma.XOR<Prisma.CarddavDeviceNullableScalarRelationFilter, Prisma.CarddavDeviceWhereInput> | null
 }, "id">
 
 export type ApikeyOrderByWithAggregationInput = {
@@ -511,6 +514,7 @@ export type ApikeyCreateInput = {
   permissions?: string | null
   metadata?: string | null
   user: Prisma.UserCreateNestedOneWithoutApikeysInput
+  carddavDevice?: Prisma.CarddavDeviceCreateNestedOneWithoutApiKeyInput
 }
 
 export type ApikeyUncheckedCreateInput = {
@@ -536,6 +540,7 @@ export type ApikeyUncheckedCreateInput = {
   updatedAt?: Date | string
   permissions?: string | null
   metadata?: string | null
+  carddavDevice?: Prisma.CarddavDeviceUncheckedCreateNestedOneWithoutApiKeyInput
 }
 
 export type ApikeyUpdateInput = {
@@ -561,6 +566,7 @@ export type ApikeyUpdateInput = {
   permissions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutApikeysNestedInput
+  carddavDevice?: Prisma.CarddavDeviceUpdateOneWithoutApiKeyNestedInput
 }
 
 export type ApikeyUncheckedUpdateInput = {
@@ -586,6 +592,7 @@ export type ApikeyUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   permissions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  carddavDevice?: Prisma.CarddavDeviceUncheckedUpdateOneWithoutApiKeyNestedInput
 }
 
 export type ApikeyCreateManyInput = {
@@ -670,6 +677,11 @@ export type ApikeyListRelationFilter = {
 
 export type ApikeyOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type ApikeyScalarRelationFilter = {
+  is?: Prisma.ApikeyWhereInput
+  isNot?: Prisma.ApikeyWhereInput
 }
 
 export type ApikeyCountOrderByAggregateInput = {
@@ -807,6 +819,20 @@ export type ApikeyUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.ApikeyScalarWhereInput | Prisma.ApikeyScalarWhereInput[]
 }
 
+export type ApikeyCreateNestedOneWithoutCarddavDeviceInput = {
+  create?: Prisma.XOR<Prisma.ApikeyCreateWithoutCarddavDeviceInput, Prisma.ApikeyUncheckedCreateWithoutCarddavDeviceInput>
+  connectOrCreate?: Prisma.ApikeyCreateOrConnectWithoutCarddavDeviceInput
+  connect?: Prisma.ApikeyWhereUniqueInput
+}
+
+export type ApikeyUpdateOneRequiredWithoutCarddavDeviceNestedInput = {
+  create?: Prisma.XOR<Prisma.ApikeyCreateWithoutCarddavDeviceInput, Prisma.ApikeyUncheckedCreateWithoutCarddavDeviceInput>
+  connectOrCreate?: Prisma.ApikeyCreateOrConnectWithoutCarddavDeviceInput
+  upsert?: Prisma.ApikeyUpsertWithoutCarddavDeviceInput
+  connect?: Prisma.ApikeyWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ApikeyUpdateToOneWithWhereWithoutCarddavDeviceInput, Prisma.ApikeyUpdateWithoutCarddavDeviceInput>, Prisma.ApikeyUncheckedUpdateWithoutCarddavDeviceInput>
+}
+
 export type ApikeyCreateWithoutUserInput = {
   id?: string
   configId?: string
@@ -829,6 +855,7 @@ export type ApikeyCreateWithoutUserInput = {
   updatedAt?: Date | string
   permissions?: string | null
   metadata?: string | null
+  carddavDevice?: Prisma.CarddavDeviceCreateNestedOneWithoutApiKeyInput
 }
 
 export type ApikeyUncheckedCreateWithoutUserInput = {
@@ -853,6 +880,7 @@ export type ApikeyUncheckedCreateWithoutUserInput = {
   updatedAt?: Date | string
   permissions?: string | null
   metadata?: string | null
+  carddavDevice?: Prisma.CarddavDeviceUncheckedCreateNestedOneWithoutApiKeyInput
 }
 
 export type ApikeyCreateOrConnectWithoutUserInput = {
@@ -909,6 +937,122 @@ export type ApikeyScalarWhereInput = {
   metadata?: Prisma.StringNullableFilter<"Apikey"> | string | null
 }
 
+export type ApikeyCreateWithoutCarddavDeviceInput = {
+  id?: string
+  configId?: string
+  name?: string | null
+  start?: string | null
+  prefix?: string | null
+  key: string
+  refillInterval?: number | null
+  refillAmount?: number | null
+  lastRefillAt?: Date | string | null
+  enabled?: boolean
+  rateLimitEnabled?: boolean
+  rateLimitTimeWindow?: number | null
+  rateLimitMax?: number | null
+  requestCount?: number
+  remaining?: number | null
+  lastRequest?: Date | string | null
+  expiresAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  permissions?: string | null
+  metadata?: string | null
+  user: Prisma.UserCreateNestedOneWithoutApikeysInput
+}
+
+export type ApikeyUncheckedCreateWithoutCarddavDeviceInput = {
+  id?: string
+  configId?: string
+  name?: string | null
+  start?: string | null
+  prefix?: string | null
+  key: string
+  referenceId: string
+  refillInterval?: number | null
+  refillAmount?: number | null
+  lastRefillAt?: Date | string | null
+  enabled?: boolean
+  rateLimitEnabled?: boolean
+  rateLimitTimeWindow?: number | null
+  rateLimitMax?: number | null
+  requestCount?: number
+  remaining?: number | null
+  lastRequest?: Date | string | null
+  expiresAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  permissions?: string | null
+  metadata?: string | null
+}
+
+export type ApikeyCreateOrConnectWithoutCarddavDeviceInput = {
+  where: Prisma.ApikeyWhereUniqueInput
+  create: Prisma.XOR<Prisma.ApikeyCreateWithoutCarddavDeviceInput, Prisma.ApikeyUncheckedCreateWithoutCarddavDeviceInput>
+}
+
+export type ApikeyUpsertWithoutCarddavDeviceInput = {
+  update: Prisma.XOR<Prisma.ApikeyUpdateWithoutCarddavDeviceInput, Prisma.ApikeyUncheckedUpdateWithoutCarddavDeviceInput>
+  create: Prisma.XOR<Prisma.ApikeyCreateWithoutCarddavDeviceInput, Prisma.ApikeyUncheckedCreateWithoutCarddavDeviceInput>
+  where?: Prisma.ApikeyWhereInput
+}
+
+export type ApikeyUpdateToOneWithWhereWithoutCarddavDeviceInput = {
+  where?: Prisma.ApikeyWhereInput
+  data: Prisma.XOR<Prisma.ApikeyUpdateWithoutCarddavDeviceInput, Prisma.ApikeyUncheckedUpdateWithoutCarddavDeviceInput>
+}
+
+export type ApikeyUpdateWithoutCarddavDeviceInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  configId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  start?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  prefix?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  refillInterval?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  refillAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  lastRefillAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  rateLimitEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  rateLimitTimeWindow?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rateLimitMax?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  requestCount?: Prisma.IntFieldUpdateOperationsInput | number
+  remaining?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  lastRequest?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  permissions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  user?: Prisma.UserUpdateOneRequiredWithoutApikeysNestedInput
+}
+
+export type ApikeyUncheckedUpdateWithoutCarddavDeviceInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  configId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  start?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  prefix?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  referenceId?: Prisma.StringFieldUpdateOperationsInput | string
+  refillInterval?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  refillAmount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  lastRefillAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  rateLimitEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  rateLimitTimeWindow?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  rateLimitMax?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  requestCount?: Prisma.IntFieldUpdateOperationsInput | number
+  remaining?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  lastRequest?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  permissions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
 export type ApikeyCreateManyUserInput = {
   id?: string
   configId?: string
@@ -955,6 +1099,7 @@ export type ApikeyUpdateWithoutUserInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   permissions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  carddavDevice?: Prisma.CarddavDeviceUpdateOneWithoutApiKeyNestedInput
 }
 
 export type ApikeyUncheckedUpdateWithoutUserInput = {
@@ -979,6 +1124,7 @@ export type ApikeyUncheckedUpdateWithoutUserInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   permissions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  carddavDevice?: Prisma.CarddavDeviceUncheckedUpdateOneWithoutApiKeyNestedInput
 }
 
 export type ApikeyUncheckedUpdateManyWithoutUserInput = {
@@ -1031,6 +1177,7 @@ export type ApikeySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   permissions?: boolean
   metadata?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  carddavDevice?: boolean | Prisma.Apikey$carddavDeviceArgs<ExtArgs>
 }, ExtArgs["result"]["apikey"]>
 
 export type ApikeySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1113,6 +1260,7 @@ export type ApikeySelectScalar = {
 export type ApikeyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "configId" | "name" | "start" | "prefix" | "key" | "referenceId" | "refillInterval" | "refillAmount" | "lastRefillAt" | "enabled" | "rateLimitEnabled" | "rateLimitTimeWindow" | "rateLimitMax" | "requestCount" | "remaining" | "lastRequest" | "expiresAt" | "createdAt" | "updatedAt" | "permissions" | "metadata", ExtArgs["result"]["apikey"]>
 export type ApikeyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  carddavDevice?: boolean | Prisma.Apikey$carddavDeviceArgs<ExtArgs>
 }
 export type ApikeyIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1125,6 +1273,7 @@ export type $ApikeyPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
   name: "Apikey"
   objects: {
     user: Prisma.$UserPayload<ExtArgs>
+    carddavDevice: Prisma.$CarddavDevicePayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1544,6 +1693,7 @@ readonly fields: ApikeyFieldRefs;
 export interface Prisma__ApikeyClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  carddavDevice<T extends Prisma.Apikey$carddavDeviceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Apikey$carddavDeviceArgs<ExtArgs>>): Prisma.Prisma__CarddavDeviceClient<runtime.Types.Result.GetResult<Prisma.$CarddavDevicePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1993,6 +2143,25 @@ export type ApikeyDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Limit how many Apikeys to delete.
    */
   limit?: number
+}
+
+/**
+ * Apikey.carddavDevice
+ */
+export type Apikey$carddavDeviceArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CarddavDevice
+   */
+  select?: Prisma.CarddavDeviceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CarddavDevice
+   */
+  omit?: Prisma.CarddavDeviceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CarddavDeviceInclude<ExtArgs> | null
+  where?: Prisma.CarddavDeviceWhereInput
 }
 
 /**

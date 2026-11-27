@@ -22,6 +22,7 @@ import { unauthorized } from "../errors/http-errors.js";
 import type { AppFastifyInstance } from "../fastify-types.js";
 import { assertApiKeyAccess } from "./api-key-access.js";
 import { isApiKeyBearerToken } from "./api-keys.js";
+import { createVerifyDavAuth } from "./dav-auth.js";
 import { resolveOAuthBearerUser, resolveRequestAuthUser } from "./resolve-request-auth.js";
 import { createVerifyServiceSecret } from "./service-secret.js";
 
@@ -47,6 +48,11 @@ declare module "fastify" {
     assertApiKeyAccess: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
     /** Validates session or long-lived API key */
     verifyAuth: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
+    /** HTTP Basic auth with a CardDAV device key. Answers 401 + challenge itself on failure. */
+    verifyDavAuth: (
+      request: FastifyRequest,
+      reply: FastifyReply,
+    ) => Promise<FastifyReply | undefined>;
     /** Validates service role key via Authorization: Bearer header for server-to-server calls */
     verifyServiceSecret: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
     /** Validates Better Auth session or OAuth resource JWT */
@@ -81,6 +87,7 @@ async function applyResolvedAuth(
 export function registerAuthStrategies(fastify: AppFastifyInstance): void {
   fastify.decorateRequest("authUser", null);
   fastify.decorateRequest("authApiKey", null);
+  fastify.decorateRequest("davDevice", null);
 
   fastify.decorate(
     "verifySession",
@@ -106,7 +113,7 @@ export function registerAuthStrategies(fastify: AppFastifyInstance): void {
 
       if (bearerToken && isApiKeyBearerToken(bearerToken)) {
         const verification = await auth.api.verifyApiKey({
-          body: { key: bearerToken },
+          body: { configId: "default", key: bearerToken },
         });
 
         if (!verification.valid || !verification.key) {
@@ -145,6 +152,8 @@ export function registerAuthStrategies(fastify: AppFastifyInstance): void {
       await applyResolvedAuth(request, resolvedUser);
     },
   );
+
+  fastify.decorate("verifyDavAuth", createVerifyDavAuth());
 
   fastify.decorate(
     "assertApiKeyAccess",

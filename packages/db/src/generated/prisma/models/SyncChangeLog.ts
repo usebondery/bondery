@@ -476,14 +476,6 @@ export type SyncChangeLogUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.SyncChangeLogScalarWhereInput | Prisma.SyncChangeLogScalarWhereInput[]
 }
 
-export type BigIntFieldUpdateOperationsInput = {
-  set?: bigint | number
-  increment?: bigint | number
-  decrement?: bigint | number
-  multiply?: bigint | number
-  divide?: bigint | number
-}
-
 export type SyncChangeLogCreateWithoutUserInput = {
   serverSequence: bigint | number
   changeIndex: number

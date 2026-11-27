@@ -369,6 +369,7 @@ export type PeopleWhereInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationListRelationFilter
   enrichQueue?: Prisma.LinkedinEnrichQueueListRelationFilter
   interactionsLast?: Prisma.InteractionListRelationFilter
+  vcardExtras?: Prisma.XOR<Prisma.PeopleVcardExtrasNullableScalarRelationFilter, Prisma.PeopleVcardExtrasWhereInput> | null
 }
 
 export type PeopleOrderByWithRelationInput = {
@@ -410,6 +411,7 @@ export type PeopleOrderByWithRelationInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationOrderByRelationAggregateInput
   enrichQueue?: Prisma.LinkedinEnrichQueueOrderByRelationAggregateInput
   interactionsLast?: Prisma.InteractionOrderByRelationAggregateInput
+  vcardExtras?: Prisma.PeopleVcardExtrasOrderByWithRelationInput
 }
 
 export type PeopleWhereUniqueInput = Prisma.AtLeast<{
@@ -454,6 +456,7 @@ export type PeopleWhereUniqueInput = Prisma.AtLeast<{
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationListRelationFilter
   enrichQueue?: Prisma.LinkedinEnrichQueueListRelationFilter
   interactionsLast?: Prisma.InteractionListRelationFilter
+  vcardExtras?: Prisma.XOR<Prisma.PeopleVcardExtrasNullableScalarRelationFilter, Prisma.PeopleVcardExtrasWhereInput> | null
 }, "id">
 
 export type PeopleOrderByWithAggregationInput = {
@@ -549,6 +552,7 @@ export type PeopleCreateInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationCreateNestedManyWithoutRightPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueCreateNestedManyWithoutPersonInput
   interactionsLast?: Prisma.InteractionCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleUncheckedCreateInput = {
@@ -588,6 +592,7 @@ export type PeopleUncheckedCreateInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedCreateNestedManyWithoutRightPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedCreateNestedManyWithoutPersonInput
   interactionsLast?: Prisma.InteractionUncheckedCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleUpdateInput = {
@@ -627,6 +632,7 @@ export type PeopleUpdateInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUpdateManyWithoutRightPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUpdateManyWithoutPersonNestedInput
   interactionsLast?: Prisma.InteractionUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleUncheckedUpdateInput = {
@@ -666,6 +672,7 @@ export type PeopleUncheckedUpdateInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedUpdateManyWithoutRightPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedUpdateManyWithoutPersonNestedInput
   interactionsLast?: Prisma.InteractionUncheckedUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleCreateManyInput = {
@@ -877,6 +884,20 @@ export type PeopleUncheckedUpdateManyWithoutUserNestedInput = {
   update?: Prisma.PeopleUpdateWithWhereUniqueWithoutUserInput | Prisma.PeopleUpdateWithWhereUniqueWithoutUserInput[]
   updateMany?: Prisma.PeopleUpdateManyWithWhereWithoutUserInput | Prisma.PeopleUpdateManyWithWhereWithoutUserInput[]
   deleteMany?: Prisma.PeopleScalarWhereInput | Prisma.PeopleScalarWhereInput[]
+}
+
+export type PeopleCreateNestedOneWithoutVcardExtrasInput = {
+  create?: Prisma.XOR<Prisma.PeopleCreateWithoutVcardExtrasInput, Prisma.PeopleUncheckedCreateWithoutVcardExtrasInput>
+  connectOrCreate?: Prisma.PeopleCreateOrConnectWithoutVcardExtrasInput
+  connect?: Prisma.PeopleWhereUniqueInput
+}
+
+export type PeopleUpdateOneRequiredWithoutVcardExtrasNestedInput = {
+  create?: Prisma.XOR<Prisma.PeopleCreateWithoutVcardExtrasInput, Prisma.PeopleUncheckedCreateWithoutVcardExtrasInput>
+  connectOrCreate?: Prisma.PeopleCreateOrConnectWithoutVcardExtrasInput
+  upsert?: Prisma.PeopleUpsertWithoutVcardExtrasInput
+  connect?: Prisma.PeopleWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PeopleUpdateToOneWithWhereWithoutVcardExtrasInput, Prisma.PeopleUpdateWithoutVcardExtrasInput>, Prisma.PeopleUncheckedUpdateWithoutVcardExtrasInput>
 }
 
 export type PeopleCreateNestedOneWithoutGroupsInput = {
@@ -1199,6 +1220,7 @@ export type PeopleCreateWithoutUserInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationCreateNestedManyWithoutRightPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueCreateNestedManyWithoutPersonInput
   interactionsLast?: Prisma.InteractionCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleUncheckedCreateWithoutUserInput = {
@@ -1237,6 +1259,7 @@ export type PeopleUncheckedCreateWithoutUserInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedCreateNestedManyWithoutRightPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedCreateNestedManyWithoutPersonInput
   interactionsLast?: Prisma.InteractionUncheckedCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleCreateOrConnectWithoutUserInput = {
@@ -1292,6 +1315,178 @@ export type PeopleScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"People"> | Date | string
 }
 
+export type PeopleCreateWithoutVcardExtrasInput = {
+  id?: string
+  firstName: string
+  middleName?: string | null
+  lastName?: string | null
+  headline?: string | null
+  notes?: string | null
+  notesUpdatedAt?: Date | string | null
+  myself?: boolean | null
+  hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
+  language?: string | null
+  timezone?: string | null
+  location?: string | null
+  latitude?: number | null
+  longitude?: number | null
+  keepFrequencyDays?: number | null
+  lastInteraction?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutPeopleInput
+  lastInteractionActivity?: Prisma.InteractionCreateNestedOneWithoutPeopleWithLastInteractionInput
+  phones?: Prisma.PeoplePhoneCreateNestedManyWithoutPersonInput
+  emails?: Prisma.PeopleEmailCreateNestedManyWithoutPersonInput
+  socials?: Prisma.PeopleSocialCreateNestedManyWithoutPersonInput
+  addresses?: Prisma.PeopleAddressCreateNestedManyWithoutPersonInput
+  importantDates?: Prisma.PeopleImportantDateCreateNestedManyWithoutPersonInput
+  groups?: Prisma.PeopleGroupCreateNestedManyWithoutPersonInput
+  tags?: Prisma.PeopleTagCreateNestedManyWithoutPersonInput
+  linkedin?: Prisma.PeopleLinkedinCreateNestedOneWithoutPersonInput
+  interactionParticipant?: Prisma.InteractionParticipantCreateNestedManyWithoutPersonInput
+  relationshipsFrom?: Prisma.PeopleRelationshipCreateNestedManyWithoutSourcePersonInput
+  relationshipsTo?: Prisma.PeopleRelationshipCreateNestedManyWithoutTargetPersonInput
+  mergeRecommendationsLeft?: Prisma.PeopleMergeRecommendationCreateNestedManyWithoutLeftPersonInput
+  mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationCreateNestedManyWithoutRightPersonInput
+  enrichQueue?: Prisma.LinkedinEnrichQueueCreateNestedManyWithoutPersonInput
+  interactionsLast?: Prisma.InteractionCreateNestedManyWithoutPeopleLastActiveInput
+}
+
+export type PeopleUncheckedCreateWithoutVcardExtrasInput = {
+  id?: string
+  userId: string
+  firstName: string
+  middleName?: string | null
+  lastName?: string | null
+  headline?: string | null
+  notes?: string | null
+  notesUpdatedAt?: Date | string | null
+  myself?: boolean | null
+  hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
+  language?: string | null
+  timezone?: string | null
+  location?: string | null
+  latitude?: number | null
+  longitude?: number | null
+  keepFrequencyDays?: number | null
+  lastInteraction?: Date | string | null
+  lastInteractionActivityId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  phones?: Prisma.PeoplePhoneUncheckedCreateNestedManyWithoutPersonInput
+  emails?: Prisma.PeopleEmailUncheckedCreateNestedManyWithoutPersonInput
+  socials?: Prisma.PeopleSocialUncheckedCreateNestedManyWithoutPersonInput
+  addresses?: Prisma.PeopleAddressUncheckedCreateNestedManyWithoutPersonInput
+  importantDates?: Prisma.PeopleImportantDateUncheckedCreateNestedManyWithoutPersonInput
+  groups?: Prisma.PeopleGroupUncheckedCreateNestedManyWithoutPersonInput
+  tags?: Prisma.PeopleTagUncheckedCreateNestedManyWithoutPersonInput
+  linkedin?: Prisma.PeopleLinkedinUncheckedCreateNestedOneWithoutPersonInput
+  interactionParticipant?: Prisma.InteractionParticipantUncheckedCreateNestedManyWithoutPersonInput
+  relationshipsFrom?: Prisma.PeopleRelationshipUncheckedCreateNestedManyWithoutSourcePersonInput
+  relationshipsTo?: Prisma.PeopleRelationshipUncheckedCreateNestedManyWithoutTargetPersonInput
+  mergeRecommendationsLeft?: Prisma.PeopleMergeRecommendationUncheckedCreateNestedManyWithoutLeftPersonInput
+  mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedCreateNestedManyWithoutRightPersonInput
+  enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedCreateNestedManyWithoutPersonInput
+  interactionsLast?: Prisma.InteractionUncheckedCreateNestedManyWithoutPeopleLastActiveInput
+}
+
+export type PeopleCreateOrConnectWithoutVcardExtrasInput = {
+  where: Prisma.PeopleWhereUniqueInput
+  create: Prisma.XOR<Prisma.PeopleCreateWithoutVcardExtrasInput, Prisma.PeopleUncheckedCreateWithoutVcardExtrasInput>
+}
+
+export type PeopleUpsertWithoutVcardExtrasInput = {
+  update: Prisma.XOR<Prisma.PeopleUpdateWithoutVcardExtrasInput, Prisma.PeopleUncheckedUpdateWithoutVcardExtrasInput>
+  create: Prisma.XOR<Prisma.PeopleCreateWithoutVcardExtrasInput, Prisma.PeopleUncheckedCreateWithoutVcardExtrasInput>
+  where?: Prisma.PeopleWhereInput
+}
+
+export type PeopleUpdateToOneWithWhereWithoutVcardExtrasInput = {
+  where?: Prisma.PeopleWhereInput
+  data: Prisma.XOR<Prisma.PeopleUpdateWithoutVcardExtrasInput, Prisma.PeopleUncheckedUpdateWithoutVcardExtrasInput>
+}
+
+export type PeopleUpdateWithoutVcardExtrasInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  middleName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  keepFrequencyDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  lastInteraction?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutPeopleNestedInput
+  lastInteractionActivity?: Prisma.InteractionUpdateOneWithoutPeopleWithLastInteractionNestedInput
+  phones?: Prisma.PeoplePhoneUpdateManyWithoutPersonNestedInput
+  emails?: Prisma.PeopleEmailUpdateManyWithoutPersonNestedInput
+  socials?: Prisma.PeopleSocialUpdateManyWithoutPersonNestedInput
+  addresses?: Prisma.PeopleAddressUpdateManyWithoutPersonNestedInput
+  importantDates?: Prisma.PeopleImportantDateUpdateManyWithoutPersonNestedInput
+  groups?: Prisma.PeopleGroupUpdateManyWithoutPersonNestedInput
+  tags?: Prisma.PeopleTagUpdateManyWithoutPersonNestedInput
+  linkedin?: Prisma.PeopleLinkedinUpdateOneWithoutPersonNestedInput
+  interactionParticipant?: Prisma.InteractionParticipantUpdateManyWithoutPersonNestedInput
+  relationshipsFrom?: Prisma.PeopleRelationshipUpdateManyWithoutSourcePersonNestedInput
+  relationshipsTo?: Prisma.PeopleRelationshipUpdateManyWithoutTargetPersonNestedInput
+  mergeRecommendationsLeft?: Prisma.PeopleMergeRecommendationUpdateManyWithoutLeftPersonNestedInput
+  mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUpdateManyWithoutRightPersonNestedInput
+  enrichQueue?: Prisma.LinkedinEnrichQueueUpdateManyWithoutPersonNestedInput
+  interactionsLast?: Prisma.InteractionUpdateManyWithoutPeopleLastActiveNestedInput
+}
+
+export type PeopleUncheckedUpdateWithoutVcardExtrasInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  middleName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  keepFrequencyDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  lastInteraction?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastInteractionActivityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  phones?: Prisma.PeoplePhoneUncheckedUpdateManyWithoutPersonNestedInput
+  emails?: Prisma.PeopleEmailUncheckedUpdateManyWithoutPersonNestedInput
+  socials?: Prisma.PeopleSocialUncheckedUpdateManyWithoutPersonNestedInput
+  addresses?: Prisma.PeopleAddressUncheckedUpdateManyWithoutPersonNestedInput
+  importantDates?: Prisma.PeopleImportantDateUncheckedUpdateManyWithoutPersonNestedInput
+  groups?: Prisma.PeopleGroupUncheckedUpdateManyWithoutPersonNestedInput
+  tags?: Prisma.PeopleTagUncheckedUpdateManyWithoutPersonNestedInput
+  linkedin?: Prisma.PeopleLinkedinUncheckedUpdateOneWithoutPersonNestedInput
+  interactionParticipant?: Prisma.InteractionParticipantUncheckedUpdateManyWithoutPersonNestedInput
+  relationshipsFrom?: Prisma.PeopleRelationshipUncheckedUpdateManyWithoutSourcePersonNestedInput
+  relationshipsTo?: Prisma.PeopleRelationshipUncheckedUpdateManyWithoutTargetPersonNestedInput
+  mergeRecommendationsLeft?: Prisma.PeopleMergeRecommendationUncheckedUpdateManyWithoutLeftPersonNestedInput
+  mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedUpdateManyWithoutRightPersonNestedInput
+  enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedUpdateManyWithoutPersonNestedInput
+  interactionsLast?: Prisma.InteractionUncheckedUpdateManyWithoutPeopleLastActiveNestedInput
+}
+
 export type PeopleCreateWithoutGroupsInput = {
   id?: string
   firstName: string
@@ -1328,6 +1523,7 @@ export type PeopleCreateWithoutGroupsInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationCreateNestedManyWithoutRightPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueCreateNestedManyWithoutPersonInput
   interactionsLast?: Prisma.InteractionCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleUncheckedCreateWithoutGroupsInput = {
@@ -1366,6 +1562,7 @@ export type PeopleUncheckedCreateWithoutGroupsInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedCreateNestedManyWithoutRightPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedCreateNestedManyWithoutPersonInput
   interactionsLast?: Prisma.InteractionUncheckedCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleCreateOrConnectWithoutGroupsInput = {
@@ -1420,6 +1617,7 @@ export type PeopleUpdateWithoutGroupsInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUpdateManyWithoutRightPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUpdateManyWithoutPersonNestedInput
   interactionsLast?: Prisma.InteractionUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleUncheckedUpdateWithoutGroupsInput = {
@@ -1458,6 +1656,7 @@ export type PeopleUncheckedUpdateWithoutGroupsInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedUpdateManyWithoutRightPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedUpdateManyWithoutPersonNestedInput
   interactionsLast?: Prisma.InteractionUncheckedUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleCreateWithoutInteractionsLastInput = {
@@ -1496,6 +1695,7 @@ export type PeopleCreateWithoutInteractionsLastInput = {
   mergeRecommendationsLeft?: Prisma.PeopleMergeRecommendationCreateNestedManyWithoutLeftPersonInput
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationCreateNestedManyWithoutRightPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueCreateNestedManyWithoutPersonInput
+  vcardExtras?: Prisma.PeopleVcardExtrasCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleUncheckedCreateWithoutInteractionsLastInput = {
@@ -1534,6 +1734,7 @@ export type PeopleUncheckedCreateWithoutInteractionsLastInput = {
   mergeRecommendationsLeft?: Prisma.PeopleMergeRecommendationUncheckedCreateNestedManyWithoutLeftPersonInput
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedCreateNestedManyWithoutRightPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedCreateNestedManyWithoutPersonInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleCreateOrConnectWithoutInteractionsLastInput = {
@@ -1577,6 +1778,7 @@ export type PeopleCreateWithoutLastInteractionActivityInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationCreateNestedManyWithoutRightPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueCreateNestedManyWithoutPersonInput
   interactionsLast?: Prisma.InteractionCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleUncheckedCreateWithoutLastInteractionActivityInput = {
@@ -1615,6 +1817,7 @@ export type PeopleUncheckedCreateWithoutLastInteractionActivityInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedCreateNestedManyWithoutRightPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedCreateNestedManyWithoutPersonInput
   interactionsLast?: Prisma.InteractionUncheckedCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleCreateOrConnectWithoutLastInteractionActivityInput = {
@@ -1695,6 +1898,7 @@ export type PeopleCreateWithoutInteractionParticipantInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationCreateNestedManyWithoutRightPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueCreateNestedManyWithoutPersonInput
   interactionsLast?: Prisma.InteractionCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleUncheckedCreateWithoutInteractionParticipantInput = {
@@ -1733,6 +1937,7 @@ export type PeopleUncheckedCreateWithoutInteractionParticipantInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedCreateNestedManyWithoutRightPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedCreateNestedManyWithoutPersonInput
   interactionsLast?: Prisma.InteractionUncheckedCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleCreateOrConnectWithoutInteractionParticipantInput = {
@@ -1787,6 +1992,7 @@ export type PeopleUpdateWithoutInteractionParticipantInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUpdateManyWithoutRightPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUpdateManyWithoutPersonNestedInput
   interactionsLast?: Prisma.InteractionUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleUncheckedUpdateWithoutInteractionParticipantInput = {
@@ -1825,6 +2031,7 @@ export type PeopleUncheckedUpdateWithoutInteractionParticipantInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedUpdateManyWithoutRightPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedUpdateManyWithoutPersonNestedInput
   interactionsLast?: Prisma.InteractionUncheckedUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleCreateWithoutLinkedinInput = {
@@ -1863,6 +2070,7 @@ export type PeopleCreateWithoutLinkedinInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationCreateNestedManyWithoutRightPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueCreateNestedManyWithoutPersonInput
   interactionsLast?: Prisma.InteractionCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleUncheckedCreateWithoutLinkedinInput = {
@@ -1901,6 +2109,7 @@ export type PeopleUncheckedCreateWithoutLinkedinInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedCreateNestedManyWithoutRightPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedCreateNestedManyWithoutPersonInput
   interactionsLast?: Prisma.InteractionUncheckedCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleCreateOrConnectWithoutLinkedinInput = {
@@ -1955,6 +2164,7 @@ export type PeopleUpdateWithoutLinkedinInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUpdateManyWithoutRightPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUpdateManyWithoutPersonNestedInput
   interactionsLast?: Prisma.InteractionUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleUncheckedUpdateWithoutLinkedinInput = {
@@ -1993,6 +2203,7 @@ export type PeopleUncheckedUpdateWithoutLinkedinInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedUpdateManyWithoutRightPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedUpdateManyWithoutPersonNestedInput
   interactionsLast?: Prisma.InteractionUncheckedUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleCreateWithoutEnrichQueueInput = {
@@ -2031,6 +2242,7 @@ export type PeopleCreateWithoutEnrichQueueInput = {
   mergeRecommendationsLeft?: Prisma.PeopleMergeRecommendationCreateNestedManyWithoutLeftPersonInput
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationCreateNestedManyWithoutRightPersonInput
   interactionsLast?: Prisma.InteractionCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleUncheckedCreateWithoutEnrichQueueInput = {
@@ -2069,6 +2281,7 @@ export type PeopleUncheckedCreateWithoutEnrichQueueInput = {
   mergeRecommendationsLeft?: Prisma.PeopleMergeRecommendationUncheckedCreateNestedManyWithoutLeftPersonInput
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedCreateNestedManyWithoutRightPersonInput
   interactionsLast?: Prisma.InteractionUncheckedCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleCreateOrConnectWithoutEnrichQueueInput = {
@@ -2123,6 +2336,7 @@ export type PeopleUpdateWithoutEnrichQueueInput = {
   mergeRecommendationsLeft?: Prisma.PeopleMergeRecommendationUpdateManyWithoutLeftPersonNestedInput
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUpdateManyWithoutRightPersonNestedInput
   interactionsLast?: Prisma.InteractionUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleUncheckedUpdateWithoutEnrichQueueInput = {
@@ -2161,6 +2375,7 @@ export type PeopleUncheckedUpdateWithoutEnrichQueueInput = {
   mergeRecommendationsLeft?: Prisma.PeopleMergeRecommendationUncheckedUpdateManyWithoutLeftPersonNestedInput
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedUpdateManyWithoutRightPersonNestedInput
   interactionsLast?: Prisma.InteractionUncheckedUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleCreateWithoutPhonesInput = {
@@ -2199,6 +2414,7 @@ export type PeopleCreateWithoutPhonesInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationCreateNestedManyWithoutRightPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueCreateNestedManyWithoutPersonInput
   interactionsLast?: Prisma.InteractionCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleUncheckedCreateWithoutPhonesInput = {
@@ -2237,6 +2453,7 @@ export type PeopleUncheckedCreateWithoutPhonesInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedCreateNestedManyWithoutRightPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedCreateNestedManyWithoutPersonInput
   interactionsLast?: Prisma.InteractionUncheckedCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleCreateOrConnectWithoutPhonesInput = {
@@ -2291,6 +2508,7 @@ export type PeopleUpdateWithoutPhonesInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUpdateManyWithoutRightPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUpdateManyWithoutPersonNestedInput
   interactionsLast?: Prisma.InteractionUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleUncheckedUpdateWithoutPhonesInput = {
@@ -2329,6 +2547,7 @@ export type PeopleUncheckedUpdateWithoutPhonesInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedUpdateManyWithoutRightPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedUpdateManyWithoutPersonNestedInput
   interactionsLast?: Prisma.InteractionUncheckedUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleCreateWithoutEmailsInput = {
@@ -2367,6 +2586,7 @@ export type PeopleCreateWithoutEmailsInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationCreateNestedManyWithoutRightPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueCreateNestedManyWithoutPersonInput
   interactionsLast?: Prisma.InteractionCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleUncheckedCreateWithoutEmailsInput = {
@@ -2405,6 +2625,7 @@ export type PeopleUncheckedCreateWithoutEmailsInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedCreateNestedManyWithoutRightPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedCreateNestedManyWithoutPersonInput
   interactionsLast?: Prisma.InteractionUncheckedCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleCreateOrConnectWithoutEmailsInput = {
@@ -2459,6 +2680,7 @@ export type PeopleUpdateWithoutEmailsInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUpdateManyWithoutRightPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUpdateManyWithoutPersonNestedInput
   interactionsLast?: Prisma.InteractionUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleUncheckedUpdateWithoutEmailsInput = {
@@ -2497,6 +2719,7 @@ export type PeopleUncheckedUpdateWithoutEmailsInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedUpdateManyWithoutRightPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedUpdateManyWithoutPersonNestedInput
   interactionsLast?: Prisma.InteractionUncheckedUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleCreateWithoutSocialsInput = {
@@ -2535,6 +2758,7 @@ export type PeopleCreateWithoutSocialsInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationCreateNestedManyWithoutRightPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueCreateNestedManyWithoutPersonInput
   interactionsLast?: Prisma.InteractionCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleUncheckedCreateWithoutSocialsInput = {
@@ -2573,6 +2797,7 @@ export type PeopleUncheckedCreateWithoutSocialsInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedCreateNestedManyWithoutRightPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedCreateNestedManyWithoutPersonInput
   interactionsLast?: Prisma.InteractionUncheckedCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleCreateOrConnectWithoutSocialsInput = {
@@ -2627,6 +2852,7 @@ export type PeopleUpdateWithoutSocialsInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUpdateManyWithoutRightPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUpdateManyWithoutPersonNestedInput
   interactionsLast?: Prisma.InteractionUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleUncheckedUpdateWithoutSocialsInput = {
@@ -2665,6 +2891,7 @@ export type PeopleUncheckedUpdateWithoutSocialsInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedUpdateManyWithoutRightPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedUpdateManyWithoutPersonNestedInput
   interactionsLast?: Prisma.InteractionUncheckedUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleCreateWithoutAddressesInput = {
@@ -2703,6 +2930,7 @@ export type PeopleCreateWithoutAddressesInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationCreateNestedManyWithoutRightPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueCreateNestedManyWithoutPersonInput
   interactionsLast?: Prisma.InteractionCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleUncheckedCreateWithoutAddressesInput = {
@@ -2741,6 +2969,7 @@ export type PeopleUncheckedCreateWithoutAddressesInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedCreateNestedManyWithoutRightPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedCreateNestedManyWithoutPersonInput
   interactionsLast?: Prisma.InteractionUncheckedCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleCreateOrConnectWithoutAddressesInput = {
@@ -2795,6 +3024,7 @@ export type PeopleUpdateWithoutAddressesInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUpdateManyWithoutRightPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUpdateManyWithoutPersonNestedInput
   interactionsLast?: Prisma.InteractionUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleUncheckedUpdateWithoutAddressesInput = {
@@ -2833,6 +3063,7 @@ export type PeopleUncheckedUpdateWithoutAddressesInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedUpdateManyWithoutRightPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedUpdateManyWithoutPersonNestedInput
   interactionsLast?: Prisma.InteractionUncheckedUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleCreateWithoutImportantDatesInput = {
@@ -2871,6 +3102,7 @@ export type PeopleCreateWithoutImportantDatesInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationCreateNestedManyWithoutRightPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueCreateNestedManyWithoutPersonInput
   interactionsLast?: Prisma.InteractionCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleUncheckedCreateWithoutImportantDatesInput = {
@@ -2909,6 +3141,7 @@ export type PeopleUncheckedCreateWithoutImportantDatesInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedCreateNestedManyWithoutRightPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedCreateNestedManyWithoutPersonInput
   interactionsLast?: Prisma.InteractionUncheckedCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleCreateOrConnectWithoutImportantDatesInput = {
@@ -2963,6 +3196,7 @@ export type PeopleUpdateWithoutImportantDatesInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUpdateManyWithoutRightPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUpdateManyWithoutPersonNestedInput
   interactionsLast?: Prisma.InteractionUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleUncheckedUpdateWithoutImportantDatesInput = {
@@ -3001,6 +3235,7 @@ export type PeopleUncheckedUpdateWithoutImportantDatesInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedUpdateManyWithoutRightPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedUpdateManyWithoutPersonNestedInput
   interactionsLast?: Prisma.InteractionUncheckedUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleCreateWithoutRelationshipsFromInput = {
@@ -3039,6 +3274,7 @@ export type PeopleCreateWithoutRelationshipsFromInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationCreateNestedManyWithoutRightPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueCreateNestedManyWithoutPersonInput
   interactionsLast?: Prisma.InteractionCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleUncheckedCreateWithoutRelationshipsFromInput = {
@@ -3077,6 +3313,7 @@ export type PeopleUncheckedCreateWithoutRelationshipsFromInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedCreateNestedManyWithoutRightPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedCreateNestedManyWithoutPersonInput
   interactionsLast?: Prisma.InteractionUncheckedCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleCreateOrConnectWithoutRelationshipsFromInput = {
@@ -3120,6 +3357,7 @@ export type PeopleCreateWithoutRelationshipsToInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationCreateNestedManyWithoutRightPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueCreateNestedManyWithoutPersonInput
   interactionsLast?: Prisma.InteractionCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleUncheckedCreateWithoutRelationshipsToInput = {
@@ -3158,6 +3396,7 @@ export type PeopleUncheckedCreateWithoutRelationshipsToInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedCreateNestedManyWithoutRightPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedCreateNestedManyWithoutPersonInput
   interactionsLast?: Prisma.InteractionUncheckedCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleCreateOrConnectWithoutRelationshipsToInput = {
@@ -3212,6 +3451,7 @@ export type PeopleUpdateWithoutRelationshipsFromInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUpdateManyWithoutRightPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUpdateManyWithoutPersonNestedInput
   interactionsLast?: Prisma.InteractionUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleUncheckedUpdateWithoutRelationshipsFromInput = {
@@ -3250,6 +3490,7 @@ export type PeopleUncheckedUpdateWithoutRelationshipsFromInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedUpdateManyWithoutRightPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedUpdateManyWithoutPersonNestedInput
   interactionsLast?: Prisma.InteractionUncheckedUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleUpsertWithoutRelationshipsToInput = {
@@ -3299,6 +3540,7 @@ export type PeopleUpdateWithoutRelationshipsToInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUpdateManyWithoutRightPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUpdateManyWithoutPersonNestedInput
   interactionsLast?: Prisma.InteractionUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleUncheckedUpdateWithoutRelationshipsToInput = {
@@ -3337,6 +3579,7 @@ export type PeopleUncheckedUpdateWithoutRelationshipsToInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedUpdateManyWithoutRightPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedUpdateManyWithoutPersonNestedInput
   interactionsLast?: Prisma.InteractionUncheckedUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleCreateWithoutMergeRecommendationsLeftInput = {
@@ -3375,6 +3618,7 @@ export type PeopleCreateWithoutMergeRecommendationsLeftInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationCreateNestedManyWithoutRightPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueCreateNestedManyWithoutPersonInput
   interactionsLast?: Prisma.InteractionCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleUncheckedCreateWithoutMergeRecommendationsLeftInput = {
@@ -3413,6 +3657,7 @@ export type PeopleUncheckedCreateWithoutMergeRecommendationsLeftInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedCreateNestedManyWithoutRightPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedCreateNestedManyWithoutPersonInput
   interactionsLast?: Prisma.InteractionUncheckedCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleCreateOrConnectWithoutMergeRecommendationsLeftInput = {
@@ -3456,6 +3701,7 @@ export type PeopleCreateWithoutMergeRecommendationsRightInput = {
   mergeRecommendationsLeft?: Prisma.PeopleMergeRecommendationCreateNestedManyWithoutLeftPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueCreateNestedManyWithoutPersonInput
   interactionsLast?: Prisma.InteractionCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleUncheckedCreateWithoutMergeRecommendationsRightInput = {
@@ -3494,6 +3740,7 @@ export type PeopleUncheckedCreateWithoutMergeRecommendationsRightInput = {
   mergeRecommendationsLeft?: Prisma.PeopleMergeRecommendationUncheckedCreateNestedManyWithoutLeftPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedCreateNestedManyWithoutPersonInput
   interactionsLast?: Prisma.InteractionUncheckedCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleCreateOrConnectWithoutMergeRecommendationsRightInput = {
@@ -3548,6 +3795,7 @@ export type PeopleUpdateWithoutMergeRecommendationsLeftInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUpdateManyWithoutRightPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUpdateManyWithoutPersonNestedInput
   interactionsLast?: Prisma.InteractionUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleUncheckedUpdateWithoutMergeRecommendationsLeftInput = {
@@ -3586,6 +3834,7 @@ export type PeopleUncheckedUpdateWithoutMergeRecommendationsLeftInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedUpdateManyWithoutRightPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedUpdateManyWithoutPersonNestedInput
   interactionsLast?: Prisma.InteractionUncheckedUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleUpsertWithoutMergeRecommendationsRightInput = {
@@ -3635,6 +3884,7 @@ export type PeopleUpdateWithoutMergeRecommendationsRightInput = {
   mergeRecommendationsLeft?: Prisma.PeopleMergeRecommendationUpdateManyWithoutLeftPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUpdateManyWithoutPersonNestedInput
   interactionsLast?: Prisma.InteractionUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleUncheckedUpdateWithoutMergeRecommendationsRightInput = {
@@ -3673,6 +3923,7 @@ export type PeopleUncheckedUpdateWithoutMergeRecommendationsRightInput = {
   mergeRecommendationsLeft?: Prisma.PeopleMergeRecommendationUncheckedUpdateManyWithoutLeftPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedUpdateManyWithoutPersonNestedInput
   interactionsLast?: Prisma.InteractionUncheckedUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleCreateWithoutTagsInput = {
@@ -3711,6 +3962,7 @@ export type PeopleCreateWithoutTagsInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationCreateNestedManyWithoutRightPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueCreateNestedManyWithoutPersonInput
   interactionsLast?: Prisma.InteractionCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleUncheckedCreateWithoutTagsInput = {
@@ -3749,6 +4001,7 @@ export type PeopleUncheckedCreateWithoutTagsInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedCreateNestedManyWithoutRightPersonInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedCreateNestedManyWithoutPersonInput
   interactionsLast?: Prisma.InteractionUncheckedCreateNestedManyWithoutPeopleLastActiveInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedCreateNestedOneWithoutPersonInput
 }
 
 export type PeopleCreateOrConnectWithoutTagsInput = {
@@ -3803,6 +4056,7 @@ export type PeopleUpdateWithoutTagsInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUpdateManyWithoutRightPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUpdateManyWithoutPersonNestedInput
   interactionsLast?: Prisma.InteractionUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleUncheckedUpdateWithoutTagsInput = {
@@ -3841,6 +4095,7 @@ export type PeopleUncheckedUpdateWithoutTagsInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedUpdateManyWithoutRightPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedUpdateManyWithoutPersonNestedInput
   interactionsLast?: Prisma.InteractionUncheckedUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleCreateManyUserInput = {
@@ -3902,6 +4157,7 @@ export type PeopleUpdateWithoutUserInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUpdateManyWithoutRightPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUpdateManyWithoutPersonNestedInput
   interactionsLast?: Prisma.InteractionUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleUncheckedUpdateWithoutUserInput = {
@@ -3940,6 +4196,7 @@ export type PeopleUncheckedUpdateWithoutUserInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedUpdateManyWithoutRightPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedUpdateManyWithoutPersonNestedInput
   interactionsLast?: Prisma.InteractionUncheckedUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleUncheckedUpdateManyWithoutUserInput = {
@@ -4024,6 +4281,7 @@ export type PeopleUpdateWithoutInteractionsLastInput = {
   mergeRecommendationsLeft?: Prisma.PeopleMergeRecommendationUpdateManyWithoutLeftPersonNestedInput
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUpdateManyWithoutRightPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUpdateManyWithoutPersonNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleUncheckedUpdateWithoutInteractionsLastInput = {
@@ -4062,6 +4320,7 @@ export type PeopleUncheckedUpdateWithoutInteractionsLastInput = {
   mergeRecommendationsLeft?: Prisma.PeopleMergeRecommendationUncheckedUpdateManyWithoutLeftPersonNestedInput
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedUpdateManyWithoutRightPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedUpdateManyWithoutPersonNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleUncheckedUpdateManyWithoutInteractionsLastInput = {
@@ -4124,6 +4383,7 @@ export type PeopleUpdateWithoutLastInteractionActivityInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUpdateManyWithoutRightPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUpdateManyWithoutPersonNestedInput
   interactionsLast?: Prisma.InteractionUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleUncheckedUpdateWithoutLastInteractionActivityInput = {
@@ -4162,6 +4422,7 @@ export type PeopleUncheckedUpdateWithoutLastInteractionActivityInput = {
   mergeRecommendationsRight?: Prisma.PeopleMergeRecommendationUncheckedUpdateManyWithoutRightPersonNestedInput
   enrichQueue?: Prisma.LinkedinEnrichQueueUncheckedUpdateManyWithoutPersonNestedInput
   interactionsLast?: Prisma.InteractionUncheckedUpdateManyWithoutPeopleLastActiveNestedInput
+  vcardExtras?: Prisma.PeopleVcardExtrasUncheckedUpdateOneWithoutPersonNestedInput
 }
 
 export type PeopleUncheckedUpdateManyWithoutLastInteractionActivityInput = {
@@ -4374,6 +4635,7 @@ export type PeopleSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   mergeRecommendationsRight?: boolean | Prisma.People$mergeRecommendationsRightArgs<ExtArgs>
   enrichQueue?: boolean | Prisma.People$enrichQueueArgs<ExtArgs>
   interactionsLast?: boolean | Prisma.People$interactionsLastArgs<ExtArgs>
+  vcardExtras?: boolean | Prisma.People$vcardExtrasArgs<ExtArgs>
   _count?: boolean | Prisma.PeopleCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["people"]>
 
@@ -4472,6 +4734,7 @@ export type PeopleInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   mergeRecommendationsRight?: boolean | Prisma.People$mergeRecommendationsRightArgs<ExtArgs>
   enrichQueue?: boolean | Prisma.People$enrichQueueArgs<ExtArgs>
   interactionsLast?: boolean | Prisma.People$interactionsLastArgs<ExtArgs>
+  vcardExtras?: boolean | Prisma.People$vcardExtrasArgs<ExtArgs>
   _count?: boolean | Prisma.PeopleCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type PeopleIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -4503,6 +4766,7 @@ export type $PeoplePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     mergeRecommendationsRight: Prisma.$PeopleMergeRecommendationPayload<ExtArgs>[]
     enrichQueue: Prisma.$LinkedinEnrichQueuePayload<ExtArgs>[]
     interactionsLast: Prisma.$InteractionPayload<ExtArgs>[]
+    vcardExtras: Prisma.$PeopleVcardExtrasPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -4937,6 +5201,7 @@ export interface Prisma__PeopleClient<T, Null = never, ExtArgs extends runtime.T
   mergeRecommendationsRight<T extends Prisma.People$mergeRecommendationsRightArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.People$mergeRecommendationsRightArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PeopleMergeRecommendationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   enrichQueue<T extends Prisma.People$enrichQueueArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.People$enrichQueueArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LinkedinEnrichQueuePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   interactionsLast<T extends Prisma.People$interactionsLastArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.People$interactionsLastArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InteractionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  vcardExtras<T extends Prisma.People$vcardExtrasArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.People$vcardExtrasArgs<ExtArgs>>): Prisma.Prisma__PeopleVcardExtrasClient<runtime.Types.Result.GetResult<Prisma.$PeopleVcardExtrasPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5759,6 +6024,25 @@ export type People$interactionsLastArgs<ExtArgs extends runtime.Types.Extensions
   take?: number
   skip?: number
   distinct?: Prisma.InteractionScalarFieldEnum | Prisma.InteractionScalarFieldEnum[]
+}
+
+/**
+ * People.vcardExtras
+ */
+export type People$vcardExtrasArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PeopleVcardExtras
+   */
+  select?: Prisma.PeopleVcardExtrasSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PeopleVcardExtras
+   */
+  omit?: Prisma.PeopleVcardExtrasOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PeopleVcardExtrasInclude<ExtArgs> | null
+  where?: Prisma.PeopleVcardExtrasWhereInput
 }
 
 /**

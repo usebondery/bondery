@@ -6,6 +6,7 @@
 import type { RouteOptions } from "fastify";
 import {
   registerApiKeyProtectedHooks,
+  registerDavAuthHooks,
   registerInternalAuthHooks,
   registerSessionAuthHooks,
 } from "./auth/api-key-access.js";
@@ -97,6 +98,18 @@ export function internalRoutes(plugin: AppRoutePlugin): AppRoutePlugin {
   return async (fastify) => {
     fastify.addHook("onRoute", stampOpenApiArea("internal"));
     registerInternalAuthHooks(fastify);
+    await fastify.register(plugin);
+  };
+}
+
+/**
+ * CardDAV routes: HTTP Basic with a device key (`bondery_dav_`), nothing else.
+ * The shell answers 401 with `WWW-Authenticate: Basic` itself. Hidden from OpenAPI.
+ */
+export function davRoutes(plugin: AppRoutePlugin): AppRoutePlugin {
+  return async (fastify) => {
+    fastify.addHook("onRoute", stampOpenApiArea("dav"));
+    registerDavAuthHooks(fastify);
     await fastify.register(plugin);
   };
 }

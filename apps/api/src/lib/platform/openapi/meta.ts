@@ -1,9 +1,14 @@
 import type { FastifySchema, RouteOptions } from "fastify";
 
-type OpenApiRouteArea = "integration" | "session" | "internal";
+type OpenApiRouteArea = "integration" | "session" | "internal" | "dav";
 
 declare module "fastify" {
   interface FastifyContextConfig {
+    /**
+     * `false` skips @fastify/cors for the route: no CORS headers and no strict preflight check.
+     * The plugin reads this key. DAV routes use it, because DAV clients are not browsers.
+     */
+    cors?: false;
     /**
      * When false, a present Idempotency-Key is rejected.
      * SSE routes cannot store a body to replay.
@@ -33,6 +38,12 @@ export function applyOpenApiRouteMeta(
     ...routeOptions.config,
     openApiArea: options.area,
   };
+
+  // DAV routes speak WebDAV, not JSON. They stay out of the published OpenAPI document.
+  if (options.area === "dav") {
+    routeOptions.schema = { ...routeOptions.schema, hide: true };
+    return;
+  }
 
   if (!routeOptions.schema) {
     return;

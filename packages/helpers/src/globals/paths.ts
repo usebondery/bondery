@@ -119,6 +119,7 @@ export const API_ROUTES = {
   CONTACTS_SELECT: "/contacts/select",
   CONTACTS_SHARE: "/contacts/share",
   CONTACTS_UPCOMING_REMINDERS: "/contacts/important-dates/upcoming",
+  DAV: "/dav",
   DOCS_API: "/docs/api",
   EXTENSION: "/extension",
   GEOCODE: "/geocode",
@@ -158,6 +159,7 @@ export const API_ROUTES = {
   SYNC_WS_TICKET: "/sync/ws-ticket",
   TAGS: "/tags",
   WEBHOOKS_STRIPE: "/webhooks/stripe",
+  WELL_KNOWN_CARDDAV: "/.well-known/carddav",
   WELL_KNOWN_MCP: "/.well-known/mcp",
 } as const;
 
