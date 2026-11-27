@@ -1,10 +1,11 @@
 "use client";
 
-import { BRAND_MARKS, type BrandMarkName, THEMED_BRAND_MARKS } from "@bondery/branding";
+import type { BrandMarkName } from "@bondery/branding";
 import { CodeHighlight } from "@mantine/code-highlight";
 import { Box, Group, SegmentedControl, Text } from "@mantine/core";
 import { type UseOSReturnValue, useOs } from "@mantine/hooks";
 import { type ReactElement, type ReactNode, useState } from "react";
+import { BrandMark } from "#BrandMark/index.js";
 import { setCodeBlockPlatform } from "#CodeBlock/platformPreference.js";
 import { setCodeBlockSnippet } from "#CodeBlock/snippetPreference.js";
 import { useCodeBlockPlatform } from "#CodeBlock/useCodeBlockPlatform.js";
@@ -53,8 +54,6 @@ const PLATFORM_LANGUAGES: Record<CodeBlockPlatform, string> = {
   windows: "powershell",
 };
 
-const MARK_SIZE_PX = 14;
-
 /** Maps a Mantine OS value to a platform tab. `undefined` means "no guess". */
 function platformForOs(os: UseOSReturnValue): CodeBlockPlatform | undefined {
   switch (os) {
@@ -74,52 +73,6 @@ function platformForOs(os: UseOSReturnValue): CodeBlockPlatform | undefined {
 
 function PlatformMark({ platform }: { platform: CodeBlockPlatform }) {
   return <BrandMark name={PLATFORM_MARKS[platform]} />;
-}
-
-/**
- * A brand mark at icon size. Marks with a light and a dark file render both, and
- * Mantine shows the one that matches the color scheme, so a dark logo never sits
- * on a dark surface. Callers pass it as a snippet `icon`.
- */
-function BrandMark({ name }: { name: BrandMarkName }): ReactElement {
-  if (name in THEMED_BRAND_MARKS) {
-    const themed = THEMED_BRAND_MARKS[name as keyof typeof THEMED_BRAND_MARKS];
-
-    return (
-      <>
-        <MarkImage darkHidden src={themed.light} />
-        <MarkImage lightHidden src={themed.dark} />
-      </>
-    );
-  }
-
-  return (
-    <MarkImage src={BRAND_MARKS[name as Exclude<BrandMarkName, keyof typeof THEMED_BRAND_MARKS>]} />
-  );
-}
-
-type MarkImageProps = {
-  darkHidden?: boolean;
-  lightHidden?: boolean;
-  src: string;
-};
-
-function MarkImage({ darkHidden, lightHidden, src }: MarkImageProps) {
-  return (
-    <Box
-      alt=""
-      component="img"
-      darkHidden={darkHidden}
-      height={MARK_SIZE_PX}
-      lightHidden={lightHidden}
-      src={src}
-      // No inline `display`: it would override the Mantine rule that hides the
-      // other theme's file. The parent is a flex container, so the image is
-      // blockified and adds no baseline gap.
-      style={{ flexShrink: 0, objectFit: "contain" }}
-      width={MARK_SIZE_PX}
-    />
-  );
 }
 
 /** Builds the tab list in fixed order and skips platforms without code. */
@@ -399,7 +352,6 @@ export function CodeBlock(props: CodeBlockProps): ReactElement {
 }
 
 export type { CodeBlockPlatform, CodeBlockSnippet };
-export { BrandMark };
 
 export interface CodeBlockSingleProps extends CodeBlockBaseProps {
   code: string;

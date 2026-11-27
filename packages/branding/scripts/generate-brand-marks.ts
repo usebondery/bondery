@@ -19,7 +19,7 @@ const OUT_FILE = join(__dirname, "../src/brandMarks.generated.ts");
 const MARK_SIZE_PX = 42;
 
 /** Marks that read on both themes, so one file is enough. */
-const MARKS = ["windows", "apple", "linux", "javascript", "python"];
+const MARKS = ["windows", "apple", "linux", "javascript", "python", "android", "thunderbird"];
 
 /**
  * Marks with a light-theme file and an inverse file for the dark theme.

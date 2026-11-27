@@ -1,5 +1,4 @@
 export {
-  BrandMark,
   CodeBlock,
   type CodeBlockMultiProps,
   type CodeBlockPlatform,

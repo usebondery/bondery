@@ -7,7 +7,8 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "cn": "^0.5.2",
-    "highlight.js": "^11.12.0"
+    "highlight.js": "^11.12.0",
+    "qrcode.react": "4.2.0"
   },
   "devDependencies": {
     "@bondery/typescript-config": "workspace:*",
@@ -42,6 +43,12 @@
       "node": "./dist/ActionIconButton/index.js",
       "types": "./src/ActionIconButton/index.ts"
     },
+    "./BrandMark": {
+      "default": "./dist/BrandMark/index.js",
+      "import": "./dist/BrandMark/index.js",
+      "node": "./dist/BrandMark/index.js",
+      "types": "./src/BrandMark/index.ts"
+    },
     "./ClockTime": {
       "default": "./dist/ClockTime/index.js",
       "import": "./dist/ClockTime/index.js",
@@ -59,6 +66,12 @@
       "import": "./dist/CopyButton/index.js",
       "node": "./dist/CopyButton/index.js",
       "types": "./src/CopyButton/index.ts"
+    },
+    "./CopyableInput": {
+      "default": "./dist/CopyableInput/index.js",
+      "import": "./dist/CopyableInput/index.js",
+      "node": "./dist/CopyableInput/index.js",
+      "types": "./src/CopyableInput/index.ts"
     },
     "./CornerLabeledButton": {
       "default": "./dist/CornerLabeledButton/index.js",
@@ -168,11 +181,23 @@
       "node": "./dist/PersonChip/index.js",
       "types": "./src/PersonChip/index.ts"
     },
+    "./PlatformTabs": {
+      "default": "./dist/PlatformTabs/index.js",
+      "import": "./dist/PlatformTabs/index.js",
+      "node": "./dist/PlatformTabs/index.js",
+      "types": "./src/PlatformTabs/index.ts"
+    },
     "./PressableCard": {
       "default": "./dist/PressableCard/index.js",
       "import": "./dist/PressableCard/index.js",
       "node": "./dist/PressableCard/index.js",
       "types": "./src/PressableCard/index.ts"
+    },
+    "./QrCode": {
+      "default": "./dist/QrCode/index.js",
+      "import": "./dist/QrCode/index.js",
+      "node": "./dist/QrCode/index.js",
+      "types": "./src/QrCode/index.ts"
     },
     "./SearchTrigger": {
       "default": "./dist/SearchTrigger/index.js",
@@ -215,6 +240,12 @@
       "import": "./dist/nextjs/AnchorLink/index.js",
       "node": "./dist/nextjs/AnchorLink/index.js",
       "types": "./src/nextjs/AnchorLink/index.ts"
+    },
+    "./nextjs/BrandTileLink": {
+      "default": "./dist/nextjs/BrandTileLink/index.js",
+      "import": "./dist/nextjs/BrandTileLink/index.js",
+      "node": "./dist/nextjs/BrandTileLink/index.js",
+      "types": "./src/nextjs/BrandTileLink/index.ts"
     },
     "./nextjs/ButtonLink": {
       "default": "./dist/nextjs/ButtonLink/index.js",
@@ -263,6 +294,12 @@
       "import": "./dist/ActionIconButton/actionIconGraphic.js",
       "node": "./dist/ActionIconButton/actionIconGraphic.js",
       "types": "./src/ActionIconButton/actionIconGraphic.tsx"
+    },
+    "./BrandMark/BrandMark": {
+      "default": "./dist/BrandMark/BrandMark.js",
+      "import": "./dist/BrandMark/BrandMark.js",
+      "node": "./dist/BrandMark/BrandMark.js",
+      "types": "./src/BrandMark/BrandMark.tsx"
     },
     "./ClockTime/ClockTime": {
       "default": "./dist/ClockTime/ClockTime.js",
@@ -323,6 +360,24 @@
       "import": "./dist/CopyButton/CopyButton.js",
       "node": "./dist/CopyButton/CopyButton.js",
       "types": "./src/CopyButton/CopyButton.tsx"
+    },
+    "./CopyableInput/CopyableInput": {
+      "default": "./dist/CopyableInput/CopyableInput.js",
+      "import": "./dist/CopyableInput/CopyableInput.js",
+      "node": "./dist/CopyableInput/CopyableInput.js",
+      "types": "./src/CopyableInput/CopyableInput.tsx"
+    },
+    "./CopyableInput/inputType": {
+      "default": "./dist/CopyableInput/inputType.js",
+      "import": "./dist/CopyableInput/inputType.js",
+      "node": "./dist/CopyableInput/inputType.js",
+      "types": "./src/CopyableInput/inputType.ts"
+    },
+    "./CopyableInput/inputType.test": {
+      "default": "./dist/CopyableInput/inputType.test.js",
+      "import": "./dist/CopyableInput/inputType.test.js",
+      "node": "./dist/CopyableInput/inputType.test.js",
+      "types": "./src/CopyableInput/inputType.test.ts"
     },
     "./CornerLabeledButton/CornerLabeledButton": {
       "default": "./dist/CornerLabeledButton/CornerLabeledButton.js",
@@ -516,6 +571,12 @@
       "node": "./dist/Notifications/LoadingNotificationTemplate.js",
       "types": "./src/Notifications/LoadingNotificationTemplate.ts"
     },
+    "./Notifications/NotificationMessage": {
+      "default": "./dist/Notifications/NotificationMessage.js",
+      "import": "./dist/Notifications/NotificationMessage.js",
+      "node": "./dist/Notifications/NotificationMessage.js",
+      "types": "./src/Notifications/NotificationMessage.tsx"
+    },
     "./Notifications/StatusNotificationTemplate": {
       "default": "./dist/Notifications/StatusNotificationTemplate.js",
       "import": "./dist/Notifications/StatusNotificationTemplate.js",
@@ -534,17 +595,11 @@
       "node": "./dist/Notifications/WarningNotificationTemplate.js",
       "types": "./src/Notifications/WarningNotificationTemplate.ts"
     },
-    "./nextjs/BrandTileLink": {
-      "default": "./dist/nextjs/BrandTileLink/index.js",
-      "import": "./dist/nextjs/BrandTileLink/index.js",
-      "node": "./dist/nextjs/BrandTileLink/index.js",
-      "types": "./src/nextjs/BrandTileLink/index.ts"
-    },
-    "./nextjs/BrandTileLink/BrandTileLink": {
-      "default": "./dist/nextjs/BrandTileLink/BrandTileLink.js",
-      "import": "./dist/nextjs/BrandTileLink/BrandTileLink.js",
-      "node": "./dist/nextjs/BrandTileLink/BrandTileLink.js",
-      "types": "./src/nextjs/BrandTileLink/BrandTileLink.tsx"
+    "./Notifications/buildNotificationPayload": {
+      "default": "./dist/Notifications/buildNotificationPayload.js",
+      "import": "./dist/Notifications/buildNotificationPayload.js",
+      "node": "./dist/Notifications/buildNotificationPayload.js",
+      "types": "./src/Notifications/buildNotificationPayload.tsx"
     },
     "./PeopleMultiPickerInput/PeopleMultiPickerInput": {
       "default": "./dist/PeopleMultiPickerInput/PeopleMultiPickerInput.js",
@@ -564,11 +619,35 @@
       "node": "./dist/PersonChip/personChipLayout.js",
       "types": "./src/PersonChip/personChipLayout.ts"
     },
+    "./PlatformTabs/PlatformTabs": {
+      "default": "./dist/PlatformTabs/PlatformTabs.js",
+      "import": "./dist/PlatformTabs/PlatformTabs.js",
+      "node": "./dist/PlatformTabs/PlatformTabs.js",
+      "types": "./src/PlatformTabs/PlatformTabs.tsx"
+    },
+    "./PlatformTabs/resolvePlatformTab": {
+      "default": "./dist/PlatformTabs/resolvePlatformTab.js",
+      "import": "./dist/PlatformTabs/resolvePlatformTab.js",
+      "node": "./dist/PlatformTabs/resolvePlatformTab.js",
+      "types": "./src/PlatformTabs/resolvePlatformTab.ts"
+    },
+    "./PlatformTabs/resolvePlatformTab.test": {
+      "default": "./dist/PlatformTabs/resolvePlatformTab.test.js",
+      "import": "./dist/PlatformTabs/resolvePlatformTab.test.js",
+      "node": "./dist/PlatformTabs/resolvePlatformTab.test.js",
+      "types": "./src/PlatformTabs/resolvePlatformTab.test.ts"
+    },
     "./PressableCard/PressableCard": {
       "default": "./dist/PressableCard/PressableCard.js",
       "import": "./dist/PressableCard/PressableCard.js",
       "node": "./dist/PressableCard/PressableCard.js",
       "types": "./src/PressableCard/PressableCard.tsx"
+    },
+    "./QrCode/QrCode": {
+      "default": "./dist/QrCode/QrCode.js",
+      "import": "./dist/QrCode/QrCode.js",
+      "node": "./dist/QrCode/QrCode.js",
+      "types": "./src/QrCode/QrCode.tsx"
     },
     "./SearchTrigger/SearchTrigger": {
       "default": "./dist/SearchTrigger/SearchTrigger.js",
@@ -617,6 +696,12 @@
       "import": "./dist/nextjs/AnchorLink/AnchorLink.js",
       "node": "./dist/nextjs/AnchorLink/AnchorLink.js",
       "types": "./src/nextjs/AnchorLink/AnchorLink.tsx"
+    },
+    "./nextjs/BrandTileLink/BrandTileLink": {
+      "default": "./dist/nextjs/BrandTileLink/BrandTileLink.js",
+      "import": "./dist/nextjs/BrandTileLink/BrandTileLink.js",
+      "node": "./dist/nextjs/BrandTileLink/BrandTileLink.js",
+      "types": "./src/nextjs/BrandTileLink/BrandTileLink.tsx"
     },
     "./nextjs/ButtonLink/ButtonLink": {
       "default": "./dist/nextjs/ButtonLink/ButtonLink.js",

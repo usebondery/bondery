@@ -446,3 +446,20 @@ button:active .card-press-effect {
   filter: var(--active-filter);
   transform: scale(var(--scale-shrink));
 }
+
+/* PlatformTabs: the tab list scrolls sideways on a phone and labels never wrap. */
+.platformTabsList {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.platformTabsTab {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* CopyableInput: monospace for URLs, hosts and codes. */
+.copyableInputMonospace {
+  font-family: var(--mantine-font-family-monospace);
+}

@@ -6,9 +6,9 @@ export {
   normalizeActionIconGraphicChild,
   renderActionIconGraphic,
 } from "#ActionIconButton/index.js";
+export { BrandMark, type BrandMarkProps } from "#BrandMark/index.js";
 export { ClockTime, type ClockTimeProps } from "#ClockTime/index.js";
 export {
-  BrandMark,
   CODE_BLOCK_PLATFORM_COOKIE,
   CODE_BLOCK_SNIPPET_COOKIE,
   CodeBlock,
@@ -30,6 +30,11 @@ export {
   useCodeBlockPlatform,
   useCodeBlockSnippet,
 } from "#CodeBlock/index.js";
+export {
+  CopyableInput,
+  type CopyableInputProps,
+  resolveCopyableInputType,
+} from "#CopyableInput/index.js";
 export { CopyButton, type CopyButtonProps } from "#CopyButton/index.js";
 export {
   CornerLabeledButton,
@@ -138,6 +143,13 @@ export {
   personChipBadgeStyles,
   personChipSizes,
 } from "#PersonChip/index.js";
+export {
+  type PlatformTabItem,
+  type PlatformTabOsDefaults,
+  PlatformTabs,
+  type PlatformTabsProps,
+  resolvePlatformTab,
+} from "#PlatformTabs/index.js";
 export { PressableCard, type PressableCardProps } from "#PressableCard/index.js";
 export {
   PEOPLE_PICKER_DROPDOWN_MAX_HEIGHT,
@@ -167,6 +179,7 @@ export {
   shouldLoadMoreOnArrowDown,
 } from "#peoplePicker/peoplePickerPagedList.js";
 export { usePeoplePickerPagedList } from "#peoplePicker/usePeoplePickerPagedList.js";
+export { QrCode, type QrCodeProps } from "#QrCode/index.js";
 export { SearchTrigger, type SearchTriggerProps } from "#SearchTrigger/index.js";
 export { ThemePicker, type ThemePickerProps, type ThemePreference } from "#ThemePicker/index.js";
 export {
