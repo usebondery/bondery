@@ -25666,7 +25666,8 @@ paths:
                     maximum: 9007199254740991
                     description: Next server sequence the client should pull from
                   requiresBootstrap:
-                    description: True when the client must run bootstrap before pull
+                    description: "True when the client must run bootstrap before pull: its cursor is above the server head, or below the
+                      user's bootstrap floor"
                     type: boolean
                 required:
                   - batches
