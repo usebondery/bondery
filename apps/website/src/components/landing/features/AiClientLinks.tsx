@@ -1,6 +1,7 @@
 "use client";
 
 import { ANTHROPIC_BRAND_COLOR, CHATGPT_TILE_COLOR, DARK_TILE_COLOR } from "@bondery/branding";
+import { CLAUDE_DIRECTORY_URL } from "@bondery/helpers";
 import { BrandTileLink, type BrandTileLinkProps } from "@bondery/mantine-next";
 import landing from "@bondery/translations/locales/en/platform/website/WebsiteLanding.json" with {
   type: "json",
@@ -17,7 +18,7 @@ const TILE_GLYPH_SCALE = 0.58;
 type ClientLink = Omit<BrandTileLinkProps, "glyphScale" | "size">;
 
 /*
- * Claude goes to its connector settings. Everything else goes to the MCP docs: MCP
+ * Claude goes to its connector directory page. Everything else goes to the MCP docs: MCP
  * itself, and the "Other assistants" section for the clients that are not Claude.
  *
  * Each tile uses the product's real logo on its brand colour (marks from Dashboard Icons and
@@ -29,7 +30,7 @@ const CLIENT_LINKS: readonly ClientLink[] = [
     background: ANTHROPIC_BRAND_COLOR,
     external: true,
     glyph: { color: "#FFFFFF", kind: "mask", src: "/images/brands/claude-ai.svg" },
-    href: "https://claude.ai/customize/connectors",
+    href: CLAUDE_DIRECTORY_URL,
     label: "Claude",
   },
   {

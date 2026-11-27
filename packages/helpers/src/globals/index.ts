@@ -22,6 +22,7 @@ export {
   betterAuthProtectedResourceMetadataPaths,
   CHANGELOG_URL,
   CHROME_EXTENSION_URL,
+  CLAUDE_DIRECTORY_URL,
   DOCS_GITHUB_BLOB_BASE,
   formatMetadataTitle,
   GITHUB_BLOB_BASE,

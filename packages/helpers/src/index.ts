@@ -63,6 +63,7 @@ export {
   betterAuthProtectedResourceMetadataPaths,
   CHANGELOG_URL,
   CHROME_EXTENSION_URL,
+  CLAUDE_DIRECTORY_URL,
   contactsPathWithGroupId,
   DOCS_GITHUB_BLOB_BASE,
   formatLegalAddressLine,

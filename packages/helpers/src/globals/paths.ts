@@ -237,6 +237,9 @@ export function formatMetadataTitle(pageTitle: string): string {
   return `${pageTitle} ${METADATA_TITLE_DIVIDER} ${WEBAPP_NAME}`;
 }
 
+/** Bondery plugin page in the Claude connector directory. */
+export const CLAUDE_DIRECTORY_URL = "https://claude.ai/directory/bondery";
+
 export const SOCIAL_LINKS = {
   discord: "https://discord.gg/vsTAMBMwxx",
   github: "https://github.com/usebondery/bondery",
