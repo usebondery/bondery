@@ -62,6 +62,11 @@ services:
       - traefik.enable=true
       - traefik.http.routers.bondery-plausible.rule=Host(`${BONDERY_INFRA_PLAUSIBLE_DOMAIN:?BONDERY_INFRA_PLAUSIBLE_DOMAIN must be set}`)
       - traefik.http.routers.bondery-plausible.entrypoints=websecure
+      - traefik.http.routers.bondery-plausible-http.rule=Host(`${BONDERY_INFRA_PLAUSIBLE_DOMAIN:?BONDERY_INFRA_PLAUSIBLE_DOMAIN must be set}`)
+      - traefik.http.routers.bondery-plausible-http.entrypoints=web
+      - traefik.http.routers.bondery-plausible-http.middlewares=bondery-plausible-https
+      - traefik.http.middlewares.bondery-plausible-https.redirectscheme.scheme=https
+      - traefik.http.middlewares.bondery-plausible-https.redirectscheme.permanent=true
       - traefik.http.routers.bondery-plausible.tls.certResolver=letsencrypt
       - traefik.http.routers.bondery-plausible.service=bondery-plausible
       - traefik.http.services.bondery-plausible.loadbalancer.server.port=80

@@ -41,6 +41,11 @@ services:
       - traefik.enable=true
       - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-website.rule=Host(`${BONDERY_INFRA_WEBSITE_DOMAIN:?BONDERY_INFRA_WEBSITE_DOMAIN must be set}`)"
       - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-website.entrypoints=websecure"
+      - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-website-http.rule=Host(`${BONDERY_INFRA_WEBSITE_DOMAIN:?BONDERY_INFRA_WEBSITE_DOMAIN must be set}`)"
+      - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-website-http.entrypoints=web"
+      - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-website-http.middlewares=${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-website-https"
+      - "traefik.http.middlewares.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-website-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-website-https.redirectscheme.permanent=true"
       - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-website.tls.certResolver=letsencrypt"
       - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-website.service=${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-website"
       - "traefik.http.services.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-website.loadbalancer.server.port=26630"

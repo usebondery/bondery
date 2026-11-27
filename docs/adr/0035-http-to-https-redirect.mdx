@@ -1,0 +1,36 @@
+---
+title: "ADR 0035: HTTP to HTTPS redirect"
+hidden: true
+last_updated: 2026-11-27
+description: Every public HTTPS service gets a Traefik router on the web entrypoint with a permanent redirectScheme middleware, so plain HTTP requests are upgraded instead of hitting Traefik's 404. The Dokploy host Traefik also redirects at the entrypoint level.
+---
+
+# ADR 0035: HTTP to HTTPS redirect
+
+**Status:** Accepted
+**Date:** 2026-11-27
+
+## Context
+
+Traefik serves every public domain only on the `websecure` (443) entrypoint. A request that arrives on port 80 matches no router and gets Traefik's bare 404.
+
+Desktop browsers masked this. HTTPS-First mode and HSTS auto-upgrade turn `https://` navigations into TLS before the first request, so users rarely saw the 404. Mobile browsers that send plain `http://usebondery.com` got the 404 directly.
+
+Two places can fix this, and they live in different layers:
+
+- The Dokploy host's `/etc/dokploy/traefik/traefik.yml` sits outside the repo, so its change cannot ship to self-hosters.
+- The compose files under `deploy/` are version-controlled and reach both production and self-hosters.
+
+## Decision
+
+Two layers, each covering the other's gap.
+
+1. **Host-level redirect on Dokploy.** `/etc/dokploy/traefik/traefik.yml` (outside the repo) gained `http.redirections.entryPoint` under `entryPoints.web` (`to: websecure`, `scheme: https`, `permanent: true`), and `certificatesResolvers.letsencrypt.acme` switched from `httpChallenge` to `tlsChallenge: {}`. The entrypoint redirect fires before any router, so it covers every current and future host on that Traefik. TLS-ALPN-01 keeps certificate issuance working without an HTTP-01 listener.
+
+2. **Repo fallback in compose labels.** Every compose service with a public `websecure` router also carries five Traefik labels: a `<svc>-http` router bound to the `web` entrypoint with the same `Host()` rule as the `websecure` router, a `<svc>-https` `redirectScheme` middleware (`scheme=https`, `permanent=true`), and the router's `middlewares` link. The routers carry no `service=` or `tls` labels; they only redirect, never proxy. This is the portable mechanism: self-hosters running their own Traefik get the redirect from the labels alone, and any new production service inherits it by following the same pattern. On Dokploy the labels are redundant but inert, because the entrypoint redirect fires first.
+
+## Consequences
+
+- HTTP to HTTPS is guaranteed at two layers: the host entrypoint redirect for anything on the Dokploy Traefik, and per-service labels for self-hosted Traefik and future services.
+- The labels are the version-controlled, reviewable mechanism; `deploy/*/scripts/check-compose.mjs` asserts each public service carries them.
+- The host file change is documented here because it lives outside the repo and cannot be reviewed or shipped from it.

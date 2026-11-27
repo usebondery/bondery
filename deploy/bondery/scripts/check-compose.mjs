@@ -3,6 +3,7 @@
  * Mechanical checks for deploy/bondery compose:
  * - webapp must never receive PRIVATE_* / BONDERY_PRIVATE_* secrets (except allowed PostHog)
  * - api and webapp must carry Traefik Host() rules and derive public URLs from domains
+ * - every public service must redirect HTTP to HTTPS (web-entrypoint router + redirectScheme)
  * - redis must not carry Traefik labels or join dokploy-network
  * - redis must require TLS and a password in every stack variant; api must connect with both
  * - db must require TLS (wrapper, hba file that rejects plaintext); api must verify it against
@@ -165,6 +166,21 @@ function main() {
     return next === -1 ? source.slice(start) : source.slice(start, start + 1 + next);
   }
 
+  /** Assert a public service redirects plain HTTP to HTTPS via a web-entrypoint router. */
+  function checkHttpRedirect(block, name) {
+    if (!new RegExp(`-${name}-http\\.entrypoints=web`).test(block)) {
+      errors.push(
+        `${name} must route HTTP to HTTPS (traefik -${name}-http router on entrypoints=web)`,
+      );
+    }
+    if (!new RegExp(`-${name}-https\\.redirectscheme\\.scheme=https`).test(block)) {
+      errors.push(`${name} must define a redirectScheme middleware to https`);
+    }
+    if (!new RegExp(`-${name}-https\\.redirectscheme\\.permanent=true`).test(block)) {
+      errors.push(`${name} redirectScheme middleware must be permanent`);
+    }
+  }
+
   const webapp = serviceBlock("webapp", mainText);
   const api = serviceBlock("api", mainText);
   const redis = serviceBlock("redis", mainText);
@@ -228,6 +244,7 @@ function main() {
         "webapp must derive BONDERY_PUBLIC_API_URL from https:// + BONDERY_INFRA_API_DOMAIN",
       );
     }
+    checkHttpRedirect(webapp, "webapp");
   }
 
   if (api) {
@@ -291,6 +308,7 @@ function main() {
     if (!api.includes("apps/api/dist/cli/ensure-storage-buckets.js")) {
       errors.push("api pre_start must run ensure-storage-buckets CLI");
     }
+    checkHttpRedirect(api, "api");
   }
 
   if (redis) {
@@ -339,10 +357,13 @@ function main() {
     }
   }
 
-  if (s3 && !STORAGE_NETWORK_ALIAS_RE.test(s3)) {
-    errors.push(
-      "seaweedfs-s3 must publish a unique dokploy-network alias from BONDERY_INFRA_TRAEFIK_PREFIX",
-    );
+  if (s3) {
+    if (!STORAGE_NETWORK_ALIAS_RE.test(s3)) {
+      errors.push(
+        "seaweedfs-s3 must publish a unique dokploy-network alias from BONDERY_INFRA_TRAEFIK_PREFIX",
+      );
+    }
+    checkHttpRedirect(s3, "storage");
   }
 
   for (const name of ["seaweedfs-master", "seaweedfs-volume", "seaweedfs-filer"]) {

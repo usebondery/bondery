@@ -135,6 +135,11 @@ services:
       - traefik.enable=true
       - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage.rule=Host(`${BONDERY_INFRA_STORAGE_DOMAIN:-storage.localhost}`) && (Method(`GET`) || Method(`HEAD`) || Method(`OPTIONS`))"
       - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage.entrypoints=websecure"
+      - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage-http.rule=Host(`${BONDERY_INFRA_STORAGE_DOMAIN:-storage.localhost}`) && (Method(`GET`) || Method(`HEAD`) || Method(`OPTIONS`))"
+      - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage-http.entrypoints=web"
+      - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage-http.middlewares=${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage-https"
+      - "traefik.http.middlewares.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage-https.redirectscheme.permanent=true"
       - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage.tls.certResolver=letsencrypt"
       - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage.middlewares=${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage-public-read"
       - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage.service=${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage"

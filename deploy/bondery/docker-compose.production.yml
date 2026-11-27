@@ -245,6 +245,11 @@ services:
       - traefik.enable=true
       - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api.rule=Host(`${BONDERY_INFRA_API_DOMAIN:?BONDERY_INFRA_API_DOMAIN must be set}`)"
       - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api.entrypoints=websecure"
+      - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api-http.rule=Host(`${BONDERY_INFRA_API_DOMAIN:?BONDERY_INFRA_API_DOMAIN must be set}`)"
+      - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api-http.entrypoints=web"
+      - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api-http.middlewares=${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api-https"
+      - "traefik.http.middlewares.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api-https.redirectscheme.permanent=true"
       - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api.tls.certResolver=letsencrypt"
       - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api.service=${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api"
       # Traefik forwards over HTTPS and verifies the API CA (traefik-transport job above).
@@ -307,6 +312,11 @@ services:
       - traefik.enable=true
       - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-webapp.rule=Host(`${BONDERY_INFRA_WEBAPP_DOMAIN:?BONDERY_INFRA_WEBAPP_DOMAIN must be set}`)"
       - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-webapp.entrypoints=websecure"
+      - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-webapp-http.rule=Host(`${BONDERY_INFRA_WEBAPP_DOMAIN:?BONDERY_INFRA_WEBAPP_DOMAIN must be set}`)"
+      - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-webapp-http.entrypoints=web"
+      - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-webapp-http.middlewares=${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-webapp-https"
+      - "traefik.http.middlewares.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-webapp-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-webapp-https.redirectscheme.permanent=true"
       - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-webapp.tls.certResolver=letsencrypt"
       - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-webapp.service=${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-webapp"
       - "traefik.http.services.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-webapp.loadbalancer.server.port=26632"

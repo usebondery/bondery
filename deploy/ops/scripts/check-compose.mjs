@@ -28,6 +28,9 @@ const PUBLIC_PLAUSIBLE_HOST_RE =
   /BONDERY_PUBLIC_PLAUSIBLE_HOST:\s*https:\/\/\$\{BONDERY_INFRA_PLAUSIBLE_DOMAIN/;
 const WEBSITE_IMAGE_TAG_RE =
   /image:\s*ghcr\.io\/usebondery\/website:\$\{BONDERY_INFRA_WEBSITE_IMAGE_TAG:-production\}/;
+const WEBSITE_HTTP_ENTRYPOINT_RE = /-website-http\.entrypoints=web/;
+const WEBSITE_HTTPS_SCHEME_RE = /-website-https\.redirectscheme\.scheme=https/;
+const WEBSITE_HTTPS_PERMANENT_RE = /-website-https\.redirectscheme\.permanent=true/;
 const DOKPLOY_NETWORK_RE = /dokploy-network/;
 
 function main() {
@@ -104,6 +107,14 @@ function main() {
       errors.push(
         "website must derive BONDERY_PUBLIC_PLAUSIBLE_HOST from https:// + BONDERY_INFRA_PLAUSIBLE_DOMAIN",
       );
+    }
+    if (!WEBSITE_HTTP_ENTRYPOINT_RE.test(website)) {
+      errors.push(
+        "website must route HTTP to HTTPS (traefik -website-http router on entrypoints=web)",
+      );
+    }
+    if (!WEBSITE_HTTPS_SCHEME_RE.test(website) || !WEBSITE_HTTPS_PERMANENT_RE.test(website)) {
+      errors.push("website must define a permanent redirectScheme middleware to https");
     }
     if (!WEBSITE_IMAGE_TAG_RE.test(website)) {
       errors.push(
