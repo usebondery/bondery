@@ -51,7 +51,7 @@ async function persistPeopleLastInteractionChanges(ctx: DomainContext, personIds
     return;
   }
 
-  await persistSyncChanges(ctx.user.id, changes, syncEmitMetaFromContext(ctx));
+  await persistSyncChanges(ctx.user.id, changes, syncEmitMetaFromContext(ctx), domainDb(ctx));
 }
 
 async function updateParticipantLastInteraction(

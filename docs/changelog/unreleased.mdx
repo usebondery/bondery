@@ -8,6 +8,7 @@ last_updated: 2026-11-27
 
 ### 🐛 Fixed
 
+- Mobile app: it could miss a change when two edits to the same account were saved at the same moment. It now receives every change.
 - Chrome extension: the API now blocks an outdated extension even when it is signed in. Before, the version check gave up as soon as a request carried a sign-in token, so an old extension kept working against a newer API. An extension below the minimum version now gets "update required", and it can still read `/extension/manifest` to show the update prompt.
 - Chrome extension: `/extension/manifest` answers again without a sign-in. It sat behind the session check, so the extension's update nudge never received an answer.
 - Mobile app: live sync over WebSocket can connect again. The connection carries only its one-time ticket, and a global check rejected it for having no sign-in token before the ticket was read. The app fell back to slower polling.

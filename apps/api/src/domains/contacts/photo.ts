@@ -52,9 +52,9 @@ export async function uploadContactPhoto(
 
   const peopleChange = await buildPeopleRowChange(user.id, contactId, db);
   const changes = peopleChange ? [peopleChange] : [];
-  const txid = await captureCurrentSyncTxid();
+  const txid = await captureCurrentSyncTxid(domainDb(ctx));
   const serverSequence =
-    (await persistSyncChanges(user.id, changes, syncEmitMetaFromContext(ctx))) ?? 0;
+    (await persistSyncChanges(user.id, changes, syncEmitMetaFromContext(ctx), domainDb(ctx))) ?? 0;
 
   const person = await db.people.findFirst({
     select: { avatarUpdatedAt: true },
@@ -85,9 +85,9 @@ export async function deleteContactPhoto(
 
   const peopleChange = await buildPeopleRowChange(user.id, contactId, db);
   const changes = peopleChange ? [peopleChange] : [];
-  const txid = await captureCurrentSyncTxid();
+  const txid = await captureCurrentSyncTxid(domainDb(ctx));
   const serverSequence =
-    (await persistSyncChanges(user.id, changes, syncEmitMetaFromContext(ctx))) ?? 0;
+    (await persistSyncChanges(user.id, changes, syncEmitMetaFromContext(ctx), domainDb(ctx))) ?? 0;
 
   return { data: { success: true }, serverSequence, txid };
 }

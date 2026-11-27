@@ -80,7 +80,7 @@ export async function mergeContacts(
   if (mergePeople.status === "already_merged") {
     const survivorId = mergePeople.survivor.id;
     const contact = await loadEnrichedContact(db, user.id, survivorId, undefined, log);
-    const txid = await captureCurrentSyncTxid();
+    const txid = await captureCurrentSyncTxid(domainDb(ctx));
     return {
       data: {
         contact,
@@ -205,13 +205,14 @@ export async function mergeContacts(
     userId: user.id,
   };
 
-  const txid = await captureCurrentSyncTxid();
+  const txid = await captureCurrentSyncTxid(domainDb(ctx));
   let serverSequence = 0;
   try {
     const snapshotChanges = await buildContactSnapshotChanges(user.id, leftPersonId, db);
     const changes = [...snapshotChanges, buildPeopleDeleteChange(rightPersonId)];
     serverSequence =
-      (await persistSyncChanges(user.id, changes, syncEmitMetaFromContext(ctx))) ?? 0;
+      (await persistSyncChanges(user.id, changes, syncEmitMetaFromContext(ctx), domainDb(ctx))) ??
+      0;
   } catch (error) {
     log?.error({ err: error }, "Failed to persist sync changes after contact merge");
   }

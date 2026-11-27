@@ -82,9 +82,10 @@ export async function replaceImportantDates(
       table: "people_important_dates" as const,
       value: null,
     }));
-    const txid = await captureCurrentSyncTxid();
+    const txid = await captureCurrentSyncTxid(domainDb(ctx));
     const serverSequence =
-      (await persistSyncChanges(user.id, changes, syncEmitMetaFromContext(ctx))) ?? 0;
+      (await persistSyncChanges(user.id, changes, syncEmitMetaFromContext(ctx), domainDb(ctx))) ??
+      0;
     return { data: { dates: [] }, serverSequence, txid };
   }
 
@@ -133,9 +134,9 @@ export async function replaceImportantDates(
     priorIds,
     db,
   );
-  const txid = await captureCurrentSyncTxid();
+  const txid = await captureCurrentSyncTxid(domainDb(ctx));
   const serverSequence =
-    (await persistSyncChanges(user.id, changes, syncEmitMetaFromContext(ctx))) ?? 0;
+    (await persistSyncChanges(user.id, changes, syncEmitMetaFromContext(ctx), domainDb(ctx))) ?? 0;
 
   return {
     data: { dates: insertedRows.map(toImportantDateFromRow) },

@@ -43,7 +43,7 @@ export async function updateContact(
     throw new DomainError("Contact not found", 404, "contact_not_found");
   }
 
-  const { txid } = await withPersonTxid(user.id, async () => ({ personId }));
+  const { txid } = await withPersonTxid(domainDb(ctx), user.id, async () => ({ personId }));
 
   const changes: SyncChange[] = [];
   const peopleChange = await buildPeopleRowChange(user.id, personId, db);

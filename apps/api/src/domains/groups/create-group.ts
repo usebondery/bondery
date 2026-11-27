@@ -36,7 +36,7 @@ export async function createGroup(
 
     const group = toGroupDto(row);
     const syncRow = toSyncRow(row as unknown as Record<string, unknown>);
-    const txid = await captureCurrentSyncTxid();
+    const txid = await captureCurrentSyncTxid(domainDb(ctx));
     const serverSequence =
       (await emitSyncBatch(
         user.id,

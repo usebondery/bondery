@@ -67,7 +67,9 @@ export async function createContact(
     throw internal("contact_contact_was_created_but_could_not_be_rel");
   }
 
-  const { txid } = await withPersonTxid(user.id, async () => ({ personId: newContact.id }));
+  const { txid } = await withPersonTxid(domainDb(ctx), user.id, async () => ({
+    personId: newContact.id,
+  }));
 
   const changes = await buildContactSnapshotChanges(user.id, newContact.id, db);
   const serverSequence = await emitSyncBatch(user.id, changes, syncEmitMetaFromContext(ctx));

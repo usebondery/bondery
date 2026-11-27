@@ -17,8 +17,8 @@ export async function allocateSyncServerSequence(
 }
 
 /** Postgres transaction id for sync (same transaction as surrounding Prisma writes). */
-export async function getCurrentSyncTxid(): Promise<string> {
-  const rows = await prisma.$queryRaw<{ txid: string }[]>`
+export async function getCurrentSyncTxid(db: PrismaClient): Promise<string> {
+  const rows = await db.$queryRaw<{ txid: string }[]>`
     SELECT get_current_sync_txid()::text AS txid
   `;
   const txid = rows[0]?.txid;
@@ -29,8 +29,12 @@ export async function getCurrentSyncTxid(): Promise<string> {
 }
 
 /** Touch `people.updated_at` and return the transaction id for sync. */
-export async function bumpPersonSyncTxid(personId: string, userId: string): Promise<string> {
-  const rows = await prisma.$queryRaw<{ txid: string }[]>`
+export async function bumpPersonSyncTxid(
+  db: PrismaClient,
+  personId: string,
+  userId: string,
+): Promise<string> {
+  const rows = await db.$queryRaw<{ txid: string }[]>`
     SELECT bump_person_updated_at_for_sync(${personId}::uuid, ${userId}::uuid) AS txid
   `;
   const txid = rows[0]?.txid;

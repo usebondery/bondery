@@ -55,7 +55,7 @@ export async function createTag(
 
     const tag = toTagDto(row);
     const syncRow = toSyncRow(row as unknown as Record<string, unknown>);
-    const txid = await captureCurrentSyncTxid();
+    const txid = await captureCurrentSyncTxid(domainDb(ctx));
     const serverSequence =
       (await emitSyncBatch(user.id, [buildTagRowChange(syncRow)], syncEmitMetaFromContext(ctx))) ??
       0;

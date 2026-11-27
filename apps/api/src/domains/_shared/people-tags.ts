@@ -41,10 +41,10 @@ export async function upsertPeopleTagMembership(
   }
 
   const tag = toTagDto(tagRow);
-  const { txid } = await withPersonTxid(user.id, async () => ({ personId }));
+  const { txid } = await withPersonTxid(domainDb(ctx), user.id, async () => ({ personId }));
   const changes = [buildPeopleTagChangeFromRow(toPeopleTagSyncRow(membership))];
   const serverSequence =
-    (await persistSyncChanges(user.id, changes, syncEmitMetaFromContext(ctx))) ?? 0;
+    (await persistSyncChanges(user.id, changes, syncEmitMetaFromContext(ctx), domainDb(ctx))) ?? 0;
 
   return { personId, serverSequence, tag, txid };
 }
@@ -70,7 +70,7 @@ export async function removePeopleTagMembership(
 
   const peopleTagId = membership?.id ?? null;
 
-  const { txid } = await withPersonTxid(user.id, async () => ({ personId }));
+  const { txid } = await withPersonTxid(domainDb(ctx), user.id, async () => ({ personId }));
   const changes = peopleTagId
     ? [
         {
@@ -82,7 +82,7 @@ export async function removePeopleTagMembership(
       ]
     : [];
   const serverSequence =
-    (await persistSyncChanges(user.id, changes, syncEmitMetaFromContext(ctx))) ?? 0;
+    (await persistSyncChanges(user.id, changes, syncEmitMetaFromContext(ctx), domainDb(ctx))) ?? 0;
 
   return { personId, serverSequence, tagId, txid };
 }
@@ -136,9 +136,9 @@ export async function upsertPeopleTagMemberships(
     )
   ).filter((change): change is NonNullable<typeof change> => change !== null);
 
-  const txid = await captureCurrentSyncTxid();
+  const txid = await captureCurrentSyncTxid(domainDb(ctx));
   const serverSequence =
-    (await persistSyncChanges(user.id, changes, syncEmitMetaFromContext(ctx))) ?? 0;
+    (await persistSyncChanges(user.id, changes, syncEmitMetaFromContext(ctx), domainDb(ctx))) ?? 0;
 
   return { addedCount: newPersonIds.length, serverSequence, skippedCount, txid };
 }
@@ -172,9 +172,9 @@ export async function removePeopleTagMemberships(
       value: null,
     }));
 
-  const txid = await captureCurrentSyncTxid();
+  const txid = await captureCurrentSyncTxid(domainDb(ctx));
   const serverSequence =
-    (await persistSyncChanges(user.id, changes, syncEmitMetaFromContext(ctx))) ?? 0;
+    (await persistSyncChanges(user.id, changes, syncEmitMetaFromContext(ctx), domainDb(ctx))) ?? 0;
 
   return { removedCount: deleted.count, serverSequence, txid };
 }

@@ -57,9 +57,9 @@ export async function upsertPeopleGroupMemberships(
     )
   ).filter((change): change is NonNullable<typeof change> => change !== null);
 
-  const txid = await captureCurrentSyncTxid();
+  const txid = await captureCurrentSyncTxid(domainDb(ctx));
   const serverSequence =
-    (await persistSyncChanges(user.id, changes, syncEmitMetaFromContext(ctx))) ?? 0;
+    (await persistSyncChanges(user.id, changes, syncEmitMetaFromContext(ctx), domainDb(ctx))) ?? 0;
 
   return { addedCount: newPersonIds.length, serverSequence, skippedCount, txid };
 }
@@ -93,9 +93,9 @@ export async function removePeopleGroupMemberships(
       value: null,
     }));
 
-  const txid = await captureCurrentSyncTxid();
+  const txid = await captureCurrentSyncTxid(domainDb(ctx));
   const serverSequence =
-    (await persistSyncChanges(user.id, changes, syncEmitMetaFromContext(ctx))) ?? 0;
+    (await persistSyncChanges(user.id, changes, syncEmitMetaFromContext(ctx), domainDb(ctx))) ?? 0;
 
   return { removedCount: personIds.length, serverSequence, txid };
 }

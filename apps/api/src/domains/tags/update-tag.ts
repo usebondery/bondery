@@ -34,7 +34,7 @@ export async function updateTag(
       throw new DomainError("Tag not found", 404, "tag_not_found");
     }
     const tag = toTagDto(existing);
-    const txid = await captureCurrentSyncTxid();
+    const txid = await captureCurrentSyncTxid(domainDb(ctx));
     return { data: { tag }, serverSequence: 0, txid };
   }
 
@@ -55,7 +55,7 @@ export async function updateTag(
 
     const tag = toTagDto(row);
     const syncRow = toSyncRow(row as unknown as Record<string, unknown>);
-    const txid = await captureCurrentSyncTxid();
+    const txid = await captureCurrentSyncTxid(domainDb(ctx));
     const serverSequence =
       (await emitSyncBatch(user.id, [buildTagRowChange(syncRow)], syncEmitMetaFromContext(ctx))) ??
       0;

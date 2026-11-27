@@ -19,7 +19,7 @@ export async function deleteGroup(
     throw new DomainError("Group not found", 404, "group_not_found");
   }
 
-  const txid = await captureCurrentSyncTxid();
+  const txid = await captureCurrentSyncTxid(domainDb(ctx));
   const serverSequence =
     (await emitSyncBatch(
       user.id,

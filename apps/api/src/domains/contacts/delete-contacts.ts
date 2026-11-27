@@ -80,9 +80,9 @@ export async function deleteContacts(
   }
 
   const changes = deletedIds.map((id) => buildPeopleDeleteChange(id));
-  const txid = await captureCurrentSyncTxid();
+  const txid = await captureCurrentSyncTxid(domainDb(ctx));
   const serverSequence =
-    (await persistSyncChanges(user.id, changes, syncEmitMetaFromContext(ctx))) ?? 0;
+    (await persistSyncChanges(user.id, changes, syncEmitMetaFromContext(ctx), domainDb(ctx))) ?? 0;
 
   return { data: { deletedCount }, serverSequence, txid };
 }

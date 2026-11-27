@@ -38,7 +38,7 @@ export async function updateGroup(
       throw new DomainError("Group not found", 404, "group_not_found");
     }
     const group = toGroupDto(existing);
-    const txid = await captureCurrentSyncTxid();
+    const txid = await captureCurrentSyncTxid(domainDb(ctx));
     return { data: { group }, serverSequence: 0, txid };
   }
 
@@ -59,7 +59,7 @@ export async function updateGroup(
 
     const group = toGroupDto(row);
     const syncRow = toSyncRow(row as unknown as Record<string, unknown>);
-    const txid = await captureCurrentSyncTxid();
+    const txid = await captureCurrentSyncTxid(domainDb(ctx));
     const serverSequence =
       (await emitSyncBatch(
         user.id,

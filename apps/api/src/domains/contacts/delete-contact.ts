@@ -63,7 +63,7 @@ export async function deleteContact(
     log?.warn({ logoCleanupError }, "[deleteContact] Failed to clean up orphaned LinkedIn logos");
   }
 
-  const txid = await captureCurrentSyncTxid();
+  const txid = await captureCurrentSyncTxid(domainDb(ctx));
   const serverSequence =
     (await emitSyncBatch(
       user.id,

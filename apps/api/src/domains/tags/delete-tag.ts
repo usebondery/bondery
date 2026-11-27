@@ -19,7 +19,7 @@ export async function deleteTag(
     throw new DomainError("Tag not found", 404, "tag_not_found");
   }
 
-  const txid = await captureCurrentSyncTxid();
+  const txid = await captureCurrentSyncTxid(domainDb(ctx));
   const serverSequence =
     (await emitSyncBatch(user.id, [buildTagDeleteChange(tagId)], syncEmitMetaFromContext(ctx))) ??
     0;
