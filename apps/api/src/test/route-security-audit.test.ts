@@ -1,15 +1,14 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import {
-  disableRouteSecurityAudit,
-  enableRouteSecurityAudit,
-  getRouteSecurityAudit,
-} from "../lib/platform/route-areas.js";
 import { loadTestEnv } from "./load-test-env.js";
 
 describe("route security audit", () => {
   it("stamps openApiArea on every route registered through area shells", async () => {
+    // The route shells import Better Auth, which reads its secrets when the module loads, so
+    // the env must be in place before the import.
     loadTestEnv();
+    const { disableRouteSecurityAudit, enableRouteSecurityAudit, getRouteSecurityAudit } =
+      await import("../lib/platform/route-areas.js");
     enableRouteSecurityAudit();
 
     try {
