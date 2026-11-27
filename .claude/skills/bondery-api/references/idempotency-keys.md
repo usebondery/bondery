@@ -88,9 +88,11 @@ The route adds no idempotency code.
 An exemption sets `config.idempotency` to `false`.
 List each exemption and its reason in this table.
 
-| Route        | Reason                                                                        |
-| ------------ | ----------------------------------------------------------------------------- |
-| `POST /chat` | SSE stream. An `Idempotency-Key` returns `400` `idempotency_key_unsupported`. |
+| Route                                  | Reason                                                                                                                                              |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `POST /chat`                           | SSE stream. An `Idempotency-Key` returns `400` `idempotency_key_unsupported`.                                                                       |
+| `POST /me/carddav/devices`             | The response holds the device password. The store would keep it for 24 hours. An `Idempotency-Key` returns `400` `idempotency_key_unsupported`.     |
+| `POST /me/carddav/devices/{id}/rotate` | The response holds the new device password. The store would keep it for 24 hours. An `Idempotency-Key` returns `400` `idempotency_key_unsupported`. |
 
 The error envelope is in [api-errors.md](./api-errors.md).
 

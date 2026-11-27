@@ -24,7 +24,7 @@ Among paths at the **same tier**, prefer alphabetical order by path segment.
 
 Auxiliary paths use an explicit allowlist in `@bondery/schemas/openapi/route-order` (`AUXILIARY_FIRST_SEGMENTS`). The first path segment after the resource root matching that list → tier 5. All other literal segments at resource depth → tier 2.
 
-Current auxiliary segments: `merge`, `merge-recommendations`, `enrich-queue`, `keep-in-touch`.
+Current auxiliary segments: `merge`, `merge-recommendations`, `enrich-queue`, `keep-in-touch`, `mcp-consents`, `carddav`.
 
 ## HTTP methods (same path)
 

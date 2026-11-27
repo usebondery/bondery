@@ -7,6 +7,7 @@ export * from "#entities/activity/index.js";
 export * from "#entities/address/index.js";
 export * from "#entities/api/index.js";
 export * from "#entities/api-keys/index.js";
+export * from "#entities/carddav/index.js";
 export * from "#entities/channels/index.js";
 export * from "#entities/chat/index.js";
 export * from "#entities/contact/index.js";

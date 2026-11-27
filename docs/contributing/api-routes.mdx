@@ -58,7 +58,7 @@ The docs site renders endpoints in **Fastify registration order** — there is n
 | 2 | Static siblings | `/map-pins`, `/by-social`, `/important-dates/upcoming` |
 | 3 | Single resource | `GET/PATCH/DELETE /contacts/{id}` |
 | 4 | Sub-resources | `/contacts/{id}/groups`, `/groups/{id}/contacts` |
-| 5 | Auxiliary | merge, enrich-queue, mcp-consents (`AUXILIARY_FIRST_SEGMENTS` in `@bondery/schemas/openapi/route-order`) |
+| 5 | Auxiliary | merge, enrich-queue, mcp-consents, carddav (`AUXILIARY_FIRST_SEGMENTS` in `@bondery/schemas/openapi/route-order`) |
 
 Same tier → alphabetical by path segment.
 

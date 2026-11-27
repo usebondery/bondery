@@ -46,6 +46,10 @@ Living list of product analytics events. **Canonical names** use PostHog `catego
 | `imports:import_complete`          | `import_source`, `item_count`, `is_first_import`                                      | client     | Import modal success                                                                                                        |
 | `billing:subscription_create`      | `plan_interval`, `plan_tier`, `cancel_at_period_end`                                  | **server** | Stripe webhook                                                                                                              |
 | `billing:subscription_cancel`      | `plan_interval`, `plan_tier`, `cancel_at_period_end`                                  | **server** | Stripe webhook                                                                                                              |
+| `carddav:device_create`            | —                                                                                     | **server** | Device connected (no device name or key)                                                                                    |
+| `carddav:device_rotate`            | —                                                                                     | **server** | Device password replaced                                                                                                    |
+| `carddav:device_revoke`            | —                                                                                     | **server** | Device removed                                                                                                              |
+| `carddav:disconnect_all`           | `device_count`                                                                        | **server** | Every device disconnected                                                                                                   |
 
 ### `activation_type` values
 

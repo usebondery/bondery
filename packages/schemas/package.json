@@ -71,6 +71,12 @@
       "node": "./dist/entities/api-keys/index.js",
       "types": "./src/entities/api-keys/index.ts"
     },
+    "./entities/carddav": {
+      "default": "./dist/entities/carddav/index.js",
+      "import": "./dist/entities/carddav/index.js",
+      "node": "./dist/entities/carddav/index.js",
+      "types": "./src/entities/carddav/index.ts"
+    },
     "./entities/channels": {
       "default": "./dist/entities/channels/index.js",
       "import": "./dist/entities/channels/index.js",
@@ -424,6 +430,24 @@
       "import": "./dist/entities/api/types.js",
       "node": "./dist/entities/api/types.js",
       "types": "./src/entities/api/types.ts"
+    },
+    "./entities/carddav/contract": {
+      "default": "./dist/entities/carddav/contract.js",
+      "import": "./dist/entities/carddav/contract.js",
+      "node": "./dist/entities/carddav/contract.js",
+      "types": "./src/entities/carddav/contract.ts"
+    },
+    "./entities/carddav/schema": {
+      "default": "./dist/entities/carddav/schema.js",
+      "import": "./dist/entities/carddav/schema.js",
+      "node": "./dist/entities/carddav/schema.js",
+      "types": "./src/entities/carddav/schema.ts"
+    },
+    "./entities/carddav/types": {
+      "default": "./dist/entities/carddav/types.js",
+      "import": "./dist/entities/carddav/types.js",
+      "node": "./dist/entities/carddav/types.js",
+      "types": "./src/entities/carddav/types.ts"
     },
     "./entities/channels/contract": {
       "default": "./dist/entities/channels/contract.js",

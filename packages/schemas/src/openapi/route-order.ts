@@ -19,6 +19,7 @@ export const AUXILIARY_FIRST_SEGMENTS = [
   "enrich-queue",
   "keep-in-touch",
   "mcp-consents",
+  "carddav",
 ] as const;
 
 export type AuxiliaryFirstSegment = (typeof AUXILIARY_FIRST_SEGMENTS)[number];

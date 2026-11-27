@@ -24933,6 +24933,1443 @@ paths:
                   type: service_unavailable_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+  /me/carddav:
+    get:
+      summary: Get CardDAV settings
+      tags:
+        - Me
+      description: Return the CardDAV server address, the username and the connected devices. `enabled` is false when this
+        server does not offer CardDAV sync.
+      security: *a2
+      responses:
+        "200":
+          description: CardDAV settings
+          headers:
+            RateLimit:
+              $ref: "#/components/headers/RateLimit"
+            RateLimit-Policy:
+              $ref: "#/components/headers/RateLimitPolicy"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  carddav:
+                    type: object
+                    properties:
+                      devices:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            clientFamily:
+                              nullable: true
+                              description: "Client the device last used: dataaccessd, AddressBookCore, DAVx5, Thunderbird, or other. Null before the
+                                first request"
+                              type: string
+                            createdAt:
+                              type: string
+                              pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
+                              description: Creation time as ISO 8601 with timezone offset
+                            id:
+                              type: string
+                              format: uuid
+                              description: Device identifier
+                            keyStart:
+                              type: string
+                              description: First characters of the device password, to tell devices apart
+                            lastSeenAt:
+                              nullable: true
+                              description: Time of the last signed-in request from the device
+                              type: string
+                              pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
+                            lastSyncedAt:
+                              nullable: true
+                              description: Time of the last successful sync answer to the device
+                              type: string
+                              pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
+                            name:
+                              type: string
+                              description: Display name for the device
+                            pausedAt:
+                              nullable: true
+                              description: Time the mass-change guard paused writes from the device. Null when the device can write
+                              type: string
+                              pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
+                          required:
+                            - clientFamily
+                            - createdAt
+                            - id
+                            - keyStart
+                            - lastSeenAt
+                            - lastSyncedAt
+                            - name
+                            - pausedAt
+                          additionalProperties: false
+                        description: Devices connected to this account
+                      enabled:
+                        type: boolean
+                        description: True when this deployment offers CardDAV sync
+                      maxDevices:
+                        type: number
+                        description: Most devices one account can connect
+                      serverUrl:
+                        type: string
+                        description: CardDAV server address to enter on a device
+                      username:
+                        type: string
+                        description: Username to enter on a device. It is the account identifier
+                    required:
+                      - devices
+                      - enabled
+                      - maxDevices
+                      - serverUrl
+                      - username
+                    additionalProperties: false
+                    description: CardDAV sync settings and connected devices
+                required:
+                  - carddav
+                additionalProperties: false
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: body.email Invalid input. Read details for the rejected fields, correct those arguments, then retry the
+                    call.
+                  code: validation_error
+                  doc_url: https://usebondery.com/docs/api/errors/validation_error
+                  message: body.email Invalid input
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  param: body.email
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Unauthorized - Please log in. Reconnect the client and approve access, then retry the call.
+                  code: auth_required
+                  doc_url: https://usebondery.com/docs/api/errors/auth_required
+                  message: Unauthorized - Please log in
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: authentication_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Forbidden. Read doc_url for the recovery steps, then retry the call.
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
+                  message: Forbidden
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: authorization_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Resource not found
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Contact not found. Call search_contacts with the person's name and retry with a personId from the
+                    results.
+                  code: contact_not_found
+                  doc_url: https://usebondery.com/docs/api/errors/contact_not_found
+                  message: Contact not found
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Sync protocol version mismatch. Read doc_url for the recovery steps, then retry the call.
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "429":
+          description: Too many requests
+          headers:
+            RateLimit:
+              $ref: "#/components/headers/RateLimit"
+            RateLimit-Policy:
+              $ref: "#/components/headers/RateLimitPolicy"
+            Retry-After:
+              $ref: "#/components/headers/RetryAfter"
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Rate limit exceeded. Retry in 42 seconds. Wait for the number of seconds in retry_after, then retry the
+                    same call. Do not retry in a loop.
+                  code: rate_limit_exceeded
+                  doc_url: https://usebondery.com/docs/api/errors/rate_limit_exceeded
+                  message: Rate limit exceeded. Retry in 42 seconds.
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: rate_limit_error
+                  retry_after: 42
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Internal Server Error. Retry the call once with the same arguments. If it fails again, tell the user the
+                    request_id and report the failure.
+                  code: internal_server_error
+                  doc_url: https://usebondery.com/docs/api/errors/internal_server_error
+                  message: Internal Server Error
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: api_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Service unavailable. Retry the call once with the same arguments. If it fails again, tell the user the
+                    request_id and report the failure.
+                  code: service_unavailable
+                  doc_url: https://usebondery.com/docs/api/errors/service_unavailable
+                  message: Service unavailable
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: service_unavailable_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+    delete:
+      summary: Disconnect all CardDAV devices
+      tags:
+        - Me
+      description: Disconnect every device. Deletes all device passwords, the device list and the synced cards. Contacts stay.
+        Requires a one-shot `X-Bondery-Step-Up` token from `POST /me/step-up`.
+      security: *a2
+      responses:
+        "204":
+          description: No content
+          headers:
+            RateLimit:
+              $ref: "#/components/headers/RateLimit"
+            RateLimit-Policy:
+              $ref: "#/components/headers/RateLimitPolicy"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: body.email Invalid input. Read details for the rejected fields, correct those arguments, then retry the
+                    call.
+                  code: validation_error
+                  doc_url: https://usebondery.com/docs/api/errors/validation_error
+                  message: body.email Invalid input
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  param: body.email
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Unauthorized - Please log in. Reconnect the client and approve access, then retry the call.
+                  code: auth_required
+                  doc_url: https://usebondery.com/docs/api/errors/auth_required
+                  message: Unauthorized - Please log in
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: authentication_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Forbidden. Read doc_url for the recovery steps, then retry the call.
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
+                  message: Forbidden
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: authorization_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Resource not found
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Contact not found. Call search_contacts with the person's name and retry with a personId from the
+                    results.
+                  code: contact_not_found
+                  doc_url: https://usebondery.com/docs/api/errors/contact_not_found
+                  message: Contact not found
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Sync protocol version mismatch. Read doc_url for the recovery steps, then retry the call.
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "429":
+          description: Too many requests
+          headers:
+            RateLimit:
+              $ref: "#/components/headers/RateLimit"
+            RateLimit-Policy:
+              $ref: "#/components/headers/RateLimitPolicy"
+            Retry-After:
+              $ref: "#/components/headers/RetryAfter"
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Rate limit exceeded. Retry in 42 seconds. Wait for the number of seconds in retry_after, then retry the
+                    same call. Do not retry in a loop.
+                  code: rate_limit_exceeded
+                  doc_url: https://usebondery.com/docs/api/errors/rate_limit_exceeded
+                  message: Rate limit exceeded. Retry in 42 seconds.
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: rate_limit_error
+                  retry_after: 42
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Internal Server Error. Retry the call once with the same arguments. If it fails again, tell the user the
+                    request_id and report the failure.
+                  code: internal_server_error
+                  doc_url: https://usebondery.com/docs/api/errors/internal_server_error
+                  message: Internal Server Error
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: api_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Service unavailable. Retry the call once with the same arguments. If it fails again, tell the user the
+                    request_id and report the failure.
+                  code: service_unavailable
+                  doc_url: https://usebondery.com/docs/api/errors/service_unavailable
+                  message: Service unavailable
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: service_unavailable_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /me/carddav/devices:
+    post:
+      summary: Connect a CardDAV device
+      tags:
+        - Me
+      description: Connect a device. The response holds the device password. It is shown once and cannot be read again.
+        Requires a one-shot `X-Bondery-Step-Up` token from `POST /me/step-up`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                  description: Display name for the device, for example the phone model
+              required:
+                - name
+      security: *a2
+      responses:
+        "201":
+          description: Device created
+          headers:
+            RateLimit:
+              $ref: "#/components/headers/RateLimit"
+            RateLimit-Policy:
+              $ref: "#/components/headers/RateLimitPolicy"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  credentials:
+                    type: object
+                    properties:
+                      password:
+                        type: string
+                        description: Device password. Shown only once, when the device is created or rotated
+                      serverUrl:
+                        type: string
+                        description: CardDAV server address to enter on the device
+                      username:
+                        type: string
+                        description: Username to enter on the device. It is the account identifier
+                    required:
+                      - password
+                      - serverUrl
+                      - username
+                    additionalProperties: false
+                    description: Credentials to enter on the device
+                  device:
+                    type: object
+                    properties:
+                      clientFamily:
+                        nullable: true
+                        description: "Client the device last used: dataaccessd, AddressBookCore, DAVx5, Thunderbird, or other. Null before the
+                          first request"
+                        type: string
+                      createdAt:
+                        type: string
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
+                        description: Creation time as ISO 8601 with timezone offset
+                      id:
+                        type: string
+                        format: uuid
+                        description: Device identifier
+                      keyStart:
+                        type: string
+                        description: First characters of the device password, to tell devices apart
+                      lastSeenAt:
+                        nullable: true
+                        description: Time of the last signed-in request from the device
+                        type: string
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
+                      lastSyncedAt:
+                        nullable: true
+                        description: Time of the last successful sync answer to the device
+                        type: string
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
+                      name:
+                        type: string
+                        description: Display name for the device
+                      pausedAt:
+                        nullable: true
+                        description: Time the mass-change guard paused writes from the device. Null when the device can write
+                        type: string
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
+                    required:
+                      - clientFamily
+                      - createdAt
+                      - id
+                      - keyStart
+                      - lastSeenAt
+                      - lastSyncedAt
+                      - name
+                      - pausedAt
+                    additionalProperties: false
+                    description: The device
+                required:
+                  - credentials
+                  - device
+                additionalProperties: false
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: body.email Invalid input. Read details for the rejected fields, correct those arguments, then retry the
+                    call.
+                  code: validation_error
+                  doc_url: https://usebondery.com/docs/api/errors/validation_error
+                  message: body.email Invalid input
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  param: body.email
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Unauthorized - Please log in. Reconnect the client and approve access, then retry the call.
+                  code: auth_required
+                  doc_url: https://usebondery.com/docs/api/errors/auth_required
+                  message: Unauthorized - Please log in
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: authentication_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Forbidden. Read doc_url for the recovery steps, then retry the call.
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
+                  message: Forbidden
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: authorization_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Resource not found
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Contact not found. Call search_contacts with the person's name and retry with a personId from the
+                    results.
+                  code: contact_not_found
+                  doc_url: https://usebondery.com/docs/api/errors/contact_not_found
+                  message: Contact not found
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Relationship already exists. Call get_relationships for that personId and update the existing
+                    relationship instead of creating another.
+                  code: relationship_already_exists
+                  doc_url: https://usebondery.com/docs/api/errors/relationship_already_exists
+                  message: Relationship already exists
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: conflict_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Sync protocol version mismatch. Read doc_url for the recovery steps, then retry the call.
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "429":
+          description: Too many requests
+          headers:
+            RateLimit:
+              $ref: "#/components/headers/RateLimit"
+            RateLimit-Policy:
+              $ref: "#/components/headers/RateLimitPolicy"
+            Retry-After:
+              $ref: "#/components/headers/RetryAfter"
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Rate limit exceeded. Retry in 42 seconds. Wait for the number of seconds in retry_after, then retry the
+                    same call. Do not retry in a loop.
+                  code: rate_limit_exceeded
+                  doc_url: https://usebondery.com/docs/api/errors/rate_limit_exceeded
+                  message: Rate limit exceeded. Retry in 42 seconds.
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: rate_limit_error
+                  retry_after: 42
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Internal Server Error. Retry the call once with the same arguments. If it fails again, tell the user the
+                    request_id and report the failure.
+                  code: internal_server_error
+                  doc_url: https://usebondery.com/docs/api/errors/internal_server_error
+                  message: Internal Server Error
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: api_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Service unavailable. Retry the call once with the same arguments. If it fails again, tell the user the
+                    request_id and report the failure.
+                  code: service_unavailable
+                  doc_url: https://usebondery.com/docs/api/errors/service_unavailable
+                  message: Service unavailable
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: service_unavailable_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /me/carddav/devices/{id}:
+    patch:
+      summary: Rename a CardDAV device
+      tags:
+        - Me
+      description: Rename a device.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                  description: Display name for the device, for example the phone model
+              required:
+                - name
+      parameters:
+        - schema:
+            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+            description: Contact identifier
+            allOf:
+              - $ref: "#/components/schemas/ContactId"
+          in: path
+          name: id
+          required: true
+          description: Contact identifier
+      security: *a2
+      responses:
+        "200":
+          description: Updated device
+          headers:
+            RateLimit:
+              $ref: "#/components/headers/RateLimit"
+            RateLimit-Policy:
+              $ref: "#/components/headers/RateLimitPolicy"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  device:
+                    type: object
+                    properties:
+                      clientFamily:
+                        nullable: true
+                        description: "Client the device last used: dataaccessd, AddressBookCore, DAVx5, Thunderbird, or other. Null before the
+                          first request"
+                        type: string
+                      createdAt:
+                        type: string
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
+                        description: Creation time as ISO 8601 with timezone offset
+                      id:
+                        type: string
+                        format: uuid
+                        description: Device identifier
+                      keyStart:
+                        type: string
+                        description: First characters of the device password, to tell devices apart
+                      lastSeenAt:
+                        nullable: true
+                        description: Time of the last signed-in request from the device
+                        type: string
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
+                      lastSyncedAt:
+                        nullable: true
+                        description: Time of the last successful sync answer to the device
+                        type: string
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
+                      name:
+                        type: string
+                        description: Display name for the device
+                      pausedAt:
+                        nullable: true
+                        description: Time the mass-change guard paused writes from the device. Null when the device can write
+                        type: string
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
+                    required:
+                      - clientFamily
+                      - createdAt
+                      - id
+                      - keyStart
+                      - lastSeenAt
+                      - lastSyncedAt
+                      - name
+                      - pausedAt
+                    additionalProperties: false
+                    description: The device
+                required:
+                  - device
+                additionalProperties: false
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: body.email Invalid input. Read details for the rejected fields, correct those arguments, then retry the
+                    call.
+                  code: validation_error
+                  doc_url: https://usebondery.com/docs/api/errors/validation_error
+                  message: body.email Invalid input
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  param: body.email
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Unauthorized - Please log in. Reconnect the client and approve access, then retry the call.
+                  code: auth_required
+                  doc_url: https://usebondery.com/docs/api/errors/auth_required
+                  message: Unauthorized - Please log in
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: authentication_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Forbidden. Read doc_url for the recovery steps, then retry the call.
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
+                  message: Forbidden
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: authorization_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Resource not found
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Contact not found. Call search_contacts with the person's name and retry with a personId from the
+                    results.
+                  code: contact_not_found
+                  doc_url: https://usebondery.com/docs/api/errors/contact_not_found
+                  message: Contact not found
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Sync protocol version mismatch. Read doc_url for the recovery steps, then retry the call.
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "429":
+          description: Too many requests
+          headers:
+            RateLimit:
+              $ref: "#/components/headers/RateLimit"
+            RateLimit-Policy:
+              $ref: "#/components/headers/RateLimitPolicy"
+            Retry-After:
+              $ref: "#/components/headers/RetryAfter"
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Rate limit exceeded. Retry in 42 seconds. Wait for the number of seconds in retry_after, then retry the
+                    same call. Do not retry in a loop.
+                  code: rate_limit_exceeded
+                  doc_url: https://usebondery.com/docs/api/errors/rate_limit_exceeded
+                  message: Rate limit exceeded. Retry in 42 seconds.
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: rate_limit_error
+                  retry_after: 42
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Internal Server Error. Retry the call once with the same arguments. If it fails again, tell the user the
+                    request_id and report the failure.
+                  code: internal_server_error
+                  doc_url: https://usebondery.com/docs/api/errors/internal_server_error
+                  message: Internal Server Error
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: api_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Service unavailable. Retry the call once with the same arguments. If it fails again, tell the user the
+                    request_id and report the failure.
+                  code: service_unavailable
+                  doc_url: https://usebondery.com/docs/api/errors/service_unavailable
+                  message: Service unavailable
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: service_unavailable_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+    delete:
+      summary: Remove a CardDAV device
+      tags:
+        - Me
+      description: Remove a device. Its password stops working at once. Cards already on the device stay there. Requires a
+        one-shot `X-Bondery-Step-Up` token from `POST /me/step-up`.
+      parameters:
+        - schema:
+            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+            description: Contact identifier
+            allOf:
+              - $ref: "#/components/schemas/ContactId"
+          in: path
+          name: id
+          required: true
+          description: Contact identifier
+      security: *a2
+      responses:
+        "204":
+          description: No content
+          headers:
+            RateLimit:
+              $ref: "#/components/headers/RateLimit"
+            RateLimit-Policy:
+              $ref: "#/components/headers/RateLimitPolicy"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: body.email Invalid input. Read details for the rejected fields, correct those arguments, then retry the
+                    call.
+                  code: validation_error
+                  doc_url: https://usebondery.com/docs/api/errors/validation_error
+                  message: body.email Invalid input
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  param: body.email
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Unauthorized - Please log in. Reconnect the client and approve access, then retry the call.
+                  code: auth_required
+                  doc_url: https://usebondery.com/docs/api/errors/auth_required
+                  message: Unauthorized - Please log in
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: authentication_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Forbidden. Read doc_url for the recovery steps, then retry the call.
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
+                  message: Forbidden
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: authorization_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Resource not found
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Contact not found. Call search_contacts with the person's name and retry with a personId from the
+                    results.
+                  code: contact_not_found
+                  doc_url: https://usebondery.com/docs/api/errors/contact_not_found
+                  message: Contact not found
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Sync protocol version mismatch. Read doc_url for the recovery steps, then retry the call.
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "429":
+          description: Too many requests
+          headers:
+            RateLimit:
+              $ref: "#/components/headers/RateLimit"
+            RateLimit-Policy:
+              $ref: "#/components/headers/RateLimitPolicy"
+            Retry-After:
+              $ref: "#/components/headers/RetryAfter"
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Rate limit exceeded. Retry in 42 seconds. Wait for the number of seconds in retry_after, then retry the
+                    same call. Do not retry in a loop.
+                  code: rate_limit_exceeded
+                  doc_url: https://usebondery.com/docs/api/errors/rate_limit_exceeded
+                  message: Rate limit exceeded. Retry in 42 seconds.
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: rate_limit_error
+                  retry_after: 42
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Internal Server Error. Retry the call once with the same arguments. If it fails again, tell the user the
+                    request_id and report the failure.
+                  code: internal_server_error
+                  doc_url: https://usebondery.com/docs/api/errors/internal_server_error
+                  message: Internal Server Error
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: api_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Service unavailable. Retry the call once with the same arguments. If it fails again, tell the user the
+                    request_id and report the failure.
+                  code: service_unavailable
+                  doc_url: https://usebondery.com/docs/api/errors/service_unavailable
+                  message: Service unavailable
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: service_unavailable_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /me/carddav/devices/{id}/resume:
+    post:
+      summary: Resume a CardDAV device
+      tags:
+        - Me
+      description: Let a paused device write again. The mass-change guard pauses a device that sends too many changes at once.
+      parameters:
+        - schema:
+            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+            description: Contact identifier
+            allOf:
+              - $ref: "#/components/schemas/ContactId"
+          in: path
+          name: id
+          required: true
+          description: Contact identifier
+      security: *a2
+      responses:
+        "200":
+          description: Resumed device
+          headers:
+            RateLimit:
+              $ref: "#/components/headers/RateLimit"
+            RateLimit-Policy:
+              $ref: "#/components/headers/RateLimitPolicy"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  device:
+                    type: object
+                    properties:
+                      clientFamily:
+                        nullable: true
+                        description: "Client the device last used: dataaccessd, AddressBookCore, DAVx5, Thunderbird, or other. Null before the
+                          first request"
+                        type: string
+                      createdAt:
+                        type: string
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
+                        description: Creation time as ISO 8601 with timezone offset
+                      id:
+                        type: string
+                        format: uuid
+                        description: Device identifier
+                      keyStart:
+                        type: string
+                        description: First characters of the device password, to tell devices apart
+                      lastSeenAt:
+                        nullable: true
+                        description: Time of the last signed-in request from the device
+                        type: string
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
+                      lastSyncedAt:
+                        nullable: true
+                        description: Time of the last successful sync answer to the device
+                        type: string
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
+                      name:
+                        type: string
+                        description: Display name for the device
+                      pausedAt:
+                        nullable: true
+                        description: Time the mass-change guard paused writes from the device. Null when the device can write
+                        type: string
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
+                    required:
+                      - clientFamily
+                      - createdAt
+                      - id
+                      - keyStart
+                      - lastSeenAt
+                      - lastSyncedAt
+                      - name
+                      - pausedAt
+                    additionalProperties: false
+                    description: The device
+                required:
+                  - device
+                additionalProperties: false
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: body.email Invalid input. Read details for the rejected fields, correct those arguments, then retry the
+                    call.
+                  code: validation_error
+                  doc_url: https://usebondery.com/docs/api/errors/validation_error
+                  message: body.email Invalid input
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  param: body.email
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Unauthorized - Please log in. Reconnect the client and approve access, then retry the call.
+                  code: auth_required
+                  doc_url: https://usebondery.com/docs/api/errors/auth_required
+                  message: Unauthorized - Please log in
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: authentication_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Forbidden. Read doc_url for the recovery steps, then retry the call.
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
+                  message: Forbidden
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: authorization_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Resource not found
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Contact not found. Call search_contacts with the person's name and retry with a personId from the
+                    results.
+                  code: contact_not_found
+                  doc_url: https://usebondery.com/docs/api/errors/contact_not_found
+                  message: Contact not found
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Sync protocol version mismatch. Read doc_url for the recovery steps, then retry the call.
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "429":
+          description: Too many requests
+          headers:
+            RateLimit:
+              $ref: "#/components/headers/RateLimit"
+            RateLimit-Policy:
+              $ref: "#/components/headers/RateLimitPolicy"
+            Retry-After:
+              $ref: "#/components/headers/RetryAfter"
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Rate limit exceeded. Retry in 42 seconds. Wait for the number of seconds in retry_after, then retry the
+                    same call. Do not retry in a loop.
+                  code: rate_limit_exceeded
+                  doc_url: https://usebondery.com/docs/api/errors/rate_limit_exceeded
+                  message: Rate limit exceeded. Retry in 42 seconds.
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: rate_limit_error
+                  retry_after: 42
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Internal Server Error. Retry the call once with the same arguments. If it fails again, tell the user the
+                    request_id and report the failure.
+                  code: internal_server_error
+                  doc_url: https://usebondery.com/docs/api/errors/internal_server_error
+                  message: Internal Server Error
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: api_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Service unavailable. Retry the call once with the same arguments. If it fails again, tell the user the
+                    request_id and report the failure.
+                  code: service_unavailable
+                  doc_url: https://usebondery.com/docs/api/errors/service_unavailable
+                  message: Service unavailable
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: service_unavailable_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /me/carddav/devices/{id}/rotate:
+    post:
+      summary: Rotate a CardDAV device password
+      tags:
+        - Me
+      description: Replace the device password. The old password stops working at once. The response holds the new password.
+        It is shown once. Requires a one-shot `X-Bondery-Step-Up` token from `POST /me/step-up`.
+      parameters:
+        - schema:
+            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+            description: Contact identifier
+            allOf:
+              - $ref: "#/components/schemas/ContactId"
+          in: path
+          name: id
+          required: true
+          description: Contact identifier
+      security: *a2
+      responses:
+        "200":
+          description: Device rotated
+          headers:
+            RateLimit:
+              $ref: "#/components/headers/RateLimit"
+            RateLimit-Policy:
+              $ref: "#/components/headers/RateLimitPolicy"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  credentials:
+                    type: object
+                    properties:
+                      password:
+                        type: string
+                        description: Device password. Shown only once, when the device is created or rotated
+                      serverUrl:
+                        type: string
+                        description: CardDAV server address to enter on the device
+                      username:
+                        type: string
+                        description: Username to enter on the device. It is the account identifier
+                    required:
+                      - password
+                      - serverUrl
+                      - username
+                    additionalProperties: false
+                    description: Credentials to enter on the device
+                  device:
+                    type: object
+                    properties:
+                      clientFamily:
+                        nullable: true
+                        description: "Client the device last used: dataaccessd, AddressBookCore, DAVx5, Thunderbird, or other. Null before the
+                          first request"
+                        type: string
+                      createdAt:
+                        type: string
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
+                        description: Creation time as ISO 8601 with timezone offset
+                      id:
+                        type: string
+                        format: uuid
+                        description: Device identifier
+                      keyStart:
+                        type: string
+                        description: First characters of the device password, to tell devices apart
+                      lastSeenAt:
+                        nullable: true
+                        description: Time of the last signed-in request from the device
+                        type: string
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
+                      lastSyncedAt:
+                        nullable: true
+                        description: Time of the last successful sync answer to the device
+                        type: string
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
+                      name:
+                        type: string
+                        description: Display name for the device
+                      pausedAt:
+                        nullable: true
+                        description: Time the mass-change guard paused writes from the device. Null when the device can write
+                        type: string
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
+                    required:
+                      - clientFamily
+                      - createdAt
+                      - id
+                      - keyStart
+                      - lastSeenAt
+                      - lastSyncedAt
+                      - name
+                      - pausedAt
+                    additionalProperties: false
+                    description: The device
+                required:
+                  - credentials
+                  - device
+                additionalProperties: false
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: body.email Invalid input. Read details for the rejected fields, correct those arguments, then retry the
+                    call.
+                  code: validation_error
+                  doc_url: https://usebondery.com/docs/api/errors/validation_error
+                  message: body.email Invalid input
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  param: body.email
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Unauthorized - Please log in. Reconnect the client and approve access, then retry the call.
+                  code: auth_required
+                  doc_url: https://usebondery.com/docs/api/errors/auth_required
+                  message: Unauthorized - Please log in
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: authentication_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Forbidden. Read doc_url for the recovery steps, then retry the call.
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
+                  message: Forbidden
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: authorization_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Resource not found
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Contact not found. Call search_contacts with the person's name and retry with a personId from the
+                    results.
+                  code: contact_not_found
+                  doc_url: https://usebondery.com/docs/api/errors/contact_not_found
+                  message: Contact not found
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Sync protocol version mismatch. Read doc_url for the recovery steps, then retry the call.
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "429":
+          description: Too many requests
+          headers:
+            RateLimit:
+              $ref: "#/components/headers/RateLimit"
+            RateLimit-Policy:
+              $ref: "#/components/headers/RateLimitPolicy"
+            Retry-After:
+              $ref: "#/components/headers/RetryAfter"
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Rate limit exceeded. Retry in 42 seconds. Wait for the number of seconds in retry_after, then retry the
+                    same call. Do not retry in a loop.
+                  code: rate_limit_exceeded
+                  doc_url: https://usebondery.com/docs/api/errors/rate_limit_exceeded
+                  message: Rate limit exceeded. Retry in 42 seconds.
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: rate_limit_error
+                  retry_after: 42
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Internal Server Error. Retry the call once with the same arguments. If it fails again, tell the user the
+                    request_id and report the failure.
+                  code: internal_server_error
+                  doc_url: https://usebondery.com/docs/api/errors/internal_server_error
+                  message: Internal Server Error
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: api_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              example:
+                error:
+                  agent_message: Service unavailable. Retry the call once with the same arguments. If it fails again, tell the user the
+                    request_id and report the failure.
+                  code: service_unavailable
+                  doc_url: https://usebondery.com/docs/api/errors/service_unavailable
+                  message: Service unavailable
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: service_unavailable_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
   /me/mcp-consents:
     get:
       summary: List MCP consents

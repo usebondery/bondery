@@ -36,6 +36,7 @@ import { vcardImportRoutes } from "./import/vcard/index.js";
 import { interactionRoutes } from "./interactions/index.js";
 import { mcpRoutes } from "./mcp/index.js";
 import { meApiKeysRoutes } from "./me/api-keys/index.js";
+import { meCarddavRoutes } from "./me/carddav/index.js";
 import { meExportRoutes } from "./me/export/index.js";
 import { meFeedbackRoutes } from "./me/feedback/index.js";
 import { meImportRoutes } from "./me/import/index.js";
@@ -129,6 +130,7 @@ const ROUTE_MOUNTS: RouteMount[] = [
   { area: "nativeSession", plugin: meStepUpRoutes, prefix: API_ROUTES.ME_STEP_UP },
   { area: "session", plugin: meFeedbackRoutes, prefix: API_ROUTES.ME_FEEDBACK },
   { area: "session", plugin: meApiKeysRoutes, prefix: API_ROUTES.ME_API_KEYS },
+  { area: "session", plugin: meCarddavRoutes, prefix: API_ROUTES.ME_CARDDAV },
   { area: "session", plugin: meMcpConsentsRoutes, prefix: API_ROUTES.ME_MCP_CONSENTS },
   { area: "mcp", plugin: mcpRoutes, prefix: API_ROUTES.MCP },
   { area: "composite", plugin: syncRoutes, prefix: API_ROUTES.SYNC },

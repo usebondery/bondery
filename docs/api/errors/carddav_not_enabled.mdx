@@ -1,0 +1,32 @@
+---
+title: carddav_not_enabled
+description: This server does not offer CardDAV sync. The operator turns it on with the BONDERY_INFRA_CARDDAV_ENABLED switch. Do not retry until it is on.
+last_updated: 2026-11-27
+---
+
+## When this happens
+
+You call a CardDAV management route on a server where the CardDAV switch is off. `GET /me/carddav` does not fail: it answers `enabled: false`.
+
+## What your integration should do
+
+Read `enabled` from `GET /me/carddav` and hide device sync when it is false. Do not retry.
+
+## What end users should see
+
+Translate with `common.errors.api.carddav_not_enabled`. Never surface the raw API `message`.
+
+## Response fields
+
+| Property | Value |
+|----------|-------|
+| **Type** | `not_found_error` |
+| **HTTP status** | 404 |
+| **code** | `carddav_not_enabled` |
+| **doc_url** | `/docs/api/errors/carddav_not_enabled` |
+
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
+
+## Source references
+
+- `apps/api/src/routes/me/carddav/index.ts`

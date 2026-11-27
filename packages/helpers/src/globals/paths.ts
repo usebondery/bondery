@@ -130,6 +130,7 @@ export const API_ROUTES = {
   MCP: "/mcp",
   ME: "/me",
   ME_API_KEYS: "/me/api-keys",
+  ME_CARDDAV: "/me/carddav",
   ME_EXPORT: "/me/export",
   ME_EXPORT_SUMMARY: "/me/export/summary",
   ME_FEEDBACK: "/me/feedback",

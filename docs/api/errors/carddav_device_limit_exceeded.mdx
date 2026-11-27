@@ -1,0 +1,32 @@
+---
+title: carddav_device_limit_exceeded
+description: The account already has the most devices that CardDAV sync allows. Remove a device you no longer use in Settings, then connect the new device again.
+last_updated: 2026-11-27
+---
+
+## When this happens
+
+You connect a device and the account is at its device limit. The limit is in `maxDevices` of `GET /me/carddav`.
+
+## What your integration should do
+
+Remove a device you no longer use with `DELETE /me/carddav/devices/{id}`, then connect the new device again.
+
+## What end users should see
+
+Translate with `common.errors.api.carddav_device_limit_exceeded`. Never surface the raw API `message`.
+
+## Response fields
+
+| Property | Value |
+|----------|-------|
+| **Type** | `conflict_error` |
+| **HTTP status** | 409 |
+| **code** | `carddav_device_limit_exceeded` |
+| **doc_url** | `/docs/api/errors/carddav_device_limit_exceeded` |
+
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
+
+## Source references
+
+- `apps/api/src/services/carddav/devices.ts`

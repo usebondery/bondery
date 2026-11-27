@@ -19,6 +19,11 @@ import { auth } from "../../auth/index.js";
 import { getRedisCommands } from "../../data/redis.js";
 import { constantTimeEqual } from "../security/constant-time-equal.js";
 import { createDavLoginGuard, type DavGuardRedis } from "./dav-login-guard.js";
+import {
+  createDavVerifyCache,
+  type DavVerifyCache,
+  type DavVerifyCacheRedis,
+} from "./dav-verify-cache.js";
 
 const DAV_AUTH_CHALLENGE = 'Basic realm="Bondery", charset="UTF-8"';
 const BASIC_SCHEME_PATTERN = /^basic\s+(\S+)\s*$/i;
@@ -40,7 +45,12 @@ declare module "fastify" {
   }
 }
 
-let redisProvider: () => DavGuardRedis | undefined = () => getRedisCommands();
+/** The Redis commands the shell uses: the login guard and the verify cache. */
+type DavAuthRedis = DavGuardRedis & DavVerifyCacheRedis;
+
+type DavAuthLogger = { warn: (bindings: object, message: string) => void };
+
+let redisProvider: () => DavAuthRedis | undefined = () => getRedisCommands();
 
 type BasicCredentials = { password: string; username: string };
 
@@ -85,19 +95,50 @@ type Verification =
   | { device: VerifiedDevice; ok: true }
   | { isPermanentRejection: boolean; ok: false };
 
-async function verifyCredentials(credentials: BasicCredentials): Promise<Verification> {
-  if (!credentials.password.startsWith(CARDDAV_KEY_PREFIX)) {
-    return { isPermanentRejection: false, ok: false };
+type VerifiedKey = { apiKeyId: string; referenceId: string };
+
+type KeyVerification =
+  | { key: VerifiedKey; ok: true }
+  | { isPermanentRejection: boolean; ok: false };
+
+/**
+ * Verifies the key with Better Auth, or answers from the verify cache. A cache hit skips the
+ * Better Auth call and its two key-row writes. Nothing here decides access on its own: the
+ * caller still loads the device row, which is deleted when the key is revoked.
+ */
+async function verifyKey(key: string, cache: DavVerifyCache): Promise<KeyVerification> {
+  const cached = await cache.get(key);
+  if (cached) {
+    return { key: cached, ok: true };
   }
 
-  const verification = await auth.api.verifyApiKey({
-    body: { configId: "carddav", key: credentials.password },
-  });
+  const verification = await auth.api.verifyApiKey({ body: { configId: "carddav", key } });
   if (!(verification.valid && verification.key)) {
     return { isPermanentRejection: isPermanentRejection(verification.error), ok: false };
   }
 
-  const { id: apiKeyId, referenceId } = verification.key;
+  const verified = {
+    apiKeyId: verification.key.id,
+    referenceId: verification.key.referenceId,
+  };
+  await cache.remember(key, verified);
+  return { key: verified, ok: true };
+}
+
+async function verifyCredentials(
+  credentials: BasicCredentials,
+  cache: DavVerifyCache,
+): Promise<Verification> {
+  if (!credentials.password.startsWith(CARDDAV_KEY_PREFIX)) {
+    return { isPermanentRejection: false, ok: false };
+  }
+
+  const keyVerification = await verifyKey(credentials.password, cache);
+  if (!keyVerification.ok) {
+    return keyVerification;
+  }
+
+  const { apiKeyId, referenceId } = keyVerification.key;
   if (!constantTimeEqual(credentials.username, referenceId)) {
     return { isPermanentRejection: false, ok: false };
   }
@@ -145,8 +186,17 @@ function applyVerifiedDevice(request: FastifyRequest, device: VerifiedDevice): v
 }
 
 /** @internal Test-only. Replaces the Redis client with a fake. Pass nothing to restore. */
-export function setDavAuthRedisForTests(provider?: () => DavGuardRedis | undefined): void {
+export function setDavAuthRedisForTests(provider?: () => DavAuthRedis | undefined): void {
   redisProvider = provider ?? (() => getRedisCommands());
+}
+
+/**
+ * Deletes the cached verifications of these keys. Call it after a key is deleted or rotated,
+ * with the `apikey` ids. Never throws: the device row already stops a revoked key, so a Redis
+ * failure only leaves a harmless entry that expires within 60 seconds.
+ */
+export async function forgetDavKeys(apiKeyIds: string[], log: DavAuthLogger): Promise<void> {
+  await createDavVerifyCache(redisProvider, log).forgetKeys(apiKeyIds);
 }
 
 /** Builds the `verifyDavAuth` strategy. Runs in `onRequest`, before the body is parsed. */
@@ -172,7 +222,8 @@ export function createVerifyDavAuth() {
       return challenge(reply);
     }
 
-    const result = await verifyCredentials(credentials);
+    const cache = createDavVerifyCache(redisProvider, request.log);
+    const result = await verifyCredentials(credentials, cache);
     if (!result.ok) {
       await guard.recordFailure(subject);
       if (result.isPermanentRejection) {
