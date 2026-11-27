@@ -263,6 +263,10 @@ jobs:
       - name: API sync unit tests
         run: pnpm run test:api:sync
 
+      # The CardDAV vCard writer and parser. A round-trip regression loses device data silently.
+      - name: vCard package tests
+        run: pnpm run test:vcard
+
       # Assert the CSP and CORS headers the proxies emit. A wrong `config`
       # export name or a drifted allowlist produces no error and no header, so
       # these run on every pull request. They need the built `@bondery/helpers`.

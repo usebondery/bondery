@@ -7,6 +7,7 @@
     "@bondery/typescript-config": "workspace:*",
     "@types/node": "^26.1.2",
     "rimraf": "^6.1.4",
+    "tsx": "4.23.15",
     "typescript": "^7.0.2"
   },
   "exports": {
@@ -27,6 +28,54 @@
       "import": "./dist/attachments.js",
       "node": "./dist/attachments.js",
       "types": "./src/attachments.ts"
+    },
+    "./carddav-etag": {
+      "default": "./dist/carddav-etag.js",
+      "import": "./dist/carddav-etag.js",
+      "node": "./dist/carddav-etag.js",
+      "types": "./src/carddav-etag.ts"
+    },
+    "./carddav-parse": {
+      "default": "./dist/carddav-parse.js",
+      "import": "./dist/carddav-parse.js",
+      "node": "./dist/carddav-parse.js",
+      "types": "./src/carddav-parse.ts"
+    },
+    "./carddav-parse-values": {
+      "default": "./dist/carddav-parse-values.js",
+      "import": "./dist/carddav-parse-values.js",
+      "node": "./dist/carddav-parse-values.js",
+      "types": "./src/carddav-parse-values.ts"
+    },
+    "./carddav-parse.test": {
+      "default": "./dist/carddav-parse.test.js",
+      "import": "./dist/carddav-parse.test.js",
+      "node": "./dist/carddav-parse.test.js",
+      "types": "./src/carddav-parse.test.ts"
+    },
+    "./carddav-projection": {
+      "default": "./dist/carddav-projection.js",
+      "import": "./dist/carddav-projection.js",
+      "node": "./dist/carddav-projection.js",
+      "types": "./src/carddav-projection.ts"
+    },
+    "./carddav-projection.test": {
+      "default": "./dist/carddav-projection.test.js",
+      "import": "./dist/carddav-projection.test.js",
+      "node": "./dist/carddav-projection.test.js",
+      "types": "./src/carddav-projection.test.ts"
+    },
+    "./carddav-text": {
+      "default": "./dist/carddav-text.js",
+      "import": "./dist/carddav-text.js",
+      "node": "./dist/carddav-text.js",
+      "types": "./src/carddav-text.ts"
+    },
+    "./carddav.fixtures": {
+      "default": "./dist/carddav.fixtures.js",
+      "import": "./dist/carddav.fixtures.js",
+      "node": "./dist/carddav.fixtures.js",
+      "types": "./src/carddav.fixtures.ts"
     },
     "./contact-mapping": {
       "default": "./dist/contact-mapping.js",
@@ -70,6 +119,18 @@
       "node": "./dist/serialize.js",
       "types": "./src/serialize.ts"
     },
+    "./serialize-v3": {
+      "default": "./dist/serialize-v3.js",
+      "import": "./dist/serialize-v3.js",
+      "node": "./dist/serialize-v3.js",
+      "types": "./src/serialize-v3.ts"
+    },
+    "./serialize-v3.test": {
+      "default": "./dist/serialize-v3.test.js",
+      "import": "./dist/serialize-v3.test.js",
+      "node": "./dist/serialize-v3.test.js",
+      "types": "./src/serialize-v3.test.ts"
+    },
     "./uri-schemes": {
       "default": "./dist/uri-schemes.js",
       "import": "./dist/uri-schemes.js",
@@ -99,7 +160,8 @@
     "build": "node ../../scripts/pkg/clean-dist.mjs dist tsconfig.tsbuildinfo .cache && tsc && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs vcard",
     "check:types": "tsc --noEmit",
     "compile": "tsc",
-    "dev": "tsc --watch --preserveWatchOutput"
+    "dev": "tsc --watch --preserveWatchOutput",
+    "test": "tsx --test src/**/*.test.ts"
   },
   "type": "module",
   "types": "./src/index.ts",
