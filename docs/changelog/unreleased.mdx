@@ -9,6 +9,7 @@ last_updated: 2026-11-27
 ### ✨ Added
 
 - Website: the Claude tile on the landing page now links to Bondery's listing in the Claude connector directory, so visitors can reach the plugin page directly.
+- Agents: a Claude Code prompt hook now points the agent at the `bondery-changelog` skill whenever a prompt mentions the changelog, so the skill loads instead of the agent working from memory. The hook lives in `.claude/settings.json`; its script is `scripts/dev/claude-prompt-hook.mjs`.
 
 ### 🐛 Fixed
 
