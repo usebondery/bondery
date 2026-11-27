@@ -5,13 +5,14 @@
  * and the enrich route (force-update existing contacts from webapp).
  */
 
-import { type PrismaClient, prisma } from "@bondery/db";
+import type { PrismaClient } from "@bondery/db";
 import type { ScrapedEducationEntry, ScrapedWorkHistoryEntry } from "@bondery/schemas";
 import { uploadContactAvatarAndSetFlag } from "../contacts/avatar-storage.js";
 import { validateImageMagicBytes, validateImageUpload } from "../platform/config.js";
 import logger from "../platform/logger.js";
 import { getStorage, LINKEDIN_LOGOS_BUCKET } from "../storage/get-storage.js";
 import { LINKEDIN_LOGO_MAX_EDGE, normalizeImageToJpeg } from "../storage/normalize-image.js";
+import type { SyncedWriteContext } from "../sync/synced-write.js";
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const YEAR_MONTH_PATTERN = /^\d{4}-\d{2}$/;
@@ -170,10 +171,12 @@ export async function upsertLinkedInHistory(
 
 /**
  * Downloads an image from a URL and uploads it as the contact's avatar.
+ * The download and the upload finish before the transaction that sets `has_avatar` and writes
+ * the sync log, so a phone receives the new photo flag.
  */
 export async function updateContactPhoto(
+  ctx: SyncedWriteContext,
   contactId: string,
-  userId: string,
   imageUrl: string,
 ): Promise<void> {
   try {
@@ -199,7 +202,7 @@ export async function updateContactPhoto(
       return;
     }
 
-    await uploadContactAvatarAndSetFlag(prisma, userId, contactId, buffer, blob.type);
+    await uploadContactAvatarAndSetFlag(ctx, contactId, buffer, blob.type);
   } catch (error) {
     logger.error({ err: error }, "Error in updateContactPhoto");
   }

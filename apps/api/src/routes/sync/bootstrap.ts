@@ -36,6 +36,11 @@ export const syncBootstrapRoutes: AppRoutePlugin = async (fastify): Promise<void
       const started = Date.now();
       const { user } = getAuth(request);
 
+      // Read the head before the tables. A write that commits after this read has a higher
+      // sequence, so the next pull delivers it. Read after the tables, the head could count a
+      // write whose rows the table reads missed, and the client would skip it for good.
+      const nextServerSequence = await getLastServerSequence(prisma, user.id);
+
       const tables = Object.fromEntries(
         SYNC_TABLE_KEYS.map((table) => [table, [] as Record<string, unknown>[]]),
       ) as SyncBootstrapResponse["tables"];
@@ -49,7 +54,6 @@ export const syncBootstrapRoutes: AppRoutePlugin = async (fastify): Promise<void
         }),
       );
 
-      const nextServerSequence = await getLastServerSequence(prisma, user.id);
       const durationMs = Date.now() - started;
       logSyncBootstrap(request.log, { durationMs, nextServerSequence, rowCount, userId: user.id });
 

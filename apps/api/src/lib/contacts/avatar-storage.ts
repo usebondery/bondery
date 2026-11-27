@@ -6,6 +6,11 @@ import type { PrismaClient } from "@bondery/db";
 import { isValidUuid } from "@bondery/helpers/ids";
 import { AVATARS_BUCKET, deleteStorageObjects, getStorage } from "../storage/get-storage.js";
 import { AVATAR_IMAGE_MAX_EDGE, normalizeImageToJpeg } from "../storage/normalize-image.js";
+import {
+  type SyncedWrite,
+  type SyncedWriteContext,
+  withSyncedWrite,
+} from "../sync/synced-write.js";
 
 const LEADING_SLASHES_PATTERN = /^\/+/;
 
@@ -28,6 +33,11 @@ export function contactIdFromAvatarStorageKey(userId: string, key: string): stri
   return isValidUuid(contactId) ? contactId : null;
 }
 
+/**
+ * Update the avatar flag and timestamps on one contact row. This writes the row only. The caller
+ * must record the change for the sync log, either with `setContactHasAvatarSynced` or by
+ * emitting the contact snapshot itself (the merge flow does).
+ */
 export async function setContactHasAvatar(
   db: PrismaClient,
   userId: string,
@@ -42,6 +52,16 @@ export async function setContactHasAvatar(
     },
     where: { id: contactId, userId },
   });
+}
+
+/** Set the avatar flag inside a `withSyncedWrite` and record the contact row for the sync log. */
+export async function setContactHasAvatarSynced(
+  sw: SyncedWrite,
+  contactId: string,
+  hasAvatar: boolean,
+): Promise<void> {
+  await setContactHasAvatar(sw.db, sw.userId, contactId, hasAvatar);
+  sw.touch("people", [contactId]);
 }
 
 export async function uploadContactAvatarFile(
@@ -79,24 +99,27 @@ export async function deleteContactAvatarFile(userId: string, contactId: string)
   await getStorage().delete(AVATARS_BUCKET, fileName);
 }
 
+/**
+ * Store the avatar file, then set `has_avatar` and write the sync log in one transaction.
+ * The upload runs first and outside the transaction, so storage latency never holds a lock.
+ */
 export async function uploadContactAvatarAndSetFlag(
-  db: PrismaClient,
-  userId: string,
+  ctx: SyncedWriteContext,
   contactId: string,
   buffer: Buffer,
   contentType: string,
 ): Promise<void> {
-  await uploadContactAvatarFile(userId, contactId, buffer, contentType);
-  await setContactHasAvatar(db, userId, contactId, true);
+  await uploadContactAvatarFile(ctx.user.id, contactId, buffer, contentType);
+  await withSyncedWrite(ctx, (sw) => setContactHasAvatarSynced(sw, contactId, true));
 }
 
+/** Delete the avatar file, then clear `has_avatar` and write the sync log in one transaction. */
 export async function deleteContactAvatarAndClearFlag(
-  db: PrismaClient,
-  userId: string,
+  ctx: SyncedWriteContext,
   contactId: string,
 ): Promise<void> {
-  await deleteContactAvatarFile(userId, contactId);
-  await setContactHasAvatar(db, userId, contactId, false);
+  await deleteContactAvatarFile(ctx.user.id, contactId);
+  await withSyncedWrite(ctx, (sw) => setContactHasAvatarSynced(sw, contactId, false));
 }
 
 /** Remove avatar files for multiple contacts without touching DB flags. */

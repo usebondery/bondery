@@ -2,6 +2,7 @@
  * Seeds app-domain rows for a newly registered Better Auth user.
  *
  * Seeds default user settings and the "myself" contact row for new accounts.
+ * The "myself" row is also written to the sync log.
  * Must be idempotent: partial state (e.g. `user_settings` without `people`)
  * can exist when settings were migrated or a prior hook attempt failed
  * mid-transaction.
@@ -13,6 +14,7 @@ import {
   type SupportedLocale,
 } from "@bondery/schemas/locale/supported-locale";
 import { firstAiUsagePeriodEnd } from "../chat/ai-usage-period.js";
+import { withSyncedWrite } from "../sync/synced-write.js";
 import { resolveNewUserDisplayName, splitDisplayName } from "./new-user-name.js";
 
 export async function provisionNewUser(params: {
@@ -52,15 +54,19 @@ export async function provisionNewUser(params: {
   }
 
   if (!myself) {
-    await prisma.people.create({
-      data: {
-        firstName,
-        id: userId,
-        lastInteraction: now,
-        lastName,
-        myself: true,
-        userId,
-      },
+    // The profile row goes to the sync log, so a phone that signs in later still gets it.
+    await withSyncedWrite({ user: { id: userId } }, async (sw) => {
+      await sw.db.people.create({
+        data: {
+          firstName,
+          id: userId,
+          lastInteraction: now,
+          lastName,
+          myself: true,
+          userId,
+        },
+      });
+      sw.touch("people", [userId]);
     });
   }
 

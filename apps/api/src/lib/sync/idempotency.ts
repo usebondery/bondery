@@ -86,10 +86,24 @@ export async function allocateServerSequences(
 }
 
 export async function getLastServerSequence(db: PrismaClient, userId: string): Promise<number> {
+  return (await getSyncSequenceState(db, userId)).lastSequence;
+}
+
+/**
+ * The head of a user's sync log and the lowest cursor a client may pull from.
+ * A user with no row has an empty log and no floor.
+ */
+export async function getSyncSequenceState(
+  db: PrismaClient,
+  userId: string,
+): Promise<{ bootstrapFloor: number; lastSequence: number }> {
   const row = await db.syncUserSequence.findUnique({
-    select: { lastSequence: true },
+    select: { bootstrapFloor: true, lastSequence: true },
     where: { userId },
   });
 
-  return row ? Number(row.lastSequence) : 0;
+  return {
+    bootstrapFloor: row ? Number(row.bootstrapFloor) : 0,
+    lastSequence: row ? Number(row.lastSequence) : 0,
+  };
 }

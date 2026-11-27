@@ -1,4 +1,3 @@
-import type { PrismaClient } from "@bondery/db";
 import type {
   InstagramImportCommitResponse,
   InstagramImportSource,
@@ -11,14 +10,14 @@ import {
   toInstagramImportGroupKeys,
 } from "../../lib/import/default-groups.js";
 import { internal } from "../../lib/platform/errors/http-errors.js";
+import { type SyncedWrite, withSyncedWrite } from "../../lib/sync/synced-write.js";
 import { markBulkImportCompleted } from "../../services/import/followup.js";
 import type { DomainContext } from "../_shared/context.js";
-import { domainDb } from "../_shared/domain-db.js";
 import { scheduleMergeRecommendationsRefresh } from "../contacts/merge-recommendations.js";
 
+/** Create or update one social row per person and platform. Every touched id is recorded. */
 async function upsertPeopleSocials(
-  db: PrismaClient,
-  userId: string,
+  sw: SyncedWrite,
   rows: Array<{
     personId: string;
     platform: string;
@@ -29,6 +28,7 @@ async function upsertPeopleSocials(
   if (rows.length === 0) {
     return;
   }
+  const { db, userId } = sw;
 
   const existing = await db.peopleSocial.findMany({
     select: { id: true, personId: true, platform: true },
@@ -44,7 +44,7 @@ async function upsertPeopleSocials(
   const toUpdate = rows.filter((row) => existingByKey.has(`${row.personId}:${row.platform}`));
 
   if (toCreate.length > 0) {
-    await db.peopleSocial.createMany({
+    const created = await db.peopleSocial.createManyAndReturn({
       data: toCreate.map((row) => ({
         connectedAt: row.connectedAt,
         handle: row.handle,
@@ -52,8 +52,13 @@ async function upsertPeopleSocials(
         platform: row.platform,
         userId,
       })),
+      select: { id: true },
       skipDuplicates: true,
     });
+    sw.touch(
+      "people_socials",
+      created.map((row) => row.id),
+    );
   }
 
   await Promise.all(
@@ -71,14 +76,149 @@ async function upsertPeopleSocials(
       }),
     ),
   );
+  sw.touch("people_socials", existingByKey.values());
+}
+
+const INSTAGRAM_IMPORT_TRANSACTION_TIMEOUT_MS = 120_000;
+
+/** Insert new people, update known ones, and upsert socials and groups. Records every row. */
+async function writeInstagramImport(
+  sw: SyncedWrite,
+  validContacts: InstagramPreparedContact[],
+): Promise<{ importedCount: number; updatedCount: number }> {
+  const { db, userId } = sw;
+  const now = new Date();
+  const handles = validContacts.map((contact) => contact.instagramUsername.trim().toLowerCase());
+  const handleToPersonId = new Map<string, string>();
+
+  for (let index = 0; index < handles.length; index += IMPORT_HANDLE_LOOKUP_CHUNK_SIZE) {
+    const chunk = handles.slice(index, index + IMPORT_HANDLE_LOOKUP_CHUNK_SIZE);
+
+    const existingRows = await db.peopleSocial.findMany({
+      select: { handle: true, personId: true },
+      where: {
+        handle: { in: chunk },
+        platform: "instagram",
+        userId,
+      },
+    });
+
+    for (const row of existingRows) {
+      if (row.handle && row.personId) {
+        handleToPersonId.set(row.handle.trim().toLowerCase(), row.personId);
+      }
+    }
+  }
+
+  const toInsert = validContacts.filter(
+    (contact) => !handleToPersonId.has(contact.instagramUsername.trim().toLowerCase()),
+  );
+  const toUpdate = validContacts.filter((contact) =>
+    handleToPersonId.has(contact.instagramUsername.trim().toLowerCase()),
+  );
+
+  let importedCount = 0;
+  const groupAssignments = new Map<DefaultImportGroupKey, Set<string>>();
+
+  if (toInsert.length > 0) {
+    const insertedPeople = await db.people.createManyAndReturn({
+      data: toInsert.map((contact) => ({
+        firstName: contact.firstName,
+        lastInteraction: now,
+        lastName: contact.lastName,
+        middleName: contact.middleName,
+        myself: false,
+        userId,
+      })),
+      select: { id: true },
+    });
+
+    for (const [index, contact] of toInsert.entries()) {
+      const inserted = insertedPeople[index];
+      if (inserted) {
+        const handle = contact.instagramUsername.trim().toLowerCase();
+        handleToPersonId.set(handle, inserted.id);
+
+        const sources = (contact.sources ?? []) as InstagramImportSource[];
+        const groupKeys = toInstagramImportGroupKeys(sources);
+        for (const groupKey of groupKeys) {
+          const members = groupAssignments.get(groupKey) ?? new Set<string>();
+          members.add(inserted.id);
+          groupAssignments.set(groupKey, members);
+        }
+      }
+    }
+
+    importedCount = insertedPeople.length;
+    sw.touch(
+      "people",
+      insertedPeople.map((person) => person.id),
+    );
+  }
+
+  let updatedCount = 0;
+
+  if (toUpdate.length > 0) {
+    const updateResults = await Promise.all(
+      toUpdate.flatMap((contact) => {
+        const personId = handleToPersonId.get(contact.instagramUsername.trim().toLowerCase());
+        if (!personId) {
+          return [];
+        }
+
+        return [
+          db.people.updateMany({
+            data: {
+              firstName: contact.firstName,
+              lastName: contact.lastName,
+              middleName: contact.middleName,
+            },
+            where: { id: personId, userId },
+          }),
+        ];
+      }),
+    );
+
+    updatedCount = updateResults.filter((result) => result.count > 0).length;
+    sw.touch(
+      "people",
+      toUpdate.flatMap(
+        (contact) => handleToPersonId.get(contact.instagramUsername.trim().toLowerCase()) ?? [],
+      ),
+    );
+  }
+
+  const socialRows = validContacts
+    .map((contact) => {
+      const handle = contact.instagramUsername.trim().toLowerCase();
+      const personId = handleToPersonId.get(handle);
+      if (!personId) {
+        return null;
+      }
+
+      return {
+        connectedAt: contact.connectedAt ? new Date(contact.connectedAt) : null,
+        handle,
+        personId,
+        platform: "instagram",
+      };
+    })
+    .filter((row): row is NonNullable<typeof row> => row !== null);
+
+  await upsertPeopleSocials(sw, socialRows);
+
+  for (const [groupKey, personIds] of groupAssignments) {
+    await assignContactsToDefaultImportGroup(sw, groupKey, Array.from(personIds));
+  }
+
+  return { importedCount, updatedCount };
 }
 
 export async function commitInstagramImport(
   ctx: DomainContext,
   rawImportContacts: InstagramPreparedContact[],
 ): Promise<InstagramImportCommitResponse> {
-  const { user, log } = ctx;
-  const db = domainDb(ctx);
+  const { log } = ctx;
   const rawContacts = rawImportContacts;
 
   const seenHandles = new Set<string>();
@@ -108,127 +248,16 @@ export async function commitInstagramImport(
     };
   }
 
-  const now = new Date();
-  const handles = validContacts.map((contact) => contact.instagramUsername.trim().toLowerCase());
-  const handleToPersonId = new Map<string, string>();
-
-  for (let index = 0; index < handles.length; index += IMPORT_HANDLE_LOOKUP_CHUNK_SIZE) {
-    const chunk = handles.slice(index, index + IMPORT_HANDLE_LOOKUP_CHUNK_SIZE);
-
-    const existingRows = await db.peopleSocial.findMany({
-      select: { handle: true, personId: true },
-      where: {
-        handle: { in: chunk },
-        platform: "instagram",
-        userId: user.id,
-      },
-    });
-
-    for (const row of existingRows) {
-      if (row.handle && row.personId) {
-        handleToPersonId.set(row.handle.trim().toLowerCase(), row.personId);
-      }
-    }
-  }
-
-  const toInsert = validContacts.filter(
-    (contact) => !handleToPersonId.has(contact.instagramUsername.trim().toLowerCase()),
-  );
-  const toUpdate = validContacts.filter((contact) =>
-    handleToPersonId.has(contact.instagramUsername.trim().toLowerCase()),
-  );
-
-  let importedCount = 0;
-  const groupAssignments = new Map<DefaultImportGroupKey, Set<string>>();
-
-  if (toInsert.length > 0) {
-    const insertedPeople = await db.people.createManyAndReturn({
-      data: toInsert.map((contact) => ({
-        firstName: contact.firstName,
-        lastInteraction: now,
-        lastName: contact.lastName,
-        middleName: contact.middleName,
-        myself: false,
-        userId: user.id,
-      })),
-      select: { id: true },
-    });
-
-    for (const [index, contact] of toInsert.entries()) {
-      const inserted = insertedPeople[index];
-      if (inserted) {
-        const handle = contact.instagramUsername.trim().toLowerCase();
-        handleToPersonId.set(handle, inserted.id);
-
-        const sources = (contact.sources ?? []) as InstagramImportSource[];
-        const groupKeys = toInstagramImportGroupKeys(sources);
-        for (const groupKey of groupKeys) {
-          const members = groupAssignments.get(groupKey) ?? new Set<string>();
-          members.add(inserted.id);
-          groupAssignments.set(groupKey, members);
-        }
-      }
-    }
-
-    importedCount = insertedPeople.length;
-  }
-
-  let updatedCount = 0;
-
-  if (toUpdate.length > 0) {
-    const updateResults = await Promise.all(
-      toUpdate.flatMap((contact) => {
-        const personId = handleToPersonId.get(contact.instagramUsername.trim().toLowerCase());
-        if (!personId) {
-          return [];
-        }
-
-        return [
-          db.people.updateMany({
-            data: {
-              firstName: contact.firstName,
-              lastName: contact.lastName,
-              middleName: contact.middleName,
-            },
-            where: { id: personId, userId: user.id },
-          }),
-        ];
-      }),
-    );
-
-    updatedCount = updateResults.filter((result) => result.count > 0).length;
-  }
-
-  const socialRows = validContacts
-    .map((contact) => {
-      const handle = contact.instagramUsername.trim().toLowerCase();
-      const personId = handleToPersonId.get(handle);
-      if (!personId) {
-        return null;
-      }
-
-      return {
-        connectedAt: contact.connectedAt ? new Date(contact.connectedAt) : null,
-        handle,
-        personId,
-        platform: "instagram",
-      };
-    })
-    .filter((row): row is NonNullable<typeof row> => row !== null);
-
-  await upsertPeopleSocials(db, user.id, socialRows);
-
+  let counts: { importedCount: number; updatedCount: number };
   try {
-    await Promise.all(
-      Array.from(groupAssignments.entries()).map(([groupKey, personIds]) =>
-        assignContactsToDefaultImportGroup(ctx, groupKey, Array.from(personIds)),
-      ),
-    );
-  } catch (groupError) {
-    const message =
-      groupError instanceof Error ? groupError.message : "Failed to assign imported contacts";
+    counts = await withSyncedWrite(ctx, (sw) => writeInstagramImport(sw, validContacts), {
+      timeoutMs: INSTAGRAM_IMPORT_TRANSACTION_TIMEOUT_MS,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to import contacts";
     throw internal("import_instagram_failed", message);
   }
+  const { importedCount, updatedCount } = counts;
 
   if (importedCount + updatedCount > 0) {
     try {

@@ -1,6 +1,5 @@
 import type { InstagramImportSource } from "@bondery/schemas";
-import type { DomainContext } from "../../domains/_shared/context.js";
-import { domainDb } from "../../domains/_shared/domain-db.js";
+import type { SyncedWrite } from "../sync/synced-write.js";
 
 type DefaultImportGroupKey =
   | "linkedin_import"
@@ -62,35 +61,35 @@ export type { DefaultImportGroupKey };
  * Ensures the given default import group exists for a user and returns its id.
  *
  * The group is identified by its default label. If no such group exists,
- * a new one is created with the default emoji and color.
+ * a new one is created with the default emoji and color and recorded for the sync log.
  */
 export async function ensureDefaultImportGroup(
-  ctx: DomainContext,
+  sw: SyncedWrite,
   key: DefaultImportGroupKey,
 ): Promise<string> {
-  const { user } = ctx;
-  const db = domainDb(ctx);
+  const { db, userId } = sw;
   const defaults = DEFAULT_IMPORT_GROUPS[key];
 
   const existing = await db.group.findFirst({
     orderBy: { createdAt: "asc" },
     select: { id: true },
-    where: { label: defaults.label, userId: user.id },
+    where: { label: defaults.label, userId },
   });
 
   if (existing?.id) {
     return existing.id;
   }
 
-  const createdGroup = await db.group.create({
+  const createdGroup = await sw.db.group.create({
     data: {
       color: defaults.color,
       emoji: defaults.emoji,
       label: defaults.label,
-      userId: user.id,
+      userId,
     },
     select: { id: true },
   });
+  sw.touch("groups", [createdGroup.id]);
 
   return createdGroup.id;
 }
@@ -99,30 +98,34 @@ export async function ensureDefaultImportGroup(
  * Ensures default import group exists and upserts memberships for provided contacts.
  *
  * Only unique person ids are inserted and duplicate memberships are ignored.
+ * Call it inside `withSyncedWrite` so the new rows reach the sync log.
  */
 export async function assignContactsToDefaultImportGroup(
-  ctx: DomainContext,
+  sw: SyncedWrite,
   key: DefaultImportGroupKey,
   personIds: string[],
 ): Promise<void> {
-  const { user } = ctx;
-  const db = domainDb(ctx);
   const uniquePersonIds = Array.from(new Set(personIds.filter(Boolean)));
 
   if (uniquePersonIds.length === 0) {
     return;
   }
 
-  const groupId = await ensureDefaultImportGroup(ctx, key);
+  const groupId = await ensureDefaultImportGroup(sw, key);
 
-  await db.peopleGroup.createMany({
+  const memberships = await sw.db.peopleGroup.createManyAndReturn({
     data: uniquePersonIds.map((personId) => ({
       groupId,
       personId,
-      userId: user.id,
+      userId: sw.userId,
     })),
+    select: { id: true },
     skipDuplicates: true,
   });
+  sw.touch(
+    "people_groups",
+    memberships.map((membership) => membership.id),
+  );
 }
 
 /**

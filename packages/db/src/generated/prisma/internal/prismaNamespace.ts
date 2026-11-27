@@ -4500,7 +4500,8 @@ export type IdempotencyKeyScalarFieldEnum = (typeof IdempotencyKeyScalarFieldEnu
 
 export const SyncUserSequenceScalarFieldEnum = {
   userId: 'userId',
-  lastSequence: 'lastSequence'
+  lastSequence: 'lastSequence',
+  bootstrapFloor: 'bootstrapFloor'
 } as const
 
 export type SyncUserSequenceScalarFieldEnum = (typeof SyncUserSequenceScalarFieldEnum)[keyof typeof SyncUserSequenceScalarFieldEnum]

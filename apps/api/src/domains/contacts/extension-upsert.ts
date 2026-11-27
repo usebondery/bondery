@@ -14,6 +14,7 @@ import {
   upsertLinkedInHistory,
 } from "../../lib/import/linkedin-helpers.js";
 import { internal } from "../../lib/platform/errors/http-errors.js";
+import { withSyncedWrite } from "../../lib/sync/synced-write.js";
 import { type DomainContext, DomainError } from "../_shared/context.js";
 import { domainDb } from "../_shared/domain-db.js";
 import { createContact } from "./create-contact.js";
@@ -133,7 +134,7 @@ export async function upsertContactFromExtension(ctx: DomainContext, input: Exte
     }
 
     if (profileImageUrl && !existingContact.hasAvatar) {
-      await updateContactPhoto(existingContact.id, user.id, profileImageUrl);
+      await updateContactPhoto(ctx, existingContact.id, profileImageUrl);
     }
 
     await upsertLinkedInHistory(
@@ -171,14 +172,16 @@ export async function upsertContactFromExtension(ctx: DomainContext, input: Exte
   const extensionGroup = resolveExtensionDefaultGroup(primarySocial.platform);
   if (extensionGroup) {
     try {
-      await assignContactsToDefaultImportGroup(ctx, extensionGroup, [newContactId]);
+      await withSyncedWrite(ctx, (sw) =>
+        assignContactsToDefaultImportGroup(sw, extensionGroup, [newContactId]),
+      );
     } catch (error) {
       throw internal("contact_failed_to_assign_default_group", error);
     }
   }
 
   if (profileImageUrl) {
-    await updateContactPhoto(newContactId, user.id, profileImageUrl);
+    await updateContactPhoto(ctx, newContactId, profileImageUrl);
   }
 
   if (workHistory && workHistory.length > 0) {

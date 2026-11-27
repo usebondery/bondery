@@ -120,6 +120,7 @@ export async function mergeContactSocials(
     }
 
     socialUpdatePromises.push(
+      // biome-ignore lint/plugin: Called from merge, which writes the sync log for the surviving contact.
       db.peopleSocial.update({
         data: {
           connectedAt: rightSocial.connectedAt,
@@ -134,6 +135,7 @@ export async function mergeContactSocials(
   const socialWriteResults = await Promise.allSettled([
     ...(socialInserts.length > 0
       ? [
+          // biome-ignore lint/plugin: Called from merge, which writes the sync log for the surviving contact.
           db.peopleSocial.createMany({
             data: socialInserts,
             skipDuplicates: true,
@@ -169,6 +171,7 @@ export async function mergeContactGroupMemberships(
   }
 
   try {
+    // biome-ignore lint/plugin: Called from merge, which writes the sync log for the surviving contact.
     await db.peopleGroup.createMany({
       data: rightGroupMemberships.map((membership) => ({
         groupId: membership.groupId,
@@ -241,6 +244,7 @@ export async function mergeContactImportantDates(
     conflictResolutions,
   );
 
+  // biome-ignore lint/plugin: Called from merge, which writes the sync log for the surviving contact.
   await db.peopleImportantDate.deleteMany({
     where: { personId: leftPersonId, userId },
   });
@@ -250,6 +254,7 @@ export async function mergeContactImportantDates(
   }
 
   try {
+    // biome-ignore lint/plugin: Called from merge, which writes the sync log for the surviving contact.
     await db.peopleImportantDate.createMany({
       data: mergedImportantDates.map((event) => ({
         date: event.date,

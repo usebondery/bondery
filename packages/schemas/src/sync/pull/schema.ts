@@ -47,7 +47,9 @@ export const syncPullResponseSchema: z.ZodType<SyncPullResponse> = z.object({
   requiresBootstrap: z
     .boolean()
     .optional()
-    .describe("True when the client must run bootstrap before pull"),
+    .describe(
+      "True when the client must run bootstrap before pull: its cursor is above the server head, or below the user's bootstrap floor",
+    ),
 });
 
 export const syncBootstrapTablesSchema: z.ZodType<SyncBootstrapTables> =

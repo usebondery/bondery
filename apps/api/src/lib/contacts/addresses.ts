@@ -279,6 +279,7 @@ export async function replaceContactAddresses(
   personId: string,
   addresses: ContactAddressEntry[],
 ): Promise<void> {
+  // biome-ignore lint/plugin: Called from updateContact and merge, which write the sync log for the contact.
   await db.peopleAddress.deleteMany({
     where: { personId, userId },
   });
@@ -287,6 +288,7 @@ export async function replaceContactAddresses(
     return;
   }
 
+  // biome-ignore lint/plugin: Called from updateContact and merge, which write the sync log for the contact.
   await db.peopleAddress.createMany({
     data: addresses.map((address, index) => ({
       addressCity: address.addressCity,

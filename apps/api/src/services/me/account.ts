@@ -148,7 +148,7 @@ export async function uploadProfilePhoto(
   }
 
   try {
-    await uploadContactAvatarAndSetFlag(db, user.id, user.id, buffer, mimeType);
+    await uploadContactAvatarAndSetFlag(ctx, user.id, buffer, mimeType);
   } catch (error) {
     throw internal("account_failed_to_upload_profile_photo", error);
   }
@@ -172,7 +172,6 @@ export async function uploadProfilePhoto(
 
 export async function deleteProfilePhoto(ctx: DomainContext): Promise<{ success: true }> {
   const { user } = ctx;
-  const db = domainDb(ctx);
-  await deleteContactAvatarAndClearFlag(db, user.id, user.id);
+  await deleteContactAvatarAndClearFlag(ctx, user.id);
   return { success: true };
 }

@@ -28,50 +28,60 @@ export type AggregateSyncUserSequence = {
 
 export type SyncUserSequenceAvgAggregateOutputType = {
   lastSequence: number | null
+  bootstrapFloor: number | null
 }
 
 export type SyncUserSequenceSumAggregateOutputType = {
   lastSequence: bigint | null
+  bootstrapFloor: bigint | null
 }
 
 export type SyncUserSequenceMinAggregateOutputType = {
   userId: string | null
   lastSequence: bigint | null
+  bootstrapFloor: bigint | null
 }
 
 export type SyncUserSequenceMaxAggregateOutputType = {
   userId: string | null
   lastSequence: bigint | null
+  bootstrapFloor: bigint | null
 }
 
 export type SyncUserSequenceCountAggregateOutputType = {
   userId: number
   lastSequence: number
+  bootstrapFloor: number
   _all: number
 }
 
 
 export type SyncUserSequenceAvgAggregateInputType = {
   lastSequence?: true
+  bootstrapFloor?: true
 }
 
 export type SyncUserSequenceSumAggregateInputType = {
   lastSequence?: true
+  bootstrapFloor?: true
 }
 
 export type SyncUserSequenceMinAggregateInputType = {
   userId?: true
   lastSequence?: true
+  bootstrapFloor?: true
 }
 
 export type SyncUserSequenceMaxAggregateInputType = {
   userId?: true
   lastSequence?: true
+  bootstrapFloor?: true
 }
 
 export type SyncUserSequenceCountAggregateInputType = {
   userId?: true
   lastSequence?: true
+  bootstrapFloor?: true
   _all?: true
 }
 
@@ -164,6 +174,7 @@ export type SyncUserSequenceGroupByArgs<ExtArgs extends runtime.Types.Extensions
 export type SyncUserSequenceGroupByOutputType = {
   userId: string
   lastSequence: bigint
+  bootstrapFloor: bigint
   _count: SyncUserSequenceCountAggregateOutputType | null
   _avg: SyncUserSequenceAvgAggregateOutputType | null
   _sum: SyncUserSequenceSumAggregateOutputType | null
@@ -192,12 +203,14 @@ export type SyncUserSequenceWhereInput = {
   NOT?: Prisma.SyncUserSequenceWhereInput | Prisma.SyncUserSequenceWhereInput[]
   userId?: Prisma.UuidFilter<"SyncUserSequence"> | string
   lastSequence?: Prisma.BigIntFilter<"SyncUserSequence"> | bigint | number
+  bootstrapFloor?: Prisma.BigIntFilter<"SyncUserSequence"> | bigint | number
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
 export type SyncUserSequenceOrderByWithRelationInput = {
   userId?: Prisma.SortOrder
   lastSequence?: Prisma.SortOrder
+  bootstrapFloor?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
 }
 
@@ -207,12 +220,14 @@ export type SyncUserSequenceWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.SyncUserSequenceWhereInput[]
   NOT?: Prisma.SyncUserSequenceWhereInput | Prisma.SyncUserSequenceWhereInput[]
   lastSequence?: Prisma.BigIntFilter<"SyncUserSequence"> | bigint | number
+  bootstrapFloor?: Prisma.BigIntFilter<"SyncUserSequence"> | bigint | number
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "userId">
 
 export type SyncUserSequenceOrderByWithAggregationInput = {
   userId?: Prisma.SortOrder
   lastSequence?: Prisma.SortOrder
+  bootstrapFloor?: Prisma.SortOrder
   _count?: Prisma.SyncUserSequenceCountOrderByAggregateInput
   _avg?: Prisma.SyncUserSequenceAvgOrderByAggregateInput
   _max?: Prisma.SyncUserSequenceMaxOrderByAggregateInput
@@ -226,40 +241,48 @@ export type SyncUserSequenceScalarWhereWithAggregatesInput = {
   NOT?: Prisma.SyncUserSequenceScalarWhereWithAggregatesInput | Prisma.SyncUserSequenceScalarWhereWithAggregatesInput[]
   userId?: Prisma.UuidWithAggregatesFilter<"SyncUserSequence"> | string
   lastSequence?: Prisma.BigIntWithAggregatesFilter<"SyncUserSequence"> | bigint | number
+  bootstrapFloor?: Prisma.BigIntWithAggregatesFilter<"SyncUserSequence"> | bigint | number
 }
 
 export type SyncUserSequenceCreateInput = {
   lastSequence?: bigint | number
+  bootstrapFloor?: bigint | number
   user: Prisma.UserCreateNestedOneWithoutSyncUserSequenceInput
 }
 
 export type SyncUserSequenceUncheckedCreateInput = {
   userId: string
   lastSequence?: bigint | number
+  bootstrapFloor?: bigint | number
 }
 
 export type SyncUserSequenceUpdateInput = {
   lastSequence?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  bootstrapFloor?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   user?: Prisma.UserUpdateOneRequiredWithoutSyncUserSequenceNestedInput
 }
 
 export type SyncUserSequenceUncheckedUpdateInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   lastSequence?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  bootstrapFloor?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
 }
 
 export type SyncUserSequenceCreateManyInput = {
   userId: string
   lastSequence?: bigint | number
+  bootstrapFloor?: bigint | number
 }
 
 export type SyncUserSequenceUpdateManyMutationInput = {
   lastSequence?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  bootstrapFloor?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
 }
 
 export type SyncUserSequenceUncheckedUpdateManyInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   lastSequence?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  bootstrapFloor?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
 }
 
 export type SyncUserSequenceNullableScalarRelationFilter = {
@@ -270,24 +293,29 @@ export type SyncUserSequenceNullableScalarRelationFilter = {
 export type SyncUserSequenceCountOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   lastSequence?: Prisma.SortOrder
+  bootstrapFloor?: Prisma.SortOrder
 }
 
 export type SyncUserSequenceAvgOrderByAggregateInput = {
   lastSequence?: Prisma.SortOrder
+  bootstrapFloor?: Prisma.SortOrder
 }
 
 export type SyncUserSequenceMaxOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   lastSequence?: Prisma.SortOrder
+  bootstrapFloor?: Prisma.SortOrder
 }
 
 export type SyncUserSequenceMinOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   lastSequence?: Prisma.SortOrder
+  bootstrapFloor?: Prisma.SortOrder
 }
 
 export type SyncUserSequenceSumOrderByAggregateInput = {
   lastSequence?: Prisma.SortOrder
+  bootstrapFloor?: Prisma.SortOrder
 }
 
 export type SyncUserSequenceCreateNestedOneWithoutUserInput = {
@@ -324,10 +352,12 @@ export type SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput = {
 
 export type SyncUserSequenceCreateWithoutUserInput = {
   lastSequence?: bigint | number
+  bootstrapFloor?: bigint | number
 }
 
 export type SyncUserSequenceUncheckedCreateWithoutUserInput = {
   lastSequence?: bigint | number
+  bootstrapFloor?: bigint | number
 }
 
 export type SyncUserSequenceCreateOrConnectWithoutUserInput = {
@@ -348,10 +378,12 @@ export type SyncUserSequenceUpdateToOneWithWhereWithoutUserInput = {
 
 export type SyncUserSequenceUpdateWithoutUserInput = {
   lastSequence?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  bootstrapFloor?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
 }
 
 export type SyncUserSequenceUncheckedUpdateWithoutUserInput = {
   lastSequence?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  bootstrapFloor?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
 }
 
 
@@ -359,27 +391,31 @@ export type SyncUserSequenceUncheckedUpdateWithoutUserInput = {
 export type SyncUserSequenceSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   userId?: boolean
   lastSequence?: boolean
+  bootstrapFloor?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["syncUserSequence"]>
 
 export type SyncUserSequenceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   userId?: boolean
   lastSequence?: boolean
+  bootstrapFloor?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["syncUserSequence"]>
 
 export type SyncUserSequenceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   userId?: boolean
   lastSequence?: boolean
+  bootstrapFloor?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["syncUserSequence"]>
 
 export type SyncUserSequenceSelectScalar = {
   userId?: boolean
   lastSequence?: boolean
+  bootstrapFloor?: boolean
 }
 
-export type SyncUserSequenceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"userId" | "lastSequence", ExtArgs["result"]["syncUserSequence"]>
+export type SyncUserSequenceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"userId" | "lastSequence" | "bootstrapFloor", ExtArgs["result"]["syncUserSequence"]>
 export type SyncUserSequenceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -398,6 +434,11 @@ export type $SyncUserSequencePayload<ExtArgs extends runtime.Types.Extensions.In
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     userId: string
     lastSequence: bigint
+    /**
+     * A client whose cursor is below this sequence must bootstrap again. Raised when the log
+     * is known to hold gaps. `GET /sync/pull` answers `requiresBootstrap` for such a cursor.
+     */
+    bootstrapFloor: bigint
   }, ExtArgs["result"]["syncUserSequence"]>
   composites: {}
 }
@@ -824,6 +865,7 @@ export interface Prisma__SyncUserSequenceClient<T, Null = never, ExtArgs extends
 export interface SyncUserSequenceFieldRefs {
   readonly userId: Prisma.FieldRef<"SyncUserSequence", 'String'>
   readonly lastSequence: Prisma.FieldRef<"SyncUserSequence", 'BigInt'>
+  readonly bootstrapFloor: Prisma.FieldRef<"SyncUserSequence", 'BigInt'>
 }
     
 

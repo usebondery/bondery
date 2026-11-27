@@ -22,6 +22,7 @@ import {
   createManyReturning,
   emitSyncChunks,
   isValidLatLng,
+  readBackPeopleChanges,
   setGisPoint,
   typeResult,
   upsertChange,
@@ -110,13 +111,12 @@ export async function applyParsedImport(
   );
   const insertedPersonIds = new Set(insertedPeople.map((row) => row.id));
   const photosResult = await attachImportedPhotos({
-    db,
+    ctx,
     insertedPeople,
     insertedPersonIds,
     photos: parsed.photos,
     photosSkipped: parsed.photosSkipped,
     remapPersonId,
-    userId,
   });
 
   const phoneRows = peopleToInsert.flatMap((person) =>
@@ -441,7 +441,6 @@ export async function applyParsedImport(
   }
 
   const syncChanges: SyncChange[] = [
-    ...insertedPeople.map((row) => upsertChange("people", toSyncRow(row))),
     ...insertedGroups.map((row) => buildGroupRowChange(toSyncRow(row))),
     ...insertedTags.map((row) => buildTagRowChange(toSyncRow(row))),
     ...insertedPhones.map((row) => upsertChange("people_phones", toSyncRow(row))),
@@ -455,7 +454,12 @@ export async function applyParsedImport(
     ...insertedTagMemberships.map((row) => buildPeopleTagChangeFromRow(toPeopleTagSyncRow(row))),
   ];
   try {
-    await emitSyncChunks(ctx, db, syncChanges);
+    const peopleChanges = await readBackPeopleChanges(
+      db,
+      userId,
+      insertedPeople.map((row) => row.id),
+    );
+    await emitSyncChunks(ctx, db, [...peopleChanges, ...syncChanges]);
   } catch (error) {
     ctx.log?.error({ err: error }, "Failed to emit sync changelog after Bondery import writes");
   }

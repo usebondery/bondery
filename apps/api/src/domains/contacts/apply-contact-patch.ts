@@ -211,6 +211,7 @@ export async function applyContactPatch(
 
   updates.updatedAt = new Date();
 
+  // biome-ignore lint/plugin: applyContactPatch runs inside updateContact, which writes the sync log with persistSyncChanges.
   const updated = await db.people.updateMany({
     data: updates,
     where: { id: personId, userId: user.id },

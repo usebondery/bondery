@@ -8,7 +8,7 @@ import { getAuth } from "../../lib/platform/auth/strategies.js";
 import { badRequest } from "../../lib/platform/errors/http-errors.js";
 import type { AppRoutePlugin } from "../../lib/platform/fastify-types.js";
 import { withOkResponse } from "../../lib/platform/openapi/responses.js";
-import { getLastServerSequence } from "../../lib/sync/idempotency.js";
+import { getSyncSequenceState } from "../../lib/sync/idempotency.js";
 import { logSyncPull } from "../../lib/sync/metrics.js";
 import { validateSyncProtocolHeaders } from "../../lib/sync/protocol.js";
 import { isSyncTableKey } from "../../lib/sync/sync-tables.js";
@@ -81,9 +81,11 @@ export const syncPullRoutes: AppRoutePlugin = async (fastify): Promise<void> => 
       }
 
       const { user } = getAuth(request);
-      const head = await getLastServerSequence(prisma, user.id);
+      const { bootstrapFloor, lastSequence: head } = await getSyncSequenceState(prisma, user.id);
 
-      if (since > head) {
+      // A cursor above the head comes from another database. A cursor below the floor skipped
+      // log entries that were never written, so only a full bootstrap repairs the client.
+      if (since > head || since < bootstrapFloor) {
         const response: SyncPullResponse = {
           batches: [],
           nextServerSequence: head,

@@ -188,6 +188,9 @@ model SyncUserSequence {
   userId       String @id @map("user_id") @db.Uuid
   user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   lastSequence BigInt @default(0) @map("last_sequence")
+  /// A client whose cursor is below this sequence must bootstrap again. Raised when the log
+  /// is known to hold gaps. `GET /sync/pull` answers `requiresBootstrap` for such a cursor.
+  bootstrapFloor BigInt @default(0) @map("bootstrap_floor")
 
   @@map("sync_user_sequence")
 }

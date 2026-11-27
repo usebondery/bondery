@@ -67,7 +67,7 @@ async function importMetadataAvatarToStorage(
       return null;
     }
 
-    await uploadContactAvatarAndSetFlag(prisma, userId, userId, buffer, validationType);
+    await uploadContactAvatarAndSetFlag({ user: { id: userId } }, userId, buffer, validationType);
 
     const publicUrl = getStorage().getPublicUrl(
       AVATARS_BUCKET,

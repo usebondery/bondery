@@ -1,10 +1,9 @@
-import type { PrismaClient } from "@bondery/db";
 import type { LinkedInImportCommitResponse } from "@bondery/schemas";
 import { assignContactsToDefaultImportGroup } from "../../lib/import/default-groups.js";
 import { internal } from "../../lib/platform/errors/http-errors.js";
+import { type SyncedWrite, withSyncedWrite } from "../../lib/sync/synced-write.js";
 import { markBulkImportCompleted } from "../../services/import/followup.js";
 import type { DomainContext } from "../_shared/context.js";
-import { domainDb } from "../_shared/domain-db.js";
 import { scheduleMergeRecommendationsRefresh } from "../contacts/merge-recommendations.js";
 
 function buildImportedTitle(position: string | null, company: string | null): string | null {
@@ -22,9 +21,9 @@ function buildImportedTitle(position: string | null, company: string | null): st
   return null;
 }
 
+/** Create or update one social row per person and platform. Every touched id is recorded. */
 async function upsertPeopleSocials(
-  db: PrismaClient,
-  userId: string,
+  sw: SyncedWrite,
   rows: Array<{
     personId: string;
     platform: string;
@@ -35,6 +34,7 @@ async function upsertPeopleSocials(
   if (rows.length === 0) {
     return;
   }
+  const { db, userId } = sw;
 
   const existing = await db.peopleSocial.findMany({
     select: { id: true, personId: true, platform: true },
@@ -50,7 +50,7 @@ async function upsertPeopleSocials(
   const toUpdate = rows.filter((row) => existingByKey.has(`${row.personId}:${row.platform}`));
 
   if (toCreate.length > 0) {
-    await db.peopleSocial.createMany({
+    const created = await db.peopleSocial.createManyAndReturn({
       data: toCreate.map((row) => ({
         connectedAt: row.connectedAt,
         handle: row.handle,
@@ -58,8 +58,13 @@ async function upsertPeopleSocials(
         platform: row.platform,
         userId,
       })),
+      select: { id: true },
       skipDuplicates: true,
     });
+    sw.touch(
+      "people_socials",
+      created.map((row) => row.id),
+    );
   }
 
   await Promise.all(
@@ -77,49 +82,29 @@ async function upsertPeopleSocials(
       }),
     ),
   );
+  sw.touch("people_socials", existingByKey.values());
 }
 
-export async function commitLinkedInImport(
-  ctx: DomainContext,
-  rawImportContacts: Array<{
-    isValid: boolean;
-    linkedinUsername: string;
-    firstName: string;
-    middleName?: string | null;
-    lastName?: string | null;
-    position?: string | null;
-    company?: string | null;
-    email?: string | null;
-    connectedAt?: string | null;
-  }>,
-): Promise<LinkedInImportCommitResponse> {
-  const { user, log } = ctx;
-  const db = domainDb(ctx);
-  const rawContacts = rawImportContacts;
+type LinkedInImportContact = {
+  isValid: boolean;
+  linkedinUsername: string;
+  firstName: string;
+  middleName?: string | null;
+  lastName?: string | null;
+  position?: string | null;
+  company?: string | null;
+  email?: string | null;
+  connectedAt?: string | null;
+};
 
-  const seenHandles = new Set<string>();
-  const validContacts = rawContacts.filter((contact) => {
-    if (!contact.isValid || !contact.linkedinUsername) {
-      return false;
-    }
-    const handle = contact.linkedinUsername.trim();
-    if (!handle || seenHandles.has(handle)) {
-      return false;
-    }
-    seenHandles.add(handle);
-    return true;
-  });
+const LINKEDIN_IMPORT_TRANSACTION_TIMEOUT_MS = 120_000;
 
-  const skippedCount = rawContacts.length - validContacts.length;
-
-  if (validContacts.length === 0) {
-    return {
-      importedCount: 0,
-      skippedCount,
-      updatedCount: 0,
-    } satisfies LinkedInImportCommitResponse;
-  }
-
+/** Insert new people, update known ones, and upsert socials and emails. Records every row. */
+async function writeLinkedInImport(
+  sw: SyncedWrite,
+  validContacts: LinkedInImportContact[],
+): Promise<{ importedCount: number; updatedCount: number }> {
+  const { db, userId } = sw;
   const now = new Date();
   const handles = validContacts.map((contact) => contact.linkedinUsername.trim());
 
@@ -128,7 +113,7 @@ export async function commitLinkedInImport(
     where: {
       handle: { in: handles },
       platform: "linkedin",
-      userId: user.id,
+      userId,
     },
   });
 
@@ -155,7 +140,7 @@ export async function commitLinkedInImport(
   );
 
   let importedCount = 0;
-  let importedPersonIds: string[] = [];
+  const importedPersonIds: string[] = [];
 
   if (toInsert.length > 0) {
     const insertedPeople = await db.people.createManyAndReturn({
@@ -166,7 +151,7 @@ export async function commitLinkedInImport(
         lastName: contact.lastName,
         middleName: contact.middleName,
         myself: false,
-        userId: user.id,
+        userId,
       })),
       select: { id: true },
     });
@@ -179,7 +164,8 @@ export async function commitLinkedInImport(
     }
 
     importedCount = insertedPeople.length;
-    importedPersonIds = insertedPeople.map((person) => person.id);
+    importedPersonIds.push(...insertedPeople.map((person) => person.id));
+    sw.touch("people", importedPersonIds);
   }
 
   let updatedCount = 0;
@@ -200,13 +186,17 @@ export async function commitLinkedInImport(
               lastName: contact.lastName,
               middleName: contact.middleName,
             },
-            where: { id: personId, userId: user.id },
+            where: { id: personId, userId },
           }),
         ];
       }),
     );
 
     updatedCount = updateResults.filter((result) => result.count > 0).length;
+    sw.touch(
+      "people",
+      toUpdate.flatMap((contact) => handleToPersonId.get(contact.linkedinUsername.trim()) ?? []),
+    );
   }
 
   const socialRows = validContacts
@@ -225,7 +215,7 @@ export async function commitLinkedInImport(
     })
     .filter((row): row is NonNullable<typeof row> => row !== null);
 
-  await upsertPeopleSocials(db, user.id, socialRows);
+  await upsertPeopleSocials(sw, socialRows);
 
   const validContactsWithEmail = validContacts.filter((contact) => contact.email);
 
@@ -236,7 +226,7 @@ export async function commitLinkedInImport(
 
     const existingEmails = await db.peopleEmail.findMany({
       select: { personId: true, value: true },
-      where: { personId: { in: personIds }, userId: user.id },
+      where: { personId: { in: personIds }, userId },
     });
 
     const existingEmailsByPerson = new Map<string, string[]>();
@@ -263,27 +253,70 @@ export async function commitLinkedInImport(
           preferred: existing.length === 0,
           sortOrder: existing.length,
           type: "work",
-          userId: user.id,
+          userId,
           value: contact.email,
         };
       })
       .filter((row): row is NonNullable<typeof row> => row !== null);
 
     if (emailRowsToInsert.length > 0) {
-      await db.peopleEmail.createMany({
+      const createdEmails = await db.peopleEmail.createManyAndReturn({
         data: emailRowsToInsert,
+        select: { id: true },
         skipDuplicates: true,
       });
+      sw.touch(
+        "people_emails",
+        createdEmails.map((row) => row.id),
+      );
     }
   }
 
+  await assignContactsToDefaultImportGroup(sw, "linkedin_import", importedPersonIds);
+
+  return { importedCount, updatedCount };
+}
+
+export async function commitLinkedInImport(
+  ctx: DomainContext,
+  rawImportContacts: LinkedInImportContact[],
+): Promise<LinkedInImportCommitResponse> {
+  const { log } = ctx;
+  const rawContacts = rawImportContacts;
+
+  const seenHandles = new Set<string>();
+  const validContacts = rawContacts.filter((contact) => {
+    if (!contact.isValid || !contact.linkedinUsername) {
+      return false;
+    }
+    const handle = contact.linkedinUsername.trim();
+    if (!handle || seenHandles.has(handle)) {
+      return false;
+    }
+    seenHandles.add(handle);
+    return true;
+  });
+
+  const skippedCount = rawContacts.length - validContacts.length;
+
+  if (validContacts.length === 0) {
+    return {
+      importedCount: 0,
+      skippedCount,
+      updatedCount: 0,
+    } satisfies LinkedInImportCommitResponse;
+  }
+
+  let counts: { importedCount: number; updatedCount: number };
   try {
-    await assignContactsToDefaultImportGroup(ctx, "linkedin_import", importedPersonIds);
-  } catch (groupError) {
-    const message =
-      groupError instanceof Error ? groupError.message : "Failed to assign imported contacts";
+    counts = await withSyncedWrite(ctx, (sw) => writeLinkedInImport(sw, validContacts), {
+      timeoutMs: LINKEDIN_IMPORT_TRANSACTION_TIMEOUT_MS,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to import contacts";
     throw internal("import_linkedin_failed", message);
   }
+  const { importedCount, updatedCount } = counts;
 
   if (importedCount + updatedCount > 0) {
     try {

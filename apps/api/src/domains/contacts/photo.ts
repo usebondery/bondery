@@ -1,14 +1,27 @@
 import {
-  deleteContactAvatarAndClearFlag,
-  uploadContactAvatarAndSetFlag,
+  deleteContactAvatarFile,
+  setContactHasAvatarSynced,
+  uploadContactAvatarFile,
 } from "../../lib/contacts/avatar-storage.js";
 import { internal } from "../../lib/platform/errors/http-errors.js";
 import { resolveContactAvatarUrl } from "../../lib/storage/avatar-urls.js";
-import { buildPeopleRowChange } from "../../lib/sync/build-changes.js";
-import { persistSyncChanges } from "../../lib/sync/persist-changes.js";
-import { type DomainContext, DomainError, syncEmitMetaFromContext } from "../_shared/context.js";
+import { withSyncedWriteResult } from "../../lib/sync/synced-write.js";
+import { type DomainContext, DomainError } from "../_shared/context.js";
 import { domainDb } from "../_shared/domain-db.js";
 import { captureCurrentSyncTxid } from "../_shared/with-txid.js";
+
+/** Set or clear `has_avatar` and write the sync log in one transaction. */
+async function setAvatarFlagAndEmit(
+  ctx: DomainContext,
+  contactId: string,
+  hasAvatar: boolean,
+): Promise<{ txid: string; serverSequence: number }> {
+  const { value: txid, serverSequence } = await withSyncedWriteResult(ctx, async (sw) => {
+    await setContactHasAvatarSynced(sw, contactId, hasAvatar);
+    return captureCurrentSyncTxid(sw.db);
+  });
+  return { serverSequence: serverSequence ?? 0, txid };
+}
 
 async function assertContactExists(
   ctx: DomainContext,
@@ -44,17 +57,13 @@ export async function uploadContactPhoto(
   const { user } = ctx;
   const db = domainDb(ctx);
 
+  // The upload is slow external I/O, so it finishes before the transaction opens.
   try {
-    await uploadContactAvatarAndSetFlag(db, user.id, contactId, buffer, mimeType);
+    await uploadContactAvatarFile(user.id, contactId, buffer, mimeType);
   } catch (error) {
     throw internal("contact_failed_to_upload_photo", error);
   }
-
-  const peopleChange = await buildPeopleRowChange(user.id, contactId, db);
-  const changes = peopleChange ? [peopleChange] : [];
-  const txid = await captureCurrentSyncTxid(domainDb(ctx));
-  const serverSequence =
-    (await persistSyncChanges(user.id, changes, syncEmitMetaFromContext(ctx), domainDb(ctx))) ?? 0;
+  const { serverSequence, txid } = await setAvatarFlagAndEmit(ctx, contactId, true);
 
   const person = await db.people.findFirst({
     select: { avatarUpdatedAt: true },
@@ -79,15 +88,8 @@ export async function deleteContactPhoto(
 ): Promise<{ data: { success: true }; txid: string; serverSequence: number }> {
   await assertContactExists(ctx, contactId);
 
-  const { user } = ctx;
-  const db = domainDb(ctx);
-  await deleteContactAvatarAndClearFlag(db, user.id, contactId);
-
-  const peopleChange = await buildPeopleRowChange(user.id, contactId, db);
-  const changes = peopleChange ? [peopleChange] : [];
-  const txid = await captureCurrentSyncTxid(domainDb(ctx));
-  const serverSequence =
-    (await persistSyncChanges(user.id, changes, syncEmitMetaFromContext(ctx), domainDb(ctx))) ?? 0;
+  await deleteContactAvatarFile(ctx.user.id, contactId);
+  const { serverSequence, txid } = await setAvatarFlagAndEmit(ctx, contactId, false);
 
   return { data: { success: true }, serverSequence, txid };
 }

@@ -157,6 +157,7 @@ export async function replaceContactPhones(
   personId: string,
   phones: PhoneEntry[],
 ): Promise<void> {
+  // biome-ignore lint/plugin: Called from updateContact and merge, which write the sync log for the contact.
   await db.peoplePhone.deleteMany({
     where: { personId, userId },
   });
@@ -165,6 +166,7 @@ export async function replaceContactPhones(
     return;
   }
 
+  // biome-ignore lint/plugin: Called from updateContact and merge, which write the sync log for the contact.
   await db.peoplePhone.createMany({
     data: phones.map((phone, index) => ({
       personId,
@@ -185,6 +187,7 @@ export async function replaceContactEmails(
   personId: string,
   emails: EmailEntry[],
 ): Promise<void> {
+  // biome-ignore lint/plugin: Called from updateContact and merge, which write the sync log for the contact.
   await db.peopleEmail.deleteMany({
     where: { personId, userId },
   });
@@ -193,6 +196,7 @@ export async function replaceContactEmails(
     return;
   }
 
+  // biome-ignore lint/plugin: Called from updateContact and merge, which write the sync log for the contact.
   await db.peopleEmail.createMany({
     data: emails.map((email, index) => ({
       personId,

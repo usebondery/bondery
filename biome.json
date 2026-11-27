@@ -860,7 +860,8 @@
     "./biome/plugins/no-uncapped-multipart.grit",
     "./biome/plugins/no-raw-html-sink.grit",
     "./biome/plugins/use-cn-for-classname.grit",
-    "./biome/plugins/use-s3-client-factory.grit"
+    "./biome/plugins/use-s3-client-factory.grit",
+    "./biome/plugins/no-unsynced-sync-table-write.grit"
   ],
   "tailwind": {
     "attributes": ["class", "className"],

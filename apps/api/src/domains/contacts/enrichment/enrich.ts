@@ -6,7 +6,8 @@ import {
   uploadAllLinkedInLogos,
   upsertLinkedInHistory,
 } from "../../../lib/import/linkedin-helpers.js";
-import { cachedGeocodeLinkedInLocation } from "../../../lib/integrations/mapy.js";
+import { getGeocoder } from "../../../lib/integrations/mapy.js";
+import { withSyncedWrite } from "../../../lib/sync/synced-write.js";
 import { type DomainContext, DomainError } from "../../_shared/context.js";
 import { domainDb } from "../../_shared/domain-db.js";
 
@@ -65,7 +66,7 @@ export async function enrichContact(
 
   if (profileImageUrl) {
     try {
-      await updateContactPhoto(personId, user.id, profileImageUrl);
+      await updateContactPhoto(ctx, personId, profileImageUrl);
     } catch (error) {
       log?.error({ err: error }, "[enrich] Photo update failed, continuing");
     }
@@ -94,7 +95,7 @@ export async function enrichContact(
   if (location) {
     fieldUpdates.location = location;
     try {
-      const result = await cachedGeocodeLinkedInLocation(location);
+      const result = await getGeocoder().cachedGeocodeLocation(location);
       if (result) {
         const { geo, timezone: tz } = result;
         if (geo.formattedLabel) {
@@ -112,19 +113,23 @@ export async function enrichContact(
 
   if (Object.keys(fieldUpdates).length > 0 || gisPointEwkt !== undefined) {
     fieldUpdates.updatedAt = new Date();
-    await db.people.updateMany({
-      data: fieldUpdates,
-      where: { id: personId, userId: user.id },
-    });
+    // Geocoding and the photo download are done, so the transaction holds database work only.
+    await withSyncedWrite(ctx, async (sw) => {
+      await sw.db.people.updateMany({
+        data: fieldUpdates,
+        where: { id: personId, userId: user.id },
+      });
 
-    if (gisPointEwkt) {
-      await db.$executeRaw`
-        UPDATE people
-        SET "gisPoint" = ST_GeogFromText(${gisPointEwkt}),
-            updated_at = NOW()
-        WHERE id = ${personId}::uuid AND user_id = ${user.id}::uuid
-      `;
-    }
+      if (gisPointEwkt) {
+        await sw.db.$executeRaw`
+          UPDATE people
+          SET "gisPoint" = ST_GeogFromText(${gisPointEwkt}),
+              updated_at = NOW()
+          WHERE id = ${personId}::uuid AND user_id = ${user.id}::uuid
+        `;
+      }
+      sw.touch("people", [personId]);
+    });
   }
 
   log?.info(

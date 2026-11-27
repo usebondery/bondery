@@ -1,27 +1,35 @@
-import type { PrismaClient } from "@bondery/db";
 import type { ImportTypeResult } from "@bondery/schemas";
-import { uploadContactAvatarAndSetFlag } from "../../lib/contacts/avatar-storage.js";
+import {
+  setContactHasAvatarSynced,
+  uploadContactAvatarFile,
+} from "../../lib/contacts/avatar-storage.js";
+import { withSyncedWrite } from "../../lib/sync/synced-write.js";
+import type { DomainContext } from "../_shared/context.js";
 import { typeResult } from "./import-helpers.js";
 
 const PHOTO_UPLOAD_CONCURRENCY = 8;
+const PHOTO_FLAG_TRANSACTION_TIMEOUT_MS = 120_000;
 
 type InsertedPerson = { hasAvatar: boolean; id: string };
 
+/**
+ * Upload the photo files first, with bounded concurrency and outside any transaction. Then set
+ * `has_avatar` for every stored photo and write the sync log in one transaction.
+ */
 export async function attachImportedPhotos(options: {
-  db: PrismaClient;
+  ctx: DomainContext;
   insertedPeople: InsertedPerson[];
   insertedPersonIds: Set<string>;
   photos: Map<string, Buffer>;
   photosSkipped: number;
   remapPersonId: (sourceId: string) => string;
-  userId: string;
 }): Promise<ImportTypeResult> {
-  const { db, insertedPeople, insertedPersonIds, photos, photosSkipped, remapPersonId, userId } =
-    options;
+  const { ctx, insertedPeople, insertedPersonIds, photos, photosSkipped, remapPersonId } = options;
+  const userId = ctx.user.id;
 
   const insertedById = new Map(insertedPeople.map((person) => [person.id, person]));
   const photoEntries = [...photos.entries()];
-  let inserted = 0;
+  const storedIds: string[] = [];
 
   for (let index = 0; index < photoEntries.length; index += PHOTO_UPLOAD_CONCURRENCY) {
     const chunk = photoEntries.slice(index, index + PHOTO_UPLOAD_CONCURRENCY);
@@ -32,7 +40,7 @@ export async function attachImportedPhotos(options: {
           return null;
         }
         try {
-          await uploadContactAvatarAndSetFlag(db, userId, remappedId, buffer, "image/jpeg");
+          await uploadContactAvatarFile(userId, remappedId, buffer, "image/jpeg");
           return remappedId;
         } catch {
           return null;
@@ -44,7 +52,7 @@ export async function attachImportedPhotos(options: {
       if (!remappedId) {
         continue;
       }
-      inserted += 1;
+      storedIds.push(remappedId);
       const person = insertedById.get(remappedId);
       if (person) {
         person.hasAvatar = true;
@@ -52,5 +60,17 @@ export async function attachImportedPhotos(options: {
     }
   }
 
-  return typeResult(photos.size, inserted, photosSkipped);
+  if (storedIds.length > 0) {
+    await withSyncedWrite(
+      ctx,
+      async (sw) => {
+        for (const contactId of storedIds) {
+          await setContactHasAvatarSynced(sw, contactId, true);
+        }
+      },
+      { timeoutMs: PHOTO_FLAG_TRANSACTION_TIMEOUT_MS },
+    );
+  }
+
+  return typeResult(photos.size, storedIds.length, photosSkipped);
 }

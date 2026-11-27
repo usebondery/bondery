@@ -95,6 +95,7 @@ export async function upsertContactSocials(
   const normalizedHandle = typeof handle === "string" ? handle.trim() : "";
 
   if (normalizedHandle.length === 0) {
+    // biome-ignore lint/plugin: Called from updateContact, extension upsert and merge, which write the sync log for the contact.
     await db.peopleSocial.deleteMany({
       where: { personId, platform, userId },
     });
@@ -107,6 +108,7 @@ export async function upsertContactSocials(
   });
 
   if (existing) {
+    // biome-ignore lint/plugin: Called from updateContact, extension upsert and merge, which write the sync log for the contact.
     await db.peopleSocial.update({
       data: {
         connectedAt: connectedAt ? new Date(connectedAt) : null,
@@ -117,6 +119,7 @@ export async function upsertContactSocials(
     return;
   }
 
+  // biome-ignore lint/plugin: Called from updateContact, extension upsert and merge, which write the sync log for the contact.
   await db.peopleSocial.create({
     data: {
       connectedAt: connectedAt ? new Date(connectedAt) : null,

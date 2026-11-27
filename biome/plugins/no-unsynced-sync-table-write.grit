@@ -1,0 +1,63 @@
+// Rejects a write to a mobile-synced Prisma model in a file that never writes the sync log.
+//
+// Mobile reads these tables from its local SQLite copy. The copy only changes when the API
+// writes `sync_change_log` rows, so a write that skips the log never reaches a phone that has
+// finished its bootstrap. Five write paths did exactly that until `withSyncedWrite` existed.
+//
+// The synced models are the delegates behind SYNC_TABLE_KEYS (packages/schemas/src/sync/tables.ts):
+// people, peoplePhone, peopleEmail, peopleSocial, peopleAddress, peopleImportantDate,
+// peopleGroup, peopleTag, group, tag.
+//
+// The check is per file. A file passes when it references one of the log writers
+// (withSyncedWrite, persistSyncChanges, writeSyncBatch, emitSyncBatch, emitSyncChunks). It cannot
+// see that a helper's caller emits, so a helper file that only writes rows and leaves the emit to
+// its caller carries a `biome-ignore lint/plugin` comment that names the caller.
+//
+// Not covered: raw SQL writes (`$executeRaw`) and the account deletion service, which removes
+// the whole user and its log. The sync replay test (apps/api/src/test/assert-sync-log-matches-
+// bootstrap.ts) catches raw SQL by behavior.
+//
+// Scope: apps/api/src. Tests, test harnesses and scripts build fixtures straight in the
+// database and never serve a mobile client. services/me/account.ts deletes the account, and the
+// sync log rows go with the user.
+
+language js
+
+or {
+  `$db.people.$method($args)`,
+  `$db.peoplePhone.$method($args)`,
+  `$db.peopleEmail.$method($args)`,
+  `$db.peopleSocial.$method($args)`,
+  `$db.peopleAddress.$method($args)`,
+  `$db.peopleImportantDate.$method($args)`,
+  `$db.peopleGroup.$method($args)`,
+  `$db.peopleTag.$method($args)`,
+  `$db.group.$method($args)`,
+  `$db.tag.$method($args)`
+} as $call where {
+  $method <: or {
+    `create`,
+    `createMany`,
+    `createManyAndReturn`,
+    `update`,
+    `updateMany`,
+    `updateManyAndReturn`,
+    `upsert`,
+    `delete`,
+    `deleteMany`
+  },
+  // A write through the handle that withSyncedWrite passes in (`sw.db`) is already inside one.
+  $db <: not `sw.db`,
+  $filename <: r"(?:.*\W)?apps\Wapi\Wsrc\W.*",
+  $filename <: not r".*\.test\.ts",
+  $filename <: not r"(?:.*\W)?apps\Wapi\Wsrc\Wtest\W.*",
+  $filename <: not r"(?:.*\W)?apps\Wapi\Wsrc\Wservices\Wme\Waccount\.ts",
+  $program <: not contains or {
+    `withSyncedWrite`,
+    `persistSyncChanges`,
+    `writeSyncBatch`,
+    `emitSyncBatch`,
+    `emitSyncChunks`
+  },
+  register_diagnostic(span=$call, message="This file writes a mobile-synced table but never writes sync_change_log, so a synced phone never receives the change. Wrap the write in withSyncedWrite() from apps/api/src/lib/sync/synced-write.ts. A helper whose caller emits adds a biome-ignore lint/plugin comment that names the caller.", severity="error")
+}

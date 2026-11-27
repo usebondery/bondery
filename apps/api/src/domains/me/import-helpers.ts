@@ -1,6 +1,7 @@
 import type { PrismaClient } from "@bondery/db";
 import type { ImportTypeResult } from "@bondery/schemas";
 import type { SyncChange } from "@bondery/schemas/sync";
+import { fetchSyncTableRowsByIds } from "../../lib/data/prisma-sync.js";
 import { emitSyncBatch } from "../../lib/sync/emit-change.js";
 import type { DomainContext } from "../_shared/context.js";
 import { syncEmitMetaFromContext } from "../_shared/context.js";
@@ -102,6 +103,26 @@ export async function setGisPoint(
 export function upsertChange(table: SyncChange["table"], row: Record<string, unknown>): SyncChange {
   const id = String(row["id"]);
   return { entityId: id, operation: "update", table, value: row };
+}
+
+/**
+ * Change rows for people read back from the database, in bootstrap shape. Photos, geocoding
+ * and raw SQL change a person after the insert returns, so the insert result would be stale.
+ */
+export async function readBackPeopleChanges(
+  db: PrismaClient,
+  userId: string,
+  personIds: string[],
+): Promise<SyncChange[]> {
+  const changes: SyncChange[] = [];
+  for (const chunk of chunkArray(personIds, WRITE_CHUNK_SIZE)) {
+    const rows = await fetchSyncTableRowsByIds(db, "people", userId, {
+      column: "id",
+      values: chunk,
+    });
+    changes.push(...rows.map((row) => upsertChange("people", row)));
+  }
+  return changes;
 }
 
 export async function emitSyncChunks(
