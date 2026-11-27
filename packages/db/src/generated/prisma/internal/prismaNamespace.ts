@@ -4307,6 +4307,8 @@ export const CarddavAddressBookScalarFieldEnum = {
   reconciledThrough: 'reconciledThrough',
   tombstoneFloor: 'tombstoneFloor',
   projectionVersion: 'projectionVersion',
+  rebuildHead: 'rebuildHead',
+  rebuildAfterPersonId: 'rebuildAfterPersonId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

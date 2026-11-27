@@ -32,6 +32,7 @@ export type CarddavAddressBookAvgAggregateOutputType = {
   reconciledThrough: number | null
   tombstoneFloor: number | null
   projectionVersion: number | null
+  rebuildHead: number | null
 }
 
 export type CarddavAddressBookSumAggregateOutputType = {
@@ -39,6 +40,7 @@ export type CarddavAddressBookSumAggregateOutputType = {
   reconciledThrough: bigint | null
   tombstoneFloor: bigint | null
   projectionVersion: number | null
+  rebuildHead: bigint | null
 }
 
 export type CarddavAddressBookMinAggregateOutputType = {
@@ -49,6 +51,8 @@ export type CarddavAddressBookMinAggregateOutputType = {
   reconciledThrough: bigint | null
   tombstoneFloor: bigint | null
   projectionVersion: number | null
+  rebuildHead: bigint | null
+  rebuildAfterPersonId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -61,6 +65,8 @@ export type CarddavAddressBookMaxAggregateOutputType = {
   reconciledThrough: bigint | null
   tombstoneFloor: bigint | null
   projectionVersion: number | null
+  rebuildHead: bigint | null
+  rebuildAfterPersonId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -73,6 +79,8 @@ export type CarddavAddressBookCountAggregateOutputType = {
   reconciledThrough: number
   tombstoneFloor: number
   projectionVersion: number
+  rebuildHead: number
+  rebuildAfterPersonId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -84,6 +92,7 @@ export type CarddavAddressBookAvgAggregateInputType = {
   reconciledThrough?: true
   tombstoneFloor?: true
   projectionVersion?: true
+  rebuildHead?: true
 }
 
 export type CarddavAddressBookSumAggregateInputType = {
@@ -91,6 +100,7 @@ export type CarddavAddressBookSumAggregateInputType = {
   reconciledThrough?: true
   tombstoneFloor?: true
   projectionVersion?: true
+  rebuildHead?: true
 }
 
 export type CarddavAddressBookMinAggregateInputType = {
@@ -101,6 +111,8 @@ export type CarddavAddressBookMinAggregateInputType = {
   reconciledThrough?: true
   tombstoneFloor?: true
   projectionVersion?: true
+  rebuildHead?: true
+  rebuildAfterPersonId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -113,6 +125,8 @@ export type CarddavAddressBookMaxAggregateInputType = {
   reconciledThrough?: true
   tombstoneFloor?: true
   projectionVersion?: true
+  rebuildHead?: true
+  rebuildAfterPersonId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -125,6 +139,8 @@ export type CarddavAddressBookCountAggregateInputType = {
   reconciledThrough?: true
   tombstoneFloor?: true
   projectionVersion?: true
+  rebuildHead?: true
+  rebuildAfterPersonId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -224,6 +240,8 @@ export type CarddavAddressBookGroupByOutputType = {
   reconciledThrough: bigint
   tombstoneFloor: bigint
   projectionVersion: number
+  rebuildHead: bigint | null
+  rebuildAfterPersonId: string | null
   createdAt: Date
   updatedAt: Date
   _count: CarddavAddressBookCountAggregateOutputType | null
@@ -259,6 +277,8 @@ export type CarddavAddressBookWhereInput = {
   reconciledThrough?: Prisma.BigIntFilter<"CarddavAddressBook"> | bigint | number
   tombstoneFloor?: Prisma.BigIntFilter<"CarddavAddressBook"> | bigint | number
   projectionVersion?: Prisma.IntFilter<"CarddavAddressBook"> | number
+  rebuildHead?: Prisma.BigIntNullableFilter<"CarddavAddressBook"> | bigint | number | null
+  rebuildAfterPersonId?: Prisma.UuidNullableFilter<"CarddavAddressBook"> | string | null
   createdAt?: Prisma.DateTimeFilter<"CarddavAddressBook"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"CarddavAddressBook"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -273,6 +293,8 @@ export type CarddavAddressBookOrderByWithRelationInput = {
   reconciledThrough?: Prisma.SortOrder
   tombstoneFloor?: Prisma.SortOrder
   projectionVersion?: Prisma.SortOrder
+  rebuildHead?: Prisma.SortOrderInput | Prisma.SortOrder
+  rebuildAfterPersonId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
@@ -290,6 +312,8 @@ export type CarddavAddressBookWhereUniqueInput = Prisma.AtLeast<{
   reconciledThrough?: Prisma.BigIntFilter<"CarddavAddressBook"> | bigint | number
   tombstoneFloor?: Prisma.BigIntFilter<"CarddavAddressBook"> | bigint | number
   projectionVersion?: Prisma.IntFilter<"CarddavAddressBook"> | number
+  rebuildHead?: Prisma.BigIntNullableFilter<"CarddavAddressBook"> | bigint | number | null
+  rebuildAfterPersonId?: Prisma.UuidNullableFilter<"CarddavAddressBook"> | string | null
   createdAt?: Prisma.DateTimeFilter<"CarddavAddressBook"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"CarddavAddressBook"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -304,6 +328,8 @@ export type CarddavAddressBookOrderByWithAggregationInput = {
   reconciledThrough?: Prisma.SortOrder
   tombstoneFloor?: Prisma.SortOrder
   projectionVersion?: Prisma.SortOrder
+  rebuildHead?: Prisma.SortOrderInput | Prisma.SortOrder
+  rebuildAfterPersonId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.CarddavAddressBookCountOrderByAggregateInput
@@ -324,6 +350,8 @@ export type CarddavAddressBookScalarWhereWithAggregatesInput = {
   reconciledThrough?: Prisma.BigIntWithAggregatesFilter<"CarddavAddressBook"> | bigint | number
   tombstoneFloor?: Prisma.BigIntWithAggregatesFilter<"CarddavAddressBook"> | bigint | number
   projectionVersion?: Prisma.IntWithAggregatesFilter<"CarddavAddressBook"> | number
+  rebuildHead?: Prisma.BigIntNullableWithAggregatesFilter<"CarddavAddressBook"> | bigint | number | null
+  rebuildAfterPersonId?: Prisma.UuidNullableWithAggregatesFilter<"CarddavAddressBook"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"CarddavAddressBook"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"CarddavAddressBook"> | Date | string
 }
@@ -335,6 +363,8 @@ export type CarddavAddressBookCreateInput = {
   reconciledThrough?: bigint | number
   tombstoneFloor?: bigint | number
   projectionVersion?: number
+  rebuildHead?: bigint | number | null
+  rebuildAfterPersonId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutCarddavAddressBookInput
@@ -349,6 +379,8 @@ export type CarddavAddressBookUncheckedCreateInput = {
   reconciledThrough?: bigint | number
   tombstoneFloor?: bigint | number
   projectionVersion?: number
+  rebuildHead?: bigint | number | null
+  rebuildAfterPersonId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   cards?: Prisma.CarddavCardUncheckedCreateNestedManyWithoutAddressBookInput
@@ -361,6 +393,8 @@ export type CarddavAddressBookUpdateInput = {
   reconciledThrough?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   tombstoneFloor?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   projectionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  rebuildHead?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  rebuildAfterPersonId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutCarddavAddressBookNestedInput
@@ -375,6 +409,8 @@ export type CarddavAddressBookUncheckedUpdateInput = {
   reconciledThrough?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   tombstoneFloor?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   projectionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  rebuildHead?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  rebuildAfterPersonId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cards?: Prisma.CarddavCardUncheckedUpdateManyWithoutAddressBookNestedInput
@@ -388,6 +424,8 @@ export type CarddavAddressBookCreateManyInput = {
   reconciledThrough?: bigint | number
   tombstoneFloor?: bigint | number
   projectionVersion?: number
+  rebuildHead?: bigint | number | null
+  rebuildAfterPersonId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -399,6 +437,8 @@ export type CarddavAddressBookUpdateManyMutationInput = {
   reconciledThrough?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   tombstoneFloor?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   projectionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  rebuildHead?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  rebuildAfterPersonId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -411,6 +451,8 @@ export type CarddavAddressBookUncheckedUpdateManyInput = {
   reconciledThrough?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   tombstoneFloor?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   projectionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  rebuildHead?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  rebuildAfterPersonId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -428,6 +470,8 @@ export type CarddavAddressBookCountOrderByAggregateInput = {
   reconciledThrough?: Prisma.SortOrder
   tombstoneFloor?: Prisma.SortOrder
   projectionVersion?: Prisma.SortOrder
+  rebuildHead?: Prisma.SortOrder
+  rebuildAfterPersonId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -437,6 +481,7 @@ export type CarddavAddressBookAvgOrderByAggregateInput = {
   reconciledThrough?: Prisma.SortOrder
   tombstoneFloor?: Prisma.SortOrder
   projectionVersion?: Prisma.SortOrder
+  rebuildHead?: Prisma.SortOrder
 }
 
 export type CarddavAddressBookMaxOrderByAggregateInput = {
@@ -447,6 +492,8 @@ export type CarddavAddressBookMaxOrderByAggregateInput = {
   reconciledThrough?: Prisma.SortOrder
   tombstoneFloor?: Prisma.SortOrder
   projectionVersion?: Prisma.SortOrder
+  rebuildHead?: Prisma.SortOrder
+  rebuildAfterPersonId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -459,6 +506,8 @@ export type CarddavAddressBookMinOrderByAggregateInput = {
   reconciledThrough?: Prisma.SortOrder
   tombstoneFloor?: Prisma.SortOrder
   projectionVersion?: Prisma.SortOrder
+  rebuildHead?: Prisma.SortOrder
+  rebuildAfterPersonId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -468,6 +517,7 @@ export type CarddavAddressBookSumOrderByAggregateInput = {
   reconciledThrough?: Prisma.SortOrder
   tombstoneFloor?: Prisma.SortOrder
   projectionVersion?: Prisma.SortOrder
+  rebuildHead?: Prisma.SortOrder
 }
 
 export type CarddavAddressBookScalarRelationFilter = {
@@ -515,6 +565,14 @@ export type BigIntFieldUpdateOperationsInput = {
   divide?: bigint | number
 }
 
+export type NullableBigIntFieldUpdateOperationsInput = {
+  set?: bigint | number | null
+  increment?: bigint | number
+  decrement?: bigint | number
+  multiply?: bigint | number
+  divide?: bigint | number
+}
+
 export type CarddavAddressBookCreateNestedOneWithoutCardsInput = {
   create?: Prisma.XOR<Prisma.CarddavAddressBookCreateWithoutCardsInput, Prisma.CarddavAddressBookUncheckedCreateWithoutCardsInput>
   connectOrCreate?: Prisma.CarddavAddressBookCreateOrConnectWithoutCardsInput
@@ -536,6 +594,8 @@ export type CarddavAddressBookCreateWithoutUserInput = {
   reconciledThrough?: bigint | number
   tombstoneFloor?: bigint | number
   projectionVersion?: number
+  rebuildHead?: bigint | number | null
+  rebuildAfterPersonId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   cards?: Prisma.CarddavCardCreateNestedManyWithoutAddressBookInput
@@ -548,6 +608,8 @@ export type CarddavAddressBookUncheckedCreateWithoutUserInput = {
   reconciledThrough?: bigint | number
   tombstoneFloor?: bigint | number
   projectionVersion?: number
+  rebuildHead?: bigint | number | null
+  rebuildAfterPersonId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   cards?: Prisma.CarddavCardUncheckedCreateNestedManyWithoutAddressBookInput
@@ -576,6 +638,8 @@ export type CarddavAddressBookUpdateWithoutUserInput = {
   reconciledThrough?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   tombstoneFloor?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   projectionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  rebuildHead?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  rebuildAfterPersonId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cards?: Prisma.CarddavCardUpdateManyWithoutAddressBookNestedInput
@@ -588,6 +652,8 @@ export type CarddavAddressBookUncheckedUpdateWithoutUserInput = {
   reconciledThrough?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   tombstoneFloor?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   projectionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  rebuildHead?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  rebuildAfterPersonId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cards?: Prisma.CarddavCardUncheckedUpdateManyWithoutAddressBookNestedInput
@@ -600,6 +666,8 @@ export type CarddavAddressBookCreateWithoutCardsInput = {
   reconciledThrough?: bigint | number
   tombstoneFloor?: bigint | number
   projectionVersion?: number
+  rebuildHead?: bigint | number | null
+  rebuildAfterPersonId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutCarddavAddressBookInput
@@ -613,6 +681,8 @@ export type CarddavAddressBookUncheckedCreateWithoutCardsInput = {
   reconciledThrough?: bigint | number
   tombstoneFloor?: bigint | number
   projectionVersion?: number
+  rebuildHead?: bigint | number | null
+  rebuildAfterPersonId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -640,6 +710,8 @@ export type CarddavAddressBookUpdateWithoutCardsInput = {
   reconciledThrough?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   tombstoneFloor?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   projectionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  rebuildHead?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  rebuildAfterPersonId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutCarddavAddressBookNestedInput
@@ -653,6 +725,8 @@ export type CarddavAddressBookUncheckedUpdateWithoutCardsInput = {
   reconciledThrough?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   tombstoneFloor?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   projectionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  rebuildHead?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  rebuildAfterPersonId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -696,6 +770,8 @@ export type CarddavAddressBookSelect<ExtArgs extends runtime.Types.Extensions.In
   reconciledThrough?: boolean
   tombstoneFloor?: boolean
   projectionVersion?: boolean
+  rebuildHead?: boolean
+  rebuildAfterPersonId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -711,6 +787,8 @@ export type CarddavAddressBookSelectCreateManyAndReturn<ExtArgs extends runtime.
   reconciledThrough?: boolean
   tombstoneFloor?: boolean
   projectionVersion?: boolean
+  rebuildHead?: boolean
+  rebuildAfterPersonId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -724,6 +802,8 @@ export type CarddavAddressBookSelectUpdateManyAndReturn<ExtArgs extends runtime.
   reconciledThrough?: boolean
   tombstoneFloor?: boolean
   projectionVersion?: boolean
+  rebuildHead?: boolean
+  rebuildAfterPersonId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -737,11 +817,13 @@ export type CarddavAddressBookSelectScalar = {
   reconciledThrough?: boolean
   tombstoneFloor?: boolean
   projectionVersion?: boolean
+  rebuildHead?: boolean
+  rebuildAfterPersonId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type CarddavAddressBookOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "generation" | "revision" | "reconciledThrough" | "tombstoneFloor" | "projectionVersion" | "createdAt" | "updatedAt", ExtArgs["result"]["carddavAddressBook"]>
+export type CarddavAddressBookOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "generation" | "revision" | "reconciledThrough" | "tombstoneFloor" | "projectionVersion" | "rebuildHead" | "rebuildAfterPersonId" | "createdAt" | "updatedAt", ExtArgs["result"]["carddavAddressBook"]>
 export type CarddavAddressBookInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   cards?: boolean | Prisma.CarddavAddressBook$cardsArgs<ExtArgs>
@@ -784,6 +866,14 @@ export type $CarddavAddressBookPayload<ExtArgs extends runtime.Types.Extensions.
      * Version of the projection mapping. A higher code version rebuilds the cards.
      */
     projectionVersion: number
+    /**
+     * Head sequence read before the first person of a running rebuild. Null when none runs.
+     */
+    rebuildHead: bigint | null
+    /**
+     * Last person the running rebuild folded in. Null before the first chunk and when none runs.
+     */
+    rebuildAfterPersonId: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["carddavAddressBook"]>
@@ -1218,6 +1308,8 @@ export interface CarddavAddressBookFieldRefs {
   readonly reconciledThrough: Prisma.FieldRef<"CarddavAddressBook", 'BigInt'>
   readonly tombstoneFloor: Prisma.FieldRef<"CarddavAddressBook", 'BigInt'>
   readonly projectionVersion: Prisma.FieldRef<"CarddavAddressBook", 'Int'>
+  readonly rebuildHead: Prisma.FieldRef<"CarddavAddressBook", 'BigInt'>
+  readonly rebuildAfterPersonId: Prisma.FieldRef<"CarddavAddressBook", 'String'>
   readonly createdAt: Prisma.FieldRef<"CarddavAddressBook", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"CarddavAddressBook", 'DateTime'>
 }

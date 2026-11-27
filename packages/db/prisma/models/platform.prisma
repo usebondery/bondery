@@ -151,6 +151,9 @@ model SyncChangeLog {
   // One server_sequence per emit batch; change_index distinguishes rows in the batch.
   @@id([userId, serverSequence, changeIndex])
   @@index([userId, serverSequence])
+  // The CardDAV reconciler finds the person of a child delete from the latest earlier row of
+  // the same entity.
+  @@index([userId, tableName, entityId, serverSequence(sort: Desc)], map: "sync_change_log_entity_lookup_idx")
   @@map("sync_change_log")
 }
 

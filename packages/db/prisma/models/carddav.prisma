@@ -29,6 +29,10 @@ model CarddavAddressBook {
   tombstoneFloor    BigInt   @default(0) @map("tombstone_floor")
   /// Version of the projection mapping. A higher code version rebuilds the cards.
   projectionVersion Int      @default(0) @map("projection_version")
+  /// Head sequence read before the first person of a running rebuild. Null when none runs.
+  rebuildHead       BigInt?  @map("rebuild_head")
+  /// Last person the running rebuild folded in. Null before the first chunk and when none runs.
+  rebuildAfterPersonId String? @map("rebuild_after_person_id") @db.Uuid
   createdAt         DateTime @default(now()) @map("created_at")
   updatedAt         DateTime @updatedAt @map("updated_at")
 
